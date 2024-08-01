@@ -27,9 +27,7 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
-        tokenfield: 'libs/bootstrap-tokenfield.min',
-        bq_export: 'export_to_bq',
-        gcs_export: 'export_to_gcs'
+        tokenfield: 'libs/bootstrap-tokenfield.min'
     },
     shim: {
         'tokenfield': ['jquery', 'jqueryui'],
@@ -61,16 +59,18 @@ require([
     'tokenfield',
     'vis_helpers',
     'tree_graph',
-    'stack_bar_chart',
-    'bq_export',
-    'gcs_export'
+    'stack_bar_chart'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
 
     var SELECTED_FILTERS = {};
 
-    $('.program-tab a').each(function(){
-        SELECTED_FILTERS[$(this).data('program-id')] = {};
-    });
+    var initialize_sel_filters = function() {
+        $('.program-tab a').each(function(){
+            SELECTED_FILTERS[$(this).data('program-id')] = {};
+        });
+    };
+
+    initialize_sel_filters();
 
     var UPDATE_PENDING = false;
 
@@ -214,13 +214,17 @@ require([
 
         update_displays_thread = setTimeout(function(){
             UPDATE_PENDING = true;
-            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', prog_id, for_panel_load).then(
-                function(){
+            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', prog_id, for_panel_load)
+                .then(function(){
                     !withoutCheckChanges && check_for_changes();
                     UPDATE_PENDING = false;
                     dequeueUpdate();
-                }
-            );
+                })
+                .fail(function(){
+                    !withoutCheckChanges && check_for_changes();
+                    UPDATE_PENDING = false;
+                    dequeueUpdate();
+                });
         },SUBSEQUENT_DELAY);
     };
 
@@ -399,7 +403,8 @@ require([
         if ($this.is(':checked')) { // Checkbox checked
             let tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                     value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
-                tokenFeatDisplName = '['+feature.data('node-name')+'] ' + ((feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                tokenFeatDisplName = (feature.data('node-name') ? '['+feature.data('node-name')+'] ' : '')
+                    + ((feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
                  feature.data('feature-displ-name') : feature.data('feature-name'));
 
             let feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
@@ -466,23 +471,6 @@ require([
             $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
         }
     };
-
-    // Event: Clear Filters click
-    $('.clear-filters').on('click', function() {
-        var activeDataTab = $('.data-tab.active').attr('id');
-        var prog_id = $('.data-tab.active .filter-panel').data('prog-id');
-
-        $(this).parents('.all-selected-filters').find('.panel-body').empty();
-        $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
-            $(this).prop('checked', false);
-        });
-
-        delete SELECTED_FILTERS[prog_id];
-
-        $('#selected-filters span').remove();
-        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
-        update_displays();
-    });
 
     $('button[data-target="#apply-edits-modal"]').on('click',function(e){
         // Clear previous 'bad name' alerts
@@ -870,22 +858,29 @@ require([
     });
 
     $('#clear-all-yes-btn').on('click', function() {
+        let activeDataTab = $('.data-tab.active');
+        let active_prog_id = activeDataTab.find('.filter-panel').attr('data-prog-id');
         let creationForm = $('#create-cohort-form');
 
-        let clearFiltersButton = $('.clear-filters');
-        clearFiltersButton.closest('.all-selected-filters').siblings('.selected-filters').find('.panel-body').empty();
+        $('.all-selected-filters span').each(function(){
+            if($(this).attr('data-prog-id') !== active_prog_id) {
+                $('#' + $(this).attr('data-prog-id') + '-data').remove();
+            }
+        });
 
+        $('.all-selected-filters').find('.panel-body').empty();
         // bug fix #2722
         creationForm.find('#selected-filters p').hide();
-
-        clearFiltersButton.parents('.data-tab').find('.filter-panel input:checked').each(function() {
+        creationForm.find('#selected-filters span').remove();
+        $('.data-tab .filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
 
-        creationForm.find('#selected-filters span').remove();
+        initialize_sel_filters();
 
-        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
 
+
+        update_all_selected_filters_ui('#' + activeDataTab.attr('id'));
         update_displays();
     });
 
@@ -906,8 +901,9 @@ require([
         });
     };
 
-    // Event: Filter clear warning
+    // Events which are only active for a non-cohort view
     if(!cohort_id) {
+        // Clear filter warning modal
         $('.clear-filters').on('click', function() {
              $('#clear-all-warning-modal').modal('show');
         });

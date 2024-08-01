@@ -140,21 +140,6 @@
                                target="_blank" rel="noreferrer"><i class="fa fa-arrow-circle-o-right"
                                                   aria-hidden="true"></i>Visit</a>
                         </div>
-                        <label>Google Cloud Projects</label>
-                            {% if user_details.gcp_list == 0 %}
-                                <div>Utilize your own Google Cloud Projects resources by registering them here.</div>
-                                <div class="text-right">
-                                    <a class="sm_btn" href="{% url 'register_gcp' user.id %}"><i
-                                            class="fa fa-check-square-o" aria-hidden="true"></i>Register</a>
-                                </div>
-                            {% else %}
-                                <div>You have {{ user_details.gcp_list }} registered Google Cloud Project(s)</div>
-                                <div class="text-right">
-                                    <a class="sm_btn" href="{% url 'user_gcp_list' user.id %}"><i
-                                            class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>View
-                                    </a>
-                                </div>
-                            {% endif %}
 
                     {% else %}
                         <p><i class="fa fa-check-circle"></i> Connected to Google Cloud Platform</p>

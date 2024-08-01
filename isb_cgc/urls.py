@@ -29,7 +29,6 @@ urlpatterns = [
 
     url(r'^$', views.domain_redirect, name='landing_page'),
     url(r'robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name='robots'),
-    url(r'^search_cohorts_viz/$', views.search_cohorts_viz, name='search_cohorts_viz'),
     url(r'^style_guide/', views.css_test),
     url(r'^users/$', views.user_detail_login, name='user_detail_login'),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
@@ -51,7 +50,6 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^citations/', views.citations_page, name='citations_page'),
-    url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^otp_request/$', views.CgcOtpView.as_view(), name='otp_request'),
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),

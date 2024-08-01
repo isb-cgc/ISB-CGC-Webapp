@@ -2476,8 +2476,10 @@ section .min-max {
   background-color: #fff;
   text-align: center;
   font-size: 12.7px; }
-  #cohort-details .nav-tabs li.file-browser-tab, .nav-tabs #cohort-details li.active > a:focus li.file-browser-tab, #cohort-details .nav-tabs li.program-tab, .nav-tabs #cohort-details li.active > a:focus li.program-tab, #cohort-filelist .nav-tabs li.file-browser-tab, .nav-tabs #cohort-filelist li.active > a:focus li.file-browser-tab, #cohort-filelist .nav-tabs li.program-tab, .nav-tabs #cohort-filelist li.active > a:focus li.program-tab {
+  #cohort-details .nav-tabs li.file-browser-tab, .nav-tabs #cohort-details li.active > a:focus li.file-browser-tab, #cohort-details .nav-tabs li.program-tab, .nav-tabs #cohort-details li.active > a:focus li.program-tab, #cohort-filelist .nav-tabs li.program-tab, .nav-tabs #cohort-filelist li.active > a:focus li.program-tab {
     width: 20%; }
+ #cohort-filelist .nav-tabs li.file-browser-tab, .nav-tabs #cohort-filelist li.active > a:focus li.file-browser-tab {
+   width: 25%; }
   #cohort-details .nav-tabs li.filter-tab, .nav-tabs #cohort-details li.active > a:focus li.filter-tab, #cohort-filelist .nav-tabs li.filter-tab, .nav-tabs #cohort-filelist li.active > a:focus li.filter-tab {
     width: 33.33333%; }
   #cohort-details .nav-tabs li:first-child a, .nav-tabs #cohort-details li.active > a:focus li:first-child a, #cohort-filelist .nav-tabs li:first-child a, .nav-tabs #cohort-filelist li.active > a:focus li:first-child a {
@@ -2773,7 +2775,9 @@ section .min-max {
   background-color: #9bd4ff; }
 
 #cohort-details .search-checkbox-list label, #cohort-filelist .search-checkbox-list label {
-  width: 100%; }
+  width: 100%;
+  overflow-wrap: break-word;
+}
 
 #cohort-details .sample_count, #cohort-details .case_count, #cohort-details .file_count, #cohort-filelist .sample_count, #cohort-filelist .case_count, #cohort-filelist .file_count {
   background-color: #bababa;
@@ -3057,32 +3061,6 @@ section .min-max {
 span.code {
   font-family: monospace;
   font-weight: 600; }
-
-
-
-#export-to-bq-modal .modal-header, #export-to-gcs-modal .modal-header {
-  padding-bottom: 10px; }
-
-#export-to-bq-modal .spinner, #export-to-gcs-modal .spinner {
-  position: absolute;
-  width: 100%;
-  height: 65%;
-  top: 18%;
-  left: 0px;
-  background: rgba(255, 255, 255, 0.5);
-  z-index: 10; }
-  #export-to-bq-modal .spinner div, #export-to-gcs-modal .spinner div {
-    position: absolute;
-    text-align: center;
-    height: 50px;
-    top: 35%;
-    padding-top: 20px;
-    margin: auto;
-    font-size: 18px;
-    width: 100%;
-    background: white; }
-  #export-to-bq-modal .spinner i, #export-to-gcs-modal .spinner i {
-    font-size: 20px; }
 
 #data-upload-group .checkbox .sub-checkbox {
   margin-left: 45px; }
@@ -3373,14 +3351,6 @@ span.code {
     padding: 12px 0; }
     #landing .footer-div .row > div, #landing .footer-div a .row > div {
       padding: 0; }
-
-.alert-warning.new-version {
-  text-align: center;
-}
-
-#new-version .alert-warning.new-version {
-  display: none;
-}
 
 #privacy h2, #about h2 {
   font-size: 20px;

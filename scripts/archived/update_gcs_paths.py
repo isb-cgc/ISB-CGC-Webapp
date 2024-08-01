@@ -6,7 +6,7 @@ import os
 import logging
 import datetime
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 
