@@ -40,7 +40,7 @@ try:
 
     insert_tuple = ('2', 'localhost:8000', 'localhost:8000')
     insert_tuple += ('3', 'localhost:8080', 'localhost:8080')
-    insert_tuple += ('4', 'mvm-dot-isb-cgc.appspot.com', 'mvm-dot-isb-cgc.appspot.com')
+    insert_tuple += ('4', 'dev.isb-cgc.org', 'dev.isb-cgc.org')
 
     cursor = db.cursor()
     cursor.execute(delete_str)

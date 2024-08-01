@@ -1,15 +1,17 @@
-"""
-Copyright 2015-2019, Institute for Systems Biology
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-   http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+###
+#
+# Copyright 2015-2024, Institute for Systems Biology
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#    http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+###
 
 from builtins import str
 from builtins import map
@@ -20,52 +22,49 @@ import logging
 import time
 import sys
 import re
-import datetime
+from datetime import datetime, timezone, timedelta
+from functools import partial
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
-from django.db.models import Count
+from django.dispatch import Signal
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import formats
 from django.core.exceptions import ObjectDoesNotExist
-# from django.core.mail import send_mail
 from sharing.service import send_email_message
 from django.contrib import messages
-from googleapiclient import discovery
-from oauth2client.client import GoogleCredentials
+from django.db.models import Prefetch
 
-# from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
-# from cohorts.metadata_helpers import get_sample_metadata
-# from googleapiclient.errors import HttpError
-from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
-from workbooks.models import Workbook
-from accounts.models import GoogleProject, UserOptInStatus
+from accounts.models import UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
-# from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
+from django_otp.plugins.otp_email.models import EmailDevice
+from django_otp.decorators import otp_required
+from django_otp import login
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
-# from google_helpers.bigquery.service import get_bigquery_service
+from django.views.generic.edit import FormView
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
-from solr_helpers import query_solr_and_format_result, build_solr_query, build_solr_facets
-from projects.models import Attribute, DataVersion, DataSource
+from solr_helpers import build_solr_query, build_solr_facets
+from projects.models import DataVersion, DataSource
 from solr_helpers import query_solr_and_format_result
+from .forms import CgcOtpTokenForm
 
 import requests
 
 debug = settings.DEBUG
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
-BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
 IDP = settings.IDP
 
@@ -120,7 +119,7 @@ def _decode_dict(data):
 @never_cache
 def landing_page(request):
     logger.info("[STATUS] Received landing page view request at {}".format(
-        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     return render(request, 'isb_cgc/landing.html',
                   {'bq_search_url': settings.BQ_SEARCH_URL, 'mitelman_url': settings.MITELMAN_URL,
                    'tp53_url': settings.TP53_URL})
@@ -144,13 +143,6 @@ def privacy_policy(request):
     return render(request, 'isb_cgc/privacy.html', {'request': request, })
 
 
-###
-# Displays the new version info page
-###
-def new_version(request):
-    return render(request, 'isb_cgc/new_version.html', {'request': request, })
-
-
 '''
 Returns css_test page used to test css for general ui elements
 '''
@@ -164,15 +156,15 @@ def css_test(request):
 '''
 Returns page that has user details
 '''
-
-
 @login_required
+@otp_required
 def user_detail_login(request):
     user_id = request.user.id
     return user_detail(request, user_id)
 
 
 @login_required
+@otp_required
 def user_detail(request, user_id):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
@@ -204,12 +196,10 @@ def user_detail(request, user_id):
                 'user_opt_in_status': user_opt_in_status
             }
 
-            user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user, active=1))
-
-            forced_logout = 'dcfForcedLogout' in request.session
-            nih_details = get_nih_user_details(user_id, forced_logout)
-            for key in list(nih_details.keys()):
-                user_details[key] = nih_details[key]
+        forced_logout = 'dcfForcedLogout' in request.session
+        nih_details = get_nih_user_details(user_id, forced_logout)
+        for key in list(nih_details.keys()):
+            user_details[key] = nih_details[key]
 
             if social_account:
                 user_details['extra_data'] = social_account.extra_data if social_account else None
@@ -235,24 +225,75 @@ def user_detail(request, user_id):
         return redirect(reverse("landing_page"))
 
 
-@login_required
-def bucket_object_list(request):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    credentials = GoogleCredentials.get_application_default()
-    service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
+otp_verification_signal = Signal()
 
-    req = service.objects().list(bucket='isb-cgc-dev')
-    resp = req.execute()
-    object_list = None
-    if 'items' in resp:
-        object_list = json.dumps(resp['items'])
 
-        return HttpResponse(object_list)
+def _handle_otp_verify(sender, request, user, **kwargs):
+    """
+    Automatically persists an OTP device that was set by an OTP-aware
+    AuthenticationForm.
+    """
+    if hasattr(user, 'otp_device'):
+        login(request, user.otp_device)
+
+
+otp_verification_signal.connect(_handle_otp_verify)
+
+
+@method_decorator(login_required, name="get")
+@method_decorator(login_required, name="post")
+@method_decorator(login_required, name="dispatch")
+class CgcOtpView(FormView):
+    token_form_class = CgcOtpTokenForm
+    form_class = None
+    template_name = 'isb_cgc/otp_request.html'
+    success_url = '/extended_login/'
+    next_field = None
+    post_request = None
+
+    def _set_next(self, request):
+        req = request.GET or request.POST
+        self.next_field = req.get("next", None)
+        self.success_url = self.success_url + (
+            "?next={}".format(self.next_field) if self.next_field else "")
+
+    def get(self, request):
+        try:
+            EmailDevice.objects.get(user=self.request.user)
+        except ObjectDoesNotExist as e:
+            EmailDevice.objects.update_or_create(user=self.request.user, name='default', email=self.request.user.email)
+        self._set_next(request)
+        return super().get(request)
+
+    def post(self, request):
+        self._set_next(request)
+        self.post_request = request
+        return super().post(request)
+
+    def get_form_class(self):
+        self.form_class = partial(self.token_form_class, self.request.user, next_field=self.next_field)
+        return self.form_class
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+        otp_verification_signal.send(sender=self.__class__, request=self.post_request, user=self.post_request.user)
+        return result
 
 
 # Extended login view so we can track user logins
+@login_required
+@otp_required
 def extended_login_view(request):
-    redirect_to = 'landing_page'
+    redirect_to = 'cohort'
+    redirect_url = None
+    req = request.GET or request.POST
+    print("OTP device: {}".format(request.user.otp_device))
+    print(request.session.keys())
+    if request.COOKIES and request.COOKIES.get('login_from', None):
+        redirect_to = request.COOKIES.get('login_from')
+    elif req.get("next", None):
+        redirect_to = None
+        redirect_url = req.get("next")
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -261,11 +302,17 @@ def extended_login_view(request):
         st_logger.write_text_log_entry(
             log_name,
             "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
-                                                                                   datetime.datetime.utcnow())
+                                                                                   datetime.utcnow())
         )
-        redirect_to = 'cohort' if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort' else 'dashboard'
+
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
-        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
+        try:
+            user_opt_in_stat_obj = UserOptInStatus.objects.get(user=user)
+        except ObjectDoesNotExist as e:
+            user_opt_in_stat_obj = UserOptInStatus.objects.update_or_create(
+                user=user,
+                opt_in_status=UserOptInStatus.NEW
+            )
         if user_opt_in_stat_obj:
             if user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW or \
                     user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SKIP_ONCE:
@@ -274,12 +321,13 @@ def extended_login_view(request):
             elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN:
                 user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SKIP_ONCE
                 user_opt_in_stat_obj.save()
+
     except User.DoesNotExist as e:
         logger.error("[ERROR] User not found! User provided: {}".format(request.user))
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse(redirect_to))
+    return redirect(redirect_url or reverse(redirect_to))
 
 
 # Callback for recording the user's agreement to the warning popup
@@ -288,200 +336,8 @@ def warn_page(request):
     return JsonResponse({'warning_status': 'SEEN'}, status=200)
 
 
-'''
-DEPRECATED - Returns Results from text search
-'''
-
-
 @login_required
-def search_cohorts_viz(request):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    q = request.GET.get('q', None)
-    result_obj = {
-        'q': q
-    }
-    if q:
-        cohort_results = Cohort.objects.search(q)
-        list = []
-        for cohort in cohort_results:
-            list.append({
-                'id': cohort.id,
-                'name': cohort.name,
-                'last_date_saved': formats.date_format(cohort.last_date_saved, 'DATETIME_FORMAT'),
-                'owner': cohort.get_owner().email,
-                'samples': len(cohort.samples_set.all())
-            })
-        result_obj['cohorts'] = list
-        list = []
-        viz_results = SavedViz.objects.search(q)
-        for viz in viz_results:
-            list.append({
-                'id': viz.id,
-                'name': viz.name,
-                'last_date_saved': formats.date_format(viz.last_date_saved, 'DATETIME_FORMAT'),
-                'plots': len(viz.plot_set.all()),
-                'owner': viz.get_owner().email
-            })
-        result_obj['visualizations'] = list
-    return HttpResponse(json.dumps(result_obj), status=200)
-
-
-# def get_tbl_preview(request, proj_id, dataset_id, table_id):
-#     status = 200
-#     MAX_ROW = 8
-#     try:
-#         if not proj_id or not dataset_id or not table_id:
-#             logger.warning("[WARNING] Required ID missing: {}.{}.{}".format(proj_id,dataset_id,table_id))
-#             status = 503
-#             result = {
-#                 'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
-#             }
-#         else:
-#             bq_service = get_bigquery_service()
-#             dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
-#             is_public = False
-#             for access_entry in dataset['access']:
-#                 if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
-#                     is_public = True
-#                     break
-#             if is_public:
-#                 tbl_data=bq_service.tables().get(projectId=proj_id, datasetId=dataset_id, tableId=table_id).execute()
-#                 if tbl_data.get('type') == 'VIEW' and tbl_data.get('view') and tbl_data.get('view').get('query'):
-#                     view_query_template = '''#standardSql
-#                             {query_stmt}
-#                             LIMIT {max}'''
-#                     view_query = view_query_template.format(query_stmt=tbl_data['view']['query'], max=MAX_ROW)
-#                     response = bq_service.jobs().query(
-#                         projectId=settings.BIGQUERY_PROJECT_ID,
-#                         body={ 'query': view_query  }).execute()
-#                 else:
-#                     response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
-#                                                        maxResults=MAX_ROW).execute()
-#                 if response and int(response['totalRows']) > 0:
-#                     result = {
-#                         'rows': response['rows']
-#                     }
-#                 else:
-#                     result = {
-#                         'message': 'No record has been found for table {proj_id}.{dataset_id}.{table_id}.'.format(
-#                             proj_id=proj_id,
-#                             dataset_id=dataset_id,
-#                             table_id=table_id)
-#                     }
-#             else:
-#                 status = 401
-#                 result = {
-#                     'message': "Preview is not available for this table/view."
-#                 }
-#
-#     except HttpError as e:
-#         logger.error(
-#             "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
-#                 proj_id=proj_id,
-#                 dataset_id=dataset_id,
-#                 table_id=table_id))
-#         logger.exception(e)
-#         status = e.resp.status
-#         result = {
-#             'message': "There was an error while processing this request."
-#         }
-#         if status == 403:
-#             result = {
-#                 'message': "Your attempt to preview this table [{proj_id}.{dataset_id}.{table_id}] was denied.".format(
-#                     proj_id=proj_id,
-#                     dataset_id=dataset_id,
-#                     table_id=table_id)
-#             }
-#
-#     except Exception as e:
-#         status = 503
-#         result = {
-#             'message': "There was an error while processing this request."
-#         }
-#         logger.error(
-#             "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
-#                 proj_id=proj_id,
-#                 dataset_id=dataset_id,
-#                 table_id=table_id))
-#         logger.exception(e)
-#
-#     return JsonResponse(result, status=status)
-
-
-@login_required
-def test_solr_data(request):
-    status = 200
-
-    try:
-        start = time.time()
-        filters = json.loads(request.GET.get('filters', '{}'))
-        versions = json.loads(request.GET.get('versions', '[]'))
-        source_type = request.GET.get('source', DataSource.SOLR)
-        versions = DataVersion.objects.filter(data_type__in=versions) if len(versions) else DataVersion.objects.filter(
-            active=True)
-
-        programs = Program.objects.filter(active=1, is_public=1,
-                                          owner=User.objects.get(is_superuser=1, is_active=1, is_staff=1))
-
-        if len(filters):
-            programs = programs.filter(id__in=[int(x) for x in filters.keys()])
-
-        results = {}
-
-        for prog in programs:
-            results[prog.id] = {}
-            prog_versions = prog.dataversion_set.filter(id__in=versions)
-            sources = prog.get_data_sources(source_type=source_type).filter(version__in=prog_versions)
-            prog_filters = filters.get(str(prog.id), None)
-            attrs = sources.get_source_attrs(for_ui=True)
-            for source in sources:
-                solr_query = build_solr_query(prog_filters, with_tags_for_ex=True) if prog_filters else None
-                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'],
-                                                filter_tags=solr_query['filter_tags'] if solr_query else None,
-                                                unique='case_barcode')
-                query_set = []
-
-                if solr_query:
-                    for attr in solr_query['queries']:
-                        attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
-                        # If an attribute is not in this program's attribute listing, then it's ignored
-                        if attr_name in attrs['list']:
-                            # If the attribute is from this source, just add the query
-                            if attr_name in attrs['sources'][source.id]['list']:
-                                query_set.append(solr_query['queries'][attr])
-                            # If it's in another source for this program, we need to join on that source
-                            else:
-                                for ds in sources:
-                                    if ds.id != source.id and attr_name in attrs['sources'][ds.id]['list']:
-                                        query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
-                                            ds.shared_id_col, ds.name, source.shared_id_col
-                                        )) + solr_query['queries'][attr])
-                        else:
-                            logger.warning(
-                                "[WARNING] Attribute {} not found in program {}".format(attr_name, prog.name))
-
-                solr_result = query_solr_and_format_result({
-                    'collection': source.name,
-                    'facets': solr_facets,
-                    'fqs': query_set
-                })
-
-                results[prog.id][source.name] = solr_result
-
-        stop = time.time()
-
-        results['elapsed_time'] = "{}s".format(str(stop - start))
-
-    except Exception as e:
-        logger.error("[ERROR] While trying to fetch Solr metadata:")
-        logger.exception(e)
-        results = {'msg': 'Encountered an error'}
-        status = 500
-
-    return JsonResponse({'result': results}, status=status)
-
-
-@login_required
+@otp_required
 def igv(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
@@ -565,8 +421,6 @@ def igv(request):
 
 def path_report(request, report_file=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
     try:
         if not path_report:
             messages.error(
@@ -580,17 +434,15 @@ def path_report(request, report_file=None):
             raise Exception("Received a status code of {} from IndexD.".format(str(response.status_code)))
 
         anon_signed_uri = response.json()['url']
-
-        template = 'isb_cgc/path-pdf.html'
-
-        context['path_report_file'] = anon_signed_uri
+        response = {'signed_uri': anon_signed_uri}
+        status = 200
     except Exception as e:
         logger.error("[ERROR] While trying to load Pathology report:")
         logger.exception(e)
         logger.error("Attempted URI: {}".format(uri))
-        return render(request, '500.html')
-
-    return render(request, template, context)
+        response = {'message': 'Could not obtain pathology report.'}
+        status = 500
+    return JsonResponse(response, status=status)
 
 
 # Because the match for vm_ is always done regardless of its presense in the URL
@@ -644,7 +496,6 @@ def bq_meta_search(request, full_table_id=""):
     return redirect(settings.BQ_SEARCH_URL + bq_filter)
 
 
-
 def programmatic_access_page(request):
     return render(request, 'isb_cgc/programmatic_access.html')
 
@@ -654,104 +505,7 @@ def workflow_page(request):
 
 
 @login_required
-def dashboard_page(request):
-    context = {}
-    display_count = 6
-    try:
-        # Cohort List
-        isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
-        public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort',
-                                                                                                              flat=True)
-
-        cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user,
-                                                                            cohort__active=True).exclude(
-            cohort__id__in=public_cohorts)
-        cohorts_count = cohort_perms.count()
-        cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id', flat=True), active=True).order_by(
-            '-last_date_saved')[:display_count]
-
-        # Program List
-        ownedPrograms = request.user.program_set.filter(active=True)
-        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-        programs = ownedPrograms | sharedPrograms
-        programs_count = programs.distinct().count()
-        programs = programs.distinct().order_by('-last_date_saved')[:display_count]
-
-        # Workbook List
-        userWorkbooks = request.user.workbook_set.filter(active=True)
-        sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-        workbooks = userWorkbooks | sharedWorkbooks
-        workbooks_count = workbooks.distinct().count()
-        workbooks = workbooks.distinct().order_by('-last_date_saved')[:display_count]
-
-        # # Notebook VM Instance
-        # user_instances = request.user.instance_set.filter(active=True)
-        # user = User.objects.get(id=request.user.id)
-        # gcp_list = GoogleProject.objects.filter(user=user, active=1)
-        # vm_username = request.user.email.split('@')[0]
-        # client_ip = get_ip_address_from_request(request)
-        # logger.debug('client_ip: '+client_ip)
-        # client_ip_range = ', '.join([client_ip])
-        #
-        # if user_instances:
-        #     user_vm = user_instances[0]
-        #     machine_name = user_vm.name
-        #     project_id = user_vm.gcp.project_id
-        #     zone = user_vm.zone
-        #     result = check_vm_stat(project_id, zone, machine_name)
-        #     status = result['status']
-        # else:
-        #     # default values to fill in fields in form
-        #     project_id = ''
-        #     # remove special characters
-        #     machine_header = re.sub(r'[^A-Za-z0-9]+', '', vm_username.lower())
-        #     machine_name = '{}-jupyter-vm'.format(machine_header)
-        #     zone = 'us-central1-c'
-        #     status = 'NOT FOUND'
-        #
-        # notebook_vm = {
-        #     'user': vm_username,
-        #     'project_id': project_id,
-        #     'name': machine_name,
-        #     'zone': zone,
-        #     'client_ip_range': client_ip_range,
-        #     'status': status
-        # }
-
-        # Gene & miRNA Favorites
-        genefaves = request.user.genefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
-        genefaves_count = request.user.genefavorite_set.filter(active=True).count()
-
-        # Variable Favorites
-        varfaves = request.user.variablefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
-        varfaves_count = request.user.variablefavorite_set.filter(active=True).count()
-
-        context = {
-            'request': request,
-            'cohorts': cohorts,
-            'cohorts_count': cohorts_count,
-            'programs': programs,
-            'programs_count': programs_count,
-            'workbooks': workbooks,
-            'workbooks_count': workbooks_count,
-            'genefaves': genefaves,
-            'genefaves_count': genefaves_count,
-            'varfaves': varfaves,
-            'varfaves_count': varfaves_count,
-            # 'optinstatus': opt_in_status
-            # 'notebook_vm': notebook_vm,
-            # 'gcp_list': gcp_list,
-        }
-
-    except Exception as e:
-        logger.error("[ERROR] While prepping dashboard:")
-        logger.exception(e)
-        messages.error(request, "Encountered an error while building the dashboard - please contact the administrator.")
-
-    return render(request, 'isb_cgc/dashboard.html', context)
-
-
-@login_required
+@otp_required
 def opt_in_check_show(request):
     try:
         obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
@@ -765,6 +519,7 @@ def opt_in_check_show(request):
 
 
 @login_required
+@otp_required
 def opt_in_update(request):
     # If user logs in for the second time, opt-in status changes to NOT_SEEN
     error_msg = ''
@@ -832,6 +587,7 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
 
 
 @login_required
+@otp_required
 def form_reg_user(request):
     return opt_in_form(request);
 
@@ -890,7 +646,6 @@ def opt_in_form_submitted(request):
             if user_opt_in_stat_obj:
                 user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES if subscribed else UserOptInStatus.NO
                 user_opt_in_stat_obj.save()
-                # record to store in bq table
                 feedback_row = {
                     "email": email,
                     "first_name": first_name,
@@ -898,12 +653,12 @@ def opt_in_form_submitted(request):
                     "affiliation": affiliation,
                     "subscribed": subscribed,
                     "feedback": feedback,
-                    "submitted_time": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                    "submitted_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
                 # send a notification to feedback@isb-cgc.org about the entry
-                if settings.IS_UAT:
-                    logger.info("[STATUS] UAT: sent email for feedback")
+                if settings.IS_UAT or settings.IS_DEV:
+                    logger.info("[STATUS] UAT/DEV: sent email for feedback")
                 else:
                     # send a notification to feedback@isb-cgc.org about the entry
                     send_feedback_notification(feedback_row)

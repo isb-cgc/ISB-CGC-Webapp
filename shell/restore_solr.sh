@@ -44,7 +44,7 @@ if [[ -z $SOLR_PWD ]]; then
   echo "[ERROR] SOLR_PWD not set - exiting!"
   exit 1
 fi
-if [ -z $SOLR_USER ]; then
+if [[ -z $SOLR_USER ]]; then
     echo "[ERROR] Solr API user not supplied - exiting."
     exit 1
 fi
@@ -88,7 +88,7 @@ for dirname in ${BACKUP_DIR}/*/; do
   fi
   sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema.xml $SOLR_DATA/$CORE/conf/managed-schema.xml
   echo "Schema copied, initiating core restoration..."
-  curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/${CORE}/replication?command=restore&name=${CORE}" --cacert solr-ssl.pem
+  curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/${CORE}/replication?command=restore&name=${SNAPSHOT}" --cacert solr-ssl.pem
   status=`curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${CORE}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
   if [[ "${status}" != "OK" ]]; then
     echo "Restoration is ${status} for core ${CORE}--continuing with the rest, but don't restart until these are done!"
@@ -109,8 +109,8 @@ fi
 
 echo ""
 echo -n "Solr restart in "
-for k in `seq 1 3`; do
-  echo -n "$k, "
+for k in `seq 1 4`; do
+  echo -n "$k..."
   sleep 1
 done
 echo "restarting."

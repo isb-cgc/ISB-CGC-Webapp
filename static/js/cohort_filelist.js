@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017-2020, Institute for Systems Biology
+ * Copyright 2017-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        // jquery: 'libs/jquery-1.11.1.min',
-        // bootstrap: 'libs/bootstrap.min',
-        // jqueryui: 'libs/jquery-ui.min',
-        // session_security: 'session_security/script',
-        // underscore: 'libs/underscore-min',
         tokenfield: 'libs/bootstrap-tokenfield.min',
-        // base: 'base',
-        bq_export: 'export_to_bq',
-        gcs_export: 'export_to_gcs'
     },
     shim: {
         'tokenfield': ['jquery', 'jqueryui'],
@@ -41,9 +33,7 @@ require([
     'jqueryui',
     'bootstrap',
     'session_security',
-    'tokenfield',
-    'bq_export',
-    'gcs_export'
+    'tokenfield'
 ], function ($, base, _) {
 
     // For manaaging filter changes
@@ -56,8 +46,6 @@ require([
         'all': {
         },
         'igv': {
-        },
-        'slim': {
         },
         'dicom': {
         },
@@ -127,6 +115,74 @@ require([
         }
     };
 
+    var update_filter_display = function(e, withoutDisplayUpdates) {
+        let activeDataTab = $('.data-tab.active').attr('id');
+        let dataTabType = $('.data-tab.active').attr('data-file-type');
+        let selFilterPanel = '.selected-filters-' + dataTabType;
+        let $this = $(this);
+        let feature_id = null, value_id = null;
+
+        if($this.attr('type') == 'checkbox') {
+            let feature = $this.closest('.file-feature-select-block'),
+                value = $this;
+
+            let tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+                    value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
+                tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                    feature.data('feature-displ-name') : feature.data('feature-name');
+
+            feature_id = feature.data('feature-id'), value_id = value.data('value-id');
+
+            if($this.is(':checked')) {
+                let token = $('<span>').data({
+                    'feature-id': feature_id,
+                    'feature-name': feature.data('feature-name'),
+                    'value-id': value_id,
+                    'value-name': value.data('value-name')
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
+
+                // Don't re-add the token and filter if it already exists
+                if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+                    token.append(
+                        $('<a>').addClass('delete-x filter-label label label-default')
+                            .text(tokenFeatDisplName + ': ' + tokenValDisplName)
+                            .append('<i class="fa fa-times">')
+                            .attr("title", tokenFeatDisplName + ': ' + tokenValDisplName)
+                    );
+
+                    $this.data({
+                        'select-filters-item': token.clone(true)
+                    });
+
+                    $(selFilterPanel + ' .panel-body').append($this.data('select-filters-item'));
+                }
+            } else {
+                $(selFilterPanel+' span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').remove();
+            }
+        } else {
+            let filter_token = $this.closest('span.filter-token');
+            feature_id = filter_token.attr('data-feature-id'), value_id = filter_token.attr('data-value-id');
+            let checkbox = $('.data-tab.active .filter-panel input[type="checkbox"][data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]');
+            filter_token.remove();
+            checkbox.prop('checked', false);
+            update_filters(checkbox);
+        }
+        !withoutDisplayUpdates && update_displays();
+    };
+
+    $('.data-tab-content').on('click', '.clear-filters', function() {
+        let activeDataTab = $('.data-tab.active').data('file-type');
+
+        $(this).parents('.selected-filters-'+activeDataTab).find('.panel-body').empty();
+        $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
+            $(this).prop('checked', false);
+        });
+
+        SELECTED_FILTERS[activeDataTab] = {};
+
+        update_displays();
+    });
+
     function build_igv_widgets() {
         // Build the file tokenizer for IGV
         // Bootstrap tokenfield requires 'value' as the datem attribute field
@@ -158,37 +214,6 @@ require([
         $('input.igv[type="submit"]').prop('disabled', true);
     }
 
-    var happy_name = function(input) {
-        var dictionary = {
-            'DNAseq_data': 'DNAseq',
-            'Yes': 'GA',
-            'No': 'N/A',
-            'mirnPlatform': 'microRNA',
-            'None': 'N/A',
-            'IlluminaHiSeq_miRNASeq': 'HiSeq',
-            'IlluminaGA_miRNASeq': 'GA',
-            'cnvrPlatform': 'SNP/CN',
-            'Genome_Wide_SNP_6': 'SNP6',
-            'methPlatform': 'DNAmeth',
-            'HumanMethylation27': '27k',
-            'HumanMethylation450': '450k',
-            'gexpPlatform': 'mRNA',
-            'IlluminaHiSeq_RNASeq': 'HiSeq/BCGSC',
-            'IlluminaHiSeq_RNASeqV2': 'HiSeq/UNC V2',
-            'IlluminaGA_RNASeq': 'GA/BCGSC',
-            'IlluminaGA_RNASeqV2': 'GA/UNC V2',
-            'rppaPlatform': 'Protein',
-            'MDA_RPPA_Core': 'RPPA'
-        };
-        if (input in dictionary) {
-            return dictionary[input];
-        } else if(input !== null && input !== undefined) {
-            return input.replace(/_/g, ' ');
-        } else {
-            return "N/A";
-        }
-    };
-
     var reject_load = false;
 
     var browser_tab_load = function(cohort) {
@@ -217,7 +242,7 @@ require([
                 success : function (data) {
                     data_tab_content_div.append(data);
 
-                    update_download_link(active_tab, total_files);
+                    update_links(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
 
                     build_total_files = total_files;
@@ -300,13 +325,13 @@ require([
         });
     });
 
-    function update_download_link(active_tab, file_list_total) {
+    function update_links(active_tab, file_list_total) {
         var tab_selector = '#'+active_tab+'-files';
 
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
             $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
-        } else if(!HAS_USER_DATA &&  request_user_id) {
+        } else if(user_is_social) {
             $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
@@ -319,7 +344,7 @@ require([
         }
 
         var downloadToken = new Date().getTime();
-        $('.filelist-obtain .download-token').val(downloadToken);
+        $('.filelist-obtain .download-token, .filelist-obtain .export-token').val(downloadToken);
 
         var filter_args = null;
 
@@ -330,6 +355,7 @@ require([
                 }
                 SELECTED_FILTERS[active_tab]["data_format"].indexOf("BAM") < 0 && SELECTED_FILTERS[active_tab]["data_format"].push("BAM");
             case "all":
+            case "dicom":
                 if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
                     filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
                 }
@@ -338,34 +364,31 @@ require([
                 if(!SELECTED_FILTERS[active_tab]["data_format"]) {
                     SELECTED_FILTERS[active_tab]["data_format"] = [];
                 }
-                SELECTED_FILTERS[active_tab]["data_format"].indexOf("PDF") < 0 && SELECTED_FILTERS[active_tab]["data_format"].push("PDF");
-                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
-                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
-                }
-                break;
-            case "slim":
                 if(!SELECTED_FILTERS[active_tab]["data_type"]) {
-                    SELECTED_FILTERS[active_tab]["data_type"] = [ "Slide Image" ];
+                    SELECTED_FILTERS[active_tab]["data_type"] = [];
                 }
+                SELECTED_FILTERS[active_tab]["data_format"].indexOf("PDF") < 0 && SELECTED_FILTERS[active_tab]["data_format"].push("PDF");
+                SELECTED_FILTERS[active_tab]["data_type"].indexOf("Pathology report") < 0 && SELECTED_FILTERS[active_tab]["data_type"].push("Pathology report");
                 if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
                     filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
                 }
-                break;
-            case "dicom":
-                var filters = {"data_type": ["Radiology image"]};
-                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
-                    filters = Object.assign(filters, SELECTED_FILTERS[active_tab]);
-                }
-                filter_args = 'filters=' + encodeURIComponent(JSON.stringify(filters));
                 break;
         }
 
+        let export_link = $(tab_selector).find('.export-link').attr('base-url');
         $(tab_selector).find('.download-link').attr('href', download_url + '?'
             + (filter_args ? filter_args + '&' : '')
             + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
                     'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
             + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-        if(active_tab !== 'slim' && active_tab !== 'dicom') {
+        if(user_is_social) {
+            $(tab_selector).find('.export-link').attr('url', export_link + '?'
+                + (filter_args ? filter_args + '&' : '')
+                + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
+                    'case_barcode=' + encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
+                + 'downloadToken=' + downloadToken);
+        }
+        if(active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href'));
         }
     }
@@ -399,7 +422,7 @@ require([
             url: url,
             success: function (data) {
                 if(do_filter_count) {
-                    update_download_link(active_tab, data.total_file_count);
+                    update_links(active_tab, data.total_file_count);
                 }
                 update_table_display(active_tab,data,do_filter_count);
             },
@@ -488,7 +511,7 @@ require([
                         if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
                             var tokenLabel = files[i]['sample'] + ", "
                                 + files[i]['exp_strat'] + ", "
-                                + happy_name(files[i]['platform']) + ", "
+                                + files[i]['platform'] + ", "
                                 + files[i]['datatype']
                                 + " ["+files[i]['build']+"]";
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
@@ -522,30 +545,30 @@ require([
                                     '</div></td>';
                             break;
                         case 'pdf_filename':
-                            var file_loc = PATH_PDF_URL+files[i]['file_node_id'];
+                            let file_loc = PATH_PDF_URL+files[i]['file_node_id'];
                             table_row_data += '<td><div class ="col-filename accessible-filename">' +
-                                    '<div><a href="'+file_loc+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
+                                    '<div><a role="button" class="pdf-download" url="'+file_loc+'/" data-filename="'
+                                    +files[i]['filename']+'">' + files[i]['filename'] +
                                     '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
-                                    '<div class="osmisis" style="display: none;"><i>Click to View File in a New Tab</i></div></a></div>' +
+                                    '<div class="osmisis" style="display: none;"><i>Click to download PDF</i></div></a></div>' +
                                     '</div></td>';
-                            break;
-                        case 'slide_filename':
-                             table_row_data += '<td><div class="col-filename accessible-filename">' +
-                                '<div><a href="https://'+ SLIM_URL+files[i]['study_uid'] + '/series/'
-                                    + files[i]['series_uid'] + '/" target="_blank" rel="noreferrer">'
-                                 + files[i]['filename'] + '<div>[' + files[i]['node'] + ' ID: '
-                                 + files[i]['file_node_id'] + ']</div>'
-                                 + '<div class="osmisis" style="display: none;"><i>Open in IDC SliM</i></div></a></div>' +
-                                '</div></td>';
                             break;
                         case 'study_uid':
-                            table_row_data += '<td><div class="study-uid">' +
-                                    '<a href="https://'+DICOM_VIEWER_URL+files[i]['study_uid']+'/" target="_blank" rel="nofollow noreferrer">'+files[i]['study_uid']+
-                                    '<div class="osmisis" style="display:thu none;"><i>Open in OHIF Viewer</i></div></a>'+
+                            if(files[i]['modality'] == 'SM') {
+                                table_row_data += '<td><div class="col-filename accessible-filename">' +
+                                    '<div><a href="https://'+ SLIM_URL+files[i]['study_uid'] + '/" target="_blank" rel="nofollow noreferrer">'
+                                     + files[i]['study_uid']
+                                     + '<div class="osmisis" style="display: none;"><i>Open in IDC SliM</i></div></a></div>' +
                                     '</div></td>';
+                            } else {
+                                table_row_data += '<td><div class="study-uid">' +
+                                    '<a href="https://'+DICOM_VIEWER_URL+files[i]['study_uid']+'/" target="_blank" rel="nofollow noreferrer">'+files[i]['study_uid']+
+                                    '<div class="osmisis" style="display:none;"><i>Open in IDC OHIF</i></div></a>'+
+                                    '</div></td>';
+                            }
                             break;
                         case 'platform':
-                            table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
+                            table_row_data += '<td>' + files[i][column_name] + '</td>';
                             break;
                         case 'filesize':
                             table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] != null && files[i]['filesize'] != 'N/A'? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
@@ -718,7 +741,7 @@ require([
         var active_tab = $(type_tab).data('file-type');
         SELECTED_FILTERS[active_tab] = {};
 
-        $(type_tab).find('div.filter-panel input[type="checkbox"]:checked').each(function(){
+        $(type_tab).find('div.filter-panel input:not(.hide-zeros)[type="checkbox"]:checked').each(function(){
             if(!SELECTED_FILTERS[active_tab][$(this).data('feature-name')]) {
                 SELECTED_FILTERS[active_tab][$(this).data('feature-name')] = [];
             }
@@ -767,7 +790,14 @@ require([
         return rangeWithDots;
     }
 
+    // Delegated event: filter panel checkbox
+    $('.filelist-container').on('click', '.search-checkbox-list input[type="checkbox"]', update_filter_display);
+    $('.filelist-container').on('click', '.delete-x', update_filter_display);
+
     var update_displays = function(active_tab) {
+        if(!active_tab) {
+            active_tab = $('.data-tab.active').attr('data-file-type');
+        }
         // If a user has clicked more filters while an update was going out, queue up a future update and return
         if(UPDATE_PENDING) {
             // We only need to queue one update because our updates don't pull the filter set until they run
@@ -827,7 +857,7 @@ require([
                             }
                         }
                     }
-                    update_download_link(active_tab, data.total_file_count);
+                    update_links(active_tab, data.total_file_count);
                     update_table_display(active_tab, data);
 
                     update_zero_case_filters_all();
@@ -904,7 +934,7 @@ require([
         });
     };
 
-    $('.data-tab-content').on('change','.filter-panel input[type="checkbox"]',function(){
+    $('.data-tab-content').on('change','.filter-panel input:not(.hide-zeros)[type="checkbox"]',function(){
         update_filters($(this));
         update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
     });
@@ -930,9 +960,10 @@ require([
 
     browser_tab_load(cohort_id);
 
-    $('.data-tab-content').on('click', '.download-btn', function() {
-        var self=$(this);
-        var msg = $('#download-in-prog');
+    $('.data-tab-content').on('click', '.download-btn, .export-btn  ', function() {
+        let self=$(this);
+        let msg = self.hasClass('download-btn') ? $('#download-in-prog') : $('#export-in-prog');
+        let token = self.hasClass('download-btn') ? $('.filelist-obtain .download-token').val() : $('.filelist-obtain .export-token').val();
 
         self.attr('disabled','disabled');
         msg.show();
@@ -940,7 +971,31 @@ require([
         base.blockResubmit(function() {
             self.removeAttr('disabled');
             msg.hide();
-        },$('.filelist-obtain .download-token').val(),"downloadToken");
+        },token,"downloadToken");
+
+        if(self.hasClass('export-btn')) {
+            $.ajax({
+                type        :'GET',
+                url         : $('.export-link').attr('url'),
+                success : function (data) {
+                    let msg_box = $('.export-result');
+                    msg_box.hide();
+                    msg_box.empty();
+                    msg_box.html(data['message']);
+                    msg_box.show();
+                },
+                error: function (xhr) {
+                     var responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if(responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                    }
+                },
+            });
+        }
     });
 
     $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){
@@ -951,51 +1006,6 @@ require([
         $(this).find('.osmisis').hide();
     });
 
-    // When an export button is clicked, add the filters to that modal's form
-    // Note that the export modals will always clear any 'filters' inputs applied to them when hidden/closed
-    $('.container').on('click', 'button[data-target="#export-to-bq-modal"], button[data-target="#export-to-gcs-modal"]', function (e) {
-        var target_form = $($($(this).data('target')).find('form')[0]);
-        var this_tab = $(this).parents('.data-tab');
-        var tab_type = this_tab.data('file-type');
-
-        // Clear the previous parameter settings from the export form
-        target_form.find('input[name="filters"]').remove();
-        target_form.append(
-            '<input class="param" type="hidden" name="filters" value="" />'
-        );
-
-        var filter_param = {};
-        switch(tab_type) {
-            case "igv":
-                filter_param = {"data_format": ["BAM"]};
-                break;
-            case "dicom":
-                filter_param = {"data_type": ["Radiology image"]};
-                break;
-            case "slim":
-                filter_param = {"data_type": ["Slide Image"]};
-                break;
-            case "pdf":
-                filter_param = {"data_format": ["PDF"]};
-        }
-
-        if(Object.keys(SELECTED_FILTERS[tab_type]).length > 0) {
-            Object.assign(filter_param, SELECTED_FILTERS[tab_type]);
-        }
-        if(tab_case_barcode[tab_type] && Object.keys(tab_case_barcode[tab_type]).length > 0) {
-            filter_param['case_barcode'] = tab_case_barcode[tab_type];
-        }
-
-        if(Object.keys(filter_param).length>0){
-            target_form.find('input[name="filters"]').attr(
-                'value',JSON.stringify(filter_param)
-            );
-        }
-        else{
-            target_form.find('input[name="filters"]').remove();
-        }
-    });
-
     function formatFileSize(bytes) {
         if(bytes == 0) return '0 B';
         var k = 1000,
@@ -1004,5 +1014,37 @@ require([
             i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
+
+    $('.filelist-container').on('click', '.hide-zeros input', function() {
+        update_zero_case_filters($(this));
+    });
+
+    $('.data-tab-content').on('click', '.pdf-download', function(){
+        $.ajax({
+                type        :'GET',
+                url         : $(this).attr('url'),
+                success : function (data) {
+                    let signed_uri = data['signed_uri'];
+                    let a = document.createElement('a');
+                    a.href = signed_uri;
+                    a.download = $(this).attr('data-filename');
+                    a.target="_blank"
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(a.href);
+                },
+                error: function (xhr) {
+                     let responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if(responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                    }
+                },
+            })
+    });
 
 });

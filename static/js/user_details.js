@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2015-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,6 @@
  * limitations under the License.
  *
  */
-
-// require.config({
-//     baseUrl: STATIC_FILES_URL+'js/',
-//     paths: {
-//         jquery: 'libs/jquery-1.11.1.min',
-//         bootstrap: 'libs/bootstrap.min',
-//         jqueryui: 'libs/jquery-ui.min',
-//         session_security: 'session_security/script',
-//         underscore: 'libs/underscore-min',
-//         base: 'base'
-//     },
-//     shim: {
-//         'bootstrap': ['jquery'],
-//         'session_security': ['jquery'],
-//     }
-// });
 
 require([
     'jquery',

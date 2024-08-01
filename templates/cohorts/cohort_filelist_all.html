@@ -1,204 +1,223 @@
 <div id="all-files" class="tab-pane data-tab" data-file-type="all" role="tabpanel">
-    <div id="all-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
-        <div class="panel filter-panel panel-default">
-            <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
-            <div class="panel-body tab-content filter-build-panel" id="all-filter-panel">
-                <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
-                    <li class="list-group-item">
-                        <div id="heading-all-case-id" class="list-group-item__heading">
-                            <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
-                               href="#collapse-all-case-id" aria-expanded="false"
-                               aria-controls="collapse-all-case-id">
-                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
-                            </a>
-                        </div>
-                        <div id="collapse-all-case-id"
-                             class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
-                             data-feature-type="donor"
-                             aria-labelledby="heading-all-case-id" data-feature-name="case-id"
-                             data-feature-displ-name="CASE ID">
-                            <div class="search_enter">
-                                <div class="search_input">
-                                    <input class="case-barcode-search-text" type="search" aria-label="Case Barcode" placeholder="Case Barcode"
-                                           value="">
-                                    <a class="case-barcode-search-clear-btn search_clear_btn"><i class="fa fa-times-circle"></i></a>
-                                    <a class="case-barcode-search-btn search_btn"><i class="fa fa-search"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    {% for attr_name, attr in metadata_data_attr.items %}
-                        <li class="list-group-item">
-                            <div id="heading-all-{{attr.name}}" class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr.name }}">
-                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
-                                </a>
-                            </div>
-                            <div id="collapse-all-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                 aria-labelledby="heading-all-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
-                                <ul class="search-checkbox-list" id="all-{{ attr.name }}">
-                                    {% with attr.values|how_many_more:6 as num_more %}
-                                        {% for v in attr.values|check_for_order:attr.name %}
-                                            {% if forloop.counter0 < 6 %}
-                                                <li class="checkbox">
-                                                    <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name }}-{{ v.value }}"
-                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                    </label>
-                                                </li>
-                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                <li class="extra-values checkbox" style="display:none;">
-                                                    <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name}}-{{ v.value }}"
-                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                    </label>
-                                                </li>
-                                            {% else %}
-                                                <li class="extra-values checkbox" style="display:none;">
-                                                    <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name }}-{{ v.value }}"
-                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                    </label>
-                                                </li>
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if num_more > 0 %}
-                                            <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                            <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                        {% endif %}
-                                    {% endwith %}
-                                </ul>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
+    <div class="col-lg-3 col-md-3 col-sm-pull-0"></div>
+    <div class="col-lg-9 col-md-9 col-sm-12 right">
+        <div class="selected-filters-all panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Selected Filters</h4>
+                <a class="pull-right clear-filters" role="button">Clear All</a>
             </div>
+            <div class="panel-body"></div>
         </div>
     </div>
-
-    <div id="all-file-panel" class="file-panel col-lg-9 col-md-9 col-sm-9">
-        <div class="filelist-panel panel">
-            <div class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
-                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                The maximum number of file records which can be downloaded is <span class="file-list-limit">{{ file_list_max }}</span>. Your selections currently total
-                <span class="file-list-total">#</span>. If you download the list now, it will be arbitrarily cut off after the maximum. Please consider using the filter
-                panel to the left to limit the record count.
-                {% if user.is_anonymous %}
-                Once you have logged in, you can register a Google Cloud Project and BigQuery Dataset, and export the file record list to a BigQuery table.
-                {% else %}
-                In order to obtain the complete listing, you can register a Google Cloud Project and BigQuery Dataset, and export the file record list to a BigQuery table.
-                {% endif %}
-            </div>
-            <div class="panel-heading">
-                <div class="file-panel-toggle">
-                    <a class="fa fa-angle-double-left" title="Click to hide the filters"></a>
-                    <a class="fa fa-angle-double-right" title ="Click to see the filters"></a>
-                </div>
-                <h4>File Listing</h4>
-                <div class="page-action-group pull-right">
-                    <ul>
-                        <li class="menu-item">
-                            <div class="filelist-obtain">
-                                <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
-                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
-                                <input type="hidden" class="download-token" value="" />
+    <div id="all-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
+            <div class="panel filter-panel panel-default">
+                <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 cases</div>
+                <div class="panel-body tab-content filter-build-panel" id="all-filter-panel">
+                    <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
+                        <li class="list-group-item">
+                            <div id="heading-all-case-id" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
+                                   href="#collapse-all-case-id" aria-expanded="false"
+                                   aria-controls="collapse-all-case-id">
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
+                                </a>
+                            </div>
+                            <div id="collapse-all-case-id"
+                                 class="list-group-item__body collapse file-feature-select-block" role="tabpanel"
+                                 data-feature-type="donor"
+                                 aria-labelledby="heading-all-case-id" data-feature-name="case-id"
+                                 data-feature-displ-name="CASE ID">
+                                <div class="search_enter">
+                                    <div class="search_input">
+                                        <input class="case-barcode-search-text" type="search" aria-label="Case Barcode" placeholder="Case Barcode"
+                                               value="">
+                                        <a class="case-barcode-search-clear-btn search_clear_btn"><i class="fa fa-times-circle"></i></a>
+                                        <a class="case-barcode-search-btn search_btn"><i class="fa fa-search"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </li>
-                        <li class="menu-item">
-                            <div class="filelist-obtain">
-                                <button class="btn btn-info export-btn"
-                                        data-toggle="modal" {% if has_user_data or user.is_anonymous %} disabled {% endif %} data-target="#export-to-bq-modal"
-                                        title="{% if user.is_anonymous %} Log-in to export to this file manifest to BigQuery table {% elif has_user_data %}Export for file manifests containing user data is not available at this time. {% else %}Export this file manifest to a BigQuery table{% endif %}">
-                                    BigQuery</button>
-                                <button class="btn btn-info export-btn"
-                                        data-toggle="modal" {% if has_user_data or user.is_anonymous %} disabled {% endif %} data-target="#export-to-gcs-modal"
-                                        title="{% if user.is_anonymous %} Log-in to export to this file manifest to GCS bucket {% elif has_user_data %}Export for file manifests containing user data is not available at this time. {% else %}Export this file manifest to a GCS bucket{% endif %}">
-                                    GCS</button>
-                            </div>
-                        </li>
+                        {% for attr in metadata_data_attr|get_sorted_items %}
+                            <li class="list-group-item">
+                                <div id="heading-all-{{attr.name}}" class="list-group-item__heading">
+                                    <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr.name }}">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                                    </a>
+                                </div>
+                                <div id="collapse-all-{{ attr.name }}" class="list-group-item__body collapse file-feature-select-block" role="tabpanel"
+                                     data-feature-type="donor" aria-labelledby="heading-all-{{ attr.name }}"
+                                     data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                    <ul class="search-checkbox-list" id="all-{{ attr.name }}">
+                                        {% with attr.values|how_many_more:6 as num_more %}
+                                            {% for v in attr.values|check_for_order:attr.name %}
+                                                {% if forloop.counter0 < 6 %}
+                                                    <li class="checkbox">
+                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
+                                                            <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
+                                                                   id="all-{{ attr.name }}-{{ v.value }}" data-feature-name="{{ attr.name }}"
+                                                                   data-count="{{ v.count }}" data-feature-id="{{ attr.id }}"
+                                                                   data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
+                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                        </label>
+                                                    </li>
+                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                    <li class="extra-values checkbox" style="display:none;">
+                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
+                                                            <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name}}-{{ v.value }}"
+                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                        </label>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="extra-values checkbox" style="display:none;">
+                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
+                                                            <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name }}-{{ v.value }}"
+                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                        </label>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if num_more > 0 %}
+                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endfor %}
                     </ul>
                 </div>
             </div>
-            <div class="panel-body">
-                <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
-                    <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
-                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+        </div>
+    <div id="all-file-panel" class="file-panel col-lg-9 col-md-9 col-sm-9">
+            <div class="filelist-panel panel">
+                <div class="alert alert-info alert-dismissable export-result" style="display: none;">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 </div>
-                <div>
-                    <div class="dataTables_length files-per-page">
-                        <label for="files-per-page-all-select">Show</label>
-                        <select id="files-per-page-all-select">
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                        <label>entries</label>
+                <div class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    The maximum number of file records which can be downloaded is <span class="file-list-limit">{{ file_list_max }}</span>. Your selections currently total
+                    <span class="file-list-total">#</span>. If you download the list now, it will be arbitrarily cut off after the maximum. Please consider using the filter
+                    panel to the left to limit the record count.
+                </div>
+                <div class="panel-heading">
+                    <div class="file-panel-toggle">
+                        <a class="fa fa-angle-double-left" title="Click to hide the filters"></a>
+                        <a class="fa fa-angle-double-right" title ="Click to see the filters"></a>
                     </div>
-                    <div class="dataTables_goto_page">
-                        <label for="goto-page-no-all">Page</label>
-                        <input id="goto-page-no-all" type="number" class="goto-page-number" min="1" max="1">
-                        <div class="goto-page-button dataTables_button">Go</div>
-                    </div>
-                    <div class="dataTables_paginate">
-                        <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
-                        <span class="paginate_button_space"></span>
-                        <a class="next-page paginate_button dataTables_button">Next</a>
+                    <h4>File Listing</h4>
+                    <div class="page-action-group pull-right">
+                        <ul>
+                            <li class="menu-item"><span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span></li>
+                            <li class="menu-item"><span class="pending-left" id="export-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Exporting...</span></li>
+                            <li class="menu-item">
+                                <div class="filelist-obtain">
+                                    <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>
+                                    <input type="hidden" class="download-token" value="" />
+                                </div>
+                            </li>
+                            <li class="menu-item">
+                                <div class="filelist-obtain">
+                                    <a class="export-link"
+                                       base-url="{% if not user.is_anonymous and is_social %}{{ export_url }}{% endif %}"
+                                       url="{% if not user.is_anonymous and is_social %}{{ export_url }}{% endif %}"
+                                       {% if user.is_anonymous or not is_social %}
+                                            title="Log in with a Google Account to enable this feature." disabled
+                                       {% else %}
+                                            title="Export file manifest to BQ"
+                                       {% endif %}
+                                    >
+                                        <button class="btn btn-info export-btn"{% if user.is_anonymous or not is_social %} disabled{% endif %}>BQ</button></a>
+                                    <input type="hidden" class="export-token" value="" />
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                <div class="column-inputs">
-                    <a role="button" data-toggle="collapse" href="#column-toggle-div-all" aria-expanded="false" aria-controls="column-toggle-div-all">
-                        Choose Columns to Display <i class="fa fa-caret-down"></i><i class="fa fa-caret-up"></i>
-                    </a>
-                    <div id="column-toggle-div-all" class="column-collapse collapse">
-                        <div class="column-toggle"></div>
-                        <p>*Click on column names above to hide/show columns in table</p>
+                <div class="panel-body">
+                    <div class="dataTables_info">
+                        <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
+                        <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
+                        <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
                     </div>
-                </div>
+                    <div>
+                        <div class="dataTables_length files-per-page">
+                            <label for="files-per-page-all-select">Show</label>
+                            <select id="files-per-page-all-select">
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <label>entries</label>
+                        </div>
+                        <div class="dataTables_goto_page">
+                            <label for="goto-page-no-all">Page</label>
+                            <input id="goto-page-no-all" type="number" class="goto-page-number" min="1" max="1">
+                            <div class="goto-page-button dataTables_button">Go</div>
+                        </div>
+                        <div class="dataTables_paginate">
+                            <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
+                            <span class="paginate_button_space"></span>
+                            <a class="next-page paginate_button dataTables_button">Next</a>
+                        </div>
+                    </div>
+                    <div class="column-inputs">
+                        <a role="button" data-toggle="collapse" href="#column-toggle-div-all" aria-expanded="false" aria-controls="column-toggle-div-all">
+                            Choose Columns to Display <i class="fa fa-caret-down"></i><i class="fa fa-caret-up"></i>
+                        </a>
+                        <div id="column-toggle-div-all" class="column-collapse collapse">
+                            <div class="column-toggle"></div>
+                            <p>*Click on column names above to hide/show columns in table</p>
+                        </div>
+                    </div>
 
-                <table class="table table-striped file-list-table sortable_table" aria-label="File Listing Table">
-                    <thead>
-                        <tr>
-                            <th class="col-program" columnId="col-program">Program</th>
-                            <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
-                            <th class="col-filename" columnId="col-filename">File Name</th>
-                            <th class="col-diseasecode" columnId="col-diseasecode">Disease Code</th>
-                            <th class="col-exp-strategy" columnId="col-exp-strategy">Exp. Strategy</th>
-                            <th class="col-platform" columnId="col-platform">Platform</th>
-                            <th class="col-datacat" columnId="col-datacat">Data Category</th>
-                            <th class="col-datatype" columnId="col-datatype">Data Type</th>
-                            <th class="col-dataformat" columnId="col-dataformat">Data Format</th>
-                            <th class="col-filesize" columnId="col-filesize">File Size</th>
-                        </tr>
-                    </thead>
-                    <colgroup>
-                        <col style="width: 10%">
-                        <col style="width: 13%">
-                        <col style="width: 18%">
-                        <col style="width: 8%">
-                        <col style="width: 9%">
-                        <col style="width: 8%">
-                        <col style="width: 9%">
-                        <col style="width: 9%">
-                        <col style="width: 8%">
-                        <col style="width: 8%">
-                    </colgroup>
-                    <tbody>
-                    </tbody>
-                </table>
+                    <table class="table table-striped file-list-table sortable_table" aria-label="File Listing Table">
+                        <thead>
+                            <tr>
+                                <th class="col-program" columnId="col-program">Program</th>
+                                <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
+                                <th class="col-filename" columnId="col-filename">File Name</th>
+                                <th class="col-exp-strategy" columnId="col-exp-strategy">Exp. Strategy</th>
+                                <th class="col-platform" columnId="col-platform">Platform</th>
+                                <th class="col-datacat" columnId="col-datacat">Data Category</th>
+                                <th class="col-datatype" columnId="col-datatype">Data Type</th>
+                                <th class="col-dataformat" columnId="col-dataformat">Data Format</th>
+                                <th class="col-access" columnId="col-access">Access</th>
+                                <th class="col-filesize" columnId="col-filesize">File Size</th>
+                            </tr>
+                        </thead>
+                        <colgroup>
+                            <col style="width: 10%">
+                            <col style="width: 11%">
+                            <col style="width: 10%">
+                            <col style="width: 9%">
+                            <col style="width: 9%">
+                            <col style="width: 8%">
+                            <col style="width: 8%">
+                            <col style="width: 8%">
+                            <col style="width: 8%">
+                            <col style="width: 8%">
+                        </colgroup>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+
+
 <script type="text/javascript">
     var total_files = {{ total_file_count|safe }};
     var file_listing = {{ file_list|tojson|safe }};
+    var user_is_social = {% if request.user.is_authenticated and request.user|has_social %}true{% else %}false{% endif %};
     var build_total_files = { 'HG19': undefined, 'HG38': undefined };
 </script>
