@@ -33,7 +33,6 @@ urlpatterns = [
     url(r'^users/$', views.user_detail_login, name='user_detail_login'),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
 
-    url(r'^igv/$', views.igv, name='igv'),
     url(r'^report/$', views.path_report, name='path_pdf'),
     url(r'^report/(?P<report_file>[A-Za-z0-9._/-]+)/$', views.path_report, name='path_pdf_report'),
 

@@ -86,11 +86,6 @@ function($, tree_graph, stack_bar_chart) {
         }
     };
 
-    var user_data_attr = {
-        user_program: 'Program',
-        user_project: 'Project'
-    };
-
     var format_num_with_commas = function(num) {
         if(isNaN(num))
             num = 0;
