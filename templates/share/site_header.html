@@ -69,16 +69,6 @@
                                         href="https://github.com/isb-cgc/Community-Notebooks"
                                         target="_blank" rel=“noreferrer”>GitHub Repo
                                 </a></li>
-                                <li role="separator" class="divider"></li>
-                                <li role="menuitem"><a
-                                        {% if user.is_authenticated %}
-                                            href="{% url 'user_detail' user.id %}"
-                                        {% else %}
-                                            href="{% url 'user_detail_login' %}"
-                                        {% endif %}
-                                        target="_blank" rel=“noreferrer”>Controlled Access Data
-                                </a></li>
-
                             </ul>
                         </div>
                     </li>
