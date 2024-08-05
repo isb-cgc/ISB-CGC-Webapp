@@ -2479,7 +2479,7 @@ section .min-max {
   #cohort-details .nav-tabs li.file-browser-tab, .nav-tabs #cohort-details li.active > a:focus li.file-browser-tab, #cohort-details .nav-tabs li.program-tab, .nav-tabs #cohort-details li.active > a:focus li.program-tab, #cohort-filelist .nav-tabs li.program-tab, .nav-tabs #cohort-filelist li.active > a:focus li.program-tab {
     width: 20%; }
  #cohort-filelist .nav-tabs li.file-browser-tab, .nav-tabs #cohort-filelist li.active > a:focus li.file-browser-tab {
-   width: 25%; }
+   width: 33.33333%; }
   #cohort-details .nav-tabs li.filter-tab, .nav-tabs #cohort-details li.active > a:focus li.filter-tab, #cohort-filelist .nav-tabs li.filter-tab, .nav-tabs #cohort-filelist li.active > a:focus li.filter-tab {
     width: 33.33333%; }
   #cohort-details .nav-tabs li:first-child a, .nav-tabs #cohort-details li.active > a:focus li:first-child a, #cohort-filelist .nav-tabs li:first-child a, .nav-tabs #cohort-filelist li.active > a:focus li:first-child a {
@@ -3402,6 +3402,10 @@ span.code {
   border: 4px solid #71a0ce;
   color: grey; }
 
+#user-details .panel {
+  width: 100%;
+}
+
 #user-details .panel-heading {
   color: white;
   background-color: #2b537b;
@@ -3409,7 +3413,8 @@ span.code {
   border-top-left-radius: 3px; }
 
 #user-details .panel i {
-  margin-right: 5px; }
+  margin-right: 5px;
+}
 
 #user-details .panel-body {
   padding: 20px; }
