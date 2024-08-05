@@ -66,7 +66,7 @@ logger = logging.getLogger(__name__)
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
-IDP = settings.IDP
+IDP = None
 
 
 def _needs_redirect(request):
@@ -336,89 +336,6 @@ def extended_login_view(request):
 def warn_page(request):
     request.session['seenWarning'] = True
     return JsonResponse({'warning_status': 'SEEN'}, status=200)
-
-
-@login_required
-@otp_required
-def igv(request):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-
-    req = request.GET or request.POST
-    checked_list = json.loads(req.get('checked_list', '{}'))
-    bam_list = []
-    build = None
-
-    # This is a POST request with all the information we already need
-    if len(checked_list):
-        for item in checked_list['gcs_bam']:
-            bam_item = checked_list['gcs_bam'][item]
-            if not build:
-                build = bam_item['build'].lower()
-            elif build != bam_item['build'].lower():
-                logger.warning("[WARNING] Possible build collision in IGV viewer BAMS: {} vs. {}".format(build,
-                                                                                                         bam_item[
-                                                                                                             'build'].lower()))
-                logger.warning("Dropping any files with build {}".format(bam_item['build'].lower()))
-            id_barcode = item.split(',')
-            bam_list.append({
-                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': bam_item['build'].lower(),
-                'program': bam_item['program']
-            })
-    # This is a single GET request, we need to get the full file info from Solr first
-    else:
-        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(
-            data_type=DataVersion.FILE_DATA, active=True, build=build))
-        gdc_ids = list(set(req.get('gdc_ids', '').split(',')))
-
-        if not len(gdc_ids):
-            messages.error(request,
-                           "A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
-        else:
-            if len(gdc_ids) > settings.MAX_FILES_IGV:
-                messages.warning(request,
-                                 "The maximum number of files which can be viewed in IGV at one time is {}.".format(
-                                     settings.MAX_FILES_IGV) +
-                                 " Only the first {} will be displayed.".format(settings.MAX_FILES_IGV))
-                gdc_ids = gdc_ids[:settings.MAX_FILES_IGV]
-
-            for source in sources:
-                result = query_solr_and_format_result(
-                    {
-                        'collection': source.name,
-                        'fields': ['sample_barcode', 'file_node_id', 'file_name_key', 'index_file_name_key',
-                                   'program_name', 'access'],
-                        'query_string': 'file_node_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
-                        'counts_only': False
-                    }
-                )
-                if 'docs' not in result or not len(result['docs']):
-                    messages.error(request,
-                                   "IGV compatible files corresponding to the following UUIDs were not found: {}.".format(
-                                       " ".join(gdc_ids))
-                                   + "Note that the default build is HG38; to view HG19 files, you must indicate the build as HG19: &build=hg19")
-                else:
-                    saw_controlled = False
-                    for doc in result['docs']:
-                        if doc['access'] == 'controlled':
-                            saw_controlled = True
-                        bam_list.append({
-                            'sample_barcode': doc['sample_barcode'],
-                            'gcs_path': "{};{}".format(doc['file_name_key'], doc['index_file_name_key']),
-                            'build': build,
-                            'program': doc['program_name']
-                        })
-                    if saw_controlled:
-                        messages.info(request,
-                                      "Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
-
-    context = {
-        'bam_list': bam_list,
-        'base_url': settings.BASE_URL,
-        'oauth_client_id': settings.OAUTH2_CLIENT_ID,
-        'build': build,
-    }
-
-    return render(request, 'isb_cgc/igv.html', context)
 
 
 def path_report(request, report_file=None):
