@@ -24,7 +24,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # Adapted in part from django-password-expire by spaquett
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 class PasswordExpireMiddleware:

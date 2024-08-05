@@ -38,6 +38,7 @@ from django.utils import formats
 from django.core.exceptions import ObjectDoesNotExist
 from sharing.service import send_email_message
 from django.contrib import messages
+from django.db.models import Prefetch
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
@@ -60,11 +61,10 @@ from .forms import CgcOtpTokenForm
 import requests
 
 debug = settings.DEBUG
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
-BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
 IDP = None
 
@@ -308,7 +308,13 @@ def extended_login_view(request):
         )
 
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
-        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
+        try:
+            user_opt_in_stat_obj = UserOptInStatus.objects.get(user=user)
+        except ObjectDoesNotExist as e:
+            user_opt_in_stat_obj = UserOptInStatus.objects.update_or_create(
+                user=user,
+                opt_in_status=UserOptInStatus.NEW
+            )
         if user_opt_in_stat_obj:
             if user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW or \
                     user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SKIP_ONCE:
@@ -317,6 +323,7 @@ def extended_login_view(request):
             elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN:
                 user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SKIP_ONCE
                 user_opt_in_stat_obj.save()
+
     except User.DoesNotExist as e:
         logger.error("[ERROR] User not found! User provided: {}".format(request.user))
     except Exception as e:
@@ -331,84 +338,8 @@ def warn_page(request):
     return JsonResponse({'warning_status': 'SEEN'}, status=200)
 
 
-@login_required
-@otp_required
-def test_solr_data(request):
-    status = 200
-
-    try:
-        start = time.time()
-        filters = json.loads(request.GET.get('filters', '{}'))
-        versions = json.loads(request.GET.get('versions', '[]'))
-        source_type = request.GET.get('source', DataSource.SOLR)
-        versions = DataVersion.objects.filter(data_type__in=versions) if len(versions) else DataVersion.objects.filter(
-            active=True)
-
-        programs = Program.objects.filter(active=1, is_public=1,
-                                          owner=User.objects.get(is_superuser=1, is_active=1, is_staff=1))
-
-        if len(filters):
-            programs = programs.filter(id__in=[int(x) for x in filters.keys()])
-
-        results = {}
-
-        for prog in programs:
-            results[prog.id] = {}
-            prog_versions = prog.dataversion_set.filter(id__in=versions)
-            sources = prog.get_data_sources(source_type=source_type).filter(version__in=prog_versions)
-            prog_filters = filters.get(str(prog.id), None)
-            attrs = sources.get_source_attrs(for_ui=True)
-            for source in sources:
-                solr_query = build_solr_query(prog_filters, with_tags_for_ex=True) if prog_filters else None
-                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'],
-                                                filter_tags=solr_query['filter_tags'] if solr_query else None,
-                                                unique='case_barcode')
-                query_set = []
-
-                if solr_query:
-                    for attr in solr_query['queries']:
-                        attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
-                        # If an attribute is not in this program's attribute listing, then it's ignored
-                        if attr_name in attrs['list']:
-                            # If the attribute is from this source, just add the query
-                            if attr_name in attrs['sources'][source.id]['list']:
-                                query_set.append(solr_query['queries'][attr])
-                            # If it's in another source for this program, we need to join on that source
-                            else:
-                                for ds in sources:
-                                    if ds.id != source.id and attr_name in attrs['sources'][ds.id]['list']:
-                                        query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
-                                            ds.shared_id_col, ds.name, source.shared_id_col
-                                        )) + solr_query['queries'][attr])
-                        else:
-                            logger.warning(
-                                "[WARNING] Attribute {} not found in program {}".format(attr_name, prog.name))
-
-                solr_result = query_solr_and_format_result({
-                    'collection': source.name,
-                    'facets': solr_facets,
-                    'fqs': query_set
-                })
-
-                results[prog.id][source.name] = solr_result
-
-        stop = time.time()
-
-        results['elapsed_time'] = "{}s".format(str(stop - start))
-
-    except Exception as e:
-        logger.error("[ERROR] While trying to fetch Solr metadata:")
-        logger.exception(e)
-        results = {'msg': 'Encountered an error'}
-        status = 500
-
-    return JsonResponse({'result': results}, status=status)
-
-
 def path_report(request, report_file=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
     try:
         if not path_report:
             messages.error(
@@ -422,17 +353,15 @@ def path_report(request, report_file=None):
             raise Exception("Received a status code of {} from IndexD.".format(str(response.status_code)))
 
         anon_signed_uri = response.json()['url']
-
-        template = 'isb_cgc/path-pdf.html'
-
-        context['path_report_file'] = anon_signed_uri
+        response = {'signed_uri': anon_signed_uri}
+        status = 200
     except Exception as e:
         logger.error("[ERROR] While trying to load Pathology report:")
         logger.exception(e)
         logger.error("Attempted URI: {}".format(uri))
-        return render(request, '500.html')
-
-    return render(request, template, context)
+        response = {'message': 'Could not obtain pathology report.'}
+        status = 500
+    return JsonResponse(response, status=status)
 
 
 # Because the match for vm_ is always done regardless of its presense in the URL
@@ -492,37 +421,6 @@ def programmatic_access_page(request):
 
 def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
-
-
-@login_required
-@otp_required
-def dashboard_page(request):
-    context = {}
-    display_count = 6
-    try:
-        # Cohort List
-        isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
-        public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
-
-        cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user,
-                                                                            cohort__active=True).exclude(
-            cohort__id__in=public_cohorts)
-        cohorts_count = cohort_perms.count()
-        cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id',flat=True), active=True).order_by('-date_created')[:display_count]
-
-
-        context = {
-            'request': request,
-            'cohorts': cohorts,
-            'cohorts_count': cohorts_count
-        }
-
-    except Exception as e:
-        logger.error("[ERROR] While prepping dashboard:")
-        logger.exception(e)
-        messages.error(request, "Encountered an error while building the dashboard - please contact the administrator.")
-
-    return render(request, 'isb_cgc/dashboard.html', context)
 
 
 @login_required
@@ -667,7 +565,6 @@ def opt_in_form_submitted(request):
             if user_opt_in_stat_obj:
                 user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES if subscribed else UserOptInStatus.NO
                 user_opt_in_stat_obj.save()
-                # record to store in bq table
                 feedback_row = {
                     "email": email,
                     "first_name": first_name,
@@ -679,8 +576,8 @@ def opt_in_form_submitted(request):
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
                 # send a notification to feedback@isb-cgc.org about the entry
-                if settings.IS_UAT:
-                    logger.info("[STATUS] UAT: sent email for feedback")
+                if settings.IS_UAT or settings.IS_DEV:
+                    logger.info("[STATUS] UAT/DEV: sent email for feedback")
                 else:
                     # send a notification to feedback@isb-cgc.org about the entry
                     send_feedback_notification(feedback_row)

@@ -52,20 +52,24 @@
                     <table id="cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>
                             <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
+                            <th class="id-col">Cohort ID</th>
                             <th class="name-col">Cohort Name</th>
                             <th class="case-col"># Cases</th>
                             <th class="sample-col"># Samples</th>
                             <th class="owner-col">Ownership</th>
                             <th class="share-col">Shared With</th>
-                            <th class="id-col">Cohort ID</th>
-                            <th class="date-col">Last Modified</th>
+                            <th class="export-col">Last Export</th>
+                            <th class="date-col">Created On</th>
                         </tr></thead>
                         <tbody>
                         {% for cohort in cohorts %}
-                        {% if cohort.owner.is_superuser == False %}
+                        {% with valid_export=cohort.get_export_is_valid %}
                             <tr class="page-item">
                                 <td class="checkbox-col">
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
+                                </td>
+                                <td class="id-col">
+                                    {{ cohort.id }}
                                 </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
                                 <td class="case-col">{{ cohort.case_count }}</td>
@@ -84,12 +88,24 @@
                                         You
                                     {% endif %}
                                 </td>
-                                <td class="id-col">
-                                    {{ cohort.id }}
+                                <td class="export-col{% if not valid_export and cohort.last_exported_table %} inactive-export{% endif %}">
+                                    <p>
+                                        {% with table_uri=cohort.get_last_export_uri %}
+                                            {% if valid_export %}
+                                                <a href="{{ table_uri }}" target="_blank" rel="noreferrer nofollow" title="{{ cohort.last_exported_table }}">
+                                                    {{ cohort.last_exported_date|date:"Y/m/d h:i e"}}
+                                                </a>
+                                            {% elif cohort.last_exported_table %}
+                                                {{ cohort.last_exported_date|date:"Y/m/d h:i e"}} (Expired)
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        {% endwith %}
+                                    </p>
                                 </td>
                                 <td class="date-col">{{ cohort.date_created|date:'M d, Y, g:i a' }}</td>
                             </tr>
-                        {% endif %}
+                        {% endwith %}
                         {% endfor %}
                         </tbody>
                     </table>

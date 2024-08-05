@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2015-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,10 @@ function($, d3, d3tip, vis_helpers) {
             } else {
                 treeTip.offset([CURSOR_TOOLTIP_PAD, 0]);
             }
-
-            return '<span>' + d.name + ': ' + d.count + '</span>';
+            if(d.count !== undefined) {
+                return '<span>' + d.name + ': ' + d.count + '</span>';
+            }
+            return '<span>' + d.name + ': N/A</span>';
         });
 
      var  get_tree_ready = function(data, clin_attr_key, attribute, prog_id) {
@@ -75,9 +77,14 @@ function($, d3, d3tip, vis_helpers) {
                 return d.name;
             });
             var helpers = Object.create(vis_helpers, {});
-            var color = d3.scale.ordinal()
+            let color = d3.scale.ordinal()
                 .domain(name_domain)
                 .range(helpers.color_map(name_domain.length));
+            if(Object.keys(data).length <= 0) {
+                color = d3.scale.ordinal()
+                .domain(name_domain)
+                .range(["#818181FF"]);
+            }
 
             var cell = svg.selectAll("g")
                 .data(nodes)
@@ -102,14 +109,14 @@ function($, d3, d3tip, vis_helpers) {
                     // This function predated the Issue 2018 fix, but the target element was being missed because no id
                     // was provided, and the tag generation here was faulty. Use a prebuilt click targ here that matches the
                     // pattern established in Common/cohorts/metadata_counting.py:
-                    var item = $('#' + d.click_targ);
-                    var viewOnly = ($('#cohort-mode').length) && ($('#cohort-mode').val() == 'VIEW');
-                    if ((item.length > 0) && !viewOnly) {
-                        item[0].checked = 'checked';
-                        $(item[0]).trigger('change');
+                    if(d.count > 0) {
+                        var item = $('#' + d.click_targ);
+                        var viewOnly = ($('#cohort-mode').length) && ($('#cohort-mode').val() == 'VIEW');
+                        if ((item.length > 0) && !viewOnly) {
+                            $(item[0]).click();
+                        }
                     }
                 });
-
             svg.call(tip);
         };
 

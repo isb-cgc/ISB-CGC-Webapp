@@ -34,7 +34,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging
 import math
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 # If an attribute's values should be alphanumerically sorted, list them here
@@ -77,10 +77,11 @@ VALUE_SPECIFIC_ORDERS = {
 }
 
 ATTR_SPECIFIC_ORDERS = [
+    'case-id',
     'program_name',
+    'build',
     'project_short_name_gdc',
     'project_short_name_pdc',
-    'disease_code',
     'vital_status',
     'gender_gdc',
     'gender_pdc',
@@ -106,6 +107,13 @@ ATTR_SPECIFIC_ORDERS = [
 HIDE_ATTR = [
     'program_name'
 ]
+
+
+@register.filter
+def has_social(user):
+    if user.is_authenticated:
+        return bool(len(user.socialaccount_set.all()) > 0)
+    return False
 
 
 def quick_js_bracket_replace(matchobj):

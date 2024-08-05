@@ -49,7 +49,6 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^citations/', views.citations_page, name='citations_page'),
-    url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^otp_request/$', views.CgcOtpView.as_view(), name='otp_request'),
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),

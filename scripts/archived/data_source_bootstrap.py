@@ -43,7 +43,7 @@ from projects.models import Program, Attribute, Attribute_Ranges, Attribute_Disp
 from django.contrib.auth.models import User
 isb_superuser = User.objects.get(username="isb")
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 ranges_needed = {
     'wbc_at_diagnosis': 'by_200',

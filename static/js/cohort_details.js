@@ -1,7 +1,6 @@
 /**
  *
- * Copyright 2017-2024
- * , Institute for Systems Biology
+ * Copyright 2017-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,9 +64,13 @@ require([
 
     var SELECTED_FILTERS = {};
 
-    $('.program-tab a').each(function(){
-        SELECTED_FILTERS[$(this).data('program-id')] = {};
-    });
+    var initialize_sel_filters = function() {
+        $('.program-tab a').each(function(){
+            SELECTED_FILTERS[$(this).data('program-id')] = {};
+        });
+    };
+
+    initialize_sel_filters();
 
     var UPDATE_PENDING = false;
 
@@ -211,13 +214,17 @@ require([
 
         update_displays_thread = setTimeout(function(){
             UPDATE_PENDING = true;
-            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', prog_id, for_panel_load).then(
-                function(){
+            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', prog_id, for_panel_load)
+                .then(function(){
                     !withoutCheckChanges && check_for_changes();
                     UPDATE_PENDING = false;
                     dequeueUpdate();
-                }
-            );
+                })
+                .fail(function(){
+                    !withoutCheckChanges && check_for_changes();
+                    UPDATE_PENDING = false;
+                    dequeueUpdate();
+                });
         },SUBSEQUENT_DELAY);
     };
 
@@ -396,7 +403,8 @@ require([
         if ($this.is(':checked')) { // Checkbox checked
             let tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                     value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
-                tokenFeatDisplName = '['+feature.data('node-name')+'] ' + ((feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                tokenFeatDisplName = (feature.data('node-name') ? '['+feature.data('node-name')+'] ' : '')
+                    + ((feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
                  feature.data('feature-displ-name') : feature.data('feature-name'));
 
             let feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
@@ -464,23 +472,6 @@ require([
         }
     };
 
-    // Event: Clear Filters click
-    $('.clear-filters').on('click', function() {
-        var activeDataTab = $('.data-tab.active').attr('id');
-        var prog_id = $('.data-tab.active .filter-panel').data('prog-id');
-
-        $(this).parents('.all-selected-filters').find('.panel-body').empty();
-        $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
-            $(this).prop('checked', false);
-        });
-
-        delete SELECTED_FILTERS[prog_id];
-
-        $('#selected-filters span').remove();
-        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
-        update_displays();
-    });
-
     $('button[data-target="#apply-edits-modal"]').on('click',function(e){
         // Clear previous 'bad name' alerts
         $('#unallowed-chars-alert').hide();
@@ -511,7 +502,6 @@ require([
     });
 
     var set_mode = function(from_click) {
-
         switch(mode){
             case 'EDITING':
                 // $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
@@ -868,22 +858,29 @@ require([
     });
 
     $('#clear-all-yes-btn').on('click', function() {
+        let activeDataTab = $('.data-tab.active');
+        let active_prog_id = activeDataTab.find('.filter-panel').attr('data-prog-id');
         let creationForm = $('#create-cohort-form');
 
-        let clearFiltersButton = $('.clear-filters');
-        clearFiltersButton.closest('.all-selected-filters').siblings('.selected-filters').find('.panel-body').empty();
+        $('.all-selected-filters span').each(function(){
+            if($(this).attr('data-prog-id') !== active_prog_id) {
+                $('#' + $(this).attr('data-prog-id') + '-data').remove();
+            }
+        });
 
+        $('.all-selected-filters').find('.panel-body').empty();
         // bug fix #2722
         creationForm.find('#selected-filters p').hide();
-
-        clearFiltersButton.parents('.data-tab').find('.filter-panel input:checked').each(function() {
+        creationForm.find('#selected-filters span').remove();
+        $('.data-tab .filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
 
-        creationForm.find('#selected-filters span').remove();
+        initialize_sel_filters();
 
-        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
 
+
+        update_all_selected_filters_ui('#' + activeDataTab.attr('id'));
         update_displays();
     });
 
@@ -904,53 +901,9 @@ require([
         });
     };
 
-    // Handler for the 'x' of the mutation 'category' filter tokens
-    // $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e) {
-    //     var prog_id = $(this).parents('span').data('prog-id');
-    //     var activeDataTab = prog_id+'-data';
-    //     var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
-    //     var createFormFilterSet = $('p#'+activeDataTab+'-filters');
-    //     var filter = $(this).parents('span').data('filter');
-    //     if(filter && SELECTED_FILTERS[prog_id][filter]) {
-    //         delete SELECTED_FILTERS[prog_id][filter];
-    //     }
-    //
-    //     // When the 'Selected Filters' token is removed, remove this filter from other
-    //     // locations in which it's stored
-    //
-    //     $(this).parent('span').remove();
-    //     if($(selFilterPanel+' .panel-body .mol-filter').length <= 0) {
-    //         $(selFilterPanel+' .panel-body .mol-filter-container').hide();
-    //     }
-    //
-    //     createFormFilterSet.find('span[data-filter="'+filter+'"]').remove();
-    //
-    //     if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-    //         $('#at-least-one-filter-alert-modal').show();
-    //         $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-    //     }
-    //
-    //     // If this has emptied out a program's filter set, hide the modal's subsection for that program
-    //     // if a new value isn't replacing it
-    //     if(createFormFilterSet.find('span').length <= 0) {
-    //         createFormFilterSet.hide();
-    //     }
-    //
-    //     // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-    //     var progCount = 0;
-    //     $('.selected-filters .panel-body').each(function(){
-    //         if($(this).find('span').length > 0) {
-    //             progCount++;
-    //         }
-    //     });
-    //     (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-    //
-    //     update_displays(false,false,prog_id);
-    //     return false;
-    // });
-
-    // Event: Filter clear warning
+    // Events which are only active for a non-cohort view
     if(!cohort_id) {
+        // Clear filter warning modal
         $('.clear-filters').on('click', function() {
              $('#clear-all-warning-modal').modal('show');
         });
@@ -1092,8 +1045,7 @@ require([
     var ANONYMOUS_FILTERS = {};
     var MUTATION_FILTER_COMBINE = "and";
 
-    var save_anonymous_filters = function()
-    {
+    var save_anonymous_filters = function() {
         // Collect all selected filters and save to session storage
         var filters = [];
         $('#selected-filters span.filter-token').each(function() {
@@ -1114,8 +1066,7 @@ require([
     };
 
     var load_tabs_queue = [];
-    var load_anonymous_filters = function()
-    {
+    var load_anonymous_filters = function() {
         // Load anonymous filters from session storage and clear it, so it is not always there
         var str = sessionStorage.getItem('anonymous_filters');
         ANONYMOUS_FILTERS = JSON.parse(str);
@@ -1135,8 +1086,7 @@ require([
         }
     };
 
-    var apply_anonymous_filters = function(active_program_id)
-    {
+    var apply_anonymous_filters = function(active_program_id) {
         // Check if anonymous filter exist, then find all checkbox and check them
         if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
             var has_mut_filter = false;
@@ -1219,8 +1169,6 @@ require([
 
     var reject_load = false;
 
-    var SORT_DATASET_BY = "node";
-
     var update_all_selected_filters_ui = function(dataset_selector) {
         let all_selected_panel = $('.all-selected-filters' + ' .panel-body');
         all_selected_panel.empty();
@@ -1238,8 +1186,8 @@ require([
                 let link = "#" + program_id + "-data";
                 let div = $('<div class="'+(link === dataset_selector ? 'current-data-set' : 'other-data-set')+'">');
                 let current = (link === dataset_selector) ? " (Current Data Set)" : "";
-                div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
-                    + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
+                div.append('<h5><a class="dataset-select-btn" program-id="' + program_id + '" program-name="'+ dataset_name +'"'
+                    + ' node-id="' + node_id + '">' + dataset_name + '</a>' + current + '</h5>');
 
                 $(this).find('span').each(function() {
                     var new_token = $(this).clone(true);
@@ -1257,10 +1205,12 @@ require([
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
+            let active_program_name = $(e.target).attr('program-name');
             ACTIVE_NODE_ID = $(e.target).attr('node-id');
             let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $(new_dataset_selector).addClass('active');
+            $('.sort-by-program').val(active_program_name);
             update_all_selected_filters_ui(new_dataset_selector);
         });
     };
@@ -1403,13 +1353,60 @@ require([
         }
     });
 
-    $('#log-in-to-save-btn').on('click', function()
-    {
+    $('#log-in-to-save-btn').on('click', function() {
         $.setCookie('login_from','cohort','/');
         save_anonymous_filters();
         location.href = '/accounts/login/';
     });
+
+    $('.export-btn, .download-ids-btn').on('click', function() {
+        let self=$(this);
+        if(self.hasClass('export-btn') && !user_is_social) {
+            e.preventDefault();
+            return false;
+        }
+        let msg = self.hasClass('download-ids-btn') ? $('#download-in-prog') : $('#export-in-prog');
+        let token = self.hasClass('download-ids-btn') ? $('.download-token').val() : $('.export-token').val();
+
+        self.attr('disabled','disabled');
+        msg.show();
+
+        base.blockResubmit(function() {
+            self.removeAttr('disabled');
+            msg.hide();
+        },token,"downloadToken");
+
+        if(self.hasClass('export-btn')) {
+            $.ajax({
+                type: 'GET',
+                url: $('.export-btn').attr('url') + '?downloadToken=' + token,
+                success: function (data) {
+                    let msg_box = $('#export-result');
+                    msg_box.hide();
+                    msg_box.empty();
+                    msg_box.html(data['message']);
+                    msg_box.show();
+                },
+                error: function (xhr) {
+                    var responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if (responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error", responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error", responseJSON.message, true);
+                    }
+                },
+            });
+        }
+    });
+
     set_mode();
     filter_panel_load(cohort_id);
+
+    let token = new Date().getTime();
+    $('.export-token, .download-token').val(token);
+    $('.download-ids-btn').attr('href',$('.download-ids-btn').attr('href')+'?downloadToken='+token);
+
 });
 

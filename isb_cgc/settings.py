@@ -54,7 +54,6 @@ SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', 'info@isb-cgc.org')
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
-IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
 print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
@@ -72,10 +71,19 @@ MANAGERS                = ADMINS
 # For Django 3.2, we need to specify our default auto-increment type for PKs
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
+# GCP where this application is running (dev project for local developer instances)
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
+# GCP number for the project where this application is running (dev project for local developer instances)
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
+# GCP where BQ jobs are run
 BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
+# GCP where BQ case metadata resides
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
+# Project and BQ dataset which house the exported BQ tables made available to users
+BIGQUERY_EXPORT_PROJECT_ID     = os.environ.get('BIGQUERY_EXPORT_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_EXPORT_DATASET_ID     = os.environ.get('BIGQUERY_EXPORT_DATASET_ID', 'user_exports')
+BIGQUERY_USER_MANIFEST_TIMEOUT = int(os.environ.get('BIGQUERY_USER_MANIFEST_TIMEOUT', '7'))
+# User feedback tables
 BIGQUERY_FEEDBACK_DATASET      = os.environ.get('BIGQUERY_FEEDBACK_DATASET', '')
 BIGQUERY_FEEDBACK_TABLE        = os.environ.get('BIGQUERY_FEEDBACK_TABLE', '')
 
@@ -122,13 +130,16 @@ if os.environ.get('CI', None) is not None:
 DATABASES = database_config
 DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
+# Tier ID vars are set in .envs for that tier so these should only be true on those tiers
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_UAT = (os.environ.get('IS_UAT', 'False') == 'True')
+# AppEngine var is set in the app.yaml so this should be false for CI and local dev apps
 IS_APP_ENGINE = bool(os.getenv('IS_APP_ENGINE', 'False') == 'True')
+# $CI is set only on CircleCI run VMs so this should not have a value outside of a deployment build
 IS_CI = bool(os.getenv('CI', None) is not None)
 
-# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
-# care of that for us
+# SSL Certs are used by non-appengine deployments to talk to a CloudSQL database
+# AppEngine deployments use the proxy and do not need these variables to be set
 if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
@@ -138,15 +149,14 @@ if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE:
         }
     }
 
-# Default to localhost for the site ID
+# Site ID setting for AllAuth
+# Default to localhost (set in build scripts for local VMs to entry ID 3)
 SITE_ID = 3
 
+# ...and only switch to the deployed system, which should always be ID 4, if we are on AppEngine
 if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = 4
-
-def get_project_identifier():
-    return BIGQUERY_PROJECT_ID
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
@@ -208,8 +218,6 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
-BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/bq_ecosys/')
-
 CITATIONS_STATIC_URL = os.environ.get('CITATIONS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/static/citations/')
 
 GCS_STORAGE_URI = os.environ.get('GCS_STORAGE_URI', 'https://storage.googleapis.com/')
@@ -239,6 +247,7 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '3600'))
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'isb_cgc.domain_redirect_middleware.DomainRedirectMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'isb_cgc.checkreqsize_middleware.CheckReqSize',
@@ -253,6 +262,13 @@ MIDDLEWARE = [
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://www.isb-cgc.org",
+    "https://portal.isb-cgc.org",
+    "https://isb-cgc.org",
+    "https://api.isb-cgc.org"
 ]
 
 ROOT_URLCONF = 'isb_cgc.urls'
@@ -298,11 +314,40 @@ MIDDLEWARE.append(
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+handler_set = ['console_dev', 'console_prod']
+handlers = {
+    'mail_admins': {
+        'level': 'ERROR',
+        'filters': ['require_debug_false'],
+        'class': 'django.utils.log.AdminEmailHandler'
+    },
+    'console_dev': {
+        'level': 'DEBUG',
+        'filters': ['require_debug_true'],
+        'class': 'logging.StreamHandler',
+        'formatter': 'verbose',
+    },
+    'console_prod': {
+        'level': 'DEBUG',
+        'filters': ['require_debug_false'],
+        'class': 'logging.StreamHandler',
+        'formatter': 'simple',
+    },
+}
+
+if IS_APP_ENGINE:
+    # We need to hook up Python logging to Google Cloud Logging for AppEngine (or nothing will be logged)
+    client = google.cloud.logging_v2.Client()
+    client.setup_logging()
+    handler_set.append('stackdriver')
+    handlers['stackdriver'] = {
+        'level': 'DEBUG',
+        'filters': ['require_debug_false'],
+        'class': 'google.cloud.logging_v2.handlers.CloudLoggingHandler',
+        'client': client,
+        'formatter': 'verbose'
+    }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -316,65 +361,31 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            'format': '[%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
+            'format': '[%(name)s] [%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
         },
         'simple': {
-            'format': '[%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
+            'format': '[%(name)s] [%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
         },
     },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'console_dev': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'console_prod': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_false'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
+    'handlers': handlers,
+    'root': {
+        'level': 'INFO',
+        'handlers': handler_set
     },
     'loggers': {
+        '': {
+            'level': 'INFO',
+            'handlers': handler_set,
+            'propagate': True
+        },
+        'django': {
+            'level': 'INFO',
+            'handlers': handler_set,
+            'propagate': False
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
-            'propagate': True,
-        },
-        'main_logger': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'allauth': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'google_helpers': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'accounts': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'finalware': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'anymail': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
             'propagate': True,
         }
     },
@@ -392,6 +403,7 @@ INSTALLED_APPS += (
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'corsheaders',
     'django_otp',
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
@@ -542,11 +554,6 @@ if not IS_APP_ENGINE:
     print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
 else:
     print("[STATUS] AppEngine Flex detected--default credentials will be used.")
-    # We need to hook up Python logging to Google Cloud Logging for AppEngine (or nothing will be logged)
-    client = google.cloud.logging.Client()
-    client.get_default_handler()
-    client.setup_logging()
-
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
@@ -567,7 +574,7 @@ LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VI
 #
 # This should only be done on a local system which is running against its own VM. Deployed systems will already have
 # a site superuser so this would simply overwrite that user. Don't enable this in production!
-if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
+if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CI:
     INSTALLED_APPS += (
         'finalware',)
 
@@ -625,7 +632,8 @@ SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os
 ##############################################################
 EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
-NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
+SERVER_EMAIL = "info@isb-cgc.org"
+NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATION_EMAIL_FROM_ADDRESS', SERVER_EMAIL)
 NOTIFICATION_EMAIL_TO_ADDRESS = os.environ.get('NOTIFICATION_EMAIL_TO_ADDRESS', '')
 
 #########################
@@ -639,10 +647,9 @@ ANYMAIL = {
 }
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
-SERVER_EMAIL = "info@isb-cgc.org"
 
 # Cron user settings
-CRON_USER = os.environ.get('CRON_USER', 'cron_user')
+CRON_USER = os.environ.get('CRON_USER', 'cron-user')
 CRON_AUTH_KEY = os.environ.get('CRON_AUTH_KEY', 'Token')
 
 # Explicitly check for known items

@@ -1,31 +1,21 @@
-<div id="dicom-files" class="tab-pane data-tab" data-file-type="dicom" role="tabpanel">
-    <div class="col-lg-3 col-md-3 col-sm-pull-0"></div>
-    <div class="col-lg-9 col-md-9 col-sm-12 right">
-        <div class="selected-filters-dicom panel panel-default">
-            <div class="panel-heading clearfix">
-                <h4 class="panel-title pull-left">Selected Filters</h4>
-                <a class="pull-right clear-filters" role="button">Clear All</a>
-            </div>
-            <div class="panel-body"></div>
-        </div>
-    </div>
-    <div id="dicom-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
+<div id="igv-files" class="tab-pane data-tab" data-file-type="igv" role="tabpanel">
+    <div id="igv-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
         <div class="panel panel-default filter-panel">
             <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 cases</div>
-            <div class="panel-body tab-content filter-build-panel" id="dicom-filter-panel">
-                <ul class="list-group" id="metadata-data-accordian-dicom" role="tablist" aria-multiselectable="true">
+            <div class="panel-body tab-content filter-build-panel" id="igv-filter-panel">
+                <ul class="list-group" id="metadata-data-accordian-igv" role="tablist" aria-multiselectable="true">
                     <li class="list-group-item">
-                        <div id="heading-dicom-case-id" class="list-group-item__heading">
+                        <div id="heading-igv-case-id" class="list-group-item__heading">
                             <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
-                               href="#collapse-dicom-case-id" aria-expanded="false"
-                               aria-controls="collapse-dicom-case-id">
+                               href="#collapse-igv-case-id" aria-expanded="false"
+                               aria-controls="collapse-igv-case-id">
                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
                             </a>
                         </div>
-                        <div id="collapse-dicom-case-id"
-                             class="list-group-item__body collapse file-feature-select-block" role="tabpanel"
+                        <div id="collapse-igv-case-id"
+                             class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
                              data-feature-type="donor"
-                             aria-labelledby="heading-dicom-case-id" data-feature-name="case-id"
+                             aria-labelledby="heading-igv-case-id" data-feature-name="case-id"
                              data-feature-displ-name="CASE ID">
                             <div class="search_enter">
                                 <div class="search_input">
@@ -40,24 +30,21 @@
                     </li>
                     {% for attr_name, attr in metadata_data_attr.items %}
                         <li class="list-group-item">
-                            <div id="heading-dicom-{{ attr.name }}" class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-dicom" href="#collapse-dicom-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-dicom-{{ attr.name }}">
+                            <div id="heading-igv-{{attr.name}}" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-igv" href="#collapse-igv-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-igv-{{ attr.name }}">
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                 </a>
                             </div>
-                            <div id="collapse-dicom-{{ attr.name }}" class="list-group-item__body collapse file-feature-select-block"
-                                 role="tabpanel" data-feature-type="donor" aria-labelledby="heading-dicom-{{ attr.name }}"
-                                 data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}" data-feature-displ-name="{{ attr.displ_name }}">
-                                <ul class="search-checkbox-list" id="dicom-{{ attr.name }}">
+                            <div id="collapse-igv-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                 aria-labelledby="heading-igv-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                <ul class="search-checkbox-list" id="igv-{{ attr.name }}">
                                     {% with attr.values|how_many_more:6 as num_more %}
                                         {% for v in attr.values|check_for_order:attr.name %}
                                             {% if forloop.counter0 < 6 %}
                                                 <li class="checkbox">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
-                                                               id="dicom-{{ attr.name }}-{{ v.value }}" data-feature-id="{{ attr.id }}"
-                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}"
-                                                               data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
@@ -65,7 +52,7 @@
                                             {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="dicom-{{ attr.name}}-{{ v.value }}"
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr.name}}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
@@ -74,7 +61,7 @@
                                             {% else %}
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="dicom-{{ attr.name }}-{{ v.value }}"
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
@@ -95,25 +82,55 @@
             </div>
         </div>
     </div>
-    <div id="dicom-file-panel" class="file-panel col-sm-9 col-md-9 col-lg-9">
-        <div class="filelist-panel panel">
+    <div id="igv-file-panel" class="file-panel col-lg-9 col-md-9 col-sm-9" role="tabpanel">
+        <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="file-panel-toggle">
                     <a class="fa fa-angle-double-left" title="Click to hide the filters"></a>
                     <a class="fa fa-angle-double-right" title="Click to see the filters"></a>
                 </div>
-                <h4>Image Studies</h4>
+                <h4>Selected BAM Files</h4>
+                <input type="submit" form ="view-igv" value="Launch IGV" class="btn btn-primary pull-right igv" aria-label="Selected BAM Files"/>
+                <p><i>Note: Files viewed in IGV must all be for the same build.</i></p>
+            </div>
+            <div class="panel-body file-list">
+                <p><span class="selected-count-igv">0</span> file(s) selected (<span id="selected-file-limit-igv">limit <span class="file-limit-igv file-limit">#</span></span>)</p>
+                <div id="tokenfield-holder-igv">
+                    <!-- "IGV selected files tokenizer" -->
+                    <textarea name="selected-files-igv" class="form-control tokenfield" id="selected-files-igv" placeholder="Select files" aria-label="Hidden Selected Files"></textarea>
+                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank" rel=“noreferrer”>
+                        <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list" aria-label="Hidden Checked List">
+                        <input type="text" class="hidden_form_value" id="igv-form-build" name="build" value="{{ build }}" aria-label="Hidden IGV Build">
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="filelist-panel panel">
+            <div class="panel-heading">
+                <h4>Sample File Listing</h4>
+                <div class="page-action-group pull-right">
+                    <ul>
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
+                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
+                                <input type="hidden" class="download-token" value="" aria-label="Hidden Download Input"/>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="panel-body">
                 <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
+                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> sample files</span>
                     <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
                     <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
                 </div>
                 <div>
                     <div class="dataTables_length files-per-page">
-                        <label for="files-per-page-dicom-select">Show</label>
-                        <select id="files-per-page-dicom-select">
+                        <label for="files-per-page-igv-select">Show</label>
+                        <select id="files-per-page-igv-select">
                             <option value="25">25</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
@@ -121,8 +138,8 @@
                         <label>entries</label>
                     </div>
                     <div class="dataTables_goto_page">
-                        <label for="goto-page-no-dicom">Page</label>
-                        <input id="goto-page-no-dicom" type="number" class="goto-page-number" min="1" max="1">
+                        <label for="goto-page-no-igv">Page</label>
+                        <input id="goto-page-no-igv" type="number" class="goto-page-number" min="1" max="1">
                         <div class="goto-page-button dataTables_button">Go</div>
                     </div>
                     <div class="dataTables_paginate">
@@ -132,10 +149,10 @@
                     </div>
                 </div>
                 <div class="column-inputs">
-                    <a role="button" data-toggle="collapse" href="#column-toggle-div-dicom" aria-expanded="false" aria-controls="column-toggle-div-dicom">
+                    <a role="button" data-toggle="collapse" href="#column-toggle-div-igv" aria-expanded="false" aria-controls="column-toggle-div-igv">
                         Choose Columns to Display <i class="fa fa-caret-down"></i><i class="fa fa-caret-up"></i>
                     </a>
-                    <div id="column-toggle-div-dicom" class="column-collapse collapse">
+                    <div id="column-toggle-div-igv" class="column-collapse collapse">
                         <div class="column-toggle"></div>
                         <p>*Click on column names above to hide/show columns in table</p>
                     </div>
@@ -145,19 +162,29 @@
                         <tr>
                             <th class="col-program" columnId="col-program">Program</th>
                             <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
-                            <th class="col-collection" columnId="col-collection">Collection</th>
-                            <th class="col-modality"  columnId="col-modality">Modality</th>
-                            <th class="col-studydesc" columnId="col-studydesc">Study Description</th>
-                            <th class="col-studyuid" columnId="col-studyuid">Study Instance UID</th>
+                            <th class="col-sbarcode" columnId="col-sbarcode">Sample Barcode</th>
+                            <th class="col-filename"columnId="col-filename">File Name</th>
+                            <th class="col-exp-strategy" columnId="col-exp-strategy">Exp. Strategy</th>
+                            <th class="col-platform" columnId="col-platform">Platform</th>
+                            <th class="col-datacat" columnId="col-datacat">Data Category</th>
+                            <th class="col-datatype" columnId="col-datatype">Data Type</th>
+                            <th class="col-dataformat" columnId="col-dataformat">Data Format</th>
+                            <th class="col-filesize" columnId="col-filesize">File Size</th>
+                            <th class="col-viewer sorting_disabled">View</th>
                         </tr>
                     </thead>
                     <colgroup>
+                        <col style="width: 9%">
+                        <col style="width: 10%">
+                        <col style="width: 15%">
+                        <col style="width: 9%">
+                        <col style="width: 9%">
                         <col style="width: 8%">
                         <col style="width: 10%">
-                        <col style="width: 10%">
-                        <col style="width: 12%">
-                        <col style="width: 24%">
-                        <col style="width: 36%">
+                        <col style="width: 7%">
+                        <col style="width: 7%">
+                        <col style="width: 5%">
+                        <col style="width: 4%">
                     </colgroup>
                     <tbody>
                     </tbody>
@@ -169,4 +196,5 @@
 <script type="text/javascript">
     var total_files = {{ total_file_count|safe }};
     var file_listing = {{ file_list|tojson|safe }};
+    var build_total_files = { 'HG19': undefined, 'HG38': undefined };
 </script>

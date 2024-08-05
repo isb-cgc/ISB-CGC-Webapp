@@ -1,4 +1,14 @@
 <div id="pdf-files" class="tab-pane data-tab" data-file-type="pdf" role="tabpanel">
+    <div class="col-lg-3 col-md-3 col-sm-pull-0"></div>
+    <div class="col-lg-9 col-md-9 col-sm-12 right">
+        <div class="selected-filters-pdf panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Selected Filters</h4>
+                <a class="pull-right clear-filters" role="button">Clear All</a>
+            </div>
+            <div class="panel-body"></div>
+        </div>
+    </div>
     <div id="pdf-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
         <div class="panel panel-default filter-panel">
             <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 cases</div>
@@ -13,7 +23,7 @@
                                 </a>
                             </div>
                             <div id="collapse-pdf-case-id"
-                                 class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                 class="list-group-item__body collapse file-feature-select-block" role="tabpanel"
                                  data-feature-type="donor"
                                  aria-labelledby="heading-pdf-case-id" data-feature-name="case-id"
                                  data-feature-displ-name="CASE ID">
@@ -35,8 +45,9 @@
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                     </a>
                                 </div>
-                                <div id="collapse-pdf-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                     aria-labelledby="heading-pdf-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                <div id="collapse-pdf-{{ attr.name }}" class="list-group-item__body collapse file-feature-select-block" role="tabpanel"
+                                     data-feature-type="donor" data-feature-id="{{ attr.id }}" aria-labelledby="heading-pdf-{{ attr.name }}"
+                                     data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
                                     <ul class="search-checkbox-list" id="pdf-{{ attr.name }}">
                                         {% with attr.values|how_many_more:6 as num_more %}
                                             {% for v in attr.values|check_for_order:attr.name %}
@@ -44,7 +55,9 @@
                                                     <li class="checkbox">
                                                         <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                             <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-{{ attr.name }}-{{ v.value }}"
-                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}" data-feature-id="{{ attr.id }}"
+                                                                    data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
+                                                            >
                                                             {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                              <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                         </label>
@@ -53,7 +66,8 @@
                                                     <li class="extra-values checkbox" style="display:none;">
                                                         <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                             <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-{{ attr.name}}-{{ v.value }}"
-                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}" data-feature-id="{{ attr.id }}"
+                                                                   data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                             {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
                                                              <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                         </label>
@@ -144,7 +158,6 @@
                             <th class="col-program" columnId="col-program">Program</th>
                             <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
                             <th class="col-filename" columnId="col-filename">File Name</th>
-                            <th class="col-diseasecode" columnId="col-diseasecode">Disease Code</th>
                             <th class="col-datacat" columnId="col-datacat">Data Category</th>
                             <th class="col-datatype" columnId="col-datatype">Data Type</th>
                             <th class="col-dataformat" columnId="col-dataformat">Data Format</th>
@@ -159,7 +172,6 @@
                         <col style="width: 9%">
                         <col style="width: 9%">
                         <col style="width: 9%">
-                        <col style="width: 7%">
                     </colgroup>
                     <tbody>
                     </tbody>
