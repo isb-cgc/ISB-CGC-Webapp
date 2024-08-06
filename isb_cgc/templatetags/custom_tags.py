@@ -190,9 +190,6 @@ def get_readable_name(csv_name, attr=None):
     if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
         is_mutation = True
 
-    if 'user_' in csv_name:
-        is_user_data = True
-
     csv_name = csv_name.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
 
     if attr:
@@ -235,14 +232,6 @@ def replace_whitespace(str, chr):
 @register.filter
 def get_data_attr_id(value, attr):
     return attr + '-' + value
-
-
-@register.filter
-def has_user_data(programs):
-    for prog in programs:
-        if prog['type'] == 'user-data':
-            return True
-    return False
 
 
 @register.filter
