@@ -41,6 +41,7 @@ urlpatterns = [
     url(r'^accounts/', include('accounts.urls')),
     url(r'^session_security/', include('session_security.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
+    url(r'^symposia/', views.symposia, name='symposia'),
 
     # ------------------------------------------
     # Blink views

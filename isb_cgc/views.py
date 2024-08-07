@@ -309,7 +309,7 @@ def extended_login_view(request):
         try:
             user_opt_in_stat_obj = UserOptInStatus.objects.get(user=user)
         except ObjectDoesNotExist as e:
-            user_opt_in_stat_obj = UserOptInStatus.objects.update_or_create(
+            user_opt_in_stat_obj, created = UserOptInStatus.objects.update_or_create(
                 user=user,
                 opt_in_status=UserOptInStatus.NEW
             )
@@ -375,6 +375,10 @@ def help_page(request):
 
 def about_page(request):
     return render(request, 'isb_cgc/about.html')
+
+
+def symposia(request):
+    return render(request, 'isb_cgc/symposia.html')
 
 
 def citations_page(request):
