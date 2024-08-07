@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    ISB-CGC|Video Tutorials
+{% endblock %}
+
+{% block description %}
+    Video Tutorials of ISB-CGC
+{% endblock %}
+{% block page_name %}video-tutorials{% endblock %}
+{% block page_header %}
+<div class="container">
+    <h1 class="page-header">Fall 2024 CRDC Symposium</h1>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-2 col-lg-2 col-sm-2"></div>
+                    <div class="col-md-8 col-lg-8 col-sm-8">
+                       <div class="panel panel-default">
+                            <div class="panel-body">
+                                <p>We invite everyone to register for the upcoming Fall 2024 CRDC Symposium, planned for
+                                    October 16-17. The meeting is open to the broad cancer research community and the public.
+                                    The CRDC will celebrate its 10th anniversary with this one-and-a-half-day event
+                                    highlighting its accomplishments and looking ahead to exciting initiatives.</p>
+                                <p>An event registration page and preliminary agenda are available at
+                                    <a href="https://events.cancer.gov/crdc/events" target="_blank" rel="noreferrer nofollow">
+                                        <b>https://events.cancer.gov/crdc/events</b></a></p>
+                                <p>We are planning many informative sessions and report-outs on new work, including our AI
+                                    Data Readiness Initiative and the CRDC's collaboration with the Advanced Research
+                                    Projects Agency for Health (ARPA-H) to develop a Biomedical Data Fabric (BDF) Toolbox.</p>
+                                <p>Our Fall Symposium shares a half-day joint session, focused on data sharing, with CBIIT's
+                                    Office of Data Sharing (ODS) Annual Meeting. The joint session, on the afternoon of
+                                    October 16th, will be the final session of the ODS Meeting, and the first session of the
+                                    CRDC Symposium.  If you can make it to all three days, so much the better!</p>
+                                <p>The ODS Annual Meeting runs October 15-16. The registration page is at
+                                    <a href="https://events.cancer.gov/ods/annualdatasharingsymposium" target="_blank"
+                                       rel="noreferrer nofollow"><b>https://events.cancer.gov/ods/annualdatasharingsymposium</b></a></p>
+                                <p>The CRDC has come a long way in the last 10 years as we have empowered the cancer
+                                    research community with access to NCI-funded research data, secure cloud-based workspaces,
+                                    analytical tools, and an evolving infrastructure to address the rapidly changing research
+                                    landscape.</p>
+                                <p>We hope that you will engage with us – in person or virtually – as we all look ahead to
+                                    the next 10 years.</p>
+                            </div>
+                        <div class="col-md-2 col-lg-2 col-sm-2"></div>
+                    </div>
+               </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/landing.js' %}"></script>
+{% endblock %}
