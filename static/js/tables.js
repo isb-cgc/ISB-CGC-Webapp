@@ -809,21 +809,36 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     var content="";
                     if (cntSeriesInCart>0){
                         $(row).addClass('someInCart');
+                        window.selProjects[projid].selCases[caseid]['someInCart'] = true;
+                    }
+                    else{
+                        $(row).removeClass('someInCart');
+                        if ('someInCart' in window.selProjects[projid].selCases[caseid]){
+                            delete(window.selProjects[projid].selCases[caseid]['someInCart']);
+                        }
                     }
                     if ((cntSeriesInFilt>cntSeriesInCart) || (cntSeriesInCart==0)){
                         $(row).addClass('extraInFilt');
+                        window.selProjects[projid].selCases[caseid]['extraInFilt'] = true;
                         content = "add series to the cart";
                     }
                     else{
                         $(row).removeClass('extraInFilt');
                         content = "remove series from the cart";
+                        if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
+                            delete(window.selProjects[projid].selCases[caseid]['extraInFilt']);
+                        }
                     }
 
                     if (cntSeriesInItem>cntSeriesInCart){
                         $(row).addClass('extraInItem');
+                        window.selProjects[projid].selCases[caseid]['extraInItem'] = true;
                     }
                     else{
                         $(row).removeClass('extraInItem');
+                        if ('extraInItem' in window.selProjects[projid].selCases[caseid]){
+                            delete(window.selProjects[projid].selCases[caseid]['extraInItem']);
+                        }
                     }
 
                     var target = $(row).find('.shopping-cart').parent()[0];

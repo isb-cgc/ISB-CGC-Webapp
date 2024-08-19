@@ -65,14 +65,17 @@ define(['jquery', 'utils'], function($, utils) {
     const update_bq_filters = function() {
         let filters = parseFilterObj();
         if (Object.keys(filters).length <= 0) {
+            $('.bq-string-copy').attr("disabled","disabled");
             $('.bq-string-display').attr("disabled","disabled");
             $('.bq-string-display').attr("title","Select a filter to enable this feature.");
             $('.bq-string').html("");
             $('#export-manifest-form input[name="filters"]').val("");
         } else {
+            $('.bq-string-copy').removeAttr("disabled");
             $('.bq-string-display').removeAttr("disabled");
             $('.bq-string-display').attr("title","Click to display this filter as a BQ string.");
             $('.bq-string-display').attr('filter-params', JSON.stringify(filters));
+            $('.bq-string-copy').attr('filter-params', JSON.stringify(filters));
             $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
         }
     };

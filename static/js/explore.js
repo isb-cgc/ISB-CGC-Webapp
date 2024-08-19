@@ -393,6 +393,21 @@ require([
         maxWidth: 85
     });
     */
+
+    window.sqlinstance = tippy('.bq-string-copy',{
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        trigger: 'disabled',
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        maxWidth: 85
+    });
     tippy.delegate('.series-table', {
         content: 'Copied!',
         theme: 'blue',

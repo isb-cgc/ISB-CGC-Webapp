@@ -118,6 +118,8 @@ require([
                         window.partitions = ret[0];
                         window.filtergrp_lst = ret[1];
                         window.seriesdel.push(seriesid);
+
+                        window.cartDetails = window.cartDetails+'Removed SeriesInstanceUID = "'+seriesid.toString()+'" from the cart\n\n';
                         updateCartTable([studyid], [seriesid]);
                      });
                     },
