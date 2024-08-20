@@ -613,7 +613,7 @@ def load_programs(filename):
                 Program.objects.get(short_name=line[0])
                 logger.info("[STATUS] Program {} already exists: skipping.".format(line[0]))
             except ObjectDoesNotExist as e:
-                obj = Program.objects.update_or_create(short_name=line[0],name=line[1],is_public=True,active=True,owner=idc_superuser)
+                obj = Program.objects.update_or_create(short_name=line[0],display_name=line[1],is_public=True,active=True,owner=idc_superuser)
                 logger.info("[STATUS] Program {} added.".format(obj))
 
     except Exception as e:
