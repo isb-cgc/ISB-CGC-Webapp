@@ -56,10 +56,11 @@ SEPARATOR = "[]"
 
 COLLECTION_HEADER_CHK = "collection_uuid"
 
-FIELD_MAP = {x: i for i, x in enumerate(['collection_id','collection_uuid','name','collections','image_types','supporting_data',
-                            'subject_count','doi','source_url','cancer_type','species','location','analysis_artifacts',
-                            'description','collection_type','program','access','date_updated','tcia_wiki_collection_id',
-                            'active'])}
+FIELD_MAP = {x: i for i, x in enumerate([
+            "collection_id", "collection_uuid", "name", "collections", "image_types", "supporting_data", "subject_count", "doi",
+            "source_url", "cancer_type", "species", "location", "analysis_artifacts", "description", "collection_type",
+            "program", "access", "date_updated", "tcia_wiki_collection_id", "license_short_name", "active"
+    ])}
 
 ranges_needed = {
     'wbc_at_diagnosis': 'by_200',
