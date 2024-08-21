@@ -70,6 +70,7 @@ def landing_page(request):
         'Colon': 'Colorectal',
         'Rectum': 'Colorectal',
         "Marrow, Blood": "Blood",
+        "Marrow and Blood": "Blood",
         "Testicles": "Testis",
         "Adrenal Glands": "Adrenal Gland",
         "Adrenal": "Adrenal Gland"
