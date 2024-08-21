@@ -21,13 +21,13 @@ pyjwt==2.4.0
 python-openid==2.2.5
 pytz==2018.4
 PyYAML==5.4
-requests==2.31.0
+requests==2.32.0
 requests-oauthlib==0.7.0
 rsa==4.7
 simplejson==3.8.1
 six==1.13.0
 uritemplate==4.1.1
-WebOb==1.5.0
+WebOb==1.8.8
 
 # If you are seeing an error about django-debug-toolbar not being installed,
 # the problem is almost certainly that your developer .env wasn't found
