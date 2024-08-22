@@ -1892,11 +1892,20 @@ require([
             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 try {
-                    let file_parts_count = (is_cohort ? cohort_file_parts_count : data.totals.file_parts_count);
-                    let display_file_parts_count = (is_cohort ? cohort_display_file_parts_count : data.totals.display_file_parts_count);
+                    if(data.total <= 0) {
+                        base.showJsMessage(
+                           "warning zero-results",
+                           "Your filters returned zero results!",
+                           true
+                       )
+                    } else {
+                        $('.zero-results').remove();
+                    }
+                    let file_parts_count = (is_cohort ? cohort_file_parts_count : (data.total > 0 ? data.totals.file_parts_count: 0));
+                    let display_file_parts_count = (is_cohort ? cohort_display_file_parts_count : (data.total > 0 ? data.totals.display_file_parts_count : 0));
                     let isFiltered = Boolean($('#search_def p').length > 0);
-                    $('#search_def_stats').attr('filter-series-count',data.totals.SeriesInstanceUID);
-                    if(data.totals.SeriesInstanceUID > 65000) {
+                    $('#search_def_stats').attr('filter-series-count',(data.total > 0 ? data.totals.SeriesInstanceUID: 0));
+                    if(data.total > 0 && data.totals.SeriesInstanceUID > 65000) {
                         $('#s5cmd-max-exceeded').show();
                         $('#download-s5cmd').attr('disabled','disabled');
                         $('#s5cmd-button-wrapper').addClass('manifest-disabled');
@@ -2055,15 +2064,12 @@ require([
                     }
                     updateTablesAfterFilter(collFilt, data.origin_set.All.attributes.collection_id);
 
-                    if ($('.search-configuration').find('#hide-zeros')[0].checked) {
+                    if ($('.search-configuration').find('.hide-zeros')[0].checked) {
                         addSliders('search_orig_set', false, true, '');
                         addSliders('quantitative', false, true, 'quantitative.');
                         addSliders('tcga_clinical', false, true, 'tcga_clinical.');
                     }
-
-                }
-                //changeAjax(false);
-                finally {
+                } finally {
                     deferred.resolve();
                 }
             },
@@ -2427,8 +2433,7 @@ require([
 
         var showZeros = true;
         var searchDomain = $('#'+filterCat).closest('.search-configuration, #program_set, #analysis_set');
-        //var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
-        if ((searchDomain.find('#hide-zeros').length>0) && (searchDomain.find('#hide-zeros').prop('checked'))){
+        if ((searchDomain.find('.hide-zeros').length>0) && (searchDomain.find('.hide-zeros').prop('checked'))){
             showZeros = false;
         }
         var textFilt=false;
@@ -3015,7 +3020,7 @@ require([
 
 
 
-         $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function (e) {
+         $('#' + filterId).find('input:checkbox').not('.hide-zeros').on('click', function (e) {
             var targ=e.target;
 
             if ($(e.target).parent().find('.collection_info.fa-lg, .analysis_info.fa-lg').length>0){
@@ -3036,7 +3041,7 @@ require([
             $(this).parent().hide();
             var extras = $(this).closest('.list-group-item__body, .collection-list, .list-group-sub-item__body').children('.search-checkbox-list').children('.extra-values')
 
-            if ( ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
+            if ( ($('#'+filterId).closest('.search-configuration').find('.hide-zeros').length>0)  && ($('#'+filterId).closest('.search-configuration').find('.hide-zeros').prop('checked'))){
                 extras=extras.not('.zeroed');
             }
             extras.removeClass('notDisp');
@@ -3485,9 +3490,9 @@ require([
                  // Re-enable checkboxes for export manifest dialog, unless not using social login
                  $('#export-manifest-modal input').removeAttr('disabled');
 
-                 $('input#hide-zeros').prop("disabled", "");
-                 $('input#hide-zeros').prop("checked", true);
-                 $('input#hide-zeros').each(function(){$(this).triggerHandler('change')});
+                 $('input.hide-zeros').prop("disabled", "");
+                 $('input.hide-zeros').prop("checked", true);
+                 $('input.hide-zeros').each(function(){$(this).triggerHandler('change')});
                  $('div.ui-slider').siblings('button').prop("disabled", true);
                  $('.noneBut').find('input:checkbox').prop("disabled",true);
              });
@@ -3657,8 +3662,8 @@ require([
         updateProjectTable(window.collectionData);
 
         $('.clear-filters').on('click', function () {
-            $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
-            $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
+            $('input:checkbox').not('.hide-zeros').not('.tbl-sel').prop('checked',false);
+            $('input:checkbox').not('.hide-zeros').not('.tbl-sel').prop('indeterminate',false);
             $('.ui-slider').each(function(){
                 setSlider(this.id,true,0,0,true, false);
             })
@@ -3705,7 +3710,8 @@ require([
                 ).attr("style","display: none;")
         );
 
-        
+        $('.hide-zeros').prop("checked", true);
+
         $(window).on("beforeunload",function(){
             console.log("beforeunload called");
             let hs = new Object();
@@ -3724,8 +3730,6 @@ require([
                 let sort = $(this).find('input:checked').val()
                 hs['sorter'][pid] = sort;
             });
-
-
 
             let url = encodeURI('/uihist/')
             let nhs = {'his':JSON.stringify(hs)}
