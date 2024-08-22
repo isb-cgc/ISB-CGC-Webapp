@@ -1449,7 +1449,7 @@ require([
     }
 
     window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,seriesID) {
-        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR"])
+        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
         var nonViewAbleSOPClassUID= new Set(["1.2.840.10008.5.1.4.1.1.66"])
         var slimViewAbleModality=new Set(["SM"])
         $('#series_tab').attr('data-rowsremoved', rowsRemoved);
