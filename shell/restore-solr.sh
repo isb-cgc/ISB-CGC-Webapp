@@ -1,8 +1,11 @@
 #!/bin/bash
+set -euo pipefail
+
 TARFILE=""
 BACKUP_DIR="./"
 MAKE_CORE=false
 SOLR_DATA="/opt/bitnami/solr/server/solr"
+PARSE_RESPONSE="import sys, json; print(json.load(sys.stdin).get('status',None) or 'INCOMPLETE')"
 
 while getopts ":d:t:ch" flag
 do
@@ -37,11 +40,11 @@ else
   fi
 fi
 
-if [ -z $SOLR_PWD ]; then
+if [[ -z $SOLR_PWD ]]; then
   echo "[ERROR] SOLR_PWD not set - exiting!"
   exit 1
 fi
-if [ -z $SOLR_USER ]; then
+if [[ -z $SOLR_USER ]]; then
     echo "[ERROR] Solr API user not supplied - exiting."
     exit 1
 fi
@@ -54,6 +57,8 @@ if [[ $TARFILE != "" ]]; then
         exit 1
     fi
 fi
+
+need_longer_pause=false
 
 for dirname in ${BACKUP_DIR}/*/; do
   CORE=""
@@ -68,25 +73,48 @@ for dirname in ${BACKUP_DIR}/*/; do
   fi
   if [ "$MAKE_CORE" = true ]; then
     echo "[STATUS] Core creation enabled - attempting creation of core \"${CORE}\"..."
-    sudo -u solr solr create -c $CORE
+    sudo -u solr /opt/bitnami/solr/bin/solr create -c $CORE -s 2 -rf 2
   else
     echo "[STATUS] Core creation disabled - this assumes core \"${CORE}\" exists already!"
     echo "  You'll see an error if it doesn't."
   fi
 
   SNAPSHOT=$(awk -F'[/]' '{print $2}' <<< $dirname)
-  echo "Restoring core ${CORE}...into snapshot ${SNAPSHOT}"
+  echo "--------> Restoring core ${CORE} into snapshot ${SNAPSHOT} <----------"
   sudo chown solr $dirname
   sudo -u solr cp -r $dirname $SOLR_DATA/$CORE/data/$SNAPSHOT
   if [[ -f $SOLR_DATA/$CORE/conf/managed-schema ]]; then
-    sudo -u solr mv $SOLR_DATA/$CORE/conf/managed-schema $SOLR_DATA/$CORE/conf/managed-schema.old
+    sudo -u solr mv $SOLR_DATA/$CORE/conf/managed-schema.xml $SOLR_DATA/$CORE/conf/managed-schema.old
   fi
   sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema.xml $SOLR_DATA/$CORE/conf/managed-schema.xml
-  curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=restore&name=$CORE" --cacert solr-ssl.pem
-  echo "Restoration started, status check:"
-  curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=details&name=$CORE" --cacert solr-ssl.pem
+  echo "Schema copied, initiating core restoration..."
+  curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/${CORE}/replication?command=restore&name=${CORE}" --cacert solr-ssl.pem
+  status=`curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${CORE}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
+  if [[ "${status}" != "OK" ]]; then
+    echo "Restoration is ${status} for core ${CORE}--continuing with the rest, but don't restart until these are done!"
+    need_pause=true
+  fi
+  echo "----------------------> /Restoration of core ${CORE} <------------------------"
 done
 
-echo "Remember to wait until the cores are done restoring before you restart!"
+if [[ need_longer_pause == true ]]; then
+  echo ""
+  echo -n "Additional pause before Solr restart to allow core restoration to complete"
+  for k in `seq 1 5`; do
+    echo -n "."
+    sleep 1
+  done
+  echo ".proceeding."
+fi
+
+echo ""
+echo -n "Solr restart in "
+for k in `seq 1 4`; do
+  echo -n "$k..."
+  sleep 1
+done
+echo "restarting."
+
+sudo -u solr solr restart
 
 exit 0
