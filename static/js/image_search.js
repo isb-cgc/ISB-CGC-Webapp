@@ -1897,9 +1897,11 @@ require([
                            "warning zero-results",
                            "Your filters returned zero results!",
                            true
-                       )
+                       );
+                        $('#export-manifest, #save-cohort-btn').attr('disabled', 'disabled');
                     } else {
                         $('.zero-results').remove();
+                        $('#export-manifest, #save-cohort-btn').removeAttr('disabled');
                     }
                     let file_parts_count = (is_cohort ? cohort_file_parts_count : (data.total > 0 ? data.totals.file_parts_count: 0));
                     let display_file_parts_count = (is_cohort ? cohort_display_file_parts_count : (data.total > 0 ? data.totals.display_file_parts_count : 0));
