@@ -750,6 +750,9 @@ def main():
 
         # Load the configuration file into ETL_CONFIG and run data version and data source creation
         # This will copy over any attributes from prior versions indicated in the JSON config
+        # Note that the config file is only required for 'full ETL' i.e. creation of new versions and
+        # deprecation of prior ones; it can be omitted to perform piecemeal updates eg. to collections
+        # metadata
         len(args.config_file) and update_data_versions(args.config_file)
 
         # If there are new attributes, prep them for addition
