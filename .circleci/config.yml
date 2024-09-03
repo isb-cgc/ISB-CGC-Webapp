@@ -52,7 +52,7 @@ commands:
               echo "Using test project and related deployment SA and bucket."
             elif [[ ${TIER} == "EXPR" ]]; then
               DEPLOYMENT_CONFIG=expr.deployment_config.txt
-              echo "Using experimental project and related deployment SA and bucket."
+              echo "Using development/default project with related deployment SA and bucket for experimental deployment config."
             elif [[ ${TIER} == "DEV" ]]; then
               echo "Using development/default project and related deployment SA and bucket."
             else
