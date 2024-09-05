@@ -574,3 +574,10 @@ svg {
 .viewer-toggle .viewer-menu a:hover {
     background-color: #d5d5d5;
 }
+
+@media (min-width: 768px) {
+    #export-manifest-modal .modal-dialog {
+        width: 675px;
+        margin: 30px auto;
+    }
+}

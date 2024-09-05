@@ -72,11 +72,14 @@ require([
     });
 
     var update_export_modal_for_mini = function(button){
-
         var title='';
         var filterNm='';
         var mini_type='';
         var name_base='';
+
+        $('.s5cmd-loc-type').hide();
+        $('#s5cmd-header-fields-container').hide();
+        $('#download-s5cmd').hide();
 
         $('.manifest-s5cmd a').trigger('click');
 
@@ -115,10 +118,10 @@ require([
         $('#export-manifest-form').append('<input type="hidden" name="uid">')
         $('#export-manifest-modal').find('input[name="uid"]').val(button.data('uid'));
 
-        var filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
-        filters= new Object();
+        let filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
+        let filters= new Object();
         if (filt_str.length>0){
-            filters=JSON.parse(filt_str)
+            filters = JSON.parse(filt_str)
         }
 
         filters[filterNm]=[button.data('uid')]
@@ -128,21 +131,32 @@ require([
         $('.manifest-file').hide();
         $('.manifest-bq').hide();
         $('#manifest-source').text((mini_type === "series" ? "" : "download this study manifest, "));
-        if (button.hasClass('series-export')) {
-            $('#export-manifest-form').find('#s5cmd-header-fields-container').hide();
-            $('#export-manifest-form').find('#download-s5cmd').hide();
-        } else if (button.hasClass('study-export')) {
+        if (button.hasClass('study-export')) {
             $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().hide();
             $('#s5cmd-header-fields').find('input[value="user_email"]').parent().hide();
         }
         update_file_names();
-    }
+    };
 
     $('#export-manifest-modal').on('hide.bs.modal', function() {
         $('input').removeAttr('name-base');
         if ($('#export-manifest-modal').find('input[name="mini"]').length>0){
             reset_after_mini();
         }
+    });
+
+    $('#export-manifest-modal').on('hidden.bs.modal', function() {
+      $('.manifest-file').show();
+      $('.manifest-bq').show();
+      $('#download-s5cmd').show();
+      $('.s5cmd-loc-type').show();
+      $('#s5cmd-header-fields-container').show();
+      $('#export-manifest-form').find('#s5cmd-header-fields-container').show();
+      $('#export-manifest-form').find('#download-s5cmd').show();
+      $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().show();
+      $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
+      $('.modal-title').text('Export Manifest');
+      $('#manifest-source').text('manifest');
     });
 
     var reset_after_mini = function(){
@@ -160,14 +174,7 @@ require([
       if ('SeriesInstanceUID' in filters){
           delete filters['SeriesInstanceUID']
       }
-      $('.manifest-file').show();
-      $('.manifest-bq').show();
-      $('#export-manifest-form').find('#s5cmd-header-fields-container').show();
-      $('#export-manifest-form').find('#download-s5cmd').show();
-      $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().show();
-      $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
-      $('.modal-title').text('Export Manifest');
-      $('#manifest-source').text('manifest');
+
 
       if ($('#search_def_stats').attr('filter-series-count') > 65000) {
             $('#s5cmd-max-exceeded').show();
@@ -321,15 +328,11 @@ require([
             }
         }
         let manifest_filename = file_name.attr("name-base")+"_"+$('input.loc_type:checked').val();
-        let endpoint_url = ($('input.loc_type:checked').val() === "aws" ? "https://s3.amazonaws.com" : "https://storage.googleapis.com");
-        let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} run ${manifest_filename}.s5cmd`;
+        let s5cmd_text = `idc download ${manifest_filename}.s5cmd`;
 
-
-        if ($('#export-manifest-modal').find('input[name="mini"]').val()==='series') {
-            let crdc=$('#export-manifest-modal').find('input[name="crdc"]').val()
-            let bucket = ($('input.loc_type:checked').val() === "aws" ? $('input[name="aws"]').val() : $('input[name="gcs"]').val());
-            s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} cp 's3://${bucket}/${crdc}/*' .`;
-
+        if ($('#export-manifest-modal').find('input[name="mini"]').length > 0) {
+            let uid=$('#export-manifest-modal').find('input[name="uid"]').val();
+            s5cmd_text = `idc download ${uid}`;
         }
         $('.s5cmd-text').text(s5cmd_text);
         $('.s5cmd.copy-this').attr("content",s5cmd_text);
