@@ -85,8 +85,8 @@
                     </li>
                 {% else %}
                     <li class="navbar-item inline-block navbar-signin">
-                        <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text"
-                               href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-solid fa-sign-in"></i>Sign In</a>
+                        <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text" role="button"
+                           {% if request.path == "/explore/" %}data-uri{% else %}href{% endif %}="{% url 'account_login' %}" title="Sign In"><i class="fa fa-solid fa-sign-in"></i>Sign In</a>
                     </li>
                 {% endif %}
                     </ul>
