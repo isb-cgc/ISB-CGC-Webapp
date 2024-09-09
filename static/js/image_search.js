@@ -3233,7 +3233,7 @@ require([
                 cntrlDiv.append('<div class="sliderset" style="display:block;margin-bottom:8px">Lower: <input type="text" style="display:inline" size="5" class="sl_lower" value="'+ txtLower + '">' +
                     ' Upper: <input class="sl_upper" type="text" style="display:inline" size="5" class="upper" value="' + txtUpper + '">' +
                     '<div class="slider-message notDisp" style="color:red"><br>Please set lower and upper bounds to numeric values with the upper value greater than the lower, then press Return in either text box. </div></div>')
-                cntrlDiv.append(  '<button class="reset" style="display:block;" onclick=\'setSlider("'+ this.id + '_slide", true,0,0,true, true,"'+parStr+'")\'>Clear Slider</button>');
+                cntrlDiv.append(  '<button class="reset" style="display:block;" onclick=\'setSlider("'+ this.id + '_slide", true,'+min+','+max+',true, true,"'+parStr+'")\'>Clear Slider</button>');
                 if (wNone){
                    cntrlDiv.append( '<span class="noneBut"><input type="checkbox"   onchange="addNone(this, \''+parStr+'\', true)"> None </span>');
                    cntrlDiv.find('.noneBut').find(':input')[0].checked = checked;
@@ -3382,7 +3382,8 @@ require([
         // For collection list
         $('.collection-list').each(function() {
             let $group = $(this);
-            let checkboxes = $group.find("input:checked").not(".hide-zeros").not(".sort_val");
+            console.debug($group.find("input:checked"));
+            let checkboxes = $group.find("input:checked").not(".hide-zeros").not(".sort_val").not('.join_val');
             if (checkboxes.length > 0) {
                 let values = [];
                 let my_id = "";
@@ -3405,7 +3406,7 @@ require([
             let my_id = $group.data('filter-attr-id');
             if (my_id != null)
             {
-                let checkboxes = $group.find("input:checked").not(".hide-zeros").not(".sort_val");
+                let checkboxes = $group.find("input:checked").not(".hide-zeros").not(".sort_val").not('.join_val');
                 if (checkboxes.length > 0)
                 {
                     let values = [];
@@ -3431,16 +3432,20 @@ require([
         $('.ui-slider').each(function() {
             let $this = $(this);
             let slider_id = $this[0].id;
-            let left_val = $this.slider("values", 0);
-            let right_val = $this.slider("values", 1);
             let min = $this.slider("option", "min");
             let max = $this.slider("option", "max");
-            if (left_val !== min || right_val !== max) {
-                sliders.push({
-                   'id': slider_id,
-                    'left_val': left_val,
-                    'right_val': right_val,
-                });
+            if(!Number.isNaN(min) && min !== null && !Number.isNaN(max) && max !== null) {
+                let left_val = $this.slider("values", 0);
+                let right_val = $this.slider("values", 1);
+                left_val = (left_val === null || !Number.isNaN(left_val)) ? min : left_val;
+                right_val = (right_val === null || !Number.isNaN(right_val)) ? max : right_val;
+                if (left_val !== min || right_val !== max) {
+                    sliders.push({
+                       'id': slider_id,
+                        'left_val': left_val,
+                        'right_val': right_val,
+                    });
+                }
             }
         });
         let sliderStr = JSON.stringify(sliders);
@@ -3467,15 +3472,11 @@ require([
         });
     };
 
-    $('#save-cohort-btn').on('click', function() {
+    $('#save-cohort-btn, #sign-in-dropdown').on('click', function() {
         if (!user_is_auth) {
             save_anonymous_selection_data();
             location.href=$(this).data('uri');
         }
-    });
-
-    $('#sign-in-dropdown').on('click', function() {
-        save_anonymous_selection_data();
     });
 
     cohort_loaded = false;
