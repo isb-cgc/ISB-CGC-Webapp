@@ -577,7 +577,7 @@ svg {
 
 @media (min-width: 768px) {
     #export-manifest-modal .modal-dialog {
-        width: 700px;
+        width: 730px;
         margin: 30px auto;
     }
 }
