@@ -575,6 +575,11 @@ svg {
     background-color: #d5d5d5;
 }
 
+#export-manifest-modal .modal-dialog {
+    min-width: 610px;
+    margin: 30px auto;
+}
+
 @media (min-width: 768px) {
     #export-manifest-modal .modal-dialog {
         width: 730px;
