@@ -80,6 +80,7 @@ require([
         $('.s5cmd-loc-type').hide();
         $('#s5cmd-header-fields-container').hide();
         $('#download-s5cmd').hide();
+        $('#export-manifest-form').find('.download-manifest-text').hide();
 
         $('.manifest-s5cmd a').trigger('click');
 
@@ -153,6 +154,7 @@ require([
       $('#s5cmd-header-fields-container').show();
       $('#export-manifest-form').find('#s5cmd-header-fields-container').show();
       $('#export-manifest-form').find('#download-s5cmd').show();
+      $('#export-manifest-form').find('.download-manifest-text').show();
       $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().show();
       $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
       $('.modal-title').text('Export Manifest');
