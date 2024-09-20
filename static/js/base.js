@@ -198,6 +198,13 @@ require([
         );
     });
 
+    $(document).ready(function(){
+        if($('#liveText').siblings()[1].shadowRoot !== null) {
+            $('.main-content').css("margin-top", "0px");
+            $($('#liveText').siblings()[1]).css("margin-top", "56px");
+        }
+    });
+
 });
 
 // Return an object for consts/methods used by most views
