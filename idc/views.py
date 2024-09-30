@@ -37,7 +37,7 @@ from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips, DataSetType
-from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data
+from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data, get_cart_data_studylvl
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
@@ -272,7 +272,7 @@ def cart(request):
        limit = json.loads(req.get(limit, 1000))
        offset = json.loads(req.get(offset, 0))
 
-       get_cart_data(filtlist,partitions, field_list,limit, offset)
+       get_cart_data(filtlist,partitions,limit, offset)
 
 
 
@@ -789,9 +789,16 @@ def explore_data_page(request, filter_path=False, path_filters=None):
     wcohort = False
     status = 200
 
+    if not request.session.exists(request.session.session_key):
+        request.session.create()
+
     try:
         req = request.GET or request.POST
         mode=req.get('mode','1')
+        ref = (req.get('ref', 'False').lower() == "true")
+        if ref:
+            request.session.create()
+
 
         is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
         source = req.get('data_source_type', DataSource.SOLR)
@@ -999,17 +1006,47 @@ def about_page(request):
 def cart_page(request):
   status = 200
   context = {'request': request}
-  field_list = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID"]
-  try:
-    req = request.GET if request.GET else request.POST
-    context['filtergrp_list'] = json.loads(req.get('filtergrp_list', '{}'))
-    context['partitions'] = json.loads(req.get('partitions', '{}'))
 
+  if not request.session.exists(request.session.session_key):
+      request.session.create()
 
-  except Exception as e:
-    status=400
-    logger.error("[ERROR] While loading cart:")
-    logger.exception(e)
+  versions = []
+  versions = ImagingDataCommonsVersion.objects.filter(
+      version_number__in=versions
+  ).get_data_versions(active=True) if len(versions) else ImagingDataCommonsVersion.objects.filter(
+      active=True
+  ).get_data_versions(active=True)
+
+  aggregate_level = "StudyInstanceUID"
+
+  data_types = [DataSetType.IMAGE_DATA, DataSetType.ANCILLARY_DATA, DataSetType.DERIVED_DATA]
+  data_sets = DataSetType.objects.filter(data_type__in=data_types)
+  aux_sources = data_sets.get_data_sources().filter(
+      source_type=DataSource.SOLR,
+      aggregate_level__in=["case_barcode", "sample_barcode", aggregate_level],
+      id__in=versions.get_data_sources().filter(source_type=DataSource.SOLR).values_list("id", flat=True)
+  ).distinct()
+
+  sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+      active=True, source_type=DataSource.SOLR,
+      aggregate_level=aggregate_level
+  )
+
+  custom_facets = {"per_id": {"type": "terms", "field": "collection_id", "limit": 500,
+                                  "facet": {"unique_patient": "unique(PatientID)",
+                                            "unique_study": "unique(StudyInstanceUID)",
+                                            "unique_series": "unique(SeriesInstanceUID)"}},
+                       "tot_series": {"type": "terms", "field": "collection_id", "limit": 500,
+                                      "facet": {"unique_series": "unique(SeriesInstanceUID)"},
+                                      "domain": {"query": "*.*"}}
+                       }
+
+  cntRecs = get_collex_metadata(
+      {}, ['collection_id'], record_limit=500, sources=sources, collapse_on='collection_id', counts_only=True,
+    records_only=False, filtered_needed=False, custom_facets=custom_facets, raw_format=True, aux_sources=aux_sources,
+    default_facets=False)
+
+  context['projcnts'] = cntRecs['facets']['per_id']['buckets']
 
   return render(request, 'collections/cart_list.html', context)
 
@@ -1021,38 +1058,20 @@ def cart_data(request):
     try:
         req = request.GET if request.GET else request.POST
         filtergrp_list = json.loads(req.get('filtergrp_list', '{}'))
+        aggregate_level = req.get('aggregate_level','StudyInstanceUID')
+        results_level = req.get('results_level', 'StudyInstanceUID')
 
         partitions = json.loads(req.get('partitions', '{}'))
-        studyidarr = json.loads(req.get('studyidarr','[]'))
-        limit = req.get('limit', 1000)
-        offset = req.get('offset', 0)
 
-        if (len(partitions)>0):
-            response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
+        limit = int(req.get('limit', 1000))
+        offset = int(req.get('offset', 0))
+        length = int(req.get('length', 10))
 
-            if (len(studyidarr)>0):
-              studymp ={}
-              filters = {}
-              filters['StudyInstanceUID'] = studyidarr
-              sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-              active=True, source_type=DataSource.SOLR,
-              aggregate_level="SeriesInstanceUID"
-              )
+        if ((len(partitions)>0) and (aggregate_level == 'StudyInstanceUID')):
+            response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, results_lvl=results_level)
 
-              idsEx = get_collex_metadata(
-                filters, ['SeriesInstanceUID', 'StudyInstanceUID'], record_limit=500,
-                sources=sources, offset=0,
-                records_only=True,
-                collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
-                raw_format=True, default_facets=False, sort='StudyInstanceUID asc, SeriesInstanceUID asc',
-              )
-              for doc in idsEx['docs']:
-                studyid =  doc['StudyInstanceUID']
-                seriesid =  doc['SeriesInstanceUID']
-                if not(studyid in studymp):
-                  studymp[studyid] =[]
-                studymp[studyid].append(seriesid)
-              response['studymp'] = studymp
+        elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
+            response = get_cart_data_studylvl(filtergrp_list, partitions, ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID'],limit, offset, results_lvl='SeriesInstanceUID')
 
         else:
             response['numFound'] = 0

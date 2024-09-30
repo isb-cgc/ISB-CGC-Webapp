@@ -76,6 +76,69 @@ require([
 // Return an object for consts/methods used by most views
 define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tippy, utils) {
 
+    var seriesTblOffset = 0;
+    var seriesTblLimit = 0;
+    var seriesTblStrt =0;
+    const setCartHistWinFromLocal = function () {
+        var cartHistSet = false;
+        if (('sessionid' in localStorage) && ('cartHist' in localStorage)){
+            var sessionid = localStorage.getItem("sessionid")
+            var cartHist = JSON.parse(localStorage.getItem("cartHist"));
+            if (sessionid in cartHist) {
+                window.cartHist = cartHist[sessionid];
+                cartHistSet = true;
+            }
+        }
+       return cartHistSet;
+    }
+
+    const setLocalFromCartHistWin = function(){
+        if ('sessionid' in localStorage) {
+            var sessionid = localStorage.getItem("sessionid")
+            var cartObj = new Object();
+            cartObj[sessionid] = window.cartHist;
+            localStorage.setItem("cartHist", JSON.stringify(cartObj));
+        }
+    }
+
+    const updateLocalCartAfterSessionChng = function(){
+        var sessionid = null;
+        var presessionid = null;
+        var cartObj = new Object();
+        var cartHist = [];
+
+        if (('cartHist' in localStorage) && ('sessionid' in localStorage)) {
+            var cartHistLcl = JSON.parse(localStorage.getItem("cartHist"));
+
+            if (('presessionid' in localStorage) || ('sessionid' in localStorage)) {
+                if ('presessionid' in localStorage) {
+                    presessionid = localStorage.getItem('presessionid');
+                    if (presessionid in cartHistLcl) {
+                        cartHist = cartHistLcl[presessionid];
+                    }
+                }
+                if ('sessionid' in localStorage) {
+                    var sessionid = localStorage.getItem('sessionid');
+                    if (sessionid in cartHistLcl) {
+                        cartHist = [...cartHist, ...cartHistLcl[sessionid]];
+                    }
+                }
+                if (cartHist.length > 0) {
+                  cartObj[sessionid] = cartHist;
+                  localStorage.setItem("cartHist", JSON.stringify(cartObj));
+                }
+                else{
+                    localStorage.removeItem("cartHist");
+                }
+                localStorage.removeItem("presessionid")
+            }
+            else {
+                localStorage.removeItem("cartHist")
+            }
+        }
+
+    }
+
 
     // given a dic with studyid as keys, add or subtract series from the cart
     const updateGlobalCart = function(cartAdded, studymp, lvl){
@@ -163,6 +226,78 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         return tots;
     }
 
+    const getCartData = function(offset, limit, aggregate_level, results_level){
+
+                    let url = '/cart_data/';
+                    url = encodeURI(url);
+                    var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
+
+                    if (parseInt(offset)>0) {
+                        ndic['offset'] = start
+                    }
+                    if (parseInt(limit)>0){
+                      ndic['limit'] = limit+1;
+                    }
+                    if (aggregate_level.length>0){
+                      ndic['aggregate_level'] = aggregate_level;
+                    }
+                    if (results_level.length>0){
+                      ndic['results_lvl'] = results_level;
+                    }
+
+                    let csrftoken = $.getCookie('csrftoken');
+                    let deferred = $.Deferred();
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        data: ndic,
+                        type: 'post',
+                        contentType: 'application/x-www-form-urlencoded',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success: function (data) {
+                            console.log(" data received");
+                            var dataset = data["docs"];
+                            deferred.resolve(
+                             {
+                                 "data": dataset,
+                                 "recordsTotal": data["numFound"],
+                                 "recordsFiltered": data["numFound"]
+                             });
+                        },
+                        error: function () {
+                            console.log("problem getting data");
+                            alert("There was an error fetching server data. Please alert the systems administrator");
+                        }
+                    });
+                    return deferred.promise();
+    }
+
+    const updateTableCountsAndGlobalCartCounts = function(){
+        window.updateTableCounts();
+        var gtotals =getGlobalCounts();
+        var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
+        tippy('.cart-view', {
+                           interactive: true,
+                           allowHTML:true,
+                          content: content
+        });
+        localStorage.setItem('cartNumStudies', gtotals[2]);
+        localStorage.setItem('cartNumSeries', gtotals[3]);
+        $('#cart_stats').html(content) ;
+        if (gtotals[0]>0){
+            $('#cart_stats').removeClass('notDisp');
+            $('#export-manifest-cart').removeAttr('disabled');
+            $('#view-cart').removeAttr('disabled');
+        }
+        else{
+            $('#cart_stats').addClass('notDisp');
+            $('#export-manifest-cart').attr('disabled','disabled');
+            $('#view-cart').attr('disabled','disabled');
+        }
+    }
+
 
 // remove all items from the cart. clear the glblcart, carHist, cartDetails
     window.resetCart = function(){
@@ -180,13 +315,14 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         cartSel['selections']= new Array();
         cartSel['partitions']= new Array();
         window.cartHist.push(cartSel);
-        //sesssionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
+        setLocalFromCartHistWin();
+        //sessionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
         window.partitions = new Array();
         window.cartStep=0
         window.cartDetails = 'Current filter definition is '+JSON.stringify(parsedFiltObj)+'\n\n'
         window.cartStep++;
 
-         window.updateTableCounts(1);
+         window.updateTableCounts();
          var gtotals = [0,0,0,0];
             var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
             tippy('.cart-view', {
@@ -221,18 +357,31 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
     })
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
-    const updateCartSelections = function(newSel){
+    const updateCartSelections = function(newSel, addingToCart,studymp,updateSource){
+        var updatedElsewhere = false;
+
+        serCartHist = setCartHistWinFromLocal();
+
         var curInd = window.cartHist.length - 1;
+        var curPageid= window.cartHist[curInd]['pageid'];
+
+        if (!(curPageid == window.pageid)){
+            updatedElsewhere = true;
+            var cartSel = new Object();
+            cartSel['filter']=filterutils.parseFilterObj();
+            cartSel['pageid'] = window.pageid
+            cartSel['selections']= new Array();
+            cartSel['partitions']= new Array();
+            window.cartHist.push(cartSel);
+            curInd = window.cartHist.length - 1;
+        }
+
         var selections = window.cartHist[curInd]['selections'];
-        var adding = newSel['added'];
         var selection = newSel['sel'];
-        var selectionCancelled = false;
-        var redundant = false;
+
         var newHistSel = new Array();
         for (var i=0;i<selections.length;i++) {
             var curselection = selections[i]['sel'];
-            var curAdded = selections[i]['added'];
-
             if (curselection.length >= selection.length) {
                 var differenceFound = false;
                 for (var j = 0; j < selection.length; j++) {
@@ -249,17 +398,160 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
             else{
                 newHistSel.push(selections[i]);
             }
+        }
+        newHistSel.push(newSel);
+        window.cartHist[curInd]['selections'] =  newHistSel;
+        window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
+        setLocalFromCartHistWin();
+
+
+        if (updatedElsewhere) {
+            refreshCartAndFiltersFromScratch(false);
+        } else {
+            var projid = newSel['sel'][0];
+            updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource);
+        }
+
+
+    }
+
+    const updateCartAndCartMetrics = function(addingToCart,projid,studymp,updateSource){
+
+        if (updateSource == 'project' && addingToCart){
+            updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries']).then(function(){
+                updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
+                updateTableCountsAndGlobalCartCounts();
+
+            })
+        }
+        else if (updateSource == "cartPg"){
+            updateGlobalCart(addingToCart, studymp, 'series');
+        }
+
+        else {
+            updateGlobalCart(addingToCart, studymp, updateSource);
+            updateTableCountsAndGlobalCartCounts();
+        }
+
+
+    }
+
+    const refreshCartAndFiltersFromScratch = function(checkFilters){
+        setCartHistWinFromLocal();
+        window.updatePartitionsFromScratch();
+        var ret =formcartdata();
+        window.partitions = ret[0];
+        window.filtergrp_lst = ret[1];
+        window.glblcart = new Object();
+
+         var projDone={}
+        var serieslim=1;
+         var studylim=1;
+        for (var j=0; j<window.partitions.length;j++){
+            var projid = window.partitions[j]['id'][0];
+            if (!(projid in projDone)){
+                projDone[projid]=1
+                var dataset = window.selProjects[projid]
+                serieslim+=parseInt(dataset.mxseries);
+                studylim+=parseInt(dataset.mxstudies);
+            }
+
 
         }
 
-        newHistSel.push(newSel);
 
-        window.cartHist[curInd]['selections'] =  newHistSel;
-        window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
+        Promise.resolve(getCartData('', studylim, 'StudyInstanceUID', 'StudyInstanceUID')).then(function (ret) {
+            //var j = 1;
+            load_filters = null;
+            var projSet = new Set();
+            var pgCnt = 0;
+
+            for (var j = 0; j < ret['data'].length; j++) {
+                var row = ret['data'][j];
+                var studyid = row['StudyInstanceUID'];
+                var patientid = row['PatientID'];
+                var collection_id = row['collection_id'][0];
+                var cnt = row['cnt']
+
+                if (!(collection_id in projstudymp)) {
+                    window.projstudymp[collection_id] = {}
+                }
+                window.glblcart[studyid] = {}
+                //window.glblcart[studyid]['cnt']=parseInt(cnt);
+
+                if ('val' in row) {
+                    window.glblcart[studyid]['sel'] = new Set(row['val']);
+                    newcnt = window.glblcart[studyid]['sel'].size;
+                    if (row['val'].length < cnt) {
+                        window.glblcart[studyid]['all'] = false;
+                    } else {
+                        window.glblcart[studyid]['all'] = true;
+                    }
+                } else {
+                    window.glblcart[studyid]['all'] = true;
+                    newcnt =cnt;
+                        }
+
+                window.projstudymp[collection_id][studyid] = cnt;
+                window.studymp[studyid] = {}
+                window.studymp[studyid]['proj'] = collection_id;
+                window.studymp[studyid]['PatientID'] = patientid;
+                window.studymp[studyid]['cnt'] = cnt;
+                window.studymp[studyid]['val'] = [];
+
+            }
+
+            if (checkFilters) {
+                load_filters = filterutils.load_preset_filters();
+            }
+            if ((load_filters === null)  ){
+                var projArr = [];
+                var mxstudies = 0;
+                var mxseries = 0;
+                for (var projid in window.projstudymp) {
+                    for (var studyid in window.projstudymp[projid]) {
+                        if (studyid in window.glblcart) {
+                            projArr.push(projid);
+                            mxstudies += window.selProjects[projid]['mxstudies'];
+                            mxseries += window.selProjects[projid]['mxseries'];
+                            break;
+                        }
+                    }
+                }
+                if (projArr.length > 0) {
+                    updateProjStudyMp(projArr, mxstudies, mxseries).then(function(){
+                        updateTableCountsAndGlobalCartCounts();
+                    });
+                }
+
+            }
+        })
+
+    }
+
+    const removeSeriesFromTalley = function(seriesid,studyid,curind){
+        //var curind = window.glblcart[studyid]['pos'];
+        var pgLocInd = window.seriesTalley[curind]['pgind'];
+        var splicelen = window.cartPgLocator - pgLocInd;
+        window.cartPgLocator.splice(pgLocInd,splicelen);
+
+        if (!(studyid in window.glblcart)){
+           window.seriesTalley.splice(curind, 1)
+        }
+        for (var j=curind; j<window.seriesTalley.length+1;j++){
+            window.seriesTalley[j]['talley'] = window.seriesTalley[j]['talley']-1
+              var nxtind = Math.floor(window.seriesTalley[j]['talley']*0.1);
+              for (var k=pgLocInd+1;k<nxtind+1;k++){
+                  window.cartPgLocator.push(j);
+                  pgLocInd=nxtind;
+              }
+        }
+
+
     }
 
     // make partitions from table selections
-    mkOrderedPartitions = function(selections){
+    const mkOrderedPartitions = function(selections){
         parts=new Array();
 
         possibleParts = new Array();
@@ -373,7 +665,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
     }
 
     //looking across the history of cart selections, create one set of exclusive partitions of the imaging data
-    updateGlobalPartitions= function(newparts){
+    const updateGlobalPartitions = function(newparts){
         //var newparts = cartHist.partitions;
         for (var i=0;i<newparts.length;i++){
             var inserted = false;
@@ -430,7 +722,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
     }
 
     // add a new partition. basefilt is the active filter when this partition is first encountered
-    addNewPartition= function(part, pos, basefilt) {
+    const addNewPartition= function(part, pos, basefilt) {
         newPart = new Object();
         newPart['not'] = new Array();
         newPart['id'] = [...part]
@@ -446,7 +738,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
 
     // update the filter array for each partition
-    refilterGlobalPartitions= function(cartHist,cartnum){
+    const refilterGlobalPartitions= function(cartHist,cartnum){
 
         var selections = cartHist['selections'];
         var checkedA = new Array()
@@ -563,7 +855,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
 
     // not really needed, but used to creating the solr string in on the client side
-    createSolrString = function(filtStringA){
+    const createSolrString = function(filtStringA){
         var solrStr=''
         var solrA=[]
         for (var i=0;i< window.partitions.length;i++){
@@ -586,7 +878,8 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
        var solrStr = solrA.join(' OR ')
         return solrStr
     }
-    parsePartitionAttStrings = function(filtStringA, partition){
+
+    const parsePartitionAttStrings = function(filtStringA, partition){
         var attStrA =[];
         var filt2D = partition['filt'];
         for (var i=0; i<filt2D.length;i++){
@@ -609,7 +902,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         }
         return attStrA;
     }
-    parsePartitionStrings = function(partition){
+    const parsePartitionStrings = function(partition){
         var filts = ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID']
         var id = partition['id']
         var partStr='';
@@ -625,6 +918,297 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         return partStr
     }
 
+    const getCartSeriesDataPages = function(start, length){
+         seriesTblLimit = length;
+         seriesTblStrt = start
+         var firstPage = Math.floor((start)*0.1);
+         var lastPage = Math.min(Math.floor((length+start)*0.1),window.cartPgLocator.length-1);
+         var prevPage = firstPage-1;
+         var firstStudyIndex = window.cartPgLocator[firstPage];
+         var lastStudyIndex = window.cartPgLocator[lastPage];
+         var firstPgWhichStartsWithFirstStudy = window.seriesTalley[firstStudyIndex]['pgind']
+
+         // seriesTblOffset is the number of series in the table just before the first study which is encountered on the first page in this selection
+         if (firstPgWhichStartsWithFirstStudy>0) {
+             var prevPageIndex = window.cartPgLocator[firstPgWhichStartsWithFirstStudy-1];
+             seriesTblOffset = window.seriesTalley[prevPageIndex]['talley']
+         }
+         else{
+             seriesTblOffset = 0;
+         }
+
+
+
+         // the ids of the studies in these pages
+         var studyArr = [];
+         for (var i=firstStudyIndex;i<lastStudyIndex+1;i++){
+                 studyArr.push(window.seriesTalley[i]['studyid']);
+         }
+
+        var filterStr = JSON.stringify({'StudyInstanceUID': studyArr});
+         var ndic = {'filters':filterStr, 'sort':'StudyInstanceUID'}
+        let url = '/tables/series/';
+         var csrftoken = $.getCookie('csrftoken');
+         url = encodeURI(url);
+         let deferred = $.Deferred();
+         $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        data: ndic,
+                        type: 'post',
+                        contentType: 'application/x-www-form-urlencoded',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success: function (data) {
+
+                            try {
+                                console.log(" data received");
+                                var numFound =0;
+
+                                var dataset = new Array();
+                                for (var i=0;i<data['res'].length;i++){
+                                    var isFound = false;
+                                    var row = data['res'][i];
+                                    var studyid = row['StudyInstanceUID'];
+                                    // we are getting all series for the study. Need to filter out series not in cart.
+                                    // Also some series may lie before or after the pages we need to return to the table
+                                    if (studyid in window.glblcart){
+                                        if (window.glblcart[studyid]['all']){
+                                            numFound++;
+                                            if (((numFound+seriesTblOffset)>seriesTblStrt) && ((numFound+seriesTblOffset)<=(seriesTblStrt+seriesTblLimit))){
+                                                isFound = true;
+                                            }
+                                        }
+                                        else {
+                                            var seriesid = row['SeriesInstanceUID'];
+                                            if (('sel' in window.glblcart[studyid]) && (window.glblcart[studyid]['sel'].has(seriesid))){
+                                                numFound++;
+                                                if (((numFound+seriesTblOffset)>seriesTblStrt) && ((numFound+seriesTblOffset)<=(seriesTblStrt+seriesTblLimit))){
+                                                  isFound = true;
+                                              }
+                                            }
+                                        }
+                                    }
+                                    if (isFound){
+                                        dataset.push(row)
+                                    }
+
+                                }
+
+                            }
+                             catch(err){
+                            console.log('error processing data');
+                            alert("There was an error processing the server data. Please alert the systems administrator")
+                          }
+                        finally {
+                          deferred.resolve(dataset);
+                          }
+                        },
+                        error: function () {
+                            console.log("problem getting data");
+                            alert("There was an error fetching server data. Please alert the systems administrator");
+                        }
+                    });
+          return deferred.promise();
+
+    }
+
+    const updateCartTable = function() {
+         var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "XC"])
+        var slimViewAbleModality=new Set(["SM"])
+        if ($('.cart-wrapper').find('.dataTables_controls').length>0){
+            var pageRows = parseInt($('.cart-wrapper').find('.dataTables_length select').val());
+            var pageCur = parseInt($('.cart-wrapper').find('.dataTables_paginate').find('.current').text());
+        }
+        else {
+            var pageRows = 10;
+            var pageCur=1;
+        }
+        $('#cart-table').DataTable().destroy();
+        try {
+            $('#cart-table').DataTable({
+                "iDisplayLength": pageRows,
+                "displayStart": (pageCur - 1) * pageRows,
+                "autoWidth": false,
+                "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
+                "order": [[1, "asc"]],
+
+                "createdRow": function (row, data, dataIndex) {
+                    $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
+                    $(row).attr('data-studyid', data['StudyInstanceUID']);
+                    $(row).attr('data-caseid', data['PatientID']);
+                    $(row).attr('data-projectid', data['collection_id'][0]);
+                    $(row).find('input').on('click', function (event) {
+                        var collection_id = data['collection_id'][0];
+                        var caseid = data['PatientID'];
+                        var studyid = data['StudyInstanceUID'];
+                        //var seriesid = data['SeriesInstanceUID'];
+                        var numseries = data['cnt'];
+                        if (!window.cartedits) {
+                            let cartSel = new Object();
+                            cartSel['filter'] = {};
+                            cartSel['selections'] = new Array();
+                            cartSel['partitions'] = new Array();
+                            window.cartHist.push(cartSel);
+                            window.cartedits = true;
+                        }
+                        var newSel = new Object();
+                        newSel['added'] = false;
+                        newSel['sel'] = [collection_id, caseid, studyid, seriesid];
+                        cartutils.updateCartSelections(newSel,false, null, 'cartpage');
+
+                        window.updatePartitionsFromScratch();
+                        var ret = cartutils.formcartdata();
+                        window.partitions = ret[0];
+                        window.filtergrp_lst = ret[1];
+                        window.seriesdel.push(seriesid);
+
+                        window.cartDetails = window.cartDetails + 'Removed SeriesInstanceUID = "' + seriesid.toString() + '" from the cart\n\n';
+                        sessionStorage.setItem("cartDetails", JSON.stringify(window.cartDetails));
+                        updateCartTable();
+                    });
+                },
+
+                "columnDefs": [],
+                "columns": [
+                    /*{
+                        "type": "html", "orderable": false, "data": "PatientID", render: function (data) {
+                            return '<input type="checkbox">';
+                        }
+                    },*/
+                    {
+                        "type": "html", "orderable": false, "data": "collection_id", render: function (data) {
+                            return data;
+                        }
+                    },
+
+                    {
+                        "type": "html", "orderable": false, "data": "PatientID", render: function (data) {
+                            return data;
+                        }
+                    },
+
+
+                    {
+                        "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
+                            return pretty_print_id(data) +
+                                ' <a class="copy-this-table" role="button" content="' + data +
+                                '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
+                        }
+                    },
+                    /*{
+                        "type": "text", "orderable": true, data: 'cnt', render: function (data, type,row) {
+                            if ('val' in row){
+                                return row['val'].length.toString();
+                            }
+                            else {
+                                return data;
+                            }
+                        }
+                    },*/
+
+
+                    {
+                        "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
+                            return pretty_print_id(data) +
+                                ' <a class="copy-this-table" role="button" content="' + data +
+                                '"  title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
+                        }
+                    },
+                    {
+                        "type": "html",
+                        "orderable": false,
+                        data: 'StudyInstanceUID',
+                        render: function (data, type, row) {
+                            var coll_id = "";
+                            if (Array.isArray(row['collection_id'])) {
+                                coll_id = row['collection_id'][0];
+                            } else {
+                                coll_id = row['collection_id']
+                            }
+                            if ((Array.isArray(row['Modality']) && row['Modality'].some(function (el) {
+                                return nonViewAbleModality.has(el)
+                            })) || nonViewAbleModality.has(row['Modality'])) {
+                                let tooltip = (
+                                    row['Modality'] === "XC" || (Array.isArray(row['Modality']) && row['Modality'].includes("XC"))
+                                ) ? "not-viewable" : "no-viewer-tooltip";
+                                return `<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash ${tooltip}"></i>`;
+                            } else if ((Array.isArray(row['Modality']) && row['Modality'].some(function (el) {
+                                    return slimViewAbleModality.has(el)
+                                }
+                            )) || (slimViewAbleModality.has(row['Modality']))) {
+                                return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
+                                    '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
+                            } else {
+                                let v2_link = '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
+                                    data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>';
+                                let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '&SeriesInstanceUID=' + data;
+                                let volView_link = VOLVIEW_PATH + "=[s3://" + row['aws_bucket'] + '/' + row['crdc_series_uuid'] + ']"';
+                                return v2_link +
+                                    '<div class="dropdown viewer-toggle">' +
+                                    '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
+                                    '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
+                                    '<li><a href="' + v3_link + '" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
+                                    '<li><a href="' + volView_link + '" target="_blank" rel="noopener noreferrer">VolView</a></li>' +
+                                    '</ul>' +
+                                    '</div>';
+                            }
+                        }
+                    }
+
+                ],
+                "processing": true,
+                "serverSide": true,
+                 "ajax": function (request, callback) {
+                    let url = '/cart_data/';
+                    url = encodeURI(url);
+                    var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
+                    ndic['offset'] = request.start
+                    ndic['length'] = request.length+1;
+                    ndic['limit'] = window.numStudies
+
+                    ndic['aggregate_level'] = 'StudyInstanceUID'
+                    ndic['results_level'] = 'SeriesInstanceUID'
+                    var csrftoken = $.getCookie('csrftoken');
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        data: ndic,
+                        type: 'post',
+                        contentType: 'application/x-www-form-urlencoded',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success: function (data) {
+                            console.log(" data received");
+                            var dataset = data["docs"];
+
+                             callback({
+                                 "data": dataset,
+                                 "recordsTotal": window.numSeries,
+                                 "recordsFiltered": window.numSeries
+                             });
+                        },
+                        error: function () {
+                            console.log("problem getting data");
+                            alert("There was an error fetching server data. Please alert the systems administrator");
+                        }
+                    });
+                }
+            })
+        }
+        catch(Exception){
+            alert("The following error was reported when processing server data: "+ Exception +". Please alert the systems administrator");
+        }
+
+    }
+
+     const pretty_print_id = function (id) {
+        var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);
+        return newId;
+    }
+
 
 
     return {
@@ -632,7 +1216,14 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         formcartdata: formcartdata,
         updateCartSelections: updateCartSelections,
         updateGlobalCart: updateGlobalCart,
-        getGlobalCounts: getGlobalCounts
+        getGlobalCounts: getGlobalCounts,
+        getCartData: getCartData,
+        setCartHistWinFromLocal: setCartHistWinFromLocal,
+        setLocalFromCartHistWin: setLocalFromCartHistWin,
+        updateLocalCartAfterSessionChng: updateLocalCartAfterSessionChng,
+        updateTableCountsAndGlobalCartCounts: updateTableCountsAndGlobalCartCounts,
+        refreshCartAndFiltersFromScratch: refreshCartAndFiltersFromScratch,
+        updateCartTable: updateCartTable
 
 
     };

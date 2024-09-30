@@ -61,6 +61,7 @@ define(['jquery', 'utils'], function($, utils) {
 
     var ANONYMOUS_FILTERS = {};
     var showFilters = [];
+    var first_filter_load = true;
 
     const update_bq_filters = function() {
         let filters = parseFilterObj();
@@ -201,8 +202,9 @@ define(['jquery', 'utils'], function($, utils) {
             load_sliders(sliders, false);
         }
 
-        mkFiltText();
-        return updateFacetsData(true).promise();
+        //mkFiltText();
+        //return updateFacetsData(true).promise();
+        return handleFilterSelectionUpdate(null, true, true)
 
      };
 
@@ -210,7 +212,7 @@ define(['jquery', 'utils'], function($, utils) {
         let loadPending = null;
         if (is_cohort && !cohort_loaded) {
              loadPending = load_filters(cohort_filters);
-             loadPending.done(function () {
+             loadPending.then(function () {
                  console.debug("Load pending complete.");
                  cohort_loaded = true;
                  $('input[type="checkbox"]').prop("disabled", "disabled");
@@ -236,7 +238,7 @@ define(['jquery', 'utils'], function($, utils) {
                  // No anonymous filters seen--check for filter URI
                 if (filters_for_load && Object.keys(filters_for_load).length > 0) {
                      loadPending = load_filters(filters_for_load, );
-                     loadPending.done(function () {
+                     loadPending.then(function () {
                          //console.debug("External filter load done.");
                      });
                  }
@@ -244,24 +246,25 @@ define(['jquery', 'utils'], function($, utils) {
                  if (has_sliders) {
                      loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
                      if (loadPending) {
-                        loadPending.done(function () {
+                        loadPending.then(function () {
                              //console.debug("Sliders loaded from anonymous login.");
                          });
                      }
                  }
                  if (has_filters) {
                      loadPending = load_filters(ANONYMOUS_FILTERS, );
-                     loadPending.done(function () {
+                     loadPending.then(function () {
                          //console.debug("Filters loaded from anonymous login.");
                      });
                  }
              }
          }
          if (loadPending) {
-             loadPending.done(function() {
+             loadPending.then(function() {
                  load_filter_selections(showFilters);
              });
          }
+         return loadPending;
      }
 
       const load_anonymous_selection_data = function() {
@@ -658,6 +661,7 @@ define(['jquery', 'utils'], function($, utils) {
 
     window.handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
 
+        var promise =  null
         if (!(filterElem ===null))
         {
             checkFilters(filterElem);
@@ -665,42 +669,10 @@ define(['jquery', 'utils'], function($, utils) {
 
         var isFiltered = false;
         //var isFiltered = Boolean($('#search_def p').length > 0);
-        if (is_cohort) {
-            isFiltered = true;
-            if (file_parts_count > display_file_parts_count) {
-                $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
-                $('#file-export-option input').prop('disabled', 'disabled');
-                $('#file-export-option input').prop('checked', false);
-                $('#file-manifest').hide();
-                if (!user_is_social) {
-                    $('#need-social-account').show();
-                } else {
-                    $('#file-manifest-max-exceeded').show();
-                    $('#bq-export-option input').prop('checked', true).trigger("click");
-                }
-            } else {
-                $('#file-manifest-max-exceeded').hide();
-                $('#file-manifest').show();
-                var select_box_div = $('#file-part-select-box');
-                var select_box = select_box_div.find('select');
-                if (file_parts_count > 1) {
-                    select_box_div.show();
-                    for (let i = 0; i < display_file_parts_count; ++i) {
-                        select_box.append($('<option/>', {
-                            value: i,
-                            text: "File Part " + (i + 1)
-                        }));
-                    }
-                } else {
-                    select_box_div.hide();
-                }
-            }
-
-        }
 
         if (mkFilt) {
 
-            isFilterediltered = mkFiltText();
+            isFiltered = mkFiltText();
             update_filter_url();
             update_bq_filters();
           if (window.location.href.search(/\/filters\//g) >= 0) {
@@ -738,7 +710,7 @@ define(['jquery', 'utils'], function($, utils) {
 
 
             //$.when.apply(undefined, serverdata).then(function(ret)
-            Promise.all(serverdata).then(function(ret)
+            promise = Promise.all(serverdata).then(function(ret)
             {
                 var collFilt = ret[0][0];
                 var collectionData = ret[0][1];
@@ -746,30 +718,8 @@ define(['jquery', 'utils'], function($, utils) {
                 var totals = ret[0][3];
                 var numStudiesRet = totals.StudyInstanceUID;
 
-                $('#search_def_stats').html(totals.PatientID.toString() +
-                            " Cases, " + totals.StudyInstanceUID.toString() +
-                            " Studies, and " + totals.SeriesInstanceUID.toString() +
-                            " Series in this cohort. " +
-                            "Size on disk: " + totals.disk_size);
 
 
-                if (!is_cohort){
-                    if (isFiltered && numStudiesRet > 0) {
-                            $('#save-cohort-btn').prop('disabled', '');
-                            if (user_is_auth) {
-                                $('#save-cohort-btn').prop('title', '');
-                            }
-
-                        } else {
-                            $('#save-cohort-btn').prop('disabled', 'disabled');
-
-                            if (user_is_auth) {
-                                $('#save-cohort-btn').prop('title', numStudiesRet > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
-                            } else {
-                                $('#save-cohort-btn').prop('title', 'Log in to save.');
-                            }
-                        }
-                }
                 createPlots('search_orig_set');
                createPlots('search_derived_set');
                createPlots('tcga_clinical');
@@ -785,6 +735,7 @@ define(['jquery', 'utils'], function($, utils) {
 
 
         }
+        return promise
     };
 
     const mkFiltText = function () {

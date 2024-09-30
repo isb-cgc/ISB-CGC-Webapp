@@ -64,6 +64,40 @@ require([
     'tablesorter',
 
 ], function (image_search, tables,$, tippy, base) {
+
+    window.selProjects= new Object();
+    window.glblcart = new Object();
+    window.partitions= new Array();
+
+    //sesssionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
+    window.partitions = new Array();
+
+
+
+    window.studymp=new Object();
+    window.projstudymp = new Object();
+    window.casestudymp = new Object();
+    window.collection = JSON.parse(document.getElementById('collections').textContent);
+    var lst = Object.keys(window.collection).sort();
+    window.collectionData = new Array();
+    window.programs = JSON.parse(document.getElementById('programs').textContent);
+    var ind = 0;
+
+    for (program in window.programs) {
+        for (project in window.programs[program]['projects']) {
+            var col = project;
+            var disp = window.programs[program]['projects'][project]['display'];
+            var val = window.programs[program]['projects'][project]['val'];
+            window.collectionData.push([col, disp, val, val]);
+            window.selProjects[project]=new Object();
+        }
+    }
+
+    window.casesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+    window.studyTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+    window.seriesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+
+
     var saving_cohort = false;
 
 

@@ -35,16 +35,16 @@
                 <table id="cart-table" class="table collex-table sortable_table table-striped table-hover">
                     <thead id ="cart-head">
 
-                        <th class="del">Remove</th>
+                        <!-- <th class="del">Remove</th> -->
                         <th class="projid">Project ID</th>
                         <th class="caseid">Case ID</th>
                         <th class="studyid">StudyInstanceUID</th>
-                        <th class="seriesid">SeriesInstanceUID</th>
+                        <th>SeriesInstanceUID</th>
                         <th class="viewer">View</th>
 
                     </thead>
                     <colgroup>
-                        <col style="width: 10%">
+                       <!-- <col style="width: 10%"> -->
                         <col style="width: 20%">
                         <col style="width: 20%">
                         <col style="width: 20%">
@@ -89,6 +89,9 @@
     {{ partitions|json_script:"partitions" }}
 
 	{{ block.super }}
+
+            {{ projcnts|json_script:"projcnts" }}
+        //const projcnts = JSON.parse(document.getElementById('projcnts').textContent);
 
 
     <script type="text/javascript" src="{% static 'js/cart_page.js' %}?v={{ APP_VERSION }}"></script>

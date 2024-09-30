@@ -316,6 +316,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
             ncur=[cur[0], cur[0], cur[0], cur[1],cur[2],cur[3]];
             newCollectionData.push(ncur);
         }
+        //newCollectionData.sort((a,b) => a[0].localeCompare(b[0]))
 
         $('#proj_table').DataTable().destroy();
         $("#proj_table_wrapper").find('.dataTables_controls').remove();
@@ -555,69 +556,16 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         var addingToCart;
         if ('extraInFilt' in window.selProjects[data[0]]){
             addingToCart = true;
-            window.cartDetails = window.cartDetails+'Added all series to the cart for which the collection_id ="'+projid.toString()+'" and the respective study matches the current filter\n\n';
-            window.cartStep++;
-
-            updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries']).then(function(){
-                cartutils.updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
-                updateTableCounts(1);
-                var gtotals =cartutils.getGlobalCounts();
-                var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-               tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });
-            $('#cart_stats').html(content) ;
-                if (gtotals[0]>0){
-                    $('#cart_stats').removeClass('notDisp');
-                    $('#export-manifest-cart').removeAttr('disabled');
-                    $('#view-cart').removeAttr('disabled');
-                }
-                else{
-                    $('#cart_stats').addClass('notDisp');
-                    $('#export-manifest-cart').attr('disabled','disabled');
-                    $('#view-cart').attr('disabled','disabled');
-                }
-
-            })
         }
-         else{
-
+         else {
             addingToCart = false;
-            window.cartDetails = window.cartDetails+'Removed any series from the cart for which the collection_id ="'+projid.toString()+'" and the respective study matches the current filter\n\n';
-            window.cartStep++;
-
-            cartutils.updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
-            updateTableCounts(1);
-            var gtotals =cartutils.getGlobalCounts();
-            var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-            tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });
-            $('#cart_stats').html(content) ;
-            if (gtotals[0]>0){
-                    $('#cart_stats').removeClass('notDisp');
-                    $('#export-manifest-cart').removeAttr('disabled');
-                    $('#view-cart').removeAttr('disabled');
-                }
-                else{
-                    $('#cart_stats').addClass('notDisp');
-                    $('#export-manifest-cart').attr('disabled','disabled');
-                    $('#view-cart').attr('disabled','disabled');
-                }
         }
-
-         var curCount = parseInt($(row).find('.cartnum').text());
-
 
         var newSel = new Object();
         newSel['added'] = addingToCart;
         newSel['sel'] = [projid]
         //window.cartHist[curInd]['selections'].push(newSel)
-        cartutils.updateCartSelections(newSel);
+        cartutils.updateCartSelections(newSel,addingToCart, window.selProjects[projid].studymp, 'project');
 
     }
 
@@ -872,45 +820,18 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                         if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
                             // cart is clear
                             addingToCart = true;
-                            window.cartDetails = window.cartDetails+'Added all series to the cart for which the PatientID = "'+caseid.toString()+'" and the respective study matches the current filter\n\n';
-                            window.cartStep++;
 
                         }
 
                         else{
                             //cart is green or yellow. pressing deletes
                             addingToCart= false;
-                            window.cartDetails = window.cartDetails+ 'Removed any series from the cart for which the PatientID = "'+caseid.toString()+'" and the respective study matches the current filter\n\n';
-                            window.cartStep++;
                         }
-
-                        cartutils.updateGlobalCart(addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case');
-                        updateTableCounts(1);
-
-                        var gtotals =cartutils.getGlobalCounts();
-
-                        var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-                      tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });
-                      $('#cart_stats').html(content) ;
-                       if (gtotals[0]>0){
-                         $('#cart_stats').removeClass('notDisp');
-                         $('#export-manifest-cart').removeAttr('disabled');
-                         $('#view-cart').removeAttr('disabled');
-                        }
-                       else{
-                        $('#cart_stats').addClass('notDisp');
-                        $('#export-manifest-cart').attr('disabled','disabled');
-                        $('#view-cart').attr('disabled','disabled');
-                       }
 
                        var newSel = new Object();
                        newSel['added'] = addingToCart;
                        newSel['sel'] = [projid, caseid];
-                       cartutils.updateCartSelections(newSel);
+                       cartutils.updateCartSelections(newSel, addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case');
 
 
                        });
@@ -1335,48 +1256,21 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                         {
                             //more to add
                             addingToCart= true;
-                            window.cartDetails = window.cartDetails+'Removed any series from the cart for which the StudyInstanceUID ="'+studyid.toString()+'"\n\n';
-                            window.cartStep++;
-
                         }
                         else{
                             // no more to add
                             addingToCart = false;
-                            window.cartDetails = window.cartDetails+'Added all series to the cart for which the StudyInstanceUID = "'+studyid.toString()+'"\n\n';
-                            window.cartStep++;
 
                         }
                         var numSeries = window.selProjects[projid].selCases[caseid].selStudies[studyid].studymp[studyid]['cnt'];
                         var mp=new Object();
-                        mp[studyid]=numSeries
-                        cartutils.updateGlobalCart(addingToCart, mp, 'study');
-                        updateTableCounts(1);
-                        var gtotals =cartutils.getGlobalCounts();
-
-                        var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-                      tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });
-                    $('#cart_stats').html(content) ;
-
-                       if (gtotals[0]>0){
-                         $('#cart_stats').removeClass('notDisp');
-                         $('#export-manifest-cart').removeAttr('disabled');
-                         $('#view-cart').removeAttr('disabled');
-                       }
-                      else{
-                         $('#cart_stats').addClass('notDisp');
-                         $('#export-manifest-cart').attr('disabled','disabled');
-                         $('#view-cart').attr('disabled','disabled');
-                      }
+                        mp[studyid]=numSeries;
 
                        //var curInd = window.cartHist.length - 1;
                        var newSel = new Object();
                        newSel['added'] = addingToCart;
                        newSel['sel'] = [projid, caseid, studyid];
-                       cartutils.updateCartSelections(newSel);
+                       cartutils.updateCartSelections(newSel, addingToCart, mp, 'study');
                        //window.cartHist[curInd]['selections'].push(newSel);
 
                     });
@@ -1725,14 +1619,9 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                         if ($(elem).parentsUntil('tr').parent().hasClass('someInCart'))
                         {
                             addingToCart = false;
-                            window.cartDetails = window.cartDetails+'Removed SeriesInstanceUID = "'+seriesid.toString()+'" from the cart\n\n';
-                            window.cartStep++;
-
                         }
                         else{
-                            window.cartDetails = window.cartDetails+'Added SeriesInstanceUID = "'+seriesid.toString()+'" to the cart\n\n';
-                            window.cartStep++;
-
+                            addingToCart = true;
                         }
 
 
@@ -1741,35 +1630,13 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                         mp[studyid]=[seriesid];
 
 
-                        cartutils.updateGlobalCart(addingToCart, mp, 'series');
-                        updateTableCounts(1);
-                        var gtotals =cartutils.getGlobalCounts();
-                        var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-                        tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });
-                     $('#cart_stats').html(content) ;
-
-
-                       if (gtotals[0]>0){
-                         $('#cart_stats').removeClass('notDisp');
-                         $('#export-manifest-cart').removeAttr('disabled');
-                         $('#view-cart').removeAttr('disabled');
-                         }
-                       else{
-                         $('#cart_stats').addClass('notDisp');
-                         $('#export-manifest-cart').attr('disabled','disabled');
-                         $('#view-cart').attr('disabled','disabled');
-                     }
 
                        //var curInd = window.cartHist.length - 1;
                        var newSel = new Object();
                        newSel['added'] = addingToCart;
                        newSel['sel'] = [collection_id, PatientID, studyid, seriesid];
                        //window.cartHist[curInd]['selections'].push(newSel);
-                       cartutils.updateCartSelections(newSel);
+                       cartutils.updateCartSelections(newSel,addingToCart, mp, 'series');
 
                     });
 
@@ -2139,14 +2006,17 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
     // update the cartnums, classes on the cart columns of all rows of all tables
     window.updateTableCounts = function() {
-          $('#projects_table').find('tr').each(function () {
-              var projid = $(this).attr('data-projectid')
-              $(this).find('.cartnum').text('0');
-              $(this).addClass('extraInFilt');
-              $(this).removeClass('someInCart');
-              $(this).removeClass('extraInCart');
-              $(this).addClass('extraInItem');
-              $(this).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
+
+        $('#proj_table').DataTable().rows().every(function() {
+          //$('#projects_table').find('tr').each(function () {
+              var row = this.node();
+              var projid = $(row).attr('data-projectid')
+              $(row).find('.cartnum').text('0');
+              $(row).addClass('extraInFilt');
+              $(row).removeClass('someInCart');
+              $(row).removeClass('extraInCart');
+              $(row).addClass('extraInItem');
+              $(row).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
 
               if ('someInCart' in window.selProjects[projid]) {
 
@@ -2163,13 +2033,13 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
               if ('studymp' in window.selProjects[projid]){
                   delete (window.selProjects[projid]['extraInFilt']);
-                 $(this).removeClass('extraInFilt');
-                 $(this).find('.shopping-cart').parent()[0]._tippy.setContent("remove series from the cart");
+                 $(row).removeClass('extraInFilt');
+                 $(row).find('.shopping-cart').parent()[0]._tippy.setContent("remove series from the cart");
                   for (studyid in window.selProjects[projid].studymp) {
                       if (!(studyid in window.glblcart) || !(window.glblcart[studyid]['all'])) {
-                          $(this).addClass('extraInFilt');
+                          $(row).addClass('extraInFilt');
                           window.selProjects[projid]['extraInFilt'] = true;
-                          $(this).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
+                          $(row).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
                           break;
                       }
                   }
@@ -2242,20 +2112,30 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                   seriesMissing = true;
               }
 
-               $('#projects_table').find('[data-projectid='+projid+']').each(function(){
+               var nm="#project_row_"+projid;
+              $('#proj_table').DataTable().rows([nm]).every(function(){
+                  var row = this.node();
+
+               //$('#projects_table').find('[data-projectid='+projid+']').each(function(){
                    var maxseries = stats['series_per_collec'][projid]
-                   $(this).addClass('someInCart');
+                   $(row).addClass('someInCart');
                    window.selProjects[projid]['someInCart']=true;
-                   var curval=parseInt($(this).find('.cartnum').text());
+                   var curval=parseInt($(row).find('.cartnum').text());
                    var nval= cnt+curval;
                    if (nval>= maxseries){
-                       $(this).removeClass('extraInItem');
+                       $(row).removeClass('extraInItem');
                        if ('extraInItem' in window.selProjects[projid]) {
                            delete(window.selProjects[projid]['extraInItem'])
                        }
                    }
+                    if (isNaN(cnt)){
+                       var stp=1;
+                   }
+                   if (isNaN(curval)){
+                       var stp=1;
+                   }
 
-                   $(this).find('.cartnum').text(nval.toString());
+                   $(row).find('.cartnum').text(nval.toString());
 
                });
 
@@ -2264,6 +2144,12 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                   window.selProjects[projid].selCases[caseid]['someInCart']=true;
                   var maxseries = window.selProjects[projid].selCases[caseid].maxseries;
                    var curval=parseInt($(this).find('.cartnum').text());
+                   if (isNaN(cnt)){
+                       alert('no!')
+                   }
+                   if (isNaN(curval)){
+                       alert('no!')
+                   }
                    var nval= cnt+curval
                    if (nval>= maxseries){
                        $(this).removeClass('extraInItem');
@@ -2273,6 +2159,9 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                    }
 
                    $(this).find('.cartnum').text(nval.toString());
+                   if (nval.toString()=='NaN'){
+                       alert('her');
+                   }
 
                });
 

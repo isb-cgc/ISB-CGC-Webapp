@@ -32,6 +32,7 @@ require.config({
         filterutils: 'filterutils',
         plotutils: 'plotutils',
         sliderutils: 'sliderutils',
+        cartutils: 'cartutils',
         tippy: 'libs/tippy-bundle.umd.min',
          '@popperjs/core': 'libs/popper.min'
 
@@ -48,6 +49,7 @@ require.config({
         'plotutils': ['jquery'],
         'sliderutils': ['jquery'],
         'tables':['jquery'],
+        'cartutils':['jquery'],
         '@popperjs/core': {
           exports: "@popperjs/core"
         },
@@ -65,6 +67,7 @@ require([
     'filterutils',
     'sliderutils',
     'tables',
+    'cartutils',
     'tippy',
     'jquery',
     'underscore',
@@ -73,7 +76,7 @@ require([
     'jqueryui',
     'bootstrap'
 
-], function(plotutils,filterutils,sliderutils, tables, tippy,$, _, base) {
+], function(plotutils,filterutils,sliderutils, tables, cartutils, tippy,$, _, base) {
 
 
     const FLOAT_SLIDERS = sliderutils.FLOAT_SLIDERS;
@@ -88,7 +91,7 @@ require([
     window.projSets['tcga']=["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
     window.projSets['rider']=["rider_lung_ct", "rider_phantom_pet_ct","rider_breast_mri", "rider_neuro_mri","rider_phantom_mri", "rider_lung_pet_ct"];
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
-    var first_filter_load = true;
+
 
 
 
@@ -141,29 +144,48 @@ require([
             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 try {
-
-                     let curInd = window.cartHist.length-1;
+                    cartutils.setCartHistWinFromLocal();
+                    let curInd = window.cartHist.length-1;
                     if (cartHist[curInd].selections.length>0){
                         //updateGlobalPartitions(window.cartHist[curInd]);
                         let cartSel = new Object();
                         cartSel['filter']= parsedFiltObj;
                         cartSel['selections']= new Array();
                         cartSel['partitions']= new Array();
+                        cartSel['pageid'] = window.pageid;
                         window.cartHist.push(cartSel);
-       }
+                    }
                     else{
                         window.cartHist[curInd]['filter'] = parsedFiltObj;
+                        window.cartHist[curInd]['pageid'] = parsedFiltObj;
                     }
-                    window.cartDetails = cartDetails+'Changed filter definition to '+JSON.stringify(parsedFiltObj)+'\n\n'
-                    window.cartStep++;
+                    cartutils.setLocalFromCartHistWin();
+                    if(data.total <= 0) {
+                        base.showJsMessage(
+                           "warning zero-results",
+                           "Your filters returned zero results!",
+                           true
+                       );
+                        $('#export-manifest, #save-cohort-btn').attr('disabled', 'disabled');
+                    } else {
+                        $('.zero-results').remove();
+                        $('#export-manifest, #save-cohort-btn').removeAttr('disabled');
+                    }
 
                     let file_parts_count = (is_cohort ? cohort_file_parts_count : data.totals.file_parts_count);
                     let display_file_parts_count = (is_cohort ? cohort_display_file_parts_count : data.totals.display_file_parts_count);
                     let isFiltered = Boolean($('#search_def p').length > 0);
 
 
-                    $('#search_def_stats').attr('filter-series-count',data.totals.SeriesInstanceUID);
-                    if(data.totals.SeriesInstanceUID > 65000) {
+                    $('#search_def_stats').attr('filter-series-count',(data.total > 0 ? data.totals.SeriesInstanceUID: 0));
+                    let totals = data.totals;
+                    $('#search_def_stats').html(totals.PatientID.toString() +
+                            " Cases, " + totals.StudyInstanceUID.toString() +
+                            " Studies, and " + totals.SeriesInstanceUID.toString() +
+                            " Series in this cohort. " +
+                            "Size on disk: " + totals.disk_size);
+
+                    if(data.total > 0 && data.totals.SeriesInstanceUID > 65000) {
                         $('#s5cmd-max-exceeded').show();
                         $('#download-s5cmd').attr('disabled','disabled');
                         $('#s5cmd-button-wrapper').addClass('manifest-disabled');
@@ -213,21 +235,13 @@ require([
                         $('.access_warn').addClass('notDisp');
                     }
                     if(is_cohort || (isFiltered && data.total > 0)) {
-                        //$('#search_def_stats').removeClass('notDisp');
-                        var content = data.totals.PatientID.toString() + " Cases, " +
+                        $('#search_def_stats').removeClass('notDisp');
+                        $('#search_def_stats').html(data.totals.PatientID.toString() + " Cases, " +
                             data.totals.StudyInstanceUID.toString() + " Studies, and " +
                             data.totals.SeriesInstanceUID.toString() + " Series in this cohort. " +
-                            "Size on disk: " + data.totals.disk_size;
-                        $('#search_def_stats').html(content);
-
-                           tippy('.cohort-summary', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });
-
+                            "Size on disk: " + data.totals.disk_size);
                     } else if(isFiltered && data.total <= 0) {
-                        //$('#search_def_stats').removeClass('notDisp');
+                        $('#search_def_stats').removeClass('notDisp');
                         $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                     } else {
                         $('#search_def_stats').addClass('notDisp');
@@ -651,9 +665,10 @@ require([
 
     updatecartedits = function(){
 
-        if (("cartedits" in sessionStorage) && (sessionStorage.getItem("cartedits") == "true")) {
+        if (("cartedits" in localStorage) && (localStorage.getItem("cartedits") == "true")) {
 
-            window.cartHist = JSON.parse(sessionStorage.getItem("cartHist"));
+            //window.cartHist = JSON.parse(sessionStorage.getItem("cartHist"));
+            setCartHistWinFromLocal();
             var edits = window.cartHist[window.cartHist.length - 1]['selections'];
 
             var filt = Object();
@@ -707,8 +722,8 @@ require([
 
 
         }
-        else if ("cartHist" in sessionStorage){
-            sessionStorage.removeItem("cartHist");
+        else if ("cartHist" in localStorage){
+            localStorage.removeItem("cartHist");
         }
         if ("cartedits" in sessionStorage){
             sessionStorage.removeItem("cartedits");
@@ -724,6 +739,8 @@ require([
     }
 
      $(document).ready(function () {
+        window.pageid = Math.random().toString(36).substr(2,8);
+
 
         tables.initializeTableData();
         filterItemBindings('access_set');
@@ -778,16 +795,33 @@ require([
             window.filterObj= {};
             filterutils.mkFiltText();
             var updateDone = false;
-           var updateWait = false;
+            var updateWait = false;
 
                updateFacetsData(true);
                tables.initializeTableData();
 
-
         });
 
-        filterutils.load_preset_filters();
+        cartutils.updateLocalCartAfterSessionChng();
+        var cartSel = new Object();
+        cartSel['filter']=new Object();
+        cartSel['pageid'] = window.pageid
+        cartSel['selections']= new Array();
+        cartSel['partitions']= new Array();
 
+        setCartHist = cartutils.setCartHistWinFromLocal();
+        if (!setCartHist){
+              window.cartHist = new Array();
+        }
+        window.cartHist.push(cartSel);
+
+        if ('cartHist' in localStorage){
+            cartutils.refreshCartAndFiltersFromScratch(true);
+        }
+        else {
+            filterutils.load_preset_filters();
+        }
+        //filterutils.load_preset_filters();
         $('.hide-filter-uri').on('click',function() {
             $(this).hide();
             $('.get-filter-uri').show();
@@ -818,33 +852,44 @@ require([
         );
 
 
-        $(window).on("beforeunload",function(){
-            console.log("beforeunload called");
-            let hs = new Object();
-            hs['hz'] = new Object();
-            hs['sorter'] = new Object();
-            $('body').find('.hide-zeros').each(function(){
-                let pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
-                let pid = pfar[0].id;
-                let checked = pfar.find('.hide-zeros')[0].checked;
-                hs['hz'][pid] = checked;
-            });
 
-            $('body').find('.sorter').each(function(){
-                let pfar = $(this).closest('.collection-list, .list-group-item__body ');
-                let pid = pfar[0].id;
-                let sort = $(this).find('input:checked').val()
-                hs['sorter'][pid] = sort;
-            });
+        initSort('num');
+        if (document.contains(document.getElementById('history'))){
+            updateViaHistory();
+        }
 
 
+        //updatecartedits();
 
-            let url = encodeURI('/uihist/')
-            let nhs = {'his':JSON.stringify(hs)}
-            let csrftoken = $.getCookie('csrftoken');
-            let deferred = $.Deferred();
-           /*
-            $.ajax({
+    });
+
+    window.onbeforeunload = function(){
+
+        console.log("beforeunload called");
+        let hs = new Object();
+        hs['hz'] = new Object();
+        hs['sorter'] = new Object();
+        $('body').find('.hide-zeros').each(function(){
+            let pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
+            let pid = pfar[0].id;
+            let checked = pfar.find('.hide-zeros')[0].checked;
+            hs['hz'][pid] = checked;
+        });
+
+        $('body').find('.sorter').each(function(){
+            let pfar = $(this).closest('.collection-list, .list-group-item__body ');
+            let pid = pfar[0].id;
+            let sort = $(this).find('input:checked').val()
+            hs['sorter'][pid] = sort;
+        });
+
+
+        let url = encodeURI('/uihist/')
+        let nhs = {'his':JSON.stringify(hs)}
+        let csrftoken = $.getCookie('csrftoken');
+        let deferred = $.Deferred();
+
+        $.ajax({
                 url: url,
                 data: nhs,
                 dataType: 'json',
@@ -859,33 +904,50 @@ require([
                 complete: function(data) {
                     deferred.resolve();
                 }
-            });
-        */
         });
 
+        cartutils.setLocalFromCartHistWin();
+        //sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
+        localStorage.setItem("cartDetails", JSON.stringify(window.cartDetails));
+        //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
+        localStorage.setItem("src", "explore_page");
 
+        var maxSeries=0;
+        var maxStudies=0;
+        var projA=[];
 
-        initSort('num');
-        if (document.contains(document.getElementById('history'))){
-            updateViaHistory();
+        for (proj in window.selProjects){
+            if (('someInCart' in window.selProjects[proj]) && (window.selProjects[proj]['someInCart'])){
+                maxSeries = maxSeries + window.selProjects[proj]['mxseries'];
+                maxStudies = maxStudies + window.selProjects[proj]['mxstudies'];
+                projA.push(proj);
+            }
+
         }
 
-        //updatecartedits();
-
-    });
-
-    window.onbeforeunload = function(){
-        sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
-        sessionStorage.setItem("cartDetails", JSON.stringify(window.cartDetails));
-        //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
-        sessionStorage.setItem("src", "explore_page");
-        //sessionStorage.setItem("cartDetails", windowcartDetails);
+        if (projA.length>0){
+          localStorage.setItem("projA", JSON.stringify(projA));
+          localStorage.setItem("maxSeries", maxSeries);
+          localStorage.setItem("maxStudies", maxStudies);
+        }
+        else{
+            if ("projA" in sessionStorage){
+                localStorage.remove("projA");
+            }
+            if ("maxSeries" in sessionStorage){
+                localStorage.remove("maxSeries");
+            }
+            if ("maxStudies" in sessionStorage){
+                localStorage.remove("maxStudies");
+            }
+        }
 
     }
+
     window.onpageshow = function (){
         //alert('show');
-        if ("cartcleared" in sessionStorage){
-            sessionStorage.removeItem("cartcleared");
+        if ("cartcleared" in localStorage){
+            localStorage.removeItem("cartcleared");
             window.resetCart();
         }
         else {
@@ -893,10 +955,6 @@ require([
         }
 
     }
-
-
-
-
 
 });
 

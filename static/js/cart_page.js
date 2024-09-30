@@ -68,203 +68,24 @@ require([
 
      var ajaxtriggered = false;
 
-     const updateCartTable = function(studyidarr, seriesidarr, offset) {
-         var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "XC"])
-        var slimViewAbleModality=new Set(["SM"])
-        if ($('.cart-wrapper').find('.dataTables_controls').length>0){
-            var pageRows = parseInt($('.cart-wrapper').find('.dataTables_length select').val());
-            var pageCur = parseInt($('.cart-wrapper').find('.dataTables_paginate').find('.current').text());
-        }
-        else {
-            var pageRows = 10;
-            var pageCur=1;
-        }
-        $('#cart-table').DataTable().destroy();
-        try {
-            $('#cart-table').DataTable({
-                "iDisplayLength": pageRows,
-                "displayStart":(pageCur-1)*pageRows,
-                "autoWidth": false,
-                "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
-                "order": [[1, "asc"]],
-
-                "createdRow": function (row, data, dataIndex) {
-                    $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
-                    $(row).attr('data-studyid', data['StudyInstanceUID']);
-                    $(row).attr('data-caseid', data['PatientID']);
-                    $(row).attr('data-projectid', data['collection_id'][0]);
-                    $(row).find('input').on('click', function(event){
-                        var collection_id = data['collection_id'][0];
-                        var caseid = data['PatientID'];
-                        var studyid = data['StudyInstanceUID'];
-                        var seriesid = data['SeriesInstanceUID'];
-
-                        if (!window.cartedits){
-                            let cartSel = new Object();
-                        cartSel['filter']= {};
-                        cartSel['selections']= new Array();
-                        cartSel['partitions']= new Array();
-                        window.cartHist.push(cartSel);
-                        window.cartedits =true;
-                        }
-                        var newSel = new Object();
-                        newSel['added'] = false;
-                        newSel['sel'] = [collection_id, caseid, studyid, seriesid];
-                       //window.cartHist[curInd]['selections'].push(newSel);
-                        cartutils.updateCartSelections(newSel);
-
-                        window.updatePartitionsFromScratch();
-                        var ret =cartutils.formcartdata();
-                        window.partitions = ret[0];
-                        window.filtergrp_lst = ret[1];
-                        window.seriesdel.push(seriesid);
-
-                        window.cartDetails = window.cartDetails+'Removed SeriesInstanceUID = "'+seriesid.toString()+'" from the cart\n\n';
-                        updateCartTable([studyid], [seriesid]);
-                     });
-                    },
-
-                "columnDefs": [],
-                "columns": [
-                    {
-                        "type": "html", "orderable": false, "data": "PatientID", render: function (data) {
-                            return '<input type="checkbox">';
-                        }
-                    },
-                    {
-                        "type": "html", "orderable": false, "data": "collection_id", render: function (data) {
-                            return data;
-                        }
-                    },
-
-                    {
-                        "type": "html", "orderable": false, "data": "PatientID", render: function (data) {
-                            return data;
-                        }
-                    },
 
 
-                    {
-                        "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
-                            return pretty_print_id(data) +
-                                ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
-                        }
-                    },
 
-
-                    {
-                        "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
-                            return pretty_print_id(data) +
-                                ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
-                        }
-                    },
-                    {
-                    "type": "html",
-                    "orderable": false,
-                    data: 'SeriesInstanceUID',
-                    render: function (data, type, row) {
-                        var coll_id="";
-                        if (Array.isArray(row['collection_id'])){
-                            coll_id=row['collection_id'][0];
-                        } else {
-                            coll_id=row['collection_id']
-                        }
-                         if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
-                            return nonViewAbleModality.has(el)
-                        }) ) || nonViewAbleModality.has(row['Modality']) )   {
-                            let tooltip = (
-                                row['Modality'] === "XC" || (Array.isArray(row['Modality']) && row['Modality'].includes("XC"))
-                            ) ? "not-viewable" : "no-viewer-tooltip";
-                            return `<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash ${tooltip}"></i>`;
-                        } else if (  ( Array.isArray(row['Modality']) && row['Modality'].some(function(el){
-                            return slimViewAbleModality.has(el)}
-                        ) ) || (slimViewAbleModality.has(row['Modality']))) {
-                            return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
-                                '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
-                        } else {
-                            let v2_link = '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
-                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>';
-                            let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '&SeriesInstanceUID=' + data;
-                            let volView_link = VOLVIEW_PATH + "=[s3://" + row['aws_bucket'] + '/'+row['crdc_series_uuid']+']"';
-                            return v2_link +
-                                '<div class="dropdown viewer-toggle">' +
-                                '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
-                                '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
-                                '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
-                                '<li><a href="'+volView_link+'" target="_blank" rel="noopener noreferrer">VolView</a></li>' +
-                                '</ul>' +
-                                '</div>';
-                        }
-                    }
-                }
-
-                ],
-                "processing": true,
-                "serverSide": true,
-                "ajax": function (request, callback) {
-                    let url = '/cart_data/';
-                    url = encodeURI(url);
-                    var ndic = {'filtergrp_lst': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
-                    ndic['offset'] = request.start
-                    ndic['limit'] = request.length+1;
-                    ndic['studyidarr'] = JSON.stringify(studyidarr);
-                    var csrftoken = $.getCookie('csrftoken');
-                    $.ajax({
-                        url: url,
-                        dataType: 'json',
-                        data: ndic,
-                        type: 'post',
-                        contentType: 'application/x-www-form-urlencoded',
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                        },
-                        success: function (data) {
-                            console.log(" data received");
-                            var dataset = data["docs"];
-                            if ("studymp" in data){
-                                var mp = data["studymp"]
-
-                                for (var studyid in data["studymp"]) {
-                                   window.studymp[studyid] = data["studymp"][studyid];
-                                }
-                            }
-                             callback({
-                                 "data": dataset,
-                                 "recordsTotal": data["numFound"],
-                                 "recordsFiltered": data["numFound"]
-                             });
-                        },
-                        error: function () {
-                            console.log("problem getting data");
-                            alert("There was an error fetching server data. Please alert the systems administrator");
-                        }
-                    });
-                }
-            })
-        }
-        catch(Exception){
-            alert("The following error was reported when processing server data: "+ Exception +". Please alert the systems administrator");
-        }
-
-
-    }
-
-     const pretty_print_id = function (id) {
-        var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);
-        return newId;
-    }
 
     window.resetCartPageView = function(){
         window.cartHist = new Array();
         window.updatePartitionsFromScratch();
-        var ret =cartutils.formcartdata();
+        let ret =cartutils.formcartdata();
         window.partitions = ret[0];
         window.filtergrp_lst = ret[1];
-        updateCartTable([],[]);
-        sessionStorage.setItem("cartcleared", "true")
-        history.back();
+        //cartutils.updateCartTable([],[]);
+        window.glblcart = new Object();
+        //window.cartPgLocator = new Array();
+        //window.seriesTalley = new Array();
+
+        localStorage.removeItem("cartHist")
+        window.location = window.location.protocol+'//'+window.location.host+'/explore/';
+        //history.back();
     }
 
     tippy.delegate('#cart-table', {
@@ -285,22 +106,48 @@ require([
 
 
      $(document).ready(function () {
-        ajaxtriggered= true;
-        window.cartedits=false;
-        window.cartHist = new Array();
-        window.studymp = new Object();
-        window.seriesdel = new Array();
-        if ("cartHist" in sessionStorage){
-            window.cartHist= JSON.parse(sessionStorage.getItem("cartHist"));
-           }
-        if ("cartDetails" in sessionStorage) {
-                window.cartDetails = JSON.parse(sessionStorage.getItem("cartDetails"));
-            }
-        window.updatePartitionsFromScratch();
+         projcnts = JSON.parse(document.getElementById('projcnts').textContent);
+
+         window.selProjects=[];
+         window.projstudymp = {};
+         for (var j=0;j<projcnts.length;j++){
+             var row= projcnts[j]
+             var  colid = row['val'];
+             var mxstudies = row['unique_study'];
+             var mxseries = row['unique_series']
+             window.selProjects[colid]={'mxseries': mxseries, 'mxstudies': mxstudies}
+
+         }
+         window.pageid = Math.random().toString(36).substr(2, 8);
+         ajaxtriggered = true;
+         window.cartedits = false;
+         window.cartHist = new Array();
+         window.studymp = new Object();
+         window.seriesdel = new Array();
+         cartutils.updateLocalCartAfterSessionChng()
+         cartutils.setCartHistWinFromLocal();
+         window.updatePartitionsFromScratch();
         var ret =cartutils.formcartdata();
         window.partitions = ret[0];
         window.filtergrp_lst = ret[1];
-        updateCartTable([],[]);
+        if (!(localStorage.getItem('cartNumStudies')==null)){
+           window.numStudies = parseInt(localStorage.getItem('cartNumStudies'));
+        }
+        else{
+            window.numStudies = 0;
+        }
+        if (!(localStorage.getItem('cartNumSeries')==null)){
+           window.numStudies = parseInt(localStorage.getItem('cartNumSeries'));
+        }
+        else{
+            window.numSeries = 0;
+        }
+
+        window.numSeries = parseInt(localStorage.getItem('cartNumSeries'));
+
+          cartutils.updateCartTable();
+
+
     });
 
 
@@ -310,9 +157,7 @@ require([
         if (!ajaxtriggered) {
             window.cartedits = false;
             window.cartHist = new Array();
-            if ("cartHist" in sessionStorage) {
-                window.cartHist = JSON.parse(sessionStorage.getItem("cartHist"));
-            }
+            cartutils.setCartHistWinFromLocal()
             if ("cartDetails" in sessionStorage) {
                 window.cartDetails = JSON.parse(sessionStorage.getItem("cartDetails"));
             }
@@ -320,7 +165,7 @@ require([
             var ret = cartutils.formcartdata();
             window.partitions = ret[0];
             window.filtergrp_lst = ret[1];
-            updateCartTable([],[]);
+            cartutils.updateCartTable();
         }
     }
 
@@ -333,12 +178,15 @@ require([
     });
 
     window.onbeforeunload = function(){
-        sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
+        //sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
+        cartutils.setLocalFromCartHistWin();
+
+        //localStorage.setItem("cartDetails",JSON.stringify(window.cartDetails));
         //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
-        sessionStorage.setItem("src", "cart_page");
-        sessionStorage.setItem("cartedits", window.cartedits.toString());
-        sessionStorage.setItem("studymp", JSON.stringify(window.studymp));
-        sessionStorage.setItem("seriesdel", JSON.stringify(window.seriesdel));
+        localStorage.setItem("src", "cart_page");
+        //localStorage.setItem("cartedits", window.cartedits.toString());
+        //localStorage.setItem("studymp", JSON.stringify(window.studymp));
+        //localStorage.setItem("seriesdel", JSON.stringify(window.seriesdel));
 
         //sessionStorage.setItem("cartDetails", windowcartDetails);
 

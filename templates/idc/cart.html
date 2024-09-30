@@ -62,9 +62,19 @@
         var OHIF_V3_PATH = 'https://dev-viewer.canceridc.dev/v3/viewer/?StudyInstanceUIDs';
         var VOLVIEW_PATH = 'https://volview.kitware.app/?urls';
         var SLIM_VIEWER_PATH = 'https://dev-viewer.canceridc.dev/slim/studies/';
+        var tmp = 'tmp';
     </script>
     <!-- Adobe User Research study -->
-    
+
+    {% block js_file %}
+
+        {{ projcnts|json_script:"projcnts" }}
+        window.projcnts = JSON.parse(document.getElementById('projcnts').textContent);
+    {% endblock %}
+
+
+
+
 </head>
 <body class="content" id="body">
 <!--Include site main header-->
@@ -315,4 +325,5 @@
 
 
 </body>
+
 </html>
