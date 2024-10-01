@@ -32,7 +32,7 @@
                                 <a href="#manifest-s5cmd" role="tab" data-toggle="tab" title="s5cmd manifest"
                                    aria-expanded="true"
                                 >
-                                    s5cmd
+                                    idc-index
                                 </a>
                             </li>
 
@@ -126,8 +126,8 @@
                                     </div>
                                 {% else %}
                                     <div class="panel-body">
-                                        Exporting to BigQuery requires you to be logged in with a linked
-                                        Google Social Account, and to save your filters as a cohort.
+                                        Exporting to BigQuery requires you to be logged in with a linked Google Social
+                                        Account, and to save your filters as a cohort.
                                         {% if user_is_auth and not user_is_social %}
                                             You can link your account to a Google ID from the
                                             <a target="_blank" rel="noopener noreferrer" href="/users/{{ request.user.id }}/">Account Details</a> page.
@@ -152,17 +152,39 @@
                                 </p>
                                 <p>
                                     <br />
-                                    To obtain these images, <span id="manifest-source">download this s5cmd manifest, </span>
-                                    <a class="external-link" url="https://github.com/peak/s5cmd#installation" data-toggle="modal"
-                                       data-target="#external-web-warning">install s5cmd <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>,
-                                    then run the following command:
+                                    To obtain these images, install the
+                                    <a class="external-link" url="https://github.com/ImagingDataCommons/idc-index"
+                                       data-toggle="modal" data-target="#external-web-warning">idc-index
+                                        <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a> python package:</p>
+                                <p>
+                                    <span class="code">
+                                        pip install --upgrade idc-index
+                                    </span> <a
+                                        role="button" class="pip-install copy-this"
+                                        content="pip install --upgrade idc-index"
+                                        title="Copy command to clipboard">
+                                        <i class="fa-solid fa-copy" aria-hidden="true"></i>
+                                    </a>
                                 </p>
                                 <p>
-                                    <span class="code s5cmd-text">s5cmd --no-sign-request --endpoint-url https://endpoint_url run file_name.s5cmd</span>
-                                    <br />
-                                    <a role="button" class="s5cmd copy-this" content=""  title="Copy command to clipboard">
-                                        ( <i class="fa-solid fa-copy" aria-hidden="true"></i> )
+                                    Then <span class="download-manifest-text">download the manifest and </span>run the following command:
+                                </p>
+                                <p>
+                                    <span class="code s5cmd-text">
+                                        idc download file_name.s5cmd
+                                    </span> <a
+                                        role="button" class="s5cmd copy-this"
+                                        content="idc download file_name.s5cmd"
+                                        title="Copy command to clipboard">
+                                        <i class="fa-solid fa-copy" aria-hidden="true"></i>
                                     </a>
+                                </p>
+                                <p>To learn about more ways to download IDC data, please <a
+                                       class="external-link" href="" url="https://learn.canceridc.dev/data/downloading-data"
+                                       data-toggle="modal" data-target="#external-web-warning"
+                                    >
+                                    see IDC download instructions page. <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>
                                 </p>
 <!--
                                 <div class="s5cmd-file-name manifest-name">

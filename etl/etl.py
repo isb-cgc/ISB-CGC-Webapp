@@ -56,10 +56,11 @@ SEPARATOR = "[]"
 
 COLLECTION_HEADER_CHK = "collection_uuid"
 
-FIELD_MAP = {x: i for i, x in enumerate(['collection_id','collection_uuid','name','collections','image_types','supporting_data',
-                            'subject_count','doi','source_url','cancer_type','species','location','analysis_artifacts',
-                            'description','collection_type','program','access','date_updated','tcia_wiki_collection_id',
-                            'active'])}
+FIELD_MAP = {x: i for i, x in enumerate([
+            "collection_id", "collection_uuid", "name", "collections", "image_types", "supporting_data", "subject_count", "doi",
+            "source_url", "cancer_type", "species", "location", "analysis_artifacts", "description", "collection_type",
+            "program", "access", "date_updated", "tcia_wiki_collection_id", "license_short_name", "active"
+    ])}
 
 ranges_needed = {
     'wbc_at_diagnosis': 'by_200',
@@ -613,7 +614,7 @@ def load_programs(filename):
                 Program.objects.get(short_name=line[0])
                 logger.info("[STATUS] Program {} already exists: skipping.".format(line[0]))
             except ObjectDoesNotExist as e:
-                obj = Program.objects.update_or_create(short_name=line[0],name=line[1],is_public=True,active=True,owner=idc_superuser)
+                obj = Program.objects.update_or_create(short_name=line[0],display_name=line[1],is_public=True,active=True,owner=idc_superuser)
                 logger.info("[STATUS] Program {} added.".format(obj))
 
     except Exception as e:
@@ -749,6 +750,9 @@ def main():
 
         # Load the configuration file into ETL_CONFIG and run data version and data source creation
         # This will copy over any attributes from prior versions indicated in the JSON config
+        # Note that the config file is only required for 'full ETL' i.e. creation of new versions and
+        # deprecation of prior ones; it can be omitted to perform piecemeal updates eg. to collections
+        # metadata
         len(args.config_file) and update_data_versions(args.config_file)
 
         # If there are new attributes, prep them for addition
