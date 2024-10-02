@@ -1907,15 +1907,9 @@ require([
                     let display_file_parts_count = (is_cohort ? cohort_display_file_parts_count : (data.total > 0 ? data.totals.display_file_parts_count : 0));
                     let isFiltered = Boolean($('#search_def p').length > 0);
                     $('#search_def_stats').attr('filter-series-count',(data.total > 0 ? data.totals.SeriesInstanceUID: 0));
-                    if(data.total > 0 && data.totals.SeriesInstanceUID > 65000) {
-                        $('#s5cmd-max-exceeded').show();
-                        $('#download-s5cmd').attr('disabled','disabled');
-                        $('#s5cmd-button-wrapper').addClass('manifest-disabled');
-                    } else {
-                        $('#s5cmd-max-exceeded').hide();
-                        $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
-                        $('#download-s5cmd').removeAttr('disabled');
-                    }
+                    $('input[name="async_download"]').val(
+                        (data.total > 0 && data.totals.SeriesInstanceUID > 65000) ? "True" : "False"
+                    );
                     if (file_parts_count > display_file_parts_count) {
                         $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
                         $('#file-manifest-max-exceeded').show();
