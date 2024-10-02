@@ -609,25 +609,13 @@ EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
 SERVER_EMAIL = "info@canceridc.dev"
 
-# Deployed systems retrieve credentials from the metadata server, but a local VM build must provide a credentials file
-# for some actions. CircleCI needs SA access but can make use of the deployment SA's key.
-GOOGLE_APPLICATION_CREDENTIALS = None
-
-if IS_DEV:
-    GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
-elif IS_CI:
-    GOOGLE_APPLICATION_CREDENTIALS = "deployment.key.json"
-
-if not IS_APP_ENGINE:
-    if GOOGLE_APPLICATION_CREDENTIALS is not None and not exists(GOOGLE_APPLICATION_CREDENTIALS):
-        print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
-        exit(1)
-    print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
-else:
-    print("[STATUS] AppEngine Flex detected--default credentials will be used.")
-
+GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 OAUTH2_CLIENT_ID                = os.environ.get('OAUTH2_CLIENT_ID', '')
 OAUTH2_CLIENT_SECRET            = os.environ.get('OAUTH2_CLIENT_SECRET', '')
+
+if not exists(GOOGLE_APPLICATION_CREDENTIALS):
+    print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+    exit(1)
 
 #################################
 #   For NIH/eRA Commons login   #
