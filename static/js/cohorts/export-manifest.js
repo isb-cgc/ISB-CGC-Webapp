@@ -211,21 +211,20 @@ require([
 
     function checkManifestReady(file_name) {
         $.ajax({
-            url: CHECK_MANIFEST_URL + "file_name",
+            url: CHECK_MANIFEST_URL + file_name,
             method: 'GET',
             success: function (data) {
-                if(data.manifest_ready == "True") {
+                if(data.manifest_ready) {
                     let fetch_manifest_url = FETCH_MANIFEST_URL + file_name;
                     base.showJsMessage("info",
                         "Your manifest is ready for download. Please click here to retrieve it: " +
-                        "<a href=\"{fetch_manifest_url}\" target=\"_blank\" role=\"button\">Download Manifest</a>"
+                        '<a href="'+fetch_manifest_url+'" role="button">Download Manifest</a>'
                         , true);
                 } else {
                     setTimeout(checkManifestReady, 15000, file_name);
                 }
             },
             error: function (xhr) {
-                deferred.reject(false);
                 var responseJSON = $.parseJSON(xhr.responseText);
                 // If we received a redirect, honor that
                 if(responseJSON.redirect) {
