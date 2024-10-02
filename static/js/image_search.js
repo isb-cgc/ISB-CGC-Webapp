@@ -1049,6 +1049,7 @@ require([
                             }
 
                         var csrftoken = $.getCookie('csrftoken');
+                        $('.spinner').show();
                         $.ajax({
                             url: url,
                             dataType: 'json',
@@ -1061,60 +1062,59 @@ require([
                                 colSort = ["", "collection_id", "PatientID", "unique_study", "unique_series"];
                                 updateCache(window.casesCache, request, backendReqStrt, backendReqLength, data, colSort);
                                 dataset = data['res'].slice(request.start - backendReqStrt, request.start - backendReqStrt + request.length);
+                                /* for (set in dataset) {
+                                    set['ids'] = {'PatientID': set['PatientID'], 'collection_id': set['collection_id']}
+                                }*/
+                                if (dataset.length > 0) {
+                                    $('#cases_tab').children('thead').children('tr').children('.ckbx').removeClass('notVis');
+                                } else {
+                                    $('#cases_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
+                                }
 
-                                    /* for (set in dataset) {
-                                        set['ids'] = {'PatientID': set['PatientID'], 'collection_id': set['collection_id']}
-                                    }*/
-                                    if (dataset.length > 0) {
-                                        $('#cases_tab').children('thead').children('tr').children('.ckbx').removeClass('notVis');
-                                    } else {
-                                        $('#cases_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
-                                    }
-
-                                    if (refreshAfterFilter && ((data['diff'].length > 0) || (rmSelCases.length > 0))) {
-                                        if (data['diff'].length > 0) {
-                                            for (projid in window.selItems.selCases) {
-                                                for (var i = 0; i < window.selItems.selCases[projid].length; i++) {
-                                                    caseid = window.selItems.selCases[projid][i];
-                                                    var ind = data['diff'].indexOf(caseid);
-                                                    if (ind > -1) {
-                                                        window.selItems.selCases[projid].splice(i, 1);
-                                                        i--;
-                                                    }
-                                                }
-                                                if (window.selItems.selCases[projid].length === 0) {
-                                                    delete window.selItems.selCases[projid];
+                                if (refreshAfterFilter && ((data['diff'].length > 0) || (rmSelCases.length > 0))) {
+                                    if (data['diff'].length > 0) {
+                                        for (projid in window.selItems.selCases) {
+                                            for (var i = 0; i < window.selItems.selCases[projid].length; i++) {
+                                                caseid = window.selItems.selCases[projid][i];
+                                                var ind = data['diff'].indexOf(caseid);
+                                                if (ind > -1) {
+                                                    window.selItems.selCases[projid].splice(i, 1);
+                                                    i--;
                                                 }
                                             }
+                                            if (window.selItems.selCases[projid].length === 0) {
+                                                delete window.selItems.selCases[projid];
+                                            }
                                         }
-                                        updateChildTables = cleanChildSelections(data['diff'], 'cases', false);
-                                        var studyID = '';
-                                        if ($('#studies_tab').find('.studyID_inp').length > 0) {
-                                            studyID = $('#studies_tab').find('.studyID_inp').val().trim();
-                                        }
-                                        updateStudyTable(false, true, true, true, studyID);
-                                    } else if (updateChildTables[0]) {
-                                        var studyID = "";
-                                        if ($('.studies_tab').find('#study_id').length > 0) {
-                                            studyID = $('#studies_tab').find('.studyID-inp').val();
-                                        }
-                                        updateStudyTable(false, true, false, [updateChildTables[1]], studyID);
                                     }
-
-                                    callback({
-                                        "data": dataset,
-                                        "recordsTotal": data["cnt"],
-                                        "recordsFiltered": data["cnt"]
-                                    })
-
-                                },
-                                error: function () {
-                                    console.log("problem getting data");
-                                    alert("There was an error fetching server data. Please alert the systems administrator")
-                                    $('#cases_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
-                                    callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"})
-
+                                    updateChildTables = cleanChildSelections(data['diff'], 'cases', false);
+                                    var studyID = '';
+                                    if ($('#studies_tab').find('.studyID_inp').length > 0) {
+                                        studyID = $('#studies_tab').find('.studyID_inp').val().trim();
+                                    }
+                                    updateStudyTable(false, true, true, true, studyID);
+                                } else if (updateChildTables[0]) {
+                                    var studyID = "";
+                                    if ($('.studies_tab').find('#study_id').length > 0) {
+                                        studyID = $('#studies_tab').find('.studyID-inp').val();
+                                    }
+                                    updateStudyTable(false, true, false, [updateChildTables[1]], studyID);
                                 }
+                                callback({
+                                    "data": dataset,
+                                    "recordsTotal": data["cnt"],
+                                    "recordsFiltered": data["cnt"]
+                                });
+                            },
+                            error: function () {
+                                console.log("problem getting data");
+                                alert("There was an error fetching server data. Please alert the systems administrator")
+                                $('#cases_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
+                                callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"})
+                            },
+                            complete: function() {
+                                $('.spinner').hide();
+                            }
                             });
                         } else {
                             if (reorderNeeded) {
@@ -1883,6 +1883,7 @@ require([
         }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
+        $('.spinner').show();
         $.ajax({
             url: url,
             data: ndic,
@@ -2072,6 +2073,9 @@ require([
             error: function(data){
                 alert("There was an error fetching server data. Please alert the systems administrator")
                 console.log('error loading data');
+            },
+            complete: function() {
+                $('.spinner').hide();
             }
         });
         return deferred.promise();
@@ -3564,15 +3568,6 @@ require([
      });
     myObserver.observe($('#rh_panel')[0]);
     myObserver.observe($('.search-scope')[0]);
-
-    $(document).ajaxStart(function(){
-        $('.spinner').show();
-    });
-
-    $(document).ajaxStop(function(){
-        $('.spinner').hide();
-    });
-
 
     updateViaHistory = function(){
         let history = JSON.parse(document.getElementById('history').textContent);
