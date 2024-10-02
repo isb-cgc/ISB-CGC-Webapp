@@ -216,9 +216,9 @@ require([
             success: function (data) {
                 if(data.manifest_ready) {
                     let fetch_manifest_url = FETCH_MANIFEST_URL + file_name;
-                    base.showJsMessage("info",
-                        "Your manifest is ready for download. Please click here to retrieve it: " +
-                        '<a href="'+fetch_manifest_url+'" role="button">Download Manifest</a>'
+                    base.showJsMessage("warning",
+                        "Your manifest is ready for download! " +
+                        '<a class="btn btn-special" href="'+fetch_manifest_url+'" role="button">Download Manifest</a>'
                         , true);
                 } else {
                     setTimeout(checkManifestReady, 15000, file_name);
@@ -323,7 +323,7 @@ require([
                     }
                     if(data.jobId) {
                         base.showJsMessage("info",
-                            "Your manifest is being prepared. Once it is ready, this window will make it available for download."
+                            "Your manifest is being prepared. Once it is ready, this space will make it available for download. <i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
                             ,true);
                         checkManifestReady(data.file_name);
                     }
