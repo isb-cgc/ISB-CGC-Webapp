@@ -18,7 +18,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
-        jquery: 'libs/jquery-3.5.1',
+        jquery: 'libs/jquery-3.7.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         base: 'base',
@@ -115,6 +115,7 @@ require([
 
 
 
+
     window.updateFacetsData = function (newFilt) {
         var url = '/explore/'
         var parsedFiltObj = filterutils.parseFilterObj();
@@ -131,6 +132,7 @@ require([
         }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
+        $('.spinner').show();
         $.ajax({
             url: url,
             data: ndic,
@@ -140,10 +142,9 @@ require([
             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 try {
-                    cartutils.setCartHistWinFromLocal();
+                    //cartutils.setCartHistWinFromLocal();
                     let curInd = window.cartHist.length-1;
                     if (cartHist[curInd].selections.length>0){
-                        //updateGlobalPartitions(window.cartHist[curInd]);
                         let cartSel = new Object();
                         cartSel['filter']= parsedFiltObj;
                         cartSel['selections']= new Array();
@@ -155,7 +156,7 @@ require([
                         window.cartHist[curInd]['filter'] = parsedFiltObj;
                         window.cartHist[curInd]['pageid'] = parsedFiltObj;
                     }
-                    cartutils.setLocalFromCartHistWin();
+                    //cartutils.setLocalFromCartHistWin();
                     if(data.total <= 0) {
                         base.showJsMessage(
                            "warning zero-results",
@@ -189,6 +190,9 @@ require([
                         $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
                         $('#download-s5cmd').removeAttr('disabled');
                     }
+                    $('input[name="async_download"]').val(
+                        (data.total > 0 && data.totals.SeriesInstanceUID > 65000) ? "True" : "False"
+                    );
                     if (file_parts_count > display_file_parts_count) {
                         $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
                         $('#file-manifest-max-exceeded').show();
@@ -333,6 +337,9 @@ require([
             error: function(data){
                 //alert("There was an error fetching server data. Please alert the systems administrator")
                 console.log('error loading data');
+            },
+            complete: function() {
+                $('.spinner').hide();
             }
         });
         return deferred.promise();
@@ -588,15 +595,6 @@ require([
     myObserver.observe($('#rh_panel')[0]);
     myObserver.observe($('.search-scope')[0]);
 
-    $(document).ajaxStart(function(){
-        $('.spinner').show();
-    });
-
-    $(document).ajaxStop(function(){
-        $('.spinner').hide();
-    });
-
-
     updateViaHistory = function(){
         let history = JSON.parse(document.getElementById('history').textContent);
         if (history.hasOwnProperty('hz') && history['hz']){
@@ -651,7 +649,7 @@ require([
         if (("cartedits" in localStorage) && (localStorage.getItem("cartedits") == "true")) {
 
             //window.cartHist = JSON.parse(sessionStorage.getItem("cartHist"));
-            setCartHistWinFromLocal();
+            //setCartHistWinFromLocal();
             var edits = window.cartHist[window.cartHist.length - 1]['selections'];
 
             var filt = Object();
@@ -684,12 +682,14 @@ require([
             cartutils.updateGlobalCart(false, studymp, 'series')
             window.updateTableCounts(1);
             var gtotals = cartutils.getGlobalCounts();
-            var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-            tippy('.cart-view', {
+            //var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
+            var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
+
+            /* tippy('.cart-view', {
                            interactive: true,
                            allowHTML:true,
                           content: content
-                        });
+                        });*/
             $('#cart_stats').html(cart) ;
 
             if (gtotals[0]>0){
@@ -783,26 +783,33 @@ require([
 
         });
 
-        cartutils.updateLocalCartAfterSessionChng();
+        //cartutils.updateLocalCartAfterSessionChng();
         var cartSel = new Object();
         cartSel['filter']=new Object();
         cartSel['pageid'] = window.pageid
         cartSel['selections']= new Array();
         cartSel['partitions']= new Array();
 
-        setCartHist = cartutils.setCartHistWinFromLocal();
+        setCartHist = false;
+        /*( setCartHist = cartutils.setCartHistWinFromLocal();
         if (!setCartHist){
               window.cartHist = new Array();
-        }
+        }*/
+         window.cartHist = new Array();
         window.cartHist.push(cartSel);
 
+
+        /*
         if ('cartHist' in localStorage){
             cartutils.refreshCartAndFiltersFromScratch(true);
         }
         else {
             filterutils.load_preset_filters();
         }
-        //filterutils.load_preset_filters();
+        */
+
+
+        filterutils.load_preset_filters();
         $('.hide-filter-uri').on('click',function() {
             $(this).hide();
             $('.get-filter-uri').show();
@@ -882,11 +889,12 @@ require([
                 }
         });
 
-        cartutils.setLocalFromCartHistWin();
+        // was saving cart data in local storage. Not feasible to maintain global cart
+        //cartutils.setLocalFromCartHistWin();
         //sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
-        localStorage.setItem("cartDetails", JSON.stringify(window.cartDetails));
+        //localStorage.setItem("cartDetails", JSON.stringify(window.cartDetails));
         //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
-        localStorage.setItem("src", "explore_page");
+        //localStorage.setItem("src", "explore_page");
 
         var maxSeries=0;
         var maxStudies=0;

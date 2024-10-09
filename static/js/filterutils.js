@@ -19,7 +19,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-3.5.1',
+        jquery: 'libs/jquery-3.7.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security/script',
@@ -724,7 +724,7 @@ define(['jquery', 'utils'], function($, utils) {
                createPlots('search_derived_set');
                createPlots('tcga_clinical');
 
-                if ($('.search-configuration').find('#hide-zeros')[0].checked) {
+                if ($('.search-configuration').find('.hide-zeros')[0].checked) {
                         addSliders('search_orig_set', false, true, '');
                         addSliders('quantitative', false, true, 'quantitative.');
                         addSliders('tcga_clinical', false, true, 'tcga_clinical.');

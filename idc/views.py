@@ -1011,6 +1011,23 @@ def cart_page(request):
   if not request.session.exists(request.session.session_key):
       request.session.create()
 
+  try:
+      req = request.GET if request.GET else request.POST
+      carthist = json.loads(req.get('carthist', '{}'))
+      mxseries = req.get('mxseries',0)
+      mxstudies = req.get('mxstudies',0)
+
+      context['carthist'] =carthist
+      context['mxseries'] = mxseries
+      context['mxstudies'] = mxstudies
+
+  except Exception as e:
+      logger.error("[ERROR] While loading cartvpage:")
+      logger.exception(e)
+      status = 400
+
+
+  '''
   versions = []
   versions = ImagingDataCommonsVersion.objects.filter(
       version_number__in=versions
@@ -1048,6 +1065,7 @@ def cart_page(request):
     default_facets=False)
 
   context['projcnts'] = cntRecs['facets']['per_id']['buckets']
+  '''
 
   return render(request, 'collections/cart_list.html', context)
 

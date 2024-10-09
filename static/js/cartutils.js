@@ -19,7 +19,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-3.5.1',
+        jquery: 'libs/jquery-3.7.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security/script',
@@ -79,6 +79,8 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
     var seriesTblOffset = 0;
     var seriesTblLimit = 0;
     var seriesTblStrt =0;
+
+    // we were maintaining a view of the cart in local storage. But its been too slow so we are aborting for now
     const setCartHistWinFromLocal = function () {
         var cartHistSet = false;
         if (('sessionid' in localStorage) && ('cartHist' in localStorage)){
@@ -91,7 +93,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         }
        return cartHistSet;
     }
-
+    // we were maintaining a view of the cart in local storage. But its been too slow so we are aborting for now
     const setLocalFromCartHistWin = function(){
         if ('sessionid' in localStorage) {
             var sessionid = localStorage.getItem("sessionid")
@@ -233,10 +235,10 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
                     var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
 
                     if (parseInt(offset)>0) {
-                        ndic['offset'] = start
+                        ndic['offset'] = offset;
                     }
                     if (parseInt(limit)>0){
-                      ndic['limit'] = limit+1;
+                      ndic['limit'] = limit;
                     }
                     if (aggregate_level.length>0){
                       ndic['aggregate_level'] = aggregate_level;
@@ -277,12 +279,14 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
     const updateTableCountsAndGlobalCartCounts = function(){
         window.updateTableCounts();
         var gtotals =getGlobalCounts();
-        var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-        tippy('.cart-view', {
+        //var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
+        var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
+
+        /* tippy('.cart-view', {
                            interactive: true,
                            allowHTML:true,
                           content: content
-        });
+        }); */
         localStorage.setItem('cartNumStudies', gtotals[2]);
         localStorage.setItem('cartNumSeries', gtotals[3]);
         $('#cart_stats').html(content) ;
@@ -324,14 +328,16 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
          window.updateTableCounts();
          var gtotals = [0,0,0,0];
-            var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-            tippy('.cart-view', {
+            //var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
+        var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
+
+            /* tippy('.cart-view', {
                            interactive: true,
                            allowHTML:true,
                           content: content
                         });
             $('#cart_stats').html(content) ;
-
+           */
           $('#cart_stats').addClass('notDisp');
           $('#export-manifest-cart').attr('disabled','disabled');
           $('#view-cart').attr('disabled','disabled');
@@ -339,8 +345,8 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
     }
 
     // show the history of cart related selections (filters and cart buttons)
-    $('.cart-modal-button').on('click', function(){
-        detsArr = window.cartDetails.split('\n\n');
+    /* $('.cart-modal-button').on('click', function(){
+         detsArr = window.cartDetails.split('\n\n');
         var str='<ol type="1" class="nav navbar-nav navbar-left">';
         var ii=0;
         for (var i=0;i<detsArr.length;i++){
@@ -350,21 +356,24 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
             }
         }
         str=str+'</ol>'
-        $('#cart_details').html(str);
+        //$('#cart_details').html('elp!!!!');
 
             $('#cart-details-modal').modal('show');
 
-    })
+    }) */
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel, addingToCart,studymp,updateSource){
-        var updatedElsewhere = false;
 
-        serCartHist = setCartHistWinFromLocal();
+        //was used to track a global cart accross multiple tabs. Just too slow to be practical
+        //var updatedElsewhere = false;
+        //serCartHist = setCartHistWinFromLocal();
 
         var curInd = window.cartHist.length - 1;
         var curPageid= window.cartHist[curInd]['pageid'];
 
+        //was used to track a global cart accross multiple tabs. Just too slow to be practical
+        /*
         if (!(curPageid == window.pageid)){
             updatedElsewhere = true;
             var cartSel = new Object();
@@ -375,6 +384,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
             window.cartHist.push(cartSel);
             curInd = window.cartHist.length - 1;
         }
+        */
 
         var selections = window.cartHist[curInd]['selections'];
         var selection = newSel['sel'];
@@ -402,9 +412,11 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         newHistSel.push(newSel);
         window.cartHist[curInd]['selections'] =  newHistSel;
         window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
-        setLocalFromCartHistWin();
 
+        //was used to track a global cart accross multiple tabs. Just too slow to be practical
+        //setLocalFromCartHistWin();
 
+        /*
         if (updatedElsewhere) {
             refreshCartAndFiltersFromScratch(false);
         } else {
@@ -412,6 +424,9 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
             updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource);
         }
 
+         */
+        var projid = newSel['sel'][0];
+        updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource);
 
     }
 
@@ -436,6 +451,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
     }
 
+    //was used to track cart across mutiple tabs or page refresh. Its too slow!
     const refreshCartAndFiltersFromScratch = function(checkFilters){
         setCartHistWinFromLocal();
         window.updatePartitionsFromScratch();
@@ -617,6 +633,19 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         var partitions = ret[0];
         var filterSets = ret[1];
 
+        var projS = new Set();
+        for (var i=0;i<partitions.length;i++){
+            projS.add(partitions[i].id[0]);
+        }
+        var mxNumSeries=0;
+        var mxNumStudies=0;
+        var projl = [...projS]
+        for (var i=0;i<projl.length;i++){
+            var proj = projl[i]
+            mxNumSeries+= window.selProjects[proj].mxseries;
+            mxNumStudies+= window.selProjects[proj].mxstudies;
+        }
+
             if ($('#cart-view-elem').length>0) {
                 document.getElementById("cart-view-elem").remove();
             }
@@ -634,12 +663,24 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
             input.value =csrftoken;
             form.appendChild(input);
             var input = document.createElement('input');
+            input.name = "carthist";
+            input.value = JSON.stringify(window.cartHist);
+            form.appendChild(input);
+            var input = document.createElement('input');
             input.name = "filtergrp_list";
             input.value = JSON.stringify(filterSets);
             form.appendChild(input);
             var input = document.createElement('input');
             input.name = "partitions";
             input.value = JSON.stringify(partitions);
+            form.appendChild(input);
+            var input = document.createElement('input');
+            input.name = "mxseries";
+            input.value = mxNumSeries;
+            form.appendChild(input);
+            var input = document.createElement('input');
+            input.name = "mxstudies";
+            input.value = mxNumStudies;
             form.appendChild(input);
             document.body.appendChild(form)
             form.submit();
@@ -1110,10 +1151,8 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
 
                     {
-                        "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
-                            return pretty_print_id(data) +
-                                ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
+                        "type": "text", "orderable": true, data: 'selcnt', render: function (data, type, row) {
+                            return data;
                         }
                     },
                     {
@@ -1164,12 +1203,18 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
                     let url = '/cart_data/';
                     url = encodeURI(url);
                     var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
-                    ndic['offset'] = request.start
-                    ndic['length'] = request.length+1;
-                    ndic['limit'] = window.numStudies
+                     try {
+                         ndic['offset'] = parseInt(request.start);
+                     }
+                     catch (Exception){
+                        print(Exception);
+                     }
+
+                    ndic['length'] = request.length;
+                    ndic['limit'] = window.mxstudies
 
                     ndic['aggregate_level'] = 'StudyInstanceUID'
-                    ndic['results_level'] = 'SeriesInstanceUID'
+                    ndic['results_level'] = 'StudyInstanceUID'
                     var csrftoken = $.getCookie('csrftoken');
                     $.ajax({
                         url: url,
@@ -1186,8 +1231,8 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
                              callback({
                                  "data": dataset,
-                                 "recordsTotal": window.numSeries,
-                                 "recordsFiltered": window.numSeries
+                                 "recordsTotal": data['numFound'],
+                                 "recordsFiltered": data['numFound']
                              });
                         },
                         error: function () {

@@ -18,7 +18,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
-        jquery: 'libs/jquery-3.5.1',
+        jquery: 'libs/jquery-3.7.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         base: 'base',
@@ -104,32 +104,76 @@ require([
         maxWidth: 85
     });
 
+    setCartDetailsModal = function(){
+        var contentArray= [];
+        for (var i=0;i< window.cartHist.length;i++){
+            var cartDetail = window.cartHist[i];
+            var filter = JSON.stringify(cartDetail.filter);
+            var selections = cartDetail.selections;
+            if (selections.length>0){
+                contentArray.push('Set filter definition set to: '+filter);
+                for (var j=0;j<selections.length;j++){
+                    var selectext=""
+                    var selec = selections[j]
+                    if (selec.sel.length ==4){
+                        if (selec.added) {
+                            selectext += "<li>Added the series " +selec.sel[3] +" from collection " + selec.sel[0] +", case "+selec.sel[1]+", study "+selec.sel[2];
+                        }
+                        else{
+                           selectext += "<li>Removed the series " +selec.sel[3] +" from collection " + selec.sel[0] +", case "+selec.sel[1]+", study "+selec.sel[2];
+                        }
+
+                    }
+                    else {
+                        if (selec.added) {
+                            selectext += "<li>Added series matching the filter from collection " + selec.sel[0]
+                        } else {
+                            selectext += "<li>Removed series matching the filter from collection " + selec.sel[0]
+                        }
+                        if (selec.sel.length > 1) {
+                            selectext += ", case " + selec.sel[1]
+                        }
+                        if (selec.sel.length > 2) {
+                            selectext += ", study " + selec.sel[2]
+                        }
+                    }
+
+                 contentArray.push(selectext);
+                }
+            }
+        }
+        content="<ol>"+contentArray.join('\n')+"</ol>";
+        $('#cart-description-modal').find('.modal-body').html(content);
+
+
+    }
+
 
      $(document).ready(function () {
-         projcnts = JSON.parse(document.getElementById('projcnts').textContent);
 
-         window.selProjects=[];
-         window.projstudymp = {};
-         for (var j=0;j<projcnts.length;j++){
-             var row= projcnts[j]
-             var  colid = row['val'];
-             var mxstudies = row['unique_study'];
-             var mxseries = row['unique_series']
-             window.selProjects[colid]={'mxseries': mxseries, 'mxstudies': mxstudies}
-
+         let navelem = $("a[href='/explore/']");
+         navelem.addClass('navexplore');
+         if (document.referrer.includes('explore')){
+             navelem.attr('href', 'javascript:window.history.back()')
          }
+
+
+         window.mxseries = parseInt(JSON.parse(document.getElementById('mxseries').textContent));
+         window.mxstudies = parseInt(JSON.parse(document.getElementById('mxstudies').textContent));
+         window.cartHist = JSON.parse(document.getElementById('carthist').textContent);
+
+         setCartDetailsModal();
+
+         window.updatePartitionsFromScratch();
+         var ret =cartutils.formcartdata();
+         window.partitions = ret[0];
+         window.filtergrp_lst = ret[1];
+
          window.pageid = Math.random().toString(36).substr(2, 8);
          ajaxtriggered = true;
-         window.cartedits = false;
-         window.cartHist = new Array();
-         window.studymp = new Object();
-         window.seriesdel = new Array();
-         cartutils.updateLocalCartAfterSessionChng()
-         cartutils.setCartHistWinFromLocal();
-         window.updatePartitionsFromScratch();
-        var ret =cartutils.formcartdata();
-        window.partitions = ret[0];
-        window.filtergrp_lst = ret[1];
+
+        // localStorage no longer used in keeping cart data
+        /*
         if (!(localStorage.getItem('cartNumStudies')==null)){
            window.numStudies = parseInt(localStorage.getItem('cartNumStudies'));
         }
@@ -142,15 +186,15 @@ require([
         else{
             window.numSeries = 0;
         }
-
         window.numSeries = parseInt(localStorage.getItem('cartNumSeries'));
+         */
 
-          cartutils.updateCartTable();
+        cartutils.updateCartTable();
 
 
     });
 
-
+/*
     window.onpageshow = function (){
 
         //alert('show');
@@ -165,10 +209,10 @@ require([
             var ret = cartutils.formcartdata();
             window.partitions = ret[0];
             window.filtergrp_lst = ret[1];
-            cartutils.updateCartTable();
+           // cartutils.updateCartTable();
         }
     }
-
+*/
     $(document).ajaxStart(function(){
         $('.spinner').show();
     });
@@ -177,19 +221,6 @@ require([
         $('.spinner').hide();
     });
 
-    window.onbeforeunload = function(){
-        //sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
-        cartutils.setLocalFromCartHistWin();
 
-        //localStorage.setItem("cartDetails",JSON.stringify(window.cartDetails));
-        //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
-        localStorage.setItem("src", "cart_page");
-        //localStorage.setItem("cartedits", window.cartedits.toString());
-        //localStorage.setItem("studymp", JSON.stringify(window.studymp));
-        //localStorage.setItem("seriesdel", JSON.stringify(window.seriesdel));
-
-        //sessionStorage.setItem("cartDetails", windowcartDetails);
-
-    }
 
 });
