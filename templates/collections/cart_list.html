@@ -17,8 +17,8 @@
 <div class="container-fluid">
 <div class="spinner" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
     <h3 class="pull-left">Cart - Study Level Summary</h3>
- <button id="export-manifest-cart" class="btn btn-special pull-right cart-export-from-cp"  data-toggle="modal"
-                data-target="#export-manifest-modal"
+ <button id="export-manifest-cart" class="btn btn-special pull-right cart-export-from-cp"  data-toggle="modal" data-target="#export-cart-modal"
+
                 title="Make a cart selection to enable this feature."> Download Cart Images
             </button>
 <button class="btn btn-special pull-right cart-modal-button" data-toggle="modal" data-target="#cart-description-modal" title="Get cart details.">Display Cart Construction Details</button>
@@ -93,5 +93,5 @@
 {% block modal_includes %}
 {% include "idc/cart-details-modal.html" %}
     {% include "cohorts/cart-description-modal.html" %}
-    {% include "cohorts/export-manifest-modal.html" %}
+    {% include "cohorts/export-cart-modal.html" %}
 {% endblock %}

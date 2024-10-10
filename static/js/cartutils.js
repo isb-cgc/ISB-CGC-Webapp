@@ -21,6 +21,7 @@ require.config({
     paths: {
         jquery: 'libs/jquery-3.7.1.min',
         bootstrap: 'libs/bootstrap.min',
+        base: 'base',
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security/script',
         underscore: 'libs/underscore-min',
@@ -244,7 +245,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
                       ndic['aggregate_level'] = aggregate_level;
                     }
                     if (results_level.length>0){
-                      ndic['results_lvl'] = results_level;
+                      ndic['results_level'] = results_level;
                     }
 
                     let csrftoken = $.getCookie('csrftoken');

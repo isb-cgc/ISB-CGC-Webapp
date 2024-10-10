@@ -22,6 +22,7 @@ require.config({
         jquery: 'libs/jquery-3.7.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
+        base: 'base',
         session_security: 'session_security/script',
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',

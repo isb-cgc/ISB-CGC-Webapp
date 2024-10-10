@@ -148,6 +148,13 @@ require([
 
     }
 
+    /*
+    $('#export-manifest-cart').on('click', function(){
+        cartutils.getCartData(0,window.mxseries,"StudyInstanceUID", "SeriesInstanceUID")
+    })
+    */
+
+
 
      $(document).ready(function () {
 

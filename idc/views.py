@@ -1090,7 +1090,7 @@ def cart_data(request):
             response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, results_lvl=results_level)
 
         elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
-            response = get_cart_data_studylvl(filtergrp_list, partitions, ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID'],limit, offset, results_lvl='SeriesInstanceUID')
+            response = get_cart_data(filtergrp_list, partitions, ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID'],limit, offset)
 
         else:
             response['numFound'] = 0
