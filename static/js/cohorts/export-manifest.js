@@ -91,7 +91,7 @@ require([
         }
     });
 
-    var update_export_modal_for_cart= function(partitions, filtergrp_list){
+    var update_export_modal_for_cart= function(partitions, filtergrp_list, mxstudies, mxseries){
         is_cohort = false;
         var name_base='';
         $('.modal-title').text("Export Cart Manifest");
@@ -102,6 +102,11 @@ require([
         $('#export-manifest-form').find('input[name="filtergrp_list"]').val(JSON.stringify(filtergrp_list));
         $('#export-manifest-form').append('<input type="hidden" name="partitions">')
         $('#export-manifest-form').find('input[name="partitions"]').val(JSON.stringify(partitions));
+        $('#export-manifest-form').append('<input type="hidden" name="mxstudies">')
+        $('#export-manifest-form').find('input[name="mxstudies"]').val(mxstudies);
+        $('#export-manifest-form').append('<input type="hidden" name="mxseries">')
+        $('#export-manifest-form').find('input[name="mxseries"]').val(mxseries);
+
 
         let file_name = $('input[name="file_name"]');
         file_name.attr("name-base",name_base);
@@ -261,6 +266,9 @@ require([
     });
 
     $('#download-s5cmd').on('click', function(e) {
+        if ($(this).hasClass('iscart')){
+            update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries)
+        }
         download_manifest("s5cmd", $(this), e)
     });
 
@@ -325,6 +333,7 @@ require([
 
 
     var download_manifest = function(file_type, clicked_button, e) {
+
         //download_file_clientside();
         let manifest_type = file_type === 'bq' ? 'bq-manifest' : 'file-manifest';
 
@@ -607,5 +616,10 @@ require([
         allowHTML: true,
         target: '.version-disabled'
     });
+
+    return{
+        update_export_modal_for_cart: update_export_modal_for_cart,
+        download_manifest: download_manifest
+    }
 
 });

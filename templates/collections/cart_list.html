@@ -6,6 +6,8 @@
 {% block header %}
 
     <link type="text/css" rel="stylesheet" href="{% static 'css/spinner.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'css/cart.css' %}">
+
     <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
 
 {% endblock %}
@@ -17,7 +19,7 @@
 <div class="container-fluid">
 <div class="spinner" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
     <h3 class="pull-left">Cart - Study Level Summary</h3>
- <button id="export-manifest-cart" class="btn btn-special pull-right cart-export-from-cp"  data-toggle="modal" data-target="#export-cart-modal"
+ <button id="export-manifest-cart" class="btn btn-special pull-right cart-export-from-cp"  data-toggle="modal" data-target="#export-manifest-modal"
 
                 title="Make a cart selection to enable this feature."> Download Cart Images
             </button>
@@ -29,9 +31,12 @@
 {% block content %}
 <div class="container-fluid">
     <div class ="row">
+
         <div class="col-lg-12 col-md-12 collex-panel">
             <div class="cart-wrapper panel panel-default short-inner-content" role="panel panel-default" id="cart-list">
+
                 <div class="panel-body">
+                    <div id="stats"> {{ stats }}</div>
                 <table id="cart-table" class="table collex-table sortable_table table-striped table-hover">
                     <thead id ="cart-head">
 
@@ -48,8 +53,8 @@
                         <col style="width: 20%">
                         <col style="width: 20%">
                         <col style="width: 20%">
-                        <col style="width: 20%">
-                        <col style="width: 10%">
+                        <col style="width: 15%">
+                        <col style="width: 15%">
 
                     </colgroup>
                     <tbody id="cart-body">
@@ -66,9 +71,7 @@
     {% include "idc/cart-details-modal.html" %}
 
 {% url 'get_explore_manifest' as export_uri %}
-{% with user_is_social=request.user|has_social is_cohort=False %}
-    {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri user_is_social=user_is_social is_cohort=is_cohort %}
-{% endwith %}
+
 
 {% endblock %}
 
@@ -86,12 +89,15 @@
 
 
     <script type="text/javascript" src="{% static 'js/cart_page.js' %}?v={{ APP_VERSION }}"></script>
+     <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
+   <!-- <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script> -->
+
     <!-- <script type="text/javascript" src="{% static 'js/cohorts/cart-description-man.js' %}?v={{ APP_VERSION }}"></script> !-->
 
 {% endblock %}
 
 {% block modal_includes %}
-{% include "idc/cart-details-modal.html" %}
+
     {% include "cohorts/cart-description-modal.html" %}
     {% include "cohorts/export-cart-modal.html" %}
 {% endblock %}

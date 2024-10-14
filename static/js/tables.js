@@ -393,6 +393,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     $(row).find('.shopping-cart').parent().on('click', function(event){
                         clickProjectTableShopping(event, row, data)
 
+
                     });
 
                      $(row).on('click', function(event) {
@@ -541,6 +542,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
      //process a click of a project(collection) table cart button row. Calls updateProjStudyMp to update relevant studymps.
     const clickProjectTableShopping = function(event, row, data){
+        $('.spinner').show();
         var oldCount = parseInt($(row).find('.cartnum').text());
         var elem = event.target;
         if ($(elem).hasClass('ckbx')){
@@ -813,6 +815,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     });
 
                     $(row).find('.shopping-cart').parent().on('click', function(event){
+                        $('.spinner').show();
                         var elem = event.target;
                         if ($(elem).hasClass('ckbx')){
                             elem=$(elem).find('.shopping-cart')[0];

@@ -1016,10 +1016,12 @@ def cart_page(request):
       carthist = json.loads(req.get('carthist', '{}'))
       mxseries = req.get('mxseries',0)
       mxstudies = req.get('mxstudies',0)
+      stats = req.get('stats','');
 
       context['carthist'] =carthist
       context['mxseries'] = mxseries
       context['mxstudies'] = mxstudies
+      context['stats'] = stats
 
   except Exception as e:
       logger.error("[ERROR] While loading cartvpage:")

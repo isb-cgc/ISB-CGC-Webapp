@@ -50,6 +50,7 @@ require.config({
         'underscore': {exports: '_'},
         'session_security': ['jquery'],
         'cartutils': ['jquery'],
+        'exportmanifest':['jquery']
     }
 });
 
@@ -64,7 +65,7 @@ require([
     'jquerydt',
     'jqueryui',
     'bootstrap'
-], function(cartutils, tables,$, tippy, _, base) {
+], function(cartutils, tables, $, tippy, _, base) {
 
      var ajaxtriggered = false;
 
@@ -154,8 +155,11 @@ require([
     })
     */
 
-
-
+/*
+     $('#download-s5cmd').on('click', function(e) {
+        exportmanifest.download_manifest("s5cmd", $(this), e)
+    });
+*/
      $(document).ready(function () {
 
          let navelem = $("a[href='/explore/']");

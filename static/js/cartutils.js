@@ -295,11 +295,13 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
             $('#cart_stats').removeClass('notDisp');
             $('#export-manifest-cart').removeAttr('disabled');
             $('#view-cart').removeAttr('disabled');
+            $('.cart-view').removeAttr('disabled');
         }
         else{
             $('#cart_stats').addClass('notDisp');
             $('#export-manifest-cart').attr('disabled','disabled');
             $('#view-cart').attr('disabled','disabled');
+            $('.cart-view').attr('disabled','disabled');
         }
     }
 
@@ -365,7 +367,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel, addingToCart,studymp,updateSource){
-
+        $('.spinner').show();
         //was used to track a global cart accross multiple tabs. Just too slow to be practical
         //var updatedElsewhere = false;
         //serCartHist = setCartHistWinFromLocal();
@@ -428,15 +430,17 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
          */
         var projid = newSel['sel'][0];
         updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource);
-
+        //$('.spinner').hide();
     }
 
     const updateCartAndCartMetrics = function(addingToCart,projid,studymp,updateSource){
 
         if (updateSource == 'project' && addingToCart){
             updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries']).then(function(){
+                $('.spinner').show();
                 updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
                 updateTableCountsAndGlobalCartCounts();
+                $('.spinner').hide();
 
             })
         }
@@ -445,8 +449,10 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         }
 
         else {
+            $('.spinner').show();
             updateGlobalCart(addingToCart, studymp, updateSource);
             updateTableCountsAndGlobalCartCounts();
+            $('.spinner').hide();
         }
 
 
@@ -682,6 +688,10 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
             var input = document.createElement('input');
             input.name = "mxstudies";
             input.value = mxNumStudies;
+            form.appendChild(input);
+            var input = document.createElement('input');
+            input.name = "stats";
+            input.value = $('#cart_stats').text();
             form.appendChild(input);
             document.body.appendChild(form)
             form.submit();
@@ -1139,20 +1149,10 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
                                 '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         }
                     },
-                    /*{
-                        "type": "text", "orderable": true, data: 'cnt', render: function (data, type,row) {
-                            if ('val' in row){
-                                return row['val'].length.toString();
-                            }
-                            else {
-                                return data;
-                            }
-                        }
-                    },*/
 
 
                     {
-                        "type": "text", "orderable": true, data: 'selcnt', render: function (data, type, row) {
+                        "type": "text", "orderable": false, data: 'selcnt', render: function (data, type, row) {
                             return data;
                         }
                     },
@@ -1235,6 +1235,13 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
                                  "recordsTotal": data['numFound'],
                                  "recordsFiltered": data['numFound']
                              });
+
+                             var txt =$('#cart-table_info').text().replace('entries','studies');
+                             $('#cart-table_info').text(txt);
+                             //var html = $('.dataTables_length').html().replace('entries','studies');
+                             //$('.dataTables_length').html(html);
+
+
                         },
                         error: function () {
                             console.log("problem getting data");
@@ -1242,13 +1249,19 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
                         }
                     });
                 }
-            })
+            });
+
+
         }
         catch(Exception){
             alert("The following error was reported when processing server data: "+ Exception +". Please alert the systems administrator");
         }
 
     }
+
+
+
+
 
      const pretty_print_id = function (id) {
         var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);
