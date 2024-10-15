@@ -861,6 +861,12 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
           if (nfilts.length ==0){
               window.partitions[i].null = true;
           }
+         /* else if (window.partitions[i].id.length>2){
+              var studyid = window.partitions[i].id[2]
+              if (!studyid in window.glblcart){
+                  window.partitions[i].null = true;
+              }
+          }*/
       }
 
     }
@@ -1213,6 +1219,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
                     ndic['length'] = request.length;
                     ndic['limit'] = window.mxstudies
+                    ndic['mxseries'] = window.mxseries
 
                     ndic['aggregate_level'] = 'StudyInstanceUID'
                     ndic['results_level'] = 'StudyInstanceUID'

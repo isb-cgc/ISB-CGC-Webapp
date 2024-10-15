@@ -305,6 +305,20 @@ def studymp(request):
             active=True, source_type=DataSource.SOLR,
             aggregate_level="StudyInstanceUID"
         )
+    data_types = [DataSetType.IMAGE_DATA, DataSetType.ANCILLARY_DATA, DataSetType.DERIVED_DATA]
+    data_sets = DataSetType.objects.filter(data_type__in=data_types)
+    aggregate_level='StudyInstanceUID'
+    versions=[]
+    versions = ImagingDataCommonsVersion.objects.filter(
+        version_number__in=versions
+    ).get_data_versions(active=True) if len(versions) else ImagingDataCommonsVersion.objects.filter(
+        active=True
+    ).get_data_versions(active=True)
+    aux_sources = data_sets.get_data_sources().filter(
+        source_type=DataSource.SOLR,
+        aggregate_level__in=["case_barcode", "sample_barcode", aggregate_level],
+        id__in=versions.get_data_sources().filter(source_type=DataSource.SOLR).values_list("id", flat=True)
+    ).distinct()
     custom_facets = {"per_id": {"type": "terms", "field":"StudyInstanceUID", "limit": 0,
                                         "facet": {"unique_series": "unique(SeriesInstanceUID)"}}}
 
@@ -327,7 +341,7 @@ def studymp(request):
        #custom_facets['per_id']['limit'] = mxStudies
        idsEx = get_collex_metadata(
                     filters, ['collection_id', 'PatientID','StudyInstanceUID', 'crdc_study_uuid','gcs_bucket','aws_bucket'], record_limit=mxStudies, sources=sources, offset=0,
-                    records_only=False, custom_facets=custom_facets,
+                    records_only=False, custom_facets=custom_facets, aux_sources=aux_sources,
                     collapse_on='StudyInstanceUID', counts_only=False, filtered_needed=False,
                     raw_format=True, default_facets=False
                 )
@@ -1086,10 +1100,11 @@ def cart_data(request):
 
         limit = int(req.get('limit', 1000))
         offset = int(req.get('offset', 0))
-        length = int(req.get('length', 10))
+        length = int(req.get('length', 100))
+        mxseries = int(req.get('mxseries',1000))
 
         if ((len(partitions)>0) and (aggregate_level == 'StudyInstanceUID')):
-            response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, results_lvl=results_level)
+            response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
 
         elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
             response = get_cart_data(filtergrp_list, partitions, ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID'],limit, offset)
