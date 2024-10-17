@@ -88,6 +88,9 @@ BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLO
 BIGQUERY_USER_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_USER_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_USER_MANIFEST_DATASET = os.environ.get('BIGQUERY_USER_MANIFEST_DATASET', 'dev_user_dataset')
 BIGQUERY_USER_MANIFEST_TIMEOUT = int(os.environ.get('BIGQUERY_USER_MANIFEST_TIMEOUT', '7'))
+PUBSUB_USER_MANIFEST_TOPIC     = "projects/{}/topics/{}".format(GCLOUD_PROJECT_ID, os.environ.get('PUBSUB_USER_MANIFEST_TOPIC', 'user-manifest'))
+USER_MANIFESTS_FOLDER          = os.environ.get('USER_MANIFESTS_FOLDER', 'user-manifests')
+RESULT_BUCKET                  = os.environ.get('RESULT_BUCKET', 'idc-dev-files')
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
@@ -143,8 +146,10 @@ DATABASES = database_config
 DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
-IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
-IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
+# AppEngine var is set in the app.yaml so this should be false for CI and local dev apps
+IS_APP_ENGINE = bool(os.getenv('IS_APP_ENGINE', 'False') == 'True')
+# $CI is set only on CircleCI run VMs so this should not have a value outside of a deployment build
+IS_CI = bool(os.getenv('CI', None) is not None)
 
 VERSION = "{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'))
 
@@ -170,7 +175,7 @@ print("[STATUS] DEV_TIER setting is {}".format(DEV_TIER))
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
+if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -182,7 +187,7 @@ if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 2
 
-if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
+if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = 3
 

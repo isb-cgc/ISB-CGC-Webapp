@@ -112,6 +112,8 @@
         const filters_for_load = JSON.parse(document.getElementById('filters_for_load').textContent);
         const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);
         const analysis_results_tooltips = JSON.parse(document.getElementById('analysis_results_tooltips').textContent);
+        const FETCH_MANIFEST_URL = "{% url 'fetch_user_manifest_base' %}";
+        const CHECK_MANIFEST_URL = "{% url 'check_user_manifest_base' %}";
         window.selItems = new Object();
         window.selItems.selProjects = new Array();
         window.selItems.selStudies = new Object();

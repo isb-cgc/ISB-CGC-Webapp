@@ -209,6 +209,35 @@ require([
         download_manifest('bq',$(this), e);
     });
 
+    function checkManifestReady(file_name) {
+        $.ajax({
+            url: CHECK_MANIFEST_URL + file_name,
+            method: 'GET',
+            success: function (data) {
+                if(data.manifest_ready) {
+                    let fetch_manifest_url = FETCH_MANIFEST_URL + file_name;
+                    base.showJsMessage("warning",
+                        "Your manifest is ready for download! " +
+                        '<a class="btn btn-special" href="'+fetch_manifest_url+'" role="button">Download Manifest</a>'
+                        , true);
+                } else {
+                    setTimeout(checkManifestReady, 15000, file_name);
+                }
+            },
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                // If we received a redirect, honor that
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
+                } else {
+                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                }
+            }
+        });
+    };
+
+
     var download_manifest = function(file_type, clicked_button, e) {
         let manifest_type = file_type === 'bq' ? 'bq-manifest' : 'file-manifest';
 
@@ -281,7 +310,7 @@ require([
             $('input[name="file_part"]').val("");
         }
 
-        if(manifest_type == 'file-manifest') {
+        if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val() !== "True") {
             $('#export-manifest-form').trigger('submit');
         } else {
             $.ajax({
@@ -291,6 +320,12 @@ require([
                 success: function (data) {
                     if(data.message) {
                         base.showJsMessage("info",data.message,true);
+                    }
+                    if(data.jobId) {
+                        base.showJsMessage("info",
+                            "Your manifest is being prepared. Once it is ready, this space will make it available for download. <i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
+                            ,true);
+                        checkManifestReady(data.file_name);
                     }
                 },
                 error: function (xhr) {
