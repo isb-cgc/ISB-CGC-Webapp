@@ -519,7 +519,17 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
     });
 
     if (projUpdate.length>0){
-        updateProjStudyMp(projUpdate, mxstudies, mxseries);
+        var numBatches = Math.ceil(mxstudies/cartutils.studympBatchSize)
+        var batchSize = Math.floor(mxstudies/numBatches)
+        for (var i=0;i<numBatches-1;i++){
+            offset = i * batchSize;
+            limit = (i+1) * batchSize;
+            updateProjStudyMp(projUpdate, mxstudies, mxseries, offset, limit);
+        }
+
+        limit= mxstudies;
+        offset = (numBatches-1)*batchSize;
+        updateProjStudyMp(projUpdate, mxstudies, mxseries, offset, limit);
     }
 
     var caseID='';
@@ -575,7 +585,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
     // defines the studymp for selected projects(collections). Also adds data to the window.casestudymp and window.studymp.
     // Called when the user clicks a cart OR a chevron in the projects(collections) table
-    window.updateProjStudyMp = function(projidA, mxStudies, mxSeries) {
+    window.updateProjStudyMp = function(projidA, mxStudies, mxSeries, offset, limit) {
 
         var curFilterObj = JSON.parse(JSON.stringify(filterutils.parseFilterObj()));
         curFilterObj.collection_id = projidA;
@@ -585,7 +595,9 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         let ndic = {
             'filters': filterStr,
             'mxstudies': mxStudies,
-            'mxseries': mxSeries
+            'mxseries': mxSeries,
+            'limit': limit,
+            'offset': offset
         }
         for (var i = 0; i < projidA.length; i++) {
             projid=projidA[i];
@@ -593,6 +605,9 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
+        console.time('ajax');
+         console.time('mp');
+        console.timeLog('ajax');
         $.ajax({
             url: url,
             dataType: 'json',
@@ -602,7 +617,8 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 try {
-
+                    console.timeEnd('ajax')
+                    console.timeLog('mp')
                     for (var i = 0; i < projidA.length; i++) {
                         projid = projidA[i];
                         if (!(projid in window.projstudymp)) {
@@ -628,7 +644,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     if ('studymp' in data) {
                         updateStudyMp(data['studymp'])
                     }
-
+                  console.timeEnd('mp')
                 }
                 catch(err){
                     console.log('error processing data');

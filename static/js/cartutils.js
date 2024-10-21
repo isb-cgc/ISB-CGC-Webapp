@@ -77,6 +77,7 @@ require([
 // Return an object for consts/methods used by most views
 define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tippy, utils) {
 
+    const studympBatchSize=20000;
     var seriesTblOffset = 0;
     var seriesTblLimit = 0;
     var seriesTblStrt =0;
@@ -434,6 +435,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
     }
 
     const updateCartAndCartMetrics = function(addingToCart,projid,studymp,updateSource){
+
 
         if (updateSource == 'project' && addingToCart){
             updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries']).then(function(){
@@ -1289,8 +1291,8 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         updateLocalCartAfterSessionChng: updateLocalCartAfterSessionChng,
         updateTableCountsAndGlobalCartCounts: updateTableCountsAndGlobalCartCounts,
         refreshCartAndFiltersFromScratch: refreshCartAndFiltersFromScratch,
-        updateCartTable: updateCartTable
-
+        updateCartTable: updateCartTable,
+        studympBatchSize: studympBatchSize
 
     };
 });

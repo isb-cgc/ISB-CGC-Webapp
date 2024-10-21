@@ -44,6 +44,11 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
 from idc.models import User_Data
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Manager
+from math import floor
+from functools import partial
+
 
 
 debug = settings.DEBUG
@@ -299,6 +304,7 @@ def cart(request):
 # returns various metadata mappings for selected projects used in calculating cart selection counts 'on the fly' client side
 #@login_required
 def studymp(request):
+
     response = {}
     status = 200
     sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
@@ -319,16 +325,6 @@ def studymp(request):
         aggregate_level__in=["case_barcode", "sample_barcode", aggregate_level],
         id__in=versions.get_data_sources().filter(source_type=DataSource.SOLR).values_list("id", flat=True)
     ).distinct()
-    custom_facets = {"per_id": {"type": "terms", "field":"StudyInstanceUID", "limit": 0,
-                                        "facet": {"unique_series": "unique(SeriesInstanceUID)"}}}
-
-    custom_facets={'per_id': {'type': 'terms', 'field': 'StudyInstanceUID', 'limit': 2000,
-                'facet': {'unique_series': 'unique(SeriesInstanceUID)'}},
-                   "tot_series": {"type": "terms", "field": "collection_id", "limit": 200,
-                                  "facet": {"unique_series": "unique(SeriesInstanceUID)"},
-                                  "domain": {"query": "*.*"}}
-                   }
-
 
     try:
        req = request.GET if request.GET else request.POST
@@ -336,62 +332,39 @@ def studymp(request):
 
        mxSeries = int(req.get('mxseries'))
        mxStudies= int(req.get('mxstudies'))
+       limit = int(req.get('limit', mxStudies))
+       offset = int(req.get('offset',0))
        custom_facets['per_id']['limit']=mxStudies;
 
-       #custom_facets['per_id']['limit'] = mxStudies
+       casestudymp = dict()
+       studymp = dict()
+       projstudymp = dict()
+
+
        idsEx = get_collex_metadata(
-                    filters, ['collection_id', 'PatientID','StudyInstanceUID', 'crdc_study_uuid','gcs_bucket','aws_bucket'], record_limit=mxStudies, sources=sources, offset=0,
-                    records_only=False, custom_facets=custom_facets, aux_sources=aux_sources,
+                    filters, ['collection_id', 'PatientID','StudyInstanceUID', 'SeriesInstanceUID'], record_limit=limit, sources=sources, offset=offset,
+                    records_only=True, custom_facets={}, aux_sources=aux_sources,
                     collapse_on='StudyInstanceUID', counts_only=False, filtered_needed=False,
-                    raw_format=True, default_facets=False
+                    raw_format=True, default_facets=False, sort=None
                 )
-
-
-       studymp={}
-       study_patient={}
-       study_proj={}
-       casestudymp ={}
-       projstudymp = {}
 
        for doc in idsEx['docs']:
           proj=doc['collection_id'][0]
           patientid=doc['PatientID']
           studyid= doc['StudyInstanceUID']
-          study_uuid = doc['crdc_study_uuid']
-          gcs_bucket= doc['gcs_bucket']
-          aws_bucket = doc['aws_bucket']
+          cnt = len(doc['SeriesInstanceUID'])
 
           if not patientid in casestudymp:
               casestudymp[patientid]={}
           if not proj in projstudymp:
               projstudymp[proj] = {}
-          if not studyid in studymp:
-              studymp[studyid] = {}
-              studymp[studyid]['val'] = []
-              studymp[studyid]['proj']=proj
-              studymp[studyid]['PatientID'] = patientid
-              studymp[studyid]['study_uuid']= study_uuid
-              studymp[studyid]['aws_bucket'] = aws_bucket
-              studymp[studyid]['gcs_bucket'] = gcs_bucket
-          if not  (studyid in study_patient):
-              study_patient[studyid]=patientid
-          if not (studyid in study_proj):
-            study_proj[studyid] = proj
-
-       if (idsEx['facets']['count']>0):
-          for studyrow in idsEx['facets']['per_id']['buckets']:
-             studyid=studyrow['val']
-             cnt=studyrow['unique_series']
-             if (studyid in studymp):
-                studymp[studyid]['cnt']=cnt
-             if (studyid in study_patient):
-                 patientid=study_patient[studyid]
-                 #studymp[studyid]=cnt
-                 casestudymp[patientid][studyid]=cnt
-             if (studyid in study_proj):
-                 proj = study_proj[studyid]
-                 projstudymp[proj][studyid]=cnt
-
+          studymp[studyid]={}
+          studymp[studyid]['cnt'] = cnt
+          studymp[studyid]['proj'] = proj
+          studymp[studyid]['PatientID'] = patientid
+          studymp[studyid]['val'] = []
+          projstudymp[proj][studyid] = cnt
+          casestudymp[patientid][studyid] = cnt
 
        response["studymp"] = studymp
        response['casestudymp'] = casestudymp
@@ -400,15 +373,17 @@ def studymp(request):
 
 
     except Exception as e:
-        logger.error("[ERROR] While attempting to populate the table:")
+        logger.error("[ERROR] While attempting to get studymp:")
         logger.exception(e)
         messages.error(
            request,
-           "Encountered an error when attempting to populate the page - please contact the administrator."
+           "Encountered an error when attempting to get the studymp - please contact the administrator."
         )
         status = 400
 
     return JsonResponse(response, status=status)
+
+
 
 #@login_required
 def populate_tables(request):
