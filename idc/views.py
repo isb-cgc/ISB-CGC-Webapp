@@ -334,7 +334,7 @@ def studymp(request):
        mxStudies= int(req.get('mxstudies'))
        limit = int(req.get('limit', mxStudies))
        offset = int(req.get('offset',0))
-       custom_facets['per_id']['limit']=mxStudies;
+    
 
        casestudymp = dict()
        studymp = dict()

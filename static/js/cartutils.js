@@ -77,7 +77,6 @@ require([
 // Return an object for consts/methods used by most views
 define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tippy, utils) {
 
-    const studympBatchSize=20000;
     var seriesTblOffset = 0;
     var seriesTblLimit = 0;
     var seriesTblStrt =0;
@@ -438,7 +437,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
 
         if (updateSource == 'project' && addingToCart){
-            updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries']).then(function(){
+            updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries'], 0, window.selProjects[projid]['mxstudies'] ).then(function(){
                 $('.spinner').show();
                 updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
                 updateTableCountsAndGlobalCartCounts();
@@ -544,7 +543,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
                     }
                 }
                 if (projArr.length > 0) {
-                    updateProjStudyMp(projArr, mxstudies, mxseries).then(function(){
+                    updateProjStudyMp(projArr, mxstudies, mxseries, 0 , mxstudies).then(function(){
                         updateTableCountsAndGlobalCartCounts();
                     });
                 }
@@ -1291,8 +1290,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         updateLocalCartAfterSessionChng: updateLocalCartAfterSessionChng,
         updateTableCountsAndGlobalCartCounts: updateTableCountsAndGlobalCartCounts,
         refreshCartAndFiltersFromScratch: refreshCartAndFiltersFromScratch,
-        updateCartTable: updateCartTable,
-        studympBatchSize: studympBatchSize
+        updateCartTable: updateCartTable
 
     };
 });

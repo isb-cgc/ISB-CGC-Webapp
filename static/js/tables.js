@@ -519,16 +519,9 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
     });
 
     if (projUpdate.length>0){
-        var numBatches = Math.ceil(mxstudies/cartutils.studympBatchSize)
-        var batchSize = Math.floor(mxstudies/numBatches)
-        for (var i=0;i<numBatches-1;i++){
-            offset = i * batchSize;
-            limit = (i+1) * batchSize;
-            updateProjStudyMp(projUpdate, mxstudies, mxseries, offset, limit);
-        }
 
         limit= mxstudies;
-        offset = (numBatches-1)*batchSize;
+        offset = 0;
         updateProjStudyMp(projUpdate, mxstudies, mxseries, offset, limit);
     }
 
