@@ -96,9 +96,6 @@ require([
         //return false;
     });
 
-    // Radio button controls bootstrap collapse
-    toggleRadio('upload');
-
     function toggleRadio(groupname){
         var radioButton =  $('.radio input[name=' + groupname + ']');
         radioButton.on('change', function(event){
@@ -112,6 +109,9 @@ require([
             }
         })
     };
+
+    // Radio button controls bootstrap collapse
+    toggleRadio('upload');
 
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
@@ -146,14 +146,6 @@ require([
             return new Date(date).getTime();
         },
         type: 'numeric'
-    });
-
-    $(document).ready(function(){
-        if(sessionStorage.getItem("reloadMsg")) {
-            var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));
-            utils.showJsMessage(msg.type,msg.text,true);
-        }
-        sessionStorage.removeItem("reloadMsg");
     });
 
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
@@ -219,13 +211,24 @@ require([
         );
     });
 
+    $('body').on('click', '.manifest-download-link, .manifest-download-box button.close', function(){
+        sessionStorage.removeItem("user-manifest");
+    });
+
     $(document).ready(function(){
+        if(sessionStorage.getItem("reloadMsg")) {
+            var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));
+            utils.showJsMessage(msg.type,msg.text,true);
+        }
+        sessionStorage.removeItem("reloadMsg");
+
+        utils.checkForManifest();
+
         if($('#liveText').siblings()[1].shadowRoot !== null) {
             $('.main-content').css("margin-top", "0px");
             $($('#liveText').siblings()[1]).css("margin-top", "56px");
         }
     });
-
 });
 
 // Return an object for consts/methods used by most views
@@ -261,6 +264,7 @@ define(['jquery', 'utils'], function($, utils) {
         removeCookie: function(name, path) {
             utils.removeCookie(name, path);
         },
-        blockResubmit: utils.blockResubmit
+        blockResubmit: utils.blockResubmit,
+        checkManifestReady: utils.checkManifestReady
     };
 });

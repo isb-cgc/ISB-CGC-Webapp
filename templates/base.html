@@ -51,13 +51,15 @@
         </script>
     {%  endif %}
     <script>
-        var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
-        var BASE_URL = '{{ BASE_URL }}' || "";
-        var STORAGE_URI = '{{ STORAGE_URI }}';
-        var OHIF_V2_PATH = '{{ OHIF_V2_PATH }}';
-        var OHIF_V3_PATH = '{{ OHIF_V3_PATH }}';
-        var VOLVIEW_PATH = '{{ VOLVIEW_PATH }}';
-        var SLIM_VIEWER_PATH = '{{ SLIM_VIEWER_PATH }}';
+        const STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
+        const BASE_URL = '{{ BASE_URL }}' || "";
+        const STORAGE_URI = '{{ STORAGE_URI }}';
+        const OHIF_V2_PATH = '{{ OHIF_V2_PATH }}';
+        const OHIF_V3_PATH = '{{ OHIF_V3_PATH }}';
+        const VOLVIEW_PATH = '{{ VOLVIEW_PATH }}';
+        const SLIM_VIEWER_PATH = '{{ SLIM_VIEWER_PATH }}';
+        const FETCH_MANIFEST_URL = "{% url 'fetch_user_manifest_base' %}";
+        const CHECK_MANIFEST_URL = "{% url 'check_user_manifest_base' %}";
     </script>
     <!-- OCPL Banner -->
 </head>

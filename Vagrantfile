@@ -16,19 +16,8 @@ Vagrant.configure(2) do |config|
      vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
   end
 
-  config.vagrant.plugins = ["vagrant-vbguest"]
-
   config.vm.box_url = "https://app.vagrantup.com/debian/boxes/bullseye64"
   config.vm.box = "debian/bullseye64"
-
-  config.vbguest.installer_options = { allow_kernel_upgrade: true }
-  config.vbguest.installer_hooks[:before_install] = [
-    "apt-get update",
-    "apt-get -y install libxt6 libxmu6"
-  ]
-  config.vbguest.installer_hooks[:after_install] = [
-    "VBoxClient --version"
-  ]
 
   # WebApp ports
   config.vm.network "forwarded_port", guest: 8086, host: 8086
