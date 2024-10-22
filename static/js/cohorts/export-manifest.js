@@ -228,7 +228,6 @@ require([
         download_manifest($(this).attr("data-export-type"), $(this), e)
     });
 
-<<<<<<< HEAD
     $('#download-s5cmd, #download-idc-index').on('click', function(e) {
         if ($(this).hasClass('iscart')){
             update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries)
@@ -237,63 +236,7 @@ require([
     });
 
 
-    var download_file_clientside =function(manifest_filenm, download_arr){
-         var content = new Array()
-         content[0] = "# To download the files in this manifest, first install s5cmd (https://github.com/peak/s5cmd),";
-         content[1] = "# then run the following command:"
 
-        let endpoint_url = ($('input.loc_type:checked').val() === "aws" ? "https://s3.amazonaws.com" : "https://storage.googleapis.com");
-        content[2] = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} run ${manifest_filename}.s5cmd`;
-
-
-        for (var i=0;i<download_arr.length;i++){
-              content[i+3] = 'cp s3'
-        }
-        var file = new File(['foo'], 'new-note.txt', {type: 'text/json',});
-        const link = document.createElement('a')
-        const url = URL.createObjectURL(file)
-
-      link.href = url
-      link.download = file.name
-      document.body.appendChild(link)
-      link.click()
-     document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    }
-
-
-    function checkManifestReady(file_name) {
-        $.ajax({
-            url: CHECK_MANIFEST_URL + file_name,
-            method: 'GET',
-            success: function (data) {
-                if(data.manifest_ready) {
-                    let fetch_manifest_url = FETCH_MANIFEST_URL + file_name;
-                    base.showJsMessage("warning",
-                        "Your manifest is ready for download! " +
-                        '<a class="btn btn-special" href="'+fetch_manifest_url+'" role="button">Download Manifest</a>'
-                        , true);
-                } else {
-                    setTimeout(checkManifestReady, 15000, file_name);
-                }
-            },
-            error: function (xhr) {
-                var responseJSON = $.parseJSON(xhr.responseText);
-                // If we received a redirect, honor that
-                if(responseJSON.redirect) {
-                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
-                    window.location = responseJSON.redirect;
-                } else {
-                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
-                }
-            }
-        });
-    };
-
-
-
-=======
->>>>>>> e2ea25b12b9c59660f62427bdfdb43cff3f91d26
     var download_manifest = function(export_type, clicked_button, e) {
         let manifest_type = (export_type === 'bq' ? 'bq-manifest' : 'file-manifest');
         $('#unallowed-chars-alert').hide();
