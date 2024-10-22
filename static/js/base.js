@@ -190,7 +190,7 @@ require([
         );
     });
 
-    $('body').on('click', '.manifest-download-link', function(){
+    $('body').on('click', '.manifest-download-link, .manifest-download-box button.close', function(){
         sessionStorage.removeItem("user-manifest");
     });
 
