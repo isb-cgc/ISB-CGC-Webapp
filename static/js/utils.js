@@ -130,7 +130,19 @@ define(['jquery'], function($) {
         return uuid;
     };
 
-    function _checkManifestReady(file_name) {
+    const MAX_ELAPSED = 120000;
+    function _checkManifestReady(file_name, check_start) {
+        if(!check_start) {
+            check_start = Date.now();
+        }
+        let check_now = Date.now();
+        if((check_now-check_start) > MAX_ELAPSED) {
+            _showJsMessage("error",
+                "There was an error generating your manifest. Please contact the administrator."
+                , true);
+            sessionStorage.removeItem("user-manifest");
+            return;
+        }
         $.ajax({
             url: CHECK_MANIFEST_URL + file_name,
             method: 'GET',
@@ -142,7 +154,7 @@ define(['jquery'], function($) {
                         '<a class="btn btn-special manifest-download-link" href="'+fetch_manifest_url+'" role="button">Download Manifest</a>'
                         , true);
                 } else {
-                    setTimeout(_checkManifestReady, 15000, file_name);
+                    setTimeout(_checkManifestReady, 15000, file_name, check_start);
                 }
             },
             error: function (xhr) {
@@ -167,7 +179,6 @@ define(['jquery'], function($) {
             _checkManifestReady(pending_manifest_request);
         }
     };
-
 
     return {
         showJsMessage: _showJsMessage,
