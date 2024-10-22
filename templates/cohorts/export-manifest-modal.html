@@ -28,11 +28,19 @@
                     <div class="form-group list-group">
                         {% csrf_token %}
                         <ul class="nav nav-tabs manifest">
-                            <li class="filter-tab active manifest-s5cmd" role="presentation">
-                                <a href="#manifest-s5cmd" role="tab" data-toggle="tab" title="s5cmd manifest"
+                            <li class="filter-tab active manifest-idc-index" role="presentation">
+                                <a href="#manifest-idc-index" role="tab" data-toggle="tab" title="idc-index manifest"
                                    aria-expanded="true"
                                 >
                                     idc-index
+                                </a>
+                            </li>
+
+                            <li class="filter-tab manifest-s5cmd" role="presentation">
+                                <a href="#manifest-s5cmd" role="tab" data-toggle="tab" title="s5cmd manifest"
+                                   aria-expanded="true"
+                                >
+                                    s5cmd
                                 </a>
                             </li>
 
@@ -140,39 +148,18 @@
                                     </div>
                                 {% endif %}
                             </div>
-                            <div id="manifest-s5cmd" class="tab-pane manifest active" role="tab-panel">
-                                <p>
-                                <div id="s5cmd-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
-                                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                    Your manifest's size exceeds the limit for file manifest download. Please {% if not is_cohort %}save your filters as a cohort and {% endif %}use
-                                    <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"
-                                       data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">
-                                        </i></a> instead (requires Google login).
-                                </div>
-                                </p>
+                            <div id="manifest-s5cmd" class="tab-pane manifest" role="tab-panel">
                                 <p>
                                     <br />
-                                    To obtain these images, install the
+                                    To obtain these images, install
                                     <a class="external-link" url="https://github.com/ImagingDataCommons/idc-index"
-                                       data-toggle="modal" data-target="#external-web-warning">idc-index
+                                       data-toggle="modal" data-target="#external-web-warning">s5cmd
                                         <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
-                                    </a> python package:</p>
-                                <p>
-                                    <span class="code">
-                                        pip install --upgrade idc-index
-                                    </span> <a
-                                        role="button" class="pip-install copy-this"
-                                        content="pip install --upgrade idc-index"
-                                        title="Copy command to clipboard">
-                                        <i class="fa-solid fa-copy" aria-hidden="true"></i>
-                                    </a>
-                                </p>
-                                <p>
-                                    Then <span class="download-manifest-text">download the manifest and </span>run the following command:
+                                    </a>, then download the manifest and run the following command:
                                 </p>
                                 <p>
                                     <span class="code s5cmd-text">
-                                        idc download file_name.s5cmd
+                                        s5cmd --no-sign-request --endpoint-url endpoint_url run &lt;manifest file name&gt;
                                     </span> <a
                                         role="button" class="s5cmd copy-this"
                                         content="idc download file_name.s5cmd"
@@ -186,27 +173,23 @@
                                     >
                                     see IDC download instructions page. <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>
                                 </p>
-<!--
-                                <div class="s5cmd-file-name manifest-name">
-                                    <label for="export-s5cmd-name">File Name</label>
-                                    <input class="form-control file-name" type="text" id="export-s5cmd-name"
-                                           name="s5cmd_file_name" data-name-base="_{% now "Ymd_Gis" %}" value=""
-                                           placeholder="Please supply a file name." required />
-                                </div>
--->
                                 <div class="s5cmd-loc-type">
                                     <h5>Cloud Source</h5>
                                     <li class="radio"><label for="export-s5cmd-loc-aws">
-                                        <input class="loc_type" id="export-s5cmd-loc-aws" name="loc_type" type="radio" value="aws" checked />
+                                        <input class="loc_type" id="export-s5cmd-loc-aws" name="loc_type_s5cmd" type="radio"
+                                               data-endpoint-url="https://s3.amazonaws.com"
+                                               value="aws" checked />
                                         <span class="value">AWS - data storage and egress sponsored by AWS Open Data Sponsorship Program</span>
                                     </label></li>
                                     <li class="radio"><label for="export-s5cmd-loc-gcp">
-                                        <input class="loc_type" id="export-s5cmd-loc-gcp" name="loc_type" type="radio" value="gcs" />
+                                        <input class="loc_type" id="export-s5cmd-loc-gcp" name="loc_type_s5cmd" type="radio"
+                                               data-endpoint-url="https://storage.googleapis.com"
+                                               value="gcs" />
                                         <span class="value">GCP - data storage and egress sponsored by Google Public Data Program</span>
                                     </label></li>
                                 </div>
                                 <!-- Header Fields -->
-                                <div id="s5cmd-header-fields-container">
+                                <div id="s5cmd-header-fields-container" class="header-fields-container">
                                     <h5>Manifest Headers</h5>
                                     <input id="include-header-s5cmd-checkbox" type="checkbox"> Include Headers
                                     <div id="s5cmd-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
@@ -243,30 +226,103 @@
                                     </div>
                                 </div>
                                 <div id="s5cmd-button-wrapper" class="manifest-button-wrapper">
-                                <a id="download-s5cmd" class="btn btn-primary download-file get-manifest">
+                                <a id="download-s5cmd" data-export-type="s5cmd" class="btn btn-primary download-file get-manifest">
                                     Download s5cmd Manifest
                                 </a>
                                 </div>
                             </div>
-                            <div id="manifest-file" class="tab-pane manifest" role="tab-panel">
+                            <div id="manifest-idc-index" class="tab-pane manifest active" role="tab-panel">
                                 <p>
-                            <div id="file-manifest-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
-                                <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                Your manifest is too large to be downloaded in its entirety. Please {% if not is_cohort %}save your filters as a cohort and {% endif %}use
-                                <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"
-                                   data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">
-                                    </i></a> instead (requires Google login).
-                            </div>
+                                    <br />
+                                    To obtain these images, install the
+                                    <a class="external-link" url="https://github.com/ImagingDataCommons/idc-index"
+                                       data-toggle="modal" data-target="#external-web-warning">idc-index
+                                        <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a> python package:</p>
+                                <p>
+                                    <span class="code">
+                                        pip install --upgrade idc-index
+                                    </span> <a
+                                        role="button" class="pip-install copy-this"
+                                        content="pip install --upgrade idc-index"
+                                        title="Copy command to clipboard">
+                                        <i class="fa-solid fa-copy" aria-hidden="true"></i>
+                                    </a>
                                 </p>
-<!--
-                                <div class="manifest-file-name manifest-name">
-                                    <label for="export-manifest-name">Name</label>
-                                    <input class="form-control file-name" type="text" id="export-manifest-name"
-                                           name="manifest_file_name"
-                                           placeholder="Please supply a file name."
-                                           value="" required />
+                                <p>
+                                    Then <span class="download-manifest-text">download the manifest and </span>run the following command:
+                                </p>
+                                <p>
+                                    <span class="code idc-index-text">
+                                        idc download &lt;manifest file name&gt;
+                                    </span> <a
+                                        role="button" class="idc-index copy-this"
+                                        content="idc download <manifest file name>"
+                                        title="Copy command to clipboard">
+                                        <i class="fa-solid fa-copy" aria-hidden="true"></i>
+                                    </a>
+                                </p>
+                                <p>To learn about more ways to download IDC data, please <a
+                                       class="external-link" href="" url="https://learn.canceridc.dev/data/downloading-data"
+                                       data-toggle="modal" data-target="#external-web-warning"
+                                    >
+                                    see IDC download instructions page. <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>
+                                </p>
+                                <div class="idc-index-loc-type">
+                                    <h5>Cloud Source</h5>
+                                    <li class="radio"><label for="export-idc-index-loc-aws">
+                                        <input class="loc_type" id="export-idc-index-loc-aws" name="loc_type_idc_index" type="radio" value="aws" checked />
+                                        <span class="value">AWS - data storage and egress sponsored by AWS Open Data Sponsorship Program</span>
+                                    </label></li>
+                                    <li class="radio"><label for="export-idc-index-loc-gcp">
+                                        <input class="loc_type" id="export-idc-index-loc-gcp" name="loc_type_idc_index" type="radio" value="gcs" />
+                                        <span class="value">GCP - data storage and egress sponsored by Google Public Data Program</span>
+                                    </label></li>
                                 </div>
--->
+                                <!-- Header Fields -->
+                                <div id="idc-index-header-fields-container" class="header-fields-container">
+                                    <h5>Manifest Headers</h5>
+                                    <input id="include-header-idc-index-checkbox" type="checkbox"> Include Headers
+                                    <div id="s5cmd-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
+                                        <a role="button" data-toggle="collapse" href="#s5cmd-header-fields" aria-expanded="false"
+                                           aria-controls="s5cmd-header-fields">
+                                            <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Header Fields
+                                        </a>
+                                    </div>
+                                    <div id="idc-index-header-fields" class="collapse list-group list-group-item__body">
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="cohort_name">
+                                            <span class="value">Cohort Name</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="user_email">
+                                            <span class="value">User Email</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="cohort_filters">
+                                            <span class="value">Cohort Filters</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="timestamp">
+                                            <span class="value">Date Generated</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="total_records">
+                                            <span class="value">Total Records</span>
+                                        </label></li>
+                                    </div>
+                                </div>
+                                <div id="idc-index-button-wrapper" class="manifest-button-wrapper">
+                                <a id="download-idc-index" data-export-type="idc_index" class="btn btn-primary download-file get-manifest">
+                                    Download idc-index Manifest
+                                </a>
+                                </div>
+                            </div>
+                            <div id="manifest-file" class="tab-pane manifest" role="tab-panel">
                                 <!-- Header Fields -->
                                 <h5>Manifest Headers</h5>
                                 <input id="include-header-file-checkbox" type="checkbox" checked> Include headers
@@ -355,17 +411,17 @@
                                     <br />
                                 </div>
                                 <div class="manifest-button-wrapper file-manifest-button-wrapper">
-                                    <a id="download-csv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in CSV format.">
+                                    <a id="download-csv" data-export-type="csv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in CSV format.">
                                         Download CSV
                                     </a>
                                 </div>
                                 <div class="manifest-button-wrapper file-manifest-button-wrapper">
-                                    <a id="download-tsv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in TSV format.">
+                                    <a id="download-tsv" data-export-type="tsv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in TSV format.">
                                         Download TSV
                                     </a>
                                 </div>
                                 <div class="manifest-button-wrapper file-manifest-button-wrapper">
-                                    <a id="download-json" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in JSON format.">
+                                    <a id="download-json" data-export-type="json" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in JSON format.">
                                         Download JSON
                                     </a>
                                 </div>

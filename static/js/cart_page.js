@@ -201,7 +201,12 @@ require([
          */
 
         cartutils.updateCartTable();
+         $('.filter-tab.manifest-file').hide();
+         $('.filter-tab.manifest-bq').hide();
 
+         $('#download-s5cmd').addClass('iscart');
+         $('#download-idc-index').addClass('iscart');
+         $('#export-manifest-form').attr('action','/explore/manifest/');
 
     });
 

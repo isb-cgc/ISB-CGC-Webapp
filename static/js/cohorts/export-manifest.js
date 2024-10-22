@@ -120,22 +120,13 @@ require([
         var mini_type='';
         var name_base='';
 
-        $('.s5cmd-loc-type').hide();
-        $('#s5cmd-header-fields-container').hide();
-        $('#download-s5cmd').hide();
-        $('#export-manifest-form').find('.download-manifest-text').hide();
+        $('input[name="idc-index-loc-type"]').hide();
+        $('.header-fields-container').hide();
+        $('.idc-index-loc-type').hide();
+        $('#download-idc-index').hide();
+        $('.download-manifest-text').hide();
 
-        $('.manifest-s5cmd a').trigger('click');
-
-        if (button.hasClass('series-export') || parseInt(button.data('series-count')) < 65000) {
-            $('#s5cmd-max-exceeded').hide();
-            $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
-            $('#download-s5cmd').removeAttr('disabled');
-        } else {
-            $('#s5cmd-max-exceeded').show();
-            $('#download-s5cmd').attr('disabled','disabled');
-            $('#s5cmd-button-wrapper').addClass('manifest-disabled');
-        }
+        $('.manifest-idc-index a').trigger('click');
 
         if (button.hasClass('series-export')) {
             title = 'Series Export';
@@ -203,12 +194,10 @@ require([
     $('#export-manifest-modal').on('hidden.bs.modal', function() {
       $('.manifest-file').show();
       $('.manifest-bq').show();
-      $('#download-s5cmd').show();
-      $('.s5cmd-loc-type').show();
-      $('#s5cmd-header-fields-container').show();
-      $('#export-manifest-form').find('#s5cmd-header-fields-container').show();
-      $('#export-manifest-form').find('#download-s5cmd').show();
-      $('#export-manifest-form').find('.download-manifest-text').show();
+      $('#download-idc-index').show();
+      $('.header-fields-container').show();
+      $('.idc-index-loc-type').show();
+      $('.download-manifest-text').show();
       $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().show();
       $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
       $('.modal-title').text('Export Manifest');
@@ -217,63 +206,33 @@ require([
 
 
     var reset_after_mini = function(){
-      $('#export-manifest-modal').find('input[name="mini"]').remove();
-      $('#export-manifest-modal').find('input[name="uid"]').remove();
-      $('#export-manifest-modal').find('input[name="crdc_uid"]').remove();
-      $('#export-manifest-modal').find('input[name="aws"]').remove();
-      $('#export-manifest-modal').find('input[name="gcs"]').remove();
+        $('#export-manifest-modal').find('input[name="mini"]').remove();
+        $('#export-manifest-modal').find('input[name="uid"]').remove();
+        $('#export-manifest-modal').find('input[name="crdc_uid"]').remove();
+        $('#export-manifest-modal').find('input[name="aws"]').remove();
+        $('#export-manifest-modal').find('input[name="gcs"]').remove();
 
 
-      var filt_str = $('#export-manifest-form').find('input[name="filters"]').val()
+        var filt_str = $('#export-manifest-form').find('input[name="filters"]').val()
         var filters=JSON.parse(filt_str);
-      if ('StudyInstanceUID' in filters){
+        if ('StudyInstanceUID' in filters){
           delete filters['StudyInstanceUID']
-      }
-      if ('SeriesInstanceUID' in filters){
-          delete filters['SeriesInstanceUID']
-      }
-
-      $('.manifest-file').show();
-      $('.manifest-bq').show();
-      $('#export-manifest-form').find('#s5cmd-header-fields-container').show();
-      $('#export-manifest-form').find('#download-s5cmd').show();
-      $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().show();
-      $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
-      $('.modal-title').text('Export Cohort Manifest');
-      $('#manifest-source').text('manifest');
-
-      if ($('#search_def_stats').attr('filter-series-count') > 65000) {
-            $('#s5cmd-max-exceeded').show();
-            $('#download-s5cmd').attr('disabled','disabled');
-            $('#s5cmd-button-wrapper').addClass('manifest-disabled');
-      } else {
-            $('#s5cmd-max-exceeded').hide();
-            $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
-            $('#download-s5cmd').removeAttr('disabled');
         }
-    }
+        if ('SeriesInstanceUID' in filters){
+          delete filters['SeriesInstanceUID']
+        }
+    };
 
-    $('#download-csv').on('click', function(e) {
-        download_manifest("csv", $(this), e)
+
+    $('.get-manifest').on('click', function(e) {
+        download_manifest($(this).attr("data-export-type"), $(this), e)
     });
 
-    $('#download-tsv').on('click', function(e) {
-        download_manifest("tsv", $(this), e)
-    });
-
-    $('#download-json').on('click', function(e) {
-        download_manifest("json", $(this), e)
-    });
-
-    $('#download-s5cmd').on('click', function(e) {
+    $('#download-s5cmd, #download-idc-index').on('click', function(e) {
         if ($(this).hasClass('iscart')){
             update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries)
         }
         download_manifest("s5cmd", $(this), e)
-    });
-
-    $('#get-bq-table').on('click',function(e){
-        download_manifest('bq',$(this), e);
     });
 
 
@@ -332,17 +291,14 @@ require([
 
 
 
-    var download_manifest = function(file_type, clicked_button, e) {
-
-        //download_file_clientside();
-        let manifest_type = file_type === 'bq' ? 'bq-manifest' : 'file-manifest';
-
+    var download_manifest = function(export_type, clicked_button, e) {
+        let manifest_type = (export_type === 'bq' ? 'bq-manifest' : 'file-manifest');
         $('#unallowed-chars-alert').hide();
         $('#name-too-long-alert-modal').hide();
 
         let name = $('input[name="file_name"]').attr('name-base');
-        if(file_type === 's5cmd') {
-            name = name+"_"+$('input.loc_type:checked').val();
+        if(export_type === 's5cmd' || export_type === 'idc_index') {
+            name = name+"_"+$('input[name="loc_type_'+export_type+'"]:checked').val();
         }
         let unallowed = (name.match(base.blacklist) || []);
 
@@ -382,7 +338,7 @@ require([
             }
         });
 
-        $('input[name="file_type"]').val(file_type);
+        $('input[name="file_type"]').val(export_type);
         $('input[name="header_fields"]').val(JSON.stringify(checked_fields));
         $('input[name="file_name"]').val(name);
         $('input[name="columns"]').val(JSON.stringify(checked_columns));
@@ -391,9 +347,9 @@ require([
 
         $('input[name="include_header"]').val('false');
 
-        if(file_type !== 'bq') {
+        if(export_type !== 'bq') {
             $('input[name="include_header"]').val(($('#include-header-'
-            + (file_type === 's5cmd' ? 's5cmd' : 'file')
+            + (export_type === 's5cmd' ? 's5cmd' : 'file')
                 + '-checkbox').is(':checked')) ? 'true' : 'false');
         }
 
@@ -444,7 +400,7 @@ require([
 
     };
 
-    $('input.loc_type').on('change',function(){
+    $('input.loc_type').on('change', function(){
         update_file_names(null);
     });
 
@@ -460,15 +416,21 @@ require([
                 file_name.attr("name-base", "cohort_" + cohort_ids.join("_") + $('#export-manifest-modal').data('file-timestamp'));
             }
         }
-        let manifest_filename = file_name.attr("name-base")+"_"+$('input.loc_type:checked').val();
-        let s5cmd_text = `idc download ${manifest_filename}.s5cmd`;
+        let s5cmd_manifest_filename = file_name.attr("name-base")+"_"+$('input[name="loc_type_s5cmd"]:checked').val();
+        let idc_index_manifest_filename = file_name.attr("name-base")+"_"+$('input[name="loc_type_idc_index"]:checked').val();
+        let s5cmd_endpoint_url = $('input[name="loc_type_s5cmd"]:checked').attr('data-endpoint-url');
+
+        let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${s5cmd_endpoint_url} run ${s5cmd_manifest_filename}.s5cmd`;
+        let idc_index_text = `idc download ${idc_index_manifest_filename}.s5cmd`;
 
         if ($('#export-manifest-modal').find('input[name="mini"]').length > 0) {
             let uid=$('#export-manifest-modal').find('input[name="uid"]').val();
-            s5cmd_text = `idc download ${uid}`;
+            idc_index_text = `idc download ${uid}`;
         }
         $('.s5cmd-text').text(s5cmd_text);
         $('.s5cmd.copy-this').attr("content",s5cmd_text);
+        $('.idc-index-text').text(idc_index_text);
+        $('.idc-index.copy-this').attr("content",idc_index_text);
     }
 
     var update_download_manifest_buttons = function(clicked){
