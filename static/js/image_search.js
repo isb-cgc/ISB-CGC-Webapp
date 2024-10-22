@@ -1819,7 +1819,10 @@ require([
         if (Object.keys(filters).length <= 0) {
             $('.get-filter-uri').attr("disabled","disabled");
             $('#export-manifest').attr("disabled","disabled");
-            $('#export-manifest').attr("title","Select a filter to enable this feature.");
+            $('#export-manifest').attr("data-no-filters", "true");
+            if(!$('#export-manifest').attr('data-pending-manifest')) {
+                $('#export-manifest').attr("title", "Select a filter to enable this feature.");
+            }
             $('.get-filter-uri').attr("title","Select a filter to enable this feature.");
             $('.filter-url').html("");
             $('.copy-url').removeAttr("content");
@@ -1832,10 +1835,13 @@ require([
             );
         } else {
             $('.get-filter-uri').removeAttr("disabled");
-            $('#export-manifest').removeAttr("disabled");
+            $('#export-manifest').removeAttr("data-no-filters");
+            if(!$('#export-manifest').attr('data-pending-manifest')) {
+                $('#export-manifest').removeAttr("disabled");
+                $('#export-manifest').attr("title", "Export these search results as a manifest for downloading.");
+            }
             $('.copy-url').removeAttr("disabled");
             $('.get-filter-uri').attr("title","Click to display this filter set's query URL.");
-            $('#export-manifest').attr("title","Export these search results as a manifest for downloading.");
             let url = BASE_URL+"/explore/filters/?";
             let encoded_filters = []
             for (let i in filters) {

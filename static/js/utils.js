@@ -106,7 +106,7 @@ define(['jquery'], function($) {
     // withEmpty: Truthy boolean for indicating if the element represented by rootSelector should first be emptied
     // rootSelector: text selector or DOM element which will be the parent of the alert; defaults to #js-messages
     //  (the DIV present on all pages which shows document-level JS messages)
-    function _showJsMessage(type,text,withEmpty,rootSelector) {
+    function _showJsMessage(type,text,withEmpty,rootSelector, add_classes) {
         rootSelector = rootSelector || '#js-messages';
         withEmpty && $(rootSelector).empty();
         var msg = "";
@@ -118,9 +118,12 @@ define(['jquery'], function($) {
             msg = text;
         }
         let uuid = crypto.randomUUID();
+        if(add_classes) {
+            uuid = `${uuid} ${add_classes}`;
+        }
         $(rootSelector).append(
             $('<div>')
-                .addClass('alert alert-' + type + ' alert-dismissible ' + uuid)
+                .addClass(`alert alert-${type} alert-dismissible ${uuid}`)
                 .html(msg)
                 .prepend(
                     '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
@@ -152,7 +155,14 @@ define(['jquery'], function($) {
                     _showJsMessage("warning",
                         "Your manifest is ready for download! " +
                         '<a class="btn btn-special manifest-download-link" href="'+fetch_manifest_url+'" role="button">Download Manifest</a>'
-                        , true);
+                        , true, null,'manifest-download-box');
+                    $('#export-manifest').removeAttr('data-pending-manifest');
+                    if(!$('#export-manifest').attr('data-no-filters')) {
+                        $('#export-manifest').removeAttr('disabled');
+                        $('#export-manifest').attr('title','Export these search results as a manifest for downloading.');
+                    } else {
+                        $('#export-manifest').attr("title","Select a filter to enable this feature.");
+                    }
                 } else {
                     setTimeout(_checkManifestReady, 15000, file_name, check_start);
                 }
@@ -173,6 +183,9 @@ define(['jquery'], function($) {
     function _checkForManifest() {
         let pending_manifest_request = sessionStorage.getItem("user-manifest");
         if(pending_manifest_request) {
+            $('#export-manifest').attr('disabled','disabled');
+            $('#export-manifest').attr('data-pending-manifest', 'true');
+            $('#export-manifest').attr('title','A manifest is currently being built.');
             _showJsMessage("info",
                 "Your manifest is being prepared. Once it is ready, this space will make it available for download. <i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
                 ,true);

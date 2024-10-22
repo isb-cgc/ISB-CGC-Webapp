@@ -237,6 +237,9 @@ require([
         if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val() !== "True") {
             $('#export-manifest-form').trigger('submit');
         } else {
+            $('#export-manifest').attr('disabled','disabled');
+            $('#export-manifest').attr('data-pending-manifest', 'true');
+            $('#export-manifest').attr('title','A manifest is currently being built.');
             $.ajax({
                 url: $('#export-manifest-form').attr('action'),
                 data: $('#export-manifest-form').serialize(),
