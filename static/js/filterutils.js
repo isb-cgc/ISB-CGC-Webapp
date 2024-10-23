@@ -47,17 +47,17 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'utils',
+    'base',
     'assetscore',
     'assetsresponsive',
     'tablesorter'
-], function($, jqueryui, bootstrap, session_security, _, utils) {
+], function($, jqueryui, bootstrap, session_security, _, base) {
 
 
 });
 
 // Return an object for consts/methods used by most views
-define(['jquery', 'utils'], function($, utils) {
+define(['jquery', 'base'], function($, base) {
 
 
     var ANONYMOUS_FILTERS = {};

@@ -64,18 +64,18 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'utils',
+    'base',
     'assetscore',
     'assetsresponsive',
     'tablesorter'
 
-], function(cartutils,filterutils,tippy,$, jqueryui, bootstrap, session_security, _, utils) {
+], function(cartutils,filterutils,tippy,$, jqueryui, bootstrap, session_security, _,base) {
     'use strict';
 });
 
 // Return an object for consts/methods used by most views
 
-define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils, filterutils, tippy, $, utils) {
+define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils, filterutils, tippy, $, base) {
 
     // Update the rows in the Projects Table, clear the other tables.
     window.updateTablesAfterFilter = function (collFilt, collectionsData, collectionStats){

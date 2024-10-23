@@ -70,9 +70,6 @@ require([
      var ajaxtriggered = false;
 
 
-
-
-
     window.resetCartPageView = function(){
         window.cartHist = new Array();
         window.updatePartitionsFromScratch();

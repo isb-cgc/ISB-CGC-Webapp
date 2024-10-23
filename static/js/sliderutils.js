@@ -49,17 +49,17 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'utils',
+    'base',
     'assetscore',
     'assetsresponsive',
     'tablesorter'
-], function($, jqueryui, bootstrap, session_security, _, utils) {
+], function($, jqueryui, bootstrap, session_security, _, base) {
 
 
 });
 
 // Return an object for consts/methods used by most views
-define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
+define(['filterutils','jquery', 'base'], function(filterutils, $, base) {
 
     const FLOAT_SLIDERS = ["Sphericity_quant"];
     const ANONYMOUS_SLIDERS = {};
@@ -398,7 +398,6 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
 
     return {
-
-
-    };
+           FLOAT_SLIDERS: FLOAT_SLIDERS
+          }
 });

@@ -65,17 +65,17 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'utils',
+    'base',
     'assetscore',
     'assetsresponsive',
     'tablesorter'
-], function(filterutils, $, jqueryui, tippy, bootstrap, session_security, _, utils) {
+], function(filterutils, $, jqueryui, tippy, bootstrap, session_security, _, base) {
 
 
 });
 
 // Return an object for consts/methods used by most views
-define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tippy, utils) {
+define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tippy, base) {
 
     var seriesTblOffset = 0;
     var seriesTblLimit = 0;

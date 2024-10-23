@@ -27,7 +27,8 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
         tablesorter:'libs/jquery.tablesorter.min',
-        filterutils:'filterutils'
+        filterutils:'filterutils',
+        sliderutils:'sliderutils'
 
     },
     shim: {
@@ -38,32 +39,34 @@ require.config({
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
-        'filteryutils':['jquery']
+        'filteryutils':['jquery'],
+        'sliderutils': ['jquery']
 
     }
 });
 
 // Set up common JS UI actions which span most views
 require([
+    'sliderutils',
     'filterutils',
     'jquery',
     'jqueryui',
     'bootstrap',
     'session_security',
     'underscore',
-    'utils',
+    'base',
     'assetscore',
     'assetsresponsive',
     'tablesorter'
-], function(filterutils, $, jqueryui, bootstrap, session_security, _, utils) {
+], function(sliderutils,filterutils, $, jqueryui, bootstrap, session_security, _, base) {
 
 
 });
 
 // Return an object for consts/methods used by most views
-define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
+define(['sliderutils','filterutils','jquery', 'base'], function(sliderutils,filterutils, $, base) {
 
-    const FLOAT_SLIDERS = filterutils.FLOAT_SLIDERS;
+    const FLOAT_SLIDERS = sliderutils.FLOAT_SLIDERS;
     var plotLayout = {
         title: '',
         autosize: true,
