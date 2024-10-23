@@ -71,7 +71,9 @@ target/
 .env
 *.env
 !sample.env
-scripts/metadata_featdef_tables.sql
+
+*.sql
+
 *secrets.txt
 
 # dummy datasets
@@ -98,7 +100,6 @@ certs/*
 saml/*
 *.key
 *.crt
-*.pem
 tmp*
 *.b64
 

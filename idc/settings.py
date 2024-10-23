@@ -189,7 +189,7 @@ SITE_ID = 2
 
 if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
-    SITE_ID = 3
+    SITE_ID = int(os.environ.get('SITE_ID', '3'))
 
 def get_project_identifier():
     return BIGQUERY_PROJECT_ID
@@ -290,8 +290,10 @@ STATICFILES_DIRS = (
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+
 )
+
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
