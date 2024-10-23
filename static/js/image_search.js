@@ -923,7 +923,6 @@ require([
                 localStorage.remove("maxStudies");
             }
         }
-
     }
 
     window.onpageshow = function (){
@@ -935,8 +934,6 @@ require([
         else {
             updatecartedits();
         }
-
     }
-
 });
 

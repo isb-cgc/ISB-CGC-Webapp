@@ -61,8 +61,6 @@ require([
     'assetsresponsive',
 ], function($, jqueryui, tippy, base) {
 
-
-
     A11y.Core();
 
     var downloadToken = new Date().getTime();
@@ -106,8 +104,6 @@ require([
         $('#export-manifest-form').find('input[name="mxstudies"]').val(mxstudies);
         $('#export-manifest-form').append('<input type="hidden" name="mxseries">')
         $('#export-manifest-form').find('input[name="mxseries"]').val(mxseries);
-
-
         let file_name = $('input[name="file_name"]');
         file_name.attr("name-base",name_base);
 
@@ -183,12 +179,11 @@ require([
         }
     });
 
-
     var reset_after_cart = function(){
         $('#export-manifest-modal').find('input[name="from_cart"]').remove();
       $('#export-manifest-modal').find('input[name="partitions"]').remove();
       $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
-      $('.modal-title').text('Export Cohort Manifest');
+      $('.modal-title').text('Export Manifest');
     }
 
     $('#export-manifest-modal').on('hidden.bs.modal', function() {
@@ -204,15 +199,12 @@ require([
       $('#manifest-source').text('manifest');
     });
 
-
     var reset_after_mini = function(){
         $('#export-manifest-modal').find('input[name="mini"]').remove();
         $('#export-manifest-modal').find('input[name="uid"]').remove();
         $('#export-manifest-modal').find('input[name="crdc_uid"]').remove();
         $('#export-manifest-modal').find('input[name="aws"]').remove();
         $('#export-manifest-modal').find('input[name="gcs"]').remove();
-
-
         var filt_str = $('#export-manifest-form').find('input[name="filters"]').val()
         var filters=JSON.parse(filt_str);
         if ('StudyInstanceUID' in filters){
@@ -223,19 +215,13 @@ require([
         }
     };
 
-
     $('.get-manifest').on('click', function(e) {
+        if(($(this).attr('data-export-type') === 's5cmd' || $(this).attr('data-export-type') === 'idc_index')
+            &&  $(this).hasClass('iscart')) {
+            update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries);
+        }
         download_manifest($(this).attr("data-export-type"), $(this), e)
     });
-
-    $('#download-s5cmd, #download-idc-index').on('click', function(e) {
-        if ($(this).hasClass('iscart')){
-            update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries)
-        }
-        download_manifest("s5cmd", $(this), e)
-    });
-
-
 
     var download_manifest = function(export_type, clicked_button, e) {
         let manifest_type = (export_type === 'bq' ? 'bq-manifest' : 'file-manifest');
@@ -479,10 +465,4 @@ require([
         allowHTML: true,
         target: '.version-disabled'
     });
-
-    return{
-        update_export_modal_for_cart: update_export_modal_for_cart,
-        download_manifest: download_manifest
-    }
-
 });

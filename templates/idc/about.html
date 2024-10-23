@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{%  load compile_static %}
-
 
 {% block title %}
     IDC | About
@@ -135,5 +133,4 @@
     <script>
     var showWarning = true;
     </script>
-    <script src="{% static 'jsx/try.es6'|compile %}"></script>
 {% endblock %}
