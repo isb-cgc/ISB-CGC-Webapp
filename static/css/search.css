@@ -386,8 +386,13 @@ tr {
     display: table;
     width: 100%; }
 
-#projects_table td.ckbx, #projects_table_head th.ckbx,
-#cases_table_head th.ckbx, #cases_table td.ckbx,
+#projects_table td.cartnum, #projects_table_head th.cartnum{
+    width: 5%;
+    word-wrap: break-word;
+}
+
+#projects_table td.ckbx:not(.cartnum), #projects_table_head th.ckbx:not(.cartnum),
+#cases_table_head th.ckbx, #cases_table_head th.shop, #cases_table td.ckbx, #cases_table td.shop,
 #series_table_head th.ckbx, #series_table td.ckbx,
 #studies_table_head th.ckbx, #studies_table td.ckbx {
     width: 5%;
@@ -409,26 +414,31 @@ tr {
 
 #studies_table_head th.project-name, th.case-id,
 #studies_table td.project-name, td.case-id {
-    width: 13%;
+    width: 12%;
 }
 
 #studies_table_head th.study-id,
 #studies_table td.study-id {
-    width: 17%;
+    width: 16%;
 }
 
 #studies_table_head th.study-date,
 #studies_table td.study-date {
-    width: 9%;
+    width: 7%;
 }
 
 #studies_table_head th.study-description,
 #studies_table td.study-description {
-    width:32%;
+    width:29%;
+}
+
+#studies_table_head th.numrows,
+#studies_table td.numrows {
+    width:10%;
 }
 #studies_table_head th.open-viewer,
 #studies_table td.open-viewer {
-    width:5%;
+    width:4%;
     /* This is necessary to make sure the 2 icons remain together, lined up. */
     min-width: 70px;
 }
@@ -553,8 +563,14 @@ svg {
     margin-bottom: 18px;
 }
 
+
 .more-checks {
     min-height: 19px;
+}
+
+
+.fa-car-shopping {
+    margin: auto;
 }
 
 .viewer-toggle {
@@ -574,6 +590,196 @@ svg {
 .viewer-toggle .viewer-menu a:hover {
     background-color: #d5d5d5;
 }
+
+td.cartnum.incart{
+    background-color:grey;
+    color:white;
+}
+
+
+
+tr:not(.someInCart).ckbx:has(.fa-cart-shopping){
+    background-color:transparent;
+}
+.cart-info-tip.case1{
+    background-color:green;
+}
+
+
+.cart-info-tip.case2{
+    background-color:yellow;
+}
+
+.cart-info-tip.case3{
+    background-color:transparent;
+}
+
+#projects_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping
+{
+    background-color:green;
+}
+
+#projects_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping
+{
+    background-color:yellow;
+}
+
+
+#cases_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping
+{
+    background-color:green;
+}
+
+#cases_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping
+{
+    background-color:yellow;
+}
+
+#studies_table tr.someInCart:not(.extraInFilt) .ckbx .fa-cart-shopping
+{
+    background-color:green;
+}
+
+#studies_table tr.someInCart.extraInFilt .ckbx .fa-cart-shopping
+{
+    background-color:yellow;
+}
+
+
+#series_table tr.someInCart .ckbx .fa-cart-shopping
+{
+    background-color:green;
+
+}
+
+.curfilt {
+  background-color: lightgrey;
+}
+
+.filts:not(.curfilt):hover{
+    text-decoration:underline;
+                    }
+
+
+
+.filtermoddisp{
+    display:block !important;
+    visibility: visible;
+    z-index:1050;
+}
+
+
+.filternotdisp{
+
+    z-index:-1;
+}
+li.cartlist{
+    display: list-item !important;
+  list-style-position: inside !important;
+}
+
+.modal-dialog {
+  height: fit-content;
+  max-width: 960px; // Optional, maximum width
+}
+
+
+
+.ckbx:has(.fa-caret-right){
+  font-size:18px;
+    text-align:center;
+    vertical-align: middle !important;
+}
+
+
+/*
+ .ckbx:has(.fa-cart-shopping) {
+    #border: solid 1px #000;
+    border-radius: 12px;
+    #padding: 5px;
+     font-size: 18px;
+     text-align:center;
+    box-shadow: inset 0 0 0 0.5px grey;
+     vertical-align: middle !important;
+
+}*/
+
+ .ckbx .fa-cart-shopping {
+    #border: solid 1px #000;
+    border-radius: 7px;
+    padding: 4px 5px;
+     font-size: 13px;
+     text-align:center;
+    box-shadow: inset 0 0 0 0.5px grey;
+     vertical-align: middle !important;
+
+}
+
+ .cart-info-tip {
+ #border: solid 1px #000;
+    border-radius: 7px;
+    padding: 4px 5px;
+     font-size: 13px;
+     text-align:center;
+    box-shadow: inset 0 0 0 0.5px grey;
+     vertical-align: middle !important;
+
+ }
+
+ .cart-info-div{
+ margin-bottom:10px !important;
+ }
+
+
+ tbody .cartnum {
+     #font-size: 11.2px !important;
+     #font-weight: 500 !important;
+     #border-radius: 7px !important;
+     #line-height: 16px !important;
+     #text-align: right !important;
+     #padding-botton: 2px !important;
+     #padding-left: 5px !important;
+     #padding-right: 5px !important;
+     #padding-top: 2px !important;
+     #text-size-adjust: 100% !important;
+     #padding: 2px 5px !important;
+
+     #color:white;
+     #background-color: #818181 !important;
+     #padding-top: 20px;
+     #vertical-align: middle !important;
+
+ }
+
+
+ .cartnum_style {
+    background-color: #818181;
+    color: white;
+    color: white;
+    border-radius: 7px;
+    font-size: 11.2px;
+    padding: 4px 5px;
+    text-align: right;
+     vertical-align: middle;
+     font-weight:500;
+}
+
+
+
+
+ .cohort-summary{
+     font-size: 16px !important;
+     color: #2A537A !important;
+     padding-left: 2px !important;
+
+
+ }
+
+ thead .cart-info {
+     text-align: center !important;
+     font-size: 18px;
+
+ }
 
 #export-manifest-modal .modal-dialog {
     min-width: 610px;

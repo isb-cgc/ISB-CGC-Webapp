@@ -1,0 +1,27 @@
+<!-- Export Manifest Modal -->
+<div class="modal fade" id="cart-description-modal" tabindex="-1" role="dialog"
+     aria-labelledby="exportManifestModal" aria-hidden="true" data-file-timestamp="{% now "Ymd_Gis" %}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exportManifestModal">Cart Construction Details</h4>
+
+                <div class="form-group list-group">
+                        {% csrf_token %}
+                </div>
+            </div>
+            <div class="modal-body">
+                  stuff here
+                </div>
+
+            <!--
+            <form id="export-manifest-form" method="GET" action="/explore/manifest/">
+                <div class="modal-body">
+                  stuff here
+                </div>
+
+            </form> -->
+        </div>
+    </div>
+</div>

@@ -27,7 +27,7 @@ require.config({
         assetsresponsive: 'libs/assets.responsive',
         jquerydt: 'libs/jquery.dataTables.min',
         base: 'base',
-        imagesearch: 'image_search',
+        image_search: 'image_search',
         tippy: 'libs/tippy-bundle.umd.min',
         '@popperjs/core': 'libs/popper.min',
         session_security: 'session_security/script'
@@ -48,21 +48,66 @@ require.config({
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
         'session_security': ['jquery'],
-        'imagesearch': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
+        'image_search': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
     }
 });
 
 require([
+    'image_search',
+    'tables',
     'jquery',
     'tippy',
     'base', // This must always be loaded
-    'imagesearch',
     'jqueryui',
     'jquerydt',
     'bootstrap',
-    'tablesorter'
-], function ($, tippy, base) {
+    'tablesorter',
+
+], function (image_search, tables,$, tippy, base) {
+
+    $(document).ajaxStart(function(){
+        $('.spinner').show();
+    });
+
+    $(document).ajaxStop(function(){
+        $('.spinner').hide();
+    });
+
+    window.selProjects= new Object();
+    window.glblcart = new Object();
+    window.partitions= new Array();
+
+    //sesssionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
+    window.partitions = new Array();
+
+
+
+    window.studymp=new Object();
+    window.projstudymp = new Object();
+    window.casestudymp = new Object();
+    window.collection = JSON.parse(document.getElementById('collections').textContent);
+    var lst = Object.keys(window.collection).sort();
+    window.collectionData = new Array();
+    window.programs = JSON.parse(document.getElementById('programs').textContent);
+    var ind = 0;
+
+    for (program in window.programs) {
+        for (project in window.programs[program]['projects']) {
+            var col = project;
+            var disp = window.programs[program]['projects'][project]['display'];
+            var val = window.programs[program]['projects'][project]['val'];
+            window.collectionData.push([col, disp, val, val]);
+            window.selProjects[project]=new Object();
+        }
+    }
+
+    window.casesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+    window.studyTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+    window.seriesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+
+
     var saving_cohort = false;
+
 
     $('#external-web-warning').on('show.bs.modal', function(){
         $('#collection-modal').hide();
@@ -230,6 +275,7 @@ require([
         $('#collection-modal').removeClass('in');
         $('#collection-modal').css("display","none");
     });
+
 /*
     tippy.delegate('table#proj_table', {
         content: function(reference) {
@@ -252,6 +298,52 @@ require([
 */
     const temp='<html><strong>now</strong></html>';
 
+    //tippy.delegate('#projects_table_head')
+    tippy.delegate('#projects_table_head', {
+        interactive: true,
+        target:'.cart-info',
+        allowHTML:true,
+        theme:'light',
+        placement:'right',
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid  fa-cart-shopping shopping-cart " style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>All series from this collection are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid  fa-cart-shopping shopping-cart case2" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>Some series from this collection are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid  fa-cart-shopping shopping-cart case3" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>No series from this collection are in the cart</span></div>'+
+            '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to studies with the given collection that match the current filter</div>'
+    });
+
+    tippy.delegate('#cases_table_head', {
+        interactive: true,
+        target:'.cart-info',
+        allowHTML:true,
+        theme:'light',
+        placement:'right',
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid  fa-cart-shopping shopping-cart " style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>All series from this case are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid  fa-cart-shopping shopping-cart case2" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>Some series from this case are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid  fa-cart-shopping shopping-cart case3" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>No series from this case are in the cart</span></div>'+
+            '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to studies within the given case that match the current filter</div>'
+    });
+
+    tippy.delegate('#studies_table_head', {
+        interactive: true,
+        target:'.cart-info',
+        allowHTML:true,
+        theme:'light',
+        placement:'right',
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid  fa-cart-shopping shopping-cart " style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>All series from this study are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid  fa-cart-shopping shopping-cart case2" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>Some series from this study are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid  fa-cart-shopping shopping-cart case3" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>No series from this study are in the cart</span></div>'
+    });
+
+    tippy.delegate('#series_table_head', {
+        interactive: true,
+        target:'.cart-info',
+        allowHTML:true,
+        theme:'light',
+        placement:'right',
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid  fa-cart-shopping shopping-cart " style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>This series is in the cart</span></div>'+
+             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid  fa-cart-shopping shopping-cart case3" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>This series is not the cart</span></div>'
+    });
+
     tippy('.case-info', {
         interactive: true,
         content: 'The Case ID attribute in the portal corresponds to the DICOM Patient ID attribute'
@@ -273,6 +365,13 @@ require([
     tippy('.tooltip_chart_info',{
         content: 'Counts shown below are the number of cases (or patients) for each attribute value. Counts for each attribute (e.g. Modality) '+
             'are unchanged by the values (e.g. PET) selected (checked) for that attribute. They only change based on the values selected for all other attributes.',
+        theme: 'light',
+        placement: 'right-end',
+        arrow: false
+    });
+
+    tippy('.filterset_info',{
+        content: 'Go ask Bill',
         theme: 'light',
         placement: 'right-end',
         arrow: false
@@ -319,7 +418,38 @@ require([
         target: ['.no-viewer-tooltip', '.not-viewable'],
         maxWidth: 130
     });
+   /*
+    tippy.delegate('.projects-table', {
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        target: '.shopping-cart-holder',
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        trigger: "click",
+        maxWidth: 85
+    });
+    */
 
+    window.sqlinstance = tippy('.bq-string-copy',{
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        trigger: 'disabled',
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        maxWidth: 85
+    });
     tippy.delegate('.series-table', {
         content: 'Copied!',
         theme: 'blue',
@@ -426,4 +556,6 @@ require([
     $('.download-link').on('click', function(){
         $('#download-images').modal("hide");
     });
+
+
 });
