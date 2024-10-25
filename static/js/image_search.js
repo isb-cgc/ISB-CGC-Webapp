@@ -618,7 +618,6 @@ require([
         }
     }
 
-
     window.changePage = function(wrapper){
         var elem=$('#'+wrapper);
         var valStr = elem.find('.dataTables_controls').find('.goto-page-number').val();
@@ -631,7 +630,6 @@ require([
         catch(err){
            console.log(err);
         }
-
     }
 
 
@@ -662,7 +660,6 @@ require([
                     studymp[studyid] = []
                 }
                 studymp[studyid].push(seriesid)
-
             }
             if ("studymp" in sessionStorage) {
                 var studymp = JSON.parse(sessionStorage.getItem("studymp"));
@@ -674,8 +671,6 @@ require([
                 window.seriesdel = JSON.parse(sessionStorage.getItem("seriesdel"));
 
             }
-
-
 
             cartutils.updateGlobalCart(false, studymp, 'series')
             window.updateTableCounts(1);
@@ -700,8 +695,6 @@ require([
                 $('#export-manifest-cart').attr('disabled','disabled');
                 $('#view-cart').attr('disabled','disabled');
             }
-
-
         }
         else if ("cartHist" in localStorage){
             localStorage.removeItem("cartHist");
@@ -713,13 +706,12 @@ require([
             sessionStorage.removeItem("studymp");
         }
         if ("seriesdel" in sessionStorage) {
-                sessionStorage.removeItem("seriesdel");
-            }
+            sessionStorage.removeItem("seriesdel");
+        }
     }
 
      $(document).ready(function () {
         window.pageid = Math.random().toString(36).substr(2,8);
-
 
         tables.initializeTableData();
         filterItemBindings('access_set');
@@ -793,9 +785,8 @@ require([
         if (!setCartHist){
               window.cartHist = new Array();
         }*/
-         window.cartHist = new Array();
+        window.cartHist = new Array();
         window.cartHist.push(cartSel);
-
 
         /*
         if ('cartHist' in localStorage){
@@ -805,7 +796,6 @@ require([
             filterutils.load_preset_filters();
         }
         */
-
 
         filterutils.load_preset_filters();
         $('.hide-filter-uri').on('click',function() {
@@ -845,54 +835,47 @@ require([
     });
 
     window.onbeforeunload = function(){
+        // User history can only be saved on the database if there is a user
+        if(user_is_auth) {
+            let hs = new Object();
+            hs['hz'] = new Object();
+            hs['sorter'] = new Object();
+            $('body').find('.hide-zeros').each(function(){
+                let pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
+                let pid = pfar[0].id;
+                let checked = pfar.find('.hide-zeros')[0].checked;
+                hs['hz'][pid] = checked;
+            });
 
-        console.log("beforeunload called");
-        let hs = new Object();
-        hs['hz'] = new Object();
-        hs['sorter'] = new Object();
-        $('body').find('.hide-zeros').each(function(){
-            let pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
-            let pid = pfar[0].id;
-            let checked = pfar.find('.hide-zeros')[0].checked;
-            hs['hz'][pid] = checked;
-        });
+            $('body').find('.sorter').each(function(){
+                let pfar = $(this).closest('.collection-list, .list-group-item__body ');
+                let pid = pfar[0].id;
+                let sort = $(this).find('input:checked').val()
+                hs['sorter'][pid] = sort;
+            });
 
-        $('body').find('.sorter').each(function(){
-            let pfar = $(this).closest('.collection-list, .list-group-item__body ');
-            let pid = pfar[0].id;
-            let sort = $(this).find('input:checked').val()
-            hs['sorter'][pid] = sort;
-        });
+            let url = encodeURI('/uihist/')
+            let nhs = {'his':JSON.stringify(hs)}
+            let csrftoken = $.getCookie('csrftoken');
+            let deferred = $.Deferred();
 
-
-        let url = encodeURI('/uihist/')
-        let nhs = {'his':JSON.stringify(hs)}
-        let csrftoken = $.getCookie('csrftoken');
-        let deferred = $.Deferred();
-
-        $.ajax({
-                url: url,
-                data: nhs,
-                dataType: 'json',
-                type: 'post',
-                contentType: 'application/x-www-form-urlencoded',
-                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-                success: function (data) {
-                },
-                error: function(data){
-                    console.debug('Error saving ui preferences.');
-                },
-                complete: function(data) {
-                    deferred.resolve();
-                }
-        });
-
-        // was saving cart data in local storage. Not feasible to maintain global cart
-        //cartutils.setLocalFromCartHistWin();
-        //sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
-        //localStorage.setItem("cartDetails", JSON.stringify(window.cartDetails));
-        //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
-        //localStorage.setItem("src", "explore_page");
+            $.ajax({
+                    url: url,
+                    data: nhs,
+                    dataType: 'json',
+                    type: 'post',
+                    contentType: 'application/x-www-form-urlencoded',
+                    beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                    success: function (data) {
+                    },
+                    error: function(data){
+                        console.debug('Error saving ui preferences.');
+                    },
+                    complete: function(data) {
+                        deferred.resolve();
+                    }
+            });
+        }
 
         var maxSeries=0;
         var maxStudies=0;
@@ -904,7 +887,6 @@ require([
                 maxStudies = maxStudies + window.selProjects[proj]['mxstudies'];
                 projA.push(proj);
             }
-
         }
 
         if (projA.length>0){
@@ -926,7 +908,6 @@ require([
     }
 
     window.onpageshow = function (){
-        //alert('show');
         if ("cartcleared" in localStorage){
             localStorage.removeItem("cartcleared");
             window.resetCart();
