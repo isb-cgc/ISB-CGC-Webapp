@@ -144,15 +144,15 @@ require([
                     let curInd = window.cartHist.length-1;
                     if (cartHist[curInd].selections.length>0){
                         let cartSel = new Object();
-                        cartSel['filter']= parsedFiltObj;
+                        cartSel['filter']= JSON.parse(JSON.stringify(parsedFiltObj));
                         cartSel['selections']= new Array();
                         cartSel['partitions']= new Array();
                         cartSel['pageid'] = window.pageid;
                         window.cartHist.push(cartSel);
                     }
                     else{
-                        window.cartHist[curInd]['filter'] = parsedFiltObj;
-                        window.cartHist[curInd]['pageid'] = parsedFiltObj;
+                        window.cartHist[curInd]['filter'] = JSON.parse(JSON.stringify(parsedFiltObj));
+                        window.cartHist[curInd]['pageid'] = window.pageid;
                     }
                     //cartutils.setLocalFromCartHistWin();
                     if(data.total <= 0) {
@@ -188,8 +188,8 @@ require([
                         $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
                         $('#download-s5cmd').removeAttr('disabled');
                     }
-                    $('input[name="async_download"]').val(
-                        (data.total > 0 && data.totals.SeriesInstanceUID > 65000) ? "True" : "False"
+                    $('input[name="async_download"]').val("True"
+                        //(data.total > 0 && data.totals.SeriesInstanceUID > 65000) ? "True" : "False"
                     );
                     if (file_parts_count > display_file_parts_count) {
                         $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
