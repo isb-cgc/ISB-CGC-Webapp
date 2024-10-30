@@ -149,8 +149,7 @@ require([
                         cartSel['partitions']= new Array();
                         cartSel['pageid'] = window.pageid;
                         window.cartHist.push(cartSel);
-                    }
-                    else{
+                    } else {
                         window.cartHist[curInd]['filter'] = parsedFiltObj;
                         window.cartHist[curInd]['pageid'] = parsedFiltObj;
                     }
@@ -166,11 +165,8 @@ require([
                         $('.zero-results').remove();
                         $('#export-manifest, #save-cohort-btn').removeAttr('disabled');
                     }
-                    let file_parts_count = (is_cohort ? cohort_file_parts_count : data.totals.file_parts_count);
-                    let display_file_parts_count = (is_cohort ? cohort_display_file_parts_count : data.totals.display_file_parts_count);
+                    let async_download = (data.total > 0 && data.totals.SeriesInstanceUID > 65000);
                     let isFiltered = Boolean($('#search_def p').length > 0);
-
-
                     $('#search_def_stats').attr('filter-series-count',(data.total > 0 ? data.totals.SeriesInstanceUID: 0));
                     let totals = data.totals;
                     $('#search_def_stats').html(totals.PatientID.toString() +
@@ -178,56 +174,16 @@ require([
                             " Studies, and " + totals.SeriesInstanceUID.toString() +
                             " Series in this cohort. " +
                             "Size on disk: " + totals.disk_size);
-
-                    if(data.total > 0 && data.totals.SeriesInstanceUID > 65000) {
-                        $('#s5cmd-max-exceeded').show();
-                        $('#download-s5cmd').attr('disabled','disabled');
-                        $('#s5cmd-button-wrapper').addClass('manifest-disabled');
-                    } else {
-                        $('#s5cmd-max-exceeded').hide();
-                        $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
-                        $('#download-s5cmd').removeAttr('disabled');
-                    }
                     $('input[name="async_download"]').val(
-                        (data.total > 0 && data.totals.SeriesInstanceUID > 65000) ? "True" : "False"
+                        async_download ? "True" : "False"
                     );
-                    if (file_parts_count > display_file_parts_count) {
-                        $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
-                        $('#file-manifest-max-exceeded').show();
-                        $('#file-export-option input').prop('disabled', 'disabled');
-                        $('#file-export-option input').prop('checked', false);
-                        $('#file-manifest').hide();
-                        $('#file-part-select-box select').attr('disabled','disabled');
-                        $('.file-manifest-button-wrapper a').attr('disabled','disabled');
-                        $('.file-manifest-button-wrapper').addClass('manifest-disabled');
-                    } else {
-                        $('#file-manifest-max-exceeded').hide();
-                        $('#file-manifest').show();
-                        $('#file-part-select-box select').removeAttr('disabled');
-                        $('.file-manifest-button-wrapper a').removeAttr('disabled');
-                        $('.file-manifest-button-wrapper').removeClass('manifest-disabled');
-                        var select_box_div = $('#file-part-select-box');
-                        var select_box = select_box_div.find('select');
-                        if (file_parts_count > 1) {
-                            select_box_div.show();
-                            for (let i = 0; i < display_file_parts_count; ++i) {
-                                select_box.append($('<option/>', {
-                                    value: i,
-                                    text: "File Part " + (i + 1)
-                                }));
-                            }
-                        } else {
-                            select_box_div.hide();
-                        }
-                    }
                     if (('filtered_counts' in data) && ('origin_set' in data['filtered_counts']) &&
                         ('access' in data['filtered_counts']['origin_set']['All']['attributes']) &&
                         ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) &&
                         (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                         $('#search_def_access').removeClass('notDisp');
                         $('.access_warn').removeClass('notDisp');
-                    }
-                    else {
+                    } else {
                         $('#search_def_access').addClass('notDisp');
                         $('.access_warn').addClass('notDisp');
                     }
@@ -244,7 +200,7 @@ require([
                         $('#search_def_stats').addClass('notDisp');
                     }
                     if (is_cohort) {
-                        ((file_parts_count > display_file_parts_count) && !user_is_social)  && $('#need-social-account').show();
+                        (async_download && !user_is_social)  && $('#need-social-account').show();
                     } else {
                         data.total > 0 && $('#save-cohort-btn').removeAttr('disabled');
                         if (user_is_auth) {
@@ -292,11 +248,9 @@ require([
                                 }
                             }
                         }
-
                     } else {
                         $('#search_derived_set').addClass('disabled');
                     }
-
 
                     for (var i = 0; i < derivedAttrs.length; i++) {
                         filterutils.updateFilterSelections(derivedAttrs[i], {});
@@ -320,15 +274,10 @@ require([
                         collFilt = parsedFiltObj['collection_id'];
                         var ind = 0;
                     }
-
-                }
-
-                catch(err){
+                } catch(err){
                     console.log('error processing data');
                     alert("There was an error processing the server data. Please alert the systems administrator")
-                }
-
-                finally {
+                } finally {
                     deferred.resolve([collFilt, data.origin_set.All.attributes.collection_id, data.stats, data.totals]);
                 }
             },
@@ -342,7 +291,6 @@ require([
         });
         return deferred.promise();
     };
-
 
     window.resort = function(filterCat){
         updateFilters(filterCat,{},false, false);
@@ -365,9 +313,7 @@ require([
         addSliders('tcga_clinical',false, hideElem.checked,'tcga_clinical.');
     }
 
-
     window.displayInfo = function(targ) {
-
         let collection_id=$(targ).attr('value');
         let collectionDisp=$(targ).data('filterDisplayVal')
 
@@ -395,9 +341,7 @@ require([
         $('#collection-modal').css({position:"absolute", top: Math.max((pos.top-height),0), left: pos.left })
     }
 
-
     var filterItemBindings = function (filterId) {
-
         $('#' + filterId).find('.join_val').on('click', function () {
             var attribute = $(this).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list')[0].id;
             if (filterObj.hasOwnProperty(attribute) && (window.filterObj[attribute]['values'].length>1)){
@@ -464,10 +408,6 @@ require([
           }
         });
     };
-
-
-
-
 
     const save_anonymous_selection_data = function() {
         let groups = [];

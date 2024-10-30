@@ -90,7 +90,6 @@
         window.collectionData = new Array();
         const stats = JSON.parse(document.getElementById('stats').textContent)
         window.programs = JSON.parse(document.getElementById('programs').textContent);
-
         var cohort_filters = {{ cohort_filters|safe }};
         var is_cohort = true;
         var cohort_version = "{{ cohort_version|safe }}";
@@ -99,7 +98,6 @@
         var cohort_file_parts_count = {{ cohort_file_parts_count }};
         var cohort_display_file_parts_count = {{ cohort_display_file_parts_count }};
         var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
-        var session_id = {{ request.session.session_key }}
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
