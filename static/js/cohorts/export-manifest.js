@@ -106,7 +106,7 @@ require([
         $('#export-manifest-form').find('input[name="mxseries"]').val(mxseries);
 
         $('input[name="async_download"]').val(
-            ((!(typeof(window.totseries) == "undefined")) && parseInt(window.totseries) > 650000) ? "True" : "False"
+            ((!(typeof(window.totseries) == "undefined")) && parseInt(window.totseries) > 65000) ? "True" : "False"
         );
 
         let file_name = $('input[name="file_name"]');
