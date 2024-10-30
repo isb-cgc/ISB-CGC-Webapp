@@ -188,8 +188,8 @@ require([
                         $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
                         $('#download-s5cmd').removeAttr('disabled');
                     }
-                    $('input[name="async_download"]').val("True"
-                        //(data.total > 0 && data.totals.SeriesInstanceUID > 65000) ? "True" : "False"
+                    $('input[name="async_download"]').val(
+                        (data.total > 0 && data.totals.SeriesInstanceUID > 65000) ? "True" : "False"
                     );
                     if (file_parts_count > display_file_parts_count) {
                         $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
