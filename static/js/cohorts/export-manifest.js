@@ -107,6 +107,10 @@ require([
         $('#export-manifest-form').append('<input type="hidden" name="mxseries">')
         $('#export-manifest-form').find('input[name="mxseries"]').val(mxseries);
 
+        $('input[name="async_download"]').val(
+            ((!(typeof(window.totseries) == "undefined")) && parseInt(window.totseries) > 650000) ? "True" : "False"
+        );
+
 
         let file_name = $('input[name="file_name"]');
         file_name.attr("name-base",name_base);
@@ -203,7 +207,6 @@ require([
       $('.modal-title').text('Export Manifest');
       $('#manifest-source').text('manifest');
     });
-
 
     var reset_after_mini = function(){
         $('#export-manifest-modal').find('input[name="mini"]').remove();

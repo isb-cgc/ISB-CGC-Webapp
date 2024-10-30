@@ -682,6 +682,14 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             input.name = "partitions";
             input.value = JSON.stringify(partitions);
             form.appendChild(input);
+
+            var gtotals = getGlobalCounts()
+            var input = document.createElement('input');
+            input.name = "totseries";
+            input.value = gtotals[3];
+            form.appendChild(input);
+
+
             var input = document.createElement('input');
             input.name = "mxseries";
             input.value = mxNumSeries;
@@ -1246,6 +1254,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
                              var txt =$('#cart-table_info').text().replace('entries','studies');
                              $('#cart-table_info').text(txt);
+                             window.totalCartStudies = parseInt(data['numFound'])
                              //var html = $('.dataTables_length').html().replace('entries','studies');
                              //$('.dataTables_length').html(html);
 
