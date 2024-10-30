@@ -141,14 +141,12 @@
                 }
             }
         }
-
     </script>
     <script>
         var is_cohort = false;
         var showWarning = true;
         var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
         var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
-        //var session_id = {{ request.session.session_key }}
 
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>

@@ -146,17 +146,6 @@ require([
 
     }
 
-    /*
-    $('#export-manifest-cart').on('click', function(){
-        cartutils.getCartData(0,window.mxseries,"StudyInstanceUID", "SeriesInstanceUID")
-    })
-    */
-
-/*
-     $('#download-s5cmd').on('click', function(e) {
-        exportmanifest.download_manifest("s5cmd", $(this), e)
-    });
-*/
      $(document).ready(function () {
 
          let navelem = $("a[href='/explore/']");

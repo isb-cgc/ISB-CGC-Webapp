@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2021, Institute for Systems Biology
+# Copyright 2015-2024, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ def news_page(request):
 
 
 # User details page
-#@login_required
+@login_required
 def user_detail(request, user_id):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
@@ -222,7 +222,7 @@ def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
 
-#@login_required
+@login_required
 def save_ui_hist(request):
     status = 200
     try:
@@ -243,28 +243,23 @@ def save_ui_hist(request):
 
     return JsonResponse({}, status=status)
 
-
-
-@login_required
-def getCartData(request):
-    response = {}
-    status = 200
-    sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-        active=True, source_type=DataSource.SOLR,
-        aggregate_level="StudyInstanceUID"
-    )
-
+# @login_required
+# def getCartData(request):
+#     response = {}
+#     status = 200
+#     sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+#         active=True, source_type=DataSource.SOLR,
+#         aggregate_level="StudyInstanceUID"
+#     )
 
 #def compcartsets(carthist, sel):
-  
 
-def cartsets(carthist):
-    cartsets = []
-
-    for cartfiltset in carhist:
-        for selection in cartfiltset:
-            sel = selection['sel']
-
+# def cartsets(carthist):
+#     cartsets = []
+#
+#     for cartfiltset in carhist:
+#         for selection in cartfiltset:
+#             sel = selection['sel']
 
 
 def cart(request):
@@ -279,14 +274,7 @@ def cart(request):
        offset = json.loads(req.get(offset, 0))
 
        get_cart_data(filtlist,partitions,limit, offset)
-
-
-
-
-
-
        i=1
-
 
     except Exception as e:
         logger.error("[ERROR] While attempting to populate the table:")
@@ -300,9 +288,8 @@ def cart(request):
     return JsonResponse(response, status=status)
 
 
-
-# returns various metadata mappings for selected projects used in calculating cart selection counts 'on the fly' client side
-#@login_required
+# returns various metadata mappings for selected projects used in calculating cart selection
+# counts 'on the fly' client side
 def studymp(request):
 
     response = {}
@@ -334,12 +321,10 @@ def studymp(request):
        mxStudies= int(req.get('mxstudies'))
        limit = int(req.get('limit', mxStudies))
        offset = int(req.get('offset',0))
-    
 
        casestudymp = dict()
        studymp = dict()
        projstudymp = dict()
-
 
        idsEx = get_collex_metadata(
                     filters, ['collection_id', 'PatientID','StudyInstanceUID', 'SeriesInstanceUID'], record_limit=limit, sources=sources, offset=offset,
@@ -370,8 +355,6 @@ def studymp(request):
        response['casestudymp'] = casestudymp
        response['projstudymp'] = projstudymp
 
-
-
     except Exception as e:
         logger.error("[ERROR] While attempting to get studymp:")
         logger.exception(e)
@@ -384,8 +367,6 @@ def studymp(request):
     return JsonResponse(response, status=status)
 
 
-
-#@login_required
 def populate_tables(request):
     response = {}
     status = 200
@@ -429,12 +410,10 @@ def populate_tables(request):
             id__in=versions.get_data_sources().filter(source_type=DataSource.SOLR).values_list("id", flat=True)
         ).distinct()
 
-
         sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
             active=True, source_type=DataSource.SOLR,
             aggregate_level=aggregate_level
         )
-
 
         sortByField = True
         #idsReq=[]
@@ -443,7 +422,6 @@ def populate_tables(request):
 
         custom_facets_ex = {"tot_series": {"type": "terms", "field": "PatientID", "limit": limit,
                                         "facet": {"unique_series": "unique(SeriesInstanceUID)"}, "domain": {"query": "*.*"}}}
-
 
         if table_type =="collections":
             custom_facets = {"per_id": {"type": "terms", "field": "collection_id", "limit": limit,
@@ -458,7 +436,6 @@ def populate_tables(request):
             sort_arg = 'collection_id asc'
             sortByField= True
             sort="collection_id"
-
 
         if table_type == 'cases':
             custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": limit,
@@ -1102,7 +1079,7 @@ def test_page(request, mtch):
 
 
 # User dashboard, where saved cohorts (and, in the future, uploaded/indexed data) are listed
-#@login_required
+@login_required
 def dashboard_page(request):
     context = {'request': request}
 
