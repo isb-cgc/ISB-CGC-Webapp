@@ -162,7 +162,11 @@ require([
                            true
                        );
                         $('#export-manifest, #save-cohort-btn').attr('disabled', 'disabled');
-                    } else {
+                    }
+                    else if (ndic['filters']=="{}"){
+                        $('#export-manifest, #save-cohort-btn').attr('disabled', 'disabled');
+                    }
+                    else {
                         $('.zero-results').remove();
                         $('#export-manifest, #save-cohort-btn').removeAttr('disabled');
                     }
@@ -653,6 +657,8 @@ require([
 
      $(document).ready(function () {
         window.pageid = Math.random().toString(36).substr(2,8);
+
+        $('.tooltip_filter_info').hide();
 
         tables.initializeTableData();
         filterItemBindings('access_set');

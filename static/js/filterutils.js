@@ -67,12 +67,14 @@ define(['jquery', 'base'], function($, base) {
     const update_bq_filters = function() {
         let filters = parseFilterObj();
         if (Object.keys(filters).length <= 0) {
+            $('#export-manifest').attr("disabled", "disabled");
             $('.bq-string-copy').attr("disabled","disabled");
             $('.bq-string-display').attr("disabled","disabled");
             $('.bq-string-display').attr("title","Select a filter to enable this feature.");
             $('.bq-string').html("");
             $('#export-manifest-form input[name="filters"]').val("");
         } else {
+            $('#export-manifest').removeAttr("disabled");
             $('.bq-string-copy').removeAttr("disabled");
             $('.bq-string-display').removeAttr("disabled");
             $('.bq-string-display').attr("title","Click to display this filter as a BQ string.");
@@ -751,7 +753,6 @@ define(['jquery', 'base'], function($, base) {
 
         var isfiltered = true;
         var buttxt = '<button class="btn filter-type clear-filters" role="button" title="Select a filter to enable this feature."><i class="fa fa-rotate-left"></i></a> </button>';
-        var infotxt = '<i class="fa-solid fa-info-circle cohort-summary"></i>';
         var hasTcga = false;
         var tcgaColSelected = false;
         if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
@@ -877,7 +878,7 @@ define(['jquery', 'base'], function($, base) {
         }
         if (oStringA.length > 0) {
             var oString = oStringA.join(" AND");
-            document.getElementById("search_def").innerHTML = '<p>' + buttxt + oString + infotxt +'</p>';
+            document.getElementById("search_def").innerHTML = '<p>' + buttxt + oString + '</p>';
             document.getElementById('filt_txt').value=oString;
             $('#search_def').removeClass('notDisp');
 

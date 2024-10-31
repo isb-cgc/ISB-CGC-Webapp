@@ -65,11 +65,11 @@ require([
 
 ], function (image_search, tables,$, tippy, base) {
 
-    $(document).ajaxStart(function(){
+     $(document).ajaxStart(function(){
         $('.spinner').show();
     });
 
-    $(document).ajaxStop(function(){
+     $(document).ajaxStop(function(){
         $('.spinner').hide();
     });
 

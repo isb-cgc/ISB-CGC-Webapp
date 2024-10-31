@@ -168,7 +168,6 @@ require([
          window.filtergrp_lst = ret[1];
 
          window.pageid = Math.random().toString(36).substr(2, 8);
-         ajaxtriggered = true;
 
         // localStorage no longer used in keeping cart data
         /*

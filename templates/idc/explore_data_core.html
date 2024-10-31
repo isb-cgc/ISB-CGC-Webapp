@@ -7,6 +7,7 @@
         <div class="tab-content data-tab-content">
             <input id="number_ajax" type="hidden" value="0">
             <div class="spinner" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
+           <div class="spinner2" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
             <div id="lh_panel" class="tab-pane data-tab active flex_div" role="tabpanel">
                 <div class="col-lg-3 col-md-3 main_cols">
                     <div class="filter-panel panel data-tab-content-panel lh">
@@ -648,11 +649,26 @@
                 {% endif %}
                 <div class="tabpanel data-tab-content-panel">
                 <div class="panel panel-default filter-display-panel">
-                    <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3>
+                    <div class="panel-heading clearfix"><h3 class="panel-title pull-left">Filter Definition</h3>
                               {%  if is_cohort %}
                                 <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
                                     <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
                               {% endif %}
+
+                           <div id="filter_def_copy">
+                               <button class="btn btn-small btn-default   bq-string-copy" disabled data-toggle="modal"
+                                   disabled="disabled" title= "Select a filter to enable this feature." >SQL<i class="fa-solid fa-copy"></i>
+                             </button>
+
+                               <button
+                                        class="btn btn-small btn-special copy-this copy-url"
+                                        disabled="disabled"
+                                        role="button"
+                                        title="Select a filter to enable this feature.">URL<i class="fa-solid fa-copy"></i></button>
+
+                               </div>
+
+
 
                         </div>
                     <div class="panel-body">
@@ -668,18 +684,11 @@
                             </div>
 
                     <div class="filter-url-container space-top-10 space-top-10">
-                    <button
-                                        class="btn btn-small btn-special copy-this copy-url"
-                                        disabled
-                                        role="button"
-                                        title="Select a filter to enable this feature.">URL<i class="fa-solid fa-copy"></i></button>
+                              <button class="btn btn-small btn-default cart-reset" role="button" disabled="disabled"
+                                        title="Get cart details." onclick="resetCart()"><i class="fa fa-solid fa-rotate-left"></i>Reset Cart</button>
 
-
-                                <button class="btn btn-small btn-default   bq-string-copy" disabled data-toggle="modal"
-                                   title= "Select a filter to enable this feature." >SQL<i class="fa-solid fa-copy"></i>
-                             </button>
-                                <button class="btn btn-small cart-view" role="button"
-                                        title="Get cart details." onclick="viewcart()"><i class="fa-solid fa-cart-shopping"></i></button>
+                                <button class="btn btn-small btn-special cart-view" role="button" disabled="disabled"
+                                        title="Get cart details." onclick="viewcart()"><i class="fa-solid fa-eye"></i>View Cart</button>
                                <span id="cart_stats"></span>
                                 <pre class="filter-url code is-hidden" style="display:none;"></pre>
 

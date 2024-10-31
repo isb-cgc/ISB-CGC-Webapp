@@ -295,13 +295,14 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             $('#cart_stats').removeClass('notDisp');
             $('#export-manifest-cart').removeAttr('disabled');
             $('#view-cart').removeAttr('disabled');
-            $('.cart-view').removeAttr('disabled');
+            $('.cart-view, .cart-export, .cart-reset').removeAttr('disabled');
+
         }
         else{
             $('#cart_stats').addClass('notDisp');
             $('#export-manifest-cart').attr('disabled','disabled');
             $('#view-cart').attr('disabled','disabled');
-            $('.cart-view').attr('disabled','disabled');
+            $('.cart-view, .cart-export, .cart-reset').attr('disabled','disabled');
         }
     }
 
@@ -334,16 +335,10 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             //var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
         var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
 
-            /* tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });
-            $('#cart_stats').html(content) ;
-           */
+
           $('#cart_stats').addClass('notDisp');
           $('#export-manifest-cart').attr('disabled','disabled');
-          $('#view-cart').attr('disabled','disabled');
+          $('.cart-view, .cart-export, .cart-reset').attr('disabled','disabled');
 
     }
 
@@ -367,7 +362,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel, addingToCart,studymp,updateSource){
-        $('.spinner').show();
+
         //was used to track a global cart accross multiple tabs. Just too slow to be practical
         //var updatedElsewhere = false;
         //serCartHist = setCartHistWinFromLocal();
@@ -430,34 +425,39 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
          */
         var projid = newSel['sel'][0];
         updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource);
-        //$('.spinner').hide();
+
     }
 
     const updateCartAndCartMetrics = function(addingToCart,projid,studymp,updateSource){
 
 
         if (updateSource == 'project' && addingToCart){
+            $('.spinner').show();
             updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries'], 0, window.selProjects[projid]['mxstudies'] ).then(function(){
-                $('.spinner').show();
+
                 updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
                 updateTableCountsAndGlobalCartCounts();
                 $('.spinner').hide();
 
             })
         }
-        else if (updateSource == "cartPg"){
-            updateGlobalCart(addingToCart, studymp, 'series');
-        }
 
         else {
             $('.spinner').show();
-            updateGlobalCart(addingToCart, studymp, updateSource);
-            updateTableCountsAndGlobalCartCounts();
-            $('.spinner').hide();
+            new Promise((resolve,reject) => {
+               setTimeout(()=> {
+                  updateGlobalCart(addingToCart, studymp, updateSource);
+               updateTableCountsAndGlobalCartCounts();
+                 resolve();
+           }, 10);
+         }).then(
+           () => $('.spinner').hide()
+         );
+
         }
 
-
     }
+
 
     //was used to track cart across mutiple tabs or page refresh. Its too slow!
     const refreshCartAndFiltersFromScratch = function(checkFilters){
@@ -654,9 +654,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             mxNumStudies+= window.selProjects[proj].mxstudies;
         }
 
-            if ($('#cart-view-elem').length>0) {
-                document.getElementById("cart-view-elem").remove();
-            }
 
             var csrftoken = $.getCookie('csrftoken');
             var form = document.createElement('form');

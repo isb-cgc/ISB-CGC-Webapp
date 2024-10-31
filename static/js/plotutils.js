@@ -115,11 +115,13 @@ define(['sliderutils','filterutils','jquery', 'base'], function(sliderutils,filt
             $('.chart-content').addClass('hidden');
             $('.showchrt').removeClass('hidden');
             $('.hidechrt').addClass('hidden');
+            $('.tooltip_filter_info').hide();
         }
         else if (cntrl==="show"){
             $('.chart-content').removeClass('hidden');
             $('.hidechrt').removeClass('hidden');
             $('.showchrt').addClass('hidden');
+            $('.tooltip_filter_info').show();
         }
 
     }
