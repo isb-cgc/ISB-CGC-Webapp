@@ -461,15 +461,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
    // open the cases for the selected projects(collections) in the cases table. Also update call updateProjStudyMp if studymp is not defined for some of the collections
     window.updateProjectViewSelection = function(rowA){
-    var purgeChildSelections=[true,true]
-    var rowsAdded=false;
-    var rowsRemoved=false;
-    var projid='';
-        var totalCases =0;
-        var totalStudies=0;
-        var totalSeries=0;
-    var mxseries=0;
-    var mxstudies =0;
+    var purgeChildSelections = [true,true]
+    var rowsAdded = false;
+    var rowsRemoved = false;
+    var projid = '';
+    var totalCases = 0;
+    var totalStudies =0;
+    var totalSeries = 0;
+    var mxseries = 0;
+    var mxstudies = 0;
     var projUpdate = new Array();
     rowA.forEach(function(row) {
     var projid = $(row).data('projectid');
@@ -494,8 +494,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             window.selProjects[projid]['extraInFilt'] = true;
 
             rowsAdded = true;
-        }
-        else if (!(window.selProjects[projid]['state']['view'])){
+        } else if (!(window.selProjects[projid]['state']['view'])){
             window.selProjects[projid]['state']['view'] = true;
             rowsAdded = true;
         }
@@ -562,8 +561,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var addingToCart;
         if ('extraInFilt' in window.selProjects[data[0]]){
             addingToCart = true;
-        }
-         else {
+        } else {
             addingToCart = false;
         }
 
@@ -579,7 +577,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     // defines the studymp for selected projects(collections). Also adds data to the window.casestudymp and window.studymp.
     // Called when the user clicks a cart OR a chevron in the projects(collections) table
     window.updateProjStudyMp = function(projidA, mxStudies, mxSeries, offset, limit) {
-
         var curFilterObj = JSON.parse(JSON.stringify(filterutils.parseFilterObj()));
         curFilterObj.collection_id = projidA;
         var filterStr = JSON.stringify(curFilterObj);
@@ -637,13 +634,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     if ('studymp' in data) {
                         updateStudyMp(data['studymp'])
                     }
-                  console.timeEnd('mp')
-                }
-                catch(err){
+                } catch(err){
                     console.log('error processing data');
                     alert("There was an error processing the server data. Please alert the systems administrator")
-                }
-                finally {
+                } finally {
                     deferred.resolve('studymp');
                 }
             },
@@ -653,8 +647,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         });
          return deferred.promise();
     }
-
-
 
     const caseTableColDefs = function(){
         return[  {className: "ckbx studyview", "targets": [0]},
@@ -667,7 +659,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     }
     const caseTableColumns = function(){
 
-        const caret_col ={
+        const caret_col = {
                         "type": "html", "orderable": false, "data":"PatientID", render: function (PatientID, type, row) {
                             collection_id=row['collection_id'][0]
                             if ((collection_id in window.selProjects) && (PatientID in window.selProjects[collection_id].selCases) && (window.selProjects[collection_id].selCases[PatientID]['state']['view'] )) {
@@ -708,7 +700,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         }};
       const study_col  = {"type": "num", "orderable": true, data: 'unique_study'};
       const series_col =  {"type": "num", "orderable": true, data: 'unique_series'};
-
       return [caret_col, cart_col, cartnum_col, collection_col, case_col, study_col, series_col];
     }
 
@@ -722,8 +713,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var viewProjects = getKeysByState(window.selProjects,'view')
         if ($('#cases_tab_wrapper').find('.dataTables_controls').length>0){
             pageRows = parseInt($('#cases_tab_wrapper').find('.dataTables_length select').val());
-        }
-        else {
+        } else {
             pageRows = 10;
         }
         var ord = [[4, 'asc'],[3, 'asc']];
@@ -770,8 +760,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     if (cntSeriesInCart>0){
                         $(row).addClass('someInCart');
                         window.selProjects[projid].selCases[caseid]['someInCart'] = true;
-                    }
-                    else{
+                    } else{
                         $(row).removeClass('someInCart');
                         if ('someInCart' in window.selProjects[projid].selCases[caseid]){
                             delete(window.selProjects[projid].selCases[caseid]['someInCart']);
@@ -781,8 +770,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         $(row).addClass('extraInFilt');
                         window.selProjects[projid].selCases[caseid]['extraInFilt'] = true;
                         content = "add series to the cart";
-                    }
-                    else{
+                    } else{
                         $(row).removeClass('extraInFilt');
                         content = "remove series from the cart";
                         if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
@@ -793,8 +781,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     if (cntSeriesInItem>cntSeriesInCart){
                         $(row).addClass('extraInItem');
                         window.selProjects[projid].selCases[caseid]['extraInItem'] = true;
-                    }
-                    else{
+                    } else{
                         $(row).removeClass('extraInItem');
                         if ('extraInItem' in window.selProjects[projid].selCases[caseid]){
                             delete(window.selProjects[projid].selCases[caseid]['extraInItem']);
@@ -803,11 +790,11 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
                     var target = $(row).find('.shopping-cart').parent()[0];
                     tippy(target, {
-                           interactive: true,
-                           allowHTML:true,
-                           placement:'right',
-                          content: content
-                        });
+                       interactive: true,
+                       allowHTML:true,
+                       placement:'right',
+                      content: content
+                    });
 
                     $(row).find('.studyview').on('click', function(event){
                         var elem = event.target;
@@ -834,9 +821,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             // cart is clear
                             addingToCart = true;
 
-                        }
-
-                        else{
+                        } else {
                             //cart is green or yellow. pressing deletes
                             addingToCart= false;
                         }
@@ -845,22 +830,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                        newSel['added'] = addingToCart;
                        newSel['sel'] = [projid, caseid];
                        cartutils.updateCartSelections(newSel, addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case');
-
-
-                       });
-
+                   });
                 },
                 "columnDefs": [...caseTableColDefs()],
-
                 "columns": [...caseTableColumns()],
-
                 "processing": true,
                 "serverSide": true,
                 "ajax": function (request, callback, settings) {
-
                     var backendReqLength = 500;
                     var backendReqStrt = Math.max(0, request.start - Math.floor(backendReqLength * 0.5));
-
                     var rowsRemoved = $('#cases_tab').data('rowsremoved');
                     var refreshAfterFilter = $('#cases_tab').data('refreshafterfilter');
                     var updateChildTables = $('#cases_tab').data('updatechildtables');
@@ -875,7 +853,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         if ($('#studies_tab_wrapper').find('.studyID_inp').length > 0) {
                             studyID = $('#studies_tab_wrapper').find('.studyID_inp').val().trim();
                         }
-
                         updateStudyTable(false, true, refreshAfterFilter, [updateChildTables[1]], studyID);
                         callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"})
                     } else {
@@ -934,7 +911,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                             success: function (data) {
                                 try {
-
                                 window.casesCache = new Object();
                                 colSort = ["", "", "", "collection_id", "PatientID", "unique_study", "unique_series"];
                                 updateCache(window.casesCache, request, backendReqStrt, backendReqLength, data, colSort);
@@ -952,7 +928,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 }
 
                                 if (refreshAfterFilter && ((data['diff'].length > 0) || (rmSelCases.length > 0))) {
-
                                     var studyID = '';
                                     if ($('#studies_tab').find('.studyID_inp').length > 0) {
                                         studyID = $('#studies_tab').find('.studyID_inp').val().trim();
@@ -981,7 +956,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                     alert("There was an error fetching server data. Please alert the systems administrator")
                                     $('#cases_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
                                     callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"})
-
                                 }
                             });
                         } else {
@@ -999,8 +973,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     }
                 }
             });
-        }
-        catch(err){
+        } catch(err){
             alert("The following error occurred trying to update the case table:" +err+". Please alert the systems administrator");
         }
 
@@ -1009,16 +982,11 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 this.style.width=null;
                 }
             );
-
-
-
-        })
-
+        });
         $('#cases_tab').find('tbody').attr('id','cases_table');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Case ID:</strong><input class="caseID_inp" type="text-box" value="'+caseID+'"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
     }
-
 
     // initialize data structures used to track which cases have items added to the cart,
     // and which chevrons are clicked in the cases table
@@ -1029,13 +997,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         window.selProjects[projid].selCases[caseid]['state']['view']=false;
         window.selProjects[projid].selCases[caseid]['totalChild'] = totalStudies;
         window.selProjects[projid].selCases[caseid]['studymp']={};
-
         window.selProjects[projid].selCases[caseid]['numChildFullCheck'] = 0;
         window.selProjects[projid].selCases[caseid]['numChildMixCheck'] = 0;
         window.selProjects[projid].selCases[caseid]['numChildNoCheck'] = totalStudies;
-
         window.selProjects[projid].selCases[caseid]['numChecksAbove'] = 0;
-
         window.selProjects[projid].selCases[caseid]['totalStudies']=$(row).attr('data-totalstudies');
         window.selProjects[projid].selCases[caseid]['totalSeries']=$(row).attr('data-totalseries');
     }
@@ -1063,8 +1028,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         if ((ids.length==1) && (ids[0] in window.selProjects)){
             maxSeries = stats['series_per_collec'][ids[0]];
             selItem = window.selProjects[ids[0]]
-            if (('studymp' in window.selProjects[ids[0]]) && !(typeof(window.selProjects[ids[0]].studymp) =="undefined"))
-            {
+            if (('studymp' in window.selProjects[ids[0]]) && !(typeof(window.selProjects[ids[0]].studymp) =="undefined")) {
                 studympFilt = window.selProjects[ids[0]].studymp;
                 studympFiltDefined = true;
             }
@@ -1073,35 +1037,27 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             studymp=window.casestudymp[ids[1]];
         }
 
-
          if ((ids.length==2) && (ids[0] in window.selProjects) && (ids[1] in window.selProjects[ids[0]].selCases)) {
              maxSeries = window.selProjects[ids[0]].selCases[ids[1]].maxseries;
              selItem = window.selProjects[ids[0]].selCases[ids[1]];
-             if (('studymp' in window.selProjects[ids[0]].selCases[ids[1]]) && !(typeof(window.selProjects[ids[0]].selCases[ids[1]].studymp) =="undefined"))
-            {
+             if (('studymp' in window.selProjects[ids[0]].selCases[ids[1]]) && !(typeof(window.selProjects[ids[0]].selCases[ids[1]].studymp) =="undefined")) {
               studympFilt = window.selProjects[ids[0]].selCases[ids[1]].studymp;
               studympFiltDefined = true;
             }
         }
 
-
         for (var studyid in studymp){
             if (studyid in window.glblcart){
                 if (window.glblcart[studyid]['all']){
-
                   cntSeriesInCart += window.studymp[studyid]['cnt']
-               }
-              else{
+               } else{
                   cntSeriesInCart += window.glblcart[studyid]['sel'].size
               }
             }
             if (studyid in studympFilt){
                 cntSeriesInFilt += studympFilt[studyid]
             }
-
         }
-
-
         //return cnt.toString();
         return [cntSeriesInCart, cntSeriesInFilt, maxSeries, studyMpFiltDefined ];
     }
@@ -1116,12 +1072,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 var caseid = $(this).data('caseid');
                 var totalStudies = $(this).data('totalstudies');
                 var totalSeries = $(this).data('totalseries');
-
                 if (!(caseid in window.selProjects[projid].selCases)) {
                     initCaseDataAndRow(projid, caseid, rowA, totalStudies);
                 }
-
-
                 window.selProjects[projid].selCases[caseid]['state']['view'] = rowsAdded;
                 updateret = rowsAdded;
                 if (!(rowsAdded)){
@@ -1129,9 +1082,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 }
                 //updateStudyTable(rowsAdded, rowsRemoved, false, purgeChildSelections,[],caseID, parseInt(totalStudies), parseInt(totalSeries));
 
-            }
-
-            else if (type === 'studies') {
+            } else if (type === 'studies') {
                 var projid = $(this).data('projectid');
                 var caseid = $(this).data('caseid');
                 var studyid = $(this).data('studyid');
@@ -1140,11 +1091,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 if (!(studyid in window.selProjects[projid].selCases[caseid].selStudies)) {
                     initStudyDataAndRow(projid, caseid, studyid, rowA, totalSeries);
                 }
-
                 window.selProjects[projid].selCases[caseid].selStudies[studyid]['state']['view'] = rowsAdded;
                 updateret = rowsAdded;
-
-
             }
         });
 
@@ -1161,7 +1109,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             }
             updateSeriesTable(rowsAdded, !rowsAdded, false, seriesID);
         }
-
        return updateret;
     }
 
@@ -1174,8 +1121,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var viewCases = getCasesByState('view');
         if ($('#studies_tab_wrapper').find('.dataTables_controls').length>0){
             pageRows = parseInt($('#studies_tab_wrapper').find('.dataTables_length select').val());
-        }
-        else {
+        } else {
             pageRows = 10;
         }
         $('#studies_tab').DataTable().destroy();
@@ -1222,8 +1168,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             window.selProjects[projid].selCases[caseid].selStudies[studyid]['extraInFilt']=true;
                             content  = 'add series to the cart';
                         }
-                    }
-                    else{
+                    } else{
                         $(row).removeClass('someInCart');
                         if ('someInCart' in window.selProjects[projid].selCases[caseid].selStudies[studyid]){
                             delete(window.selProjects[projid].selCases[caseid].selStudies[studyid]['someInCart']);
@@ -1234,25 +1179,19 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     }
                     var target = $(row).find('.shopping-cart').parent()[0];
                     tippy(target, {
-                           interactive: true,
-                           allowHTML:true,
-                           placement:'right',
-                          content: content
-                        });
-
-
-
-                    $(row).find('.cartnum').html(cnt)
-
-
+                       interactive: true,
+                       allowHTML:true,
+                       placement:'right',
+                      content: content
+                    });
+                    $(row).find('.cartnum').html(cnt);
                     $(row).find('.seriesview').on('click', function(event){
                         var elem = event.target;
                         var rowsAdded= ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false
                         if (rowsAdded){
                             $(row).find('.fa-caret-down').removeClass('notDisp');
                             $(row).find('.fa-caret-right').addClass('notDisp');
-                        }
-                        else{
+                        } else{
                             $(row).find('.fa-caret-down').addClass('notDisp');
                             $(row).find('.fa-caret-right').removeClass('notDisp');
                         }
@@ -1261,16 +1200,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
                     $(row).find('.shopping-cart').parent().on('click', function(event){
                        var elem = event.target;
-                        if ($(elem).hasClass('ckbx')){
+                        if ($(elem).hasClass('ckbx')) {
                             elem=$(elem).find('.shopping-cart')[0];
                         }
                         var addingToCart;
-                        if ('extraInFilt' in window.selProjects[projid].selCases[caseid].selStudies[studyid])
-                        {
+                        if ('extraInFilt' in window.selProjects[projid].selCases[caseid].selStudies[studyid]) {
                             //more to add
                             addingToCart= true;
-                        }
-                        else{
+                        } else{
                             // no more to add
                             addingToCart = false;
 
@@ -1285,9 +1222,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                        newSel['sel'] = [projid, caseid, studyid];
                        cartutils.updateCartSelections(newSel, addingToCart, mp, 'study');
                        //window.cartHist[curInd]['selections'].push(newSel);
-
                     });
-
                 },
                 "columnDefs": [
                     {className: "ckbx seriesview", "targets": [0]},
@@ -1325,8 +1260,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                        return '<i class=" fa-solid  fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
 
                   }
-               },
-                    {
+               }, {
                         "type": "html", "orderable": false, "data": "StudyInstanceUID", render: function (data) {
                             var cnt =0;
                             if (data in window.glblcart) {
@@ -1338,13 +1272,11 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                              }
                             return '<span class="cartnum cartnum_style">'+cnt.toString()+'</span>'
                         }
-                    },
-
-                    {
+                    }, {
                         "type": "text", "orderable": true, data: 'PatientID', render: function (data) {
                             return data;
                         }
-                    },{
+                    }, {
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
@@ -1354,7 +1286,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             $(td).data('study-id', data);
                             return;
                         }
-                    },{
+                    }, {
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
                             // fix when StudyData is an array of values
                             var dt = new Date(Date.parse(data));
@@ -1435,20 +1367,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 "ajax": function (request, callback, settings, refreshAfterFilter) {
                     var backendReqLength = 500;
                     var backendReqStrt = Math.max(0, request.start - Math.floor(backendReqLength * 0.5));
-
                     var rowsRemoved = $('#studies_tab').data('rowsremoved');
                     var refreshAfterFilter = $('#studies_tab').data('refreshafterfilter');
                     //var updateChildTables = [$('#studies_tab').data('updatechildtables')];
                     var checkIds = new Array();
                     var cols = ['', '', 'PatientID', 'StudyInstanceUID', 'StudyDate','StudyDescription', 'SeriesInstanceUID'];
                     var ssCallNeeded = true;
-
                     var caseArr = viewCases;
-                    /*for (projectid in window.selItems.selCases) {
-                        for (var i = 0; i < window.selItems.selCases[projectid].length; i++) {
-                            caseArr.push(window.selItems.selCases[projectid][i]);
-                        }
-                    }*/
 
                     if (caseArr.length === 0) {
                         ssCallNeeded = false;
@@ -1498,14 +1423,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 contentType: 'application/x-www-form-urlencoded',
                                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                                 success: function (data) {
-                                    try{
+                                    try {
                                         window.studiesCache = new Object();
                                         colSort = ["", "", "PatientID", "StudyInstanceUID","StudyDate","StudyDescription","unique_series"]
                                         updateCache(window.studiesCache, request, backendReqStrt, backendReqLength, data, colSort);
                                         if ('studymp' in data){
                                             updateStudyMp(data['studymp']);
                                         }
-
                                         dataset = data['res'].slice(request.start - backendReqStrt, request.start - backendReqStrt + request.length);
                                         if (dataset.length > 0) {
                                             $('#studies_tab').children('thead').children('tr').children('.ckbx').removeClass('notVis');
@@ -1520,15 +1444,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                             }
                                             updateSeriesTable(false, true, false,seriesID)
                                         }
-
                                         callback({
                                             "data": dataset,
                                             "recordsTotal": data["cnt"],
                                             "recordsFiltered": data["cnt"]
                                         })
-
-                                    }
-                                    catch(err){
+                                    } catch(err){
                                       console.log('error processing data');
                                    alert("There was an error processing the server data. Please alert the systems administrator")
                                    }
@@ -1555,8 +1476,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     }
                 }
             });
-        }
-        catch(err){
+        } catch(err){
             alert("The following error error was reported when processing server data: "+ err +". Please alert the systems administrator")
         }
 
@@ -1581,9 +1501,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         window.selProjects[projid].selCases[caseid].selStudies[studyid]['numChildFullCheck'] = 0;
         window.selProjects[projid].selCases[caseid].selStudies[studyid]['numChildMixCheck'] = 0;
         window.selProjects[projid].selCases[caseid].selStudies[studyid]['numChildNoCheck'] = totalSeries;
-
         window.selProjects[projid].selCases[caseid].selStudies[studyid]['totalSeries']=$(row).attr('data-totalseries');
-
     }
 
 
@@ -1595,8 +1513,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var viewStudies = getStudiesByState('view');
         if ($('#series_tab_wrapper').find('.dataTables_controls').length>0){
             pageRows = parseInt($('#series_tab_wrapper').find('.dataTables_length select').val());
-        }
-        else {
+        } else {
             pageRows = 10;
         }
         $('#series_tab').DataTable().destroy();
@@ -1608,7 +1525,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                  "order": [[0, "asc"]],
                  "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
-                     $(row).attr('data-studyid', data['StudyInstanceUID']);
+                    $(row).attr('data-studyid', data['StudyInstanceUID']);
                     $(row).attr('data-caseid', data['PatientID']);
                     $(row).attr('data-projectid', data['collection_id'][0]);
                     $(row).attr('data-crdc',  data['crdc_series_uuid'])
@@ -1625,12 +1542,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         initSeriesData(collection_id, PatientID, studyid, seriesid);
                      }
                     var target = $(row).find('.shopping-cart').parent()[0];
-                         tippy(target, {
-                           interactive: true,
-                           allowHTML:true,
-                           placement:'right',
-                          content: ''
-                        });
+                     tippy(target, {
+                       interactive: true,
+                       allowHTML:true,
+                       placement:'right',
+                      content: ''
+                    });
 
                     updateSeriesRowCount(row);
 
@@ -1640,21 +1557,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             elem=$(elem).find('.shopping-cart')[0];
                         }
                         var addingToCart = true;
-
-                        if ($(elem).parentsUntil('tr').parent().hasClass('someInCart'))
-                        {
+                        if ($(elem).parentsUntil('tr').parent().hasClass('someInCart')) {
                             addingToCart = false;
-                        }
-                        else{
+                        } else {
                             addingToCart = true;
                         }
 
-
-
                         mp = new Object();
                         mp[studyid]=[seriesid];
-
-
 
                        //var curInd = window.cartHist.length - 1;
                        var newSel = new Object();
@@ -1662,9 +1572,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                        newSel['sel'] = [collection_id, PatientID, studyid, seriesid];
                        //window.cartHist[curInd]['selections'].push(newSel);
                        cartutils.updateCartSelections(newSel,addingToCart, mp, 'series');
-
                     });
-
                  },
                 "columnDefs": [
                     {className: "ckbx", "targets": [0]},
