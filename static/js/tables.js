@@ -1372,14 +1372,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             var coll_id="";
                             if (Array.isArray(row['collection_id'])){
                                 coll_id=row['collection_id'][0];
-                            }
-                            else {
+                            } else {
                                 coll_id=row['collection_id']
                             }
                             if (row['access'].includes('Limited') ) {
                                 return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
-                            }
-                            else {
+                            } else {
                                 let modality = row['Modality'];
                                 let is_xc = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC")));
                                 if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
@@ -1763,7 +1761,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                         '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                         '</a></li>';
-
                             if(!is_xc) {
                                 v2_element = '<li><a href="' + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
                                 volView_element = '<li><a class="external-link" href="" url="' + volView_link + '" ' +
