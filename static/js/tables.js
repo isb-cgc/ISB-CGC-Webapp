@@ -1393,7 +1393,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                     let v3_link = OHIF_V3_PATH + "=" + data;
                                     let v2_element = '<li title="Not available for this modality."><a class="disabled" href="'
                                         + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
-                                    let default_viewer = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC"))) ? v3_link : v2_link;
+                                    let default_viewer = is_xc ? v3_link : v2_link;
                                     let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                         '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                         '</a></li>';
@@ -1746,7 +1746,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         else if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
                             return nonViewAbleModality.has(el)
                         }) ) || nonViewAbleModality.has(row['Modality']) )   {
-                            let tooltip = is_xc ? "not-viewable" : "no-viewer-tooltip";
+                            let tooltip = "no-viewer-tooltip";
                             return `<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash ${tooltip}"></i>`;
                         } else if (  ( Array.isArray(row['Modality']) && row['Modality'].some(function(el){
                             return slimViewAbleModality.has(el)}
