@@ -1167,7 +1167,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
 
     window.updateStudyTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables,studyID) {
-        let nonViewAbleModality= new Set(["XC"]);
+        let nonViewAbleModality= new Set([""]);
         $('#studies_tab').data('rowsremoved',rowsRemoved);
         $('#studies_tab').data('refreshafterfilter',refreshAfterFilter);
         $('#studies_tab').data('updatechildtables',updateChildTables);
@@ -1380,7 +1380,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                             }
                             else {
-                                var modality = row['Modality'];
+                                let modality = row['Modality'];
+                                let is_xc = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC")));
                                 if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
                                     return nonViewAbleModality.has(el)
                                 }) ) || nonViewAbleModality.has(row['Modality']) )   {
@@ -1388,21 +1389,34 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 } else if (( Array.isArray(modality) && modality.includes('SM')) || (modality === 'SM')) {
                                     return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                  } else {
-                                    let v2_link = OHIF_V2_PATH + data;
+                                    let v2_link = is_xc ? "" : OHIF_V2_PATH + data;
                                     let v3_link = OHIF_V3_PATH + "=" + data;
-                                    let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function(i){
-                                        return "s3://"+row['aws_bucket']+"/"+i;
-                                    }).join(",") + ']"';
-                                    return '<a href="' + v2_link + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
+                                    let v2_element = '<li title="Not available for this modality."><a class="disabled" href="'
+                                        + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
+                                    let default_viewer = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC"))) ? v3_link : v2_link;
+                                    let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
+                                        '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                        '</a></li>';
+                                    let bucket = Array.isArray(row['aws_bucket']) ? row['aws_bucket'][0] : row['aws_bucket'];
+                                    if(!is_xc) {
+                                        if(bucket.indexOf(",") < 0) {
+                                            let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function (i) {
+                                                return "s3://" + row['aws_bucket'] + "/" + i;
+                                            }).join(",") + ']"';
+                                            volView_element = '<li><a class="external-link" href="" url="'+volView_link+'" ' +
+                                                'data-toggle="modal" data-target="#external-web-warning">VolView ' +
+                                                '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                                '</a></li>';
+                                        }
+                                        v2_element = '<li><a href="'+v2_link+'" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
+                                    }
+                                    return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                         '<div class="dropdown viewer-toggle">' +
                                         '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                         '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
-                                        '<li><a href="'+v2_link+'" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>' +
+                                        v2_element +
                                         '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
-                                        '<li><a class="external-link" href="" url="'+volView_link+'" ' +
-                                        'data-toggle="modal" data-target="#external-web-warning">VolView ' +
-                                        '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
-                                        '</a></li>' +
+                                        volView_element +
                                         '</ul>' +
                                         '</div>';
                                 }
@@ -1576,7 +1590,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
 
     window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,seriesID) {
-        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "XC"])
+        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
         var slimViewAbleModality=new Set(["SM"])
         $('#series_tab').attr('data-rowsremoved', rowsRemoved);
         $('#series_tab').attr('data-refreshafterfilter', refreshAfterFilter);
@@ -1719,6 +1733,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     data: 'SeriesInstanceUID',
                     render: function (data, type, row) {
                         var coll_id="";
+                        let modality = row['Modality'];
+                        let is_xc = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC")));
                         if (Array.isArray(row['collection_id'])){
                             coll_id=row['collection_id'][0];
                         } else {
@@ -1730,9 +1746,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         else if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
                             return nonViewAbleModality.has(el)
                         }) ) || nonViewAbleModality.has(row['Modality']) )   {
-                            let tooltip = (
-                                row['Modality'] === "XC" || (Array.isArray(row['Modality']) && row['Modality'].includes("XC"))
-                            ) ? "not-viewable" : "no-viewer-tooltip";
+                            let tooltip = is_xc ? "not-viewable" : "no-viewer-tooltip";
                             return `<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash ${tooltip}"></i>`;
                         } else if (  ( Array.isArray(row['Modality']) && row['Modality'].some(function(el){
                             return slimViewAbleModality.has(el)}
@@ -1740,18 +1754,32 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
                                 '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                         } else {
-                            let v2_link = '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
-                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>';
-                            let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '&SeriesInstanceUID=' + data;
-                            let volView_link = VOLVIEW_PATH + "=[s3://" + row['aws_bucket'] + '/'+row['crdc_series_uuid']+']"';
-                            return v2_link +
+                            let v2_link = is_xc ? "" : OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data;
+                            let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '&SeriesInstanceUIDs=' + data;
+                            let default_viewer = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC"))) ? v3_link : v2_link;
+                            let volView_link = is_xc ? "" : VOLVIEW_PATH + "=[s3://" + row['aws_bucket'] + '/' + row['crdc_series_uuid']+']"';
+                            let v2_element = '<li title="Not available for this modality."><a class="disabled" href="'
+                                + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
+                            let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
+                                        '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                        '</a></li>';
+
+                            if(!is_xc) {
+                                v2_element = '<li><a href="' + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
+                                volView_element = '<li><a class="external-link" href="" url="' + volView_link + '" ' +
+                                    'data-toggle="modal" data-target="#external-web-warning">VolView ' +
+                                    '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                    '</a></li>';
+                            }
+
+                            return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                 '<div class="dropdown viewer-toggle">' +
                                 '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                 '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
+                                v2_element +
                                 '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
-                                '<li><a href="'+volView_link+'" target="_blank" rel="noopener noreferrer">VolView</a></li>' +
-                                '</ul>' +
-                                '</div>';
+                                volView_element +
+                                '</ul></div>';
                         }
                     }
                 }, {

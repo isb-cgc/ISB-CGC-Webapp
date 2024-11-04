@@ -1074,7 +1074,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     }
 
     const updateCartTable = function() {
-         var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "XC"])
+         var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
         var slimViewAbleModality=new Set(["SM"])
         if ($('.cart-wrapper').find('.dataTables_controls').length>0){
             var pageRows = parseInt($('.cart-wrapper').find('.dataTables_length select').val());
