@@ -323,72 +323,22 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         cartSel['partitions']= new Array();
         window.cartHist.push(cartSel);
         setLocalFromCartHistWin();
-        //sessionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
         window.partitions = new Array();
         window.cartStep=0
         window.cartDetails = 'Current filter definition is '+JSON.stringify(parsedFiltObj)+'\n\n'
         window.cartStep++;
 
          window.updateTableCounts();
-         var gtotals = [0,0,0,0];
-            //var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-        var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
-
-            /* tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });
-            $('#cart_stats').html(content) ;
-           */
-          $('#cart_stats').addClass('notDisp');
-          $('#export-manifest-cart').attr('disabled','disabled');
-          $('#view-cart').attr('disabled','disabled');
-
+         $('#cart_stats').addClass('notDisp');
+         $('#export-manifest-cart').attr('disabled','disabled');
+         $('#view-cart').attr('disabled','disabled');
     }
-
-    // show the history of cart related selections (filters and cart buttons)
-    /* $('.cart-modal-button').on('click', function(){
-         detsArr = window.cartDetails.split('\n\n');
-        var str='<ol type="1" class="nav navbar-nav navbar-left">';
-        var ii=0;
-        for (var i=0;i<detsArr.length;i++){
-            if (detsArr[i].length>0) {
-                str = str + '<li class="navbar-link navbar-item cartlist">' + ii.toString() + '. &nbsp;' + detsArr[i] + '</li>'
-                 ii++;
-            }
-        }
-        str=str+'</ol>'
-        //$('#cart_details').html('elp!!!!');
-
-            $('#cart-details-modal').modal('show');
-
-    }) */
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel, addingToCart,studymp,updateSource){
         $('.spinner').show();
-        //was used to track a global cart accross multiple tabs. Just too slow to be practical
-        //var updatedElsewhere = false;
-        //serCartHist = setCartHistWinFromLocal();
-
         var curInd = window.cartHist.length - 1;
         var curPageid= window.cartHist[curInd]['pageid'];
-
-        //was used to track a global cart accross multiple tabs. Just too slow to be practical
-        /*
-        if (!(curPageid == window.pageid)){
-            updatedElsewhere = true;
-            var cartSel = new Object();
-            cartSel['filter']=filterutils.parseFilterObj();
-            cartSel['pageid'] = window.pageid
-            cartSel['selections']= new Array();
-            cartSel['partitions']= new Array();
-            window.cartHist.push(cartSel);
-            curInd = window.cartHist.length - 1;
-        }
-        */
-
         var selections = window.cartHist[curInd]['selections'];
         var selection = newSel['sel'];
 
@@ -1264,10 +1214,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
                              var txt =$('#cart-table_info').text().replace('entries','studies');
                              $('#cart-table_info').text(txt);
-                             //var html = $('.dataTables_length').html().replace('entries','studies');
-                             //$('.dataTables_length').html(html);
-
-
                         },
                         error: function () {
                             console.log("problem getting data");
@@ -1276,25 +1222,16 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                     });
                 }
             });
-
-
-        }
-        catch(Exception){
+        } catch(Exception){
             alert("The following error was reported when processing server data: "+ Exception +". Please alert the systems administrator");
         }
-
     }
-
-
-
 
 
      const pretty_print_id = function (id) {
         var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);
         return newId;
     }
-
-
 
     return {
        mkOrderedPartitions: mkOrderedPartitions,

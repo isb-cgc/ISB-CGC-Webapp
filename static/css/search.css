@@ -386,6 +386,10 @@ tr {
     display: table;
     width: 100%; }
 
+.expansion-toggle:hover {
+    background-color: #b7cfe5;
+}
+
 #projects_table td.cartnum, #projects_table_head th.cartnum{
     width: 5%;
     word-wrap: break-word;

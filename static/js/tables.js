@@ -261,7 +261,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     // classes for project(collection) table columns
     var projectTableColDefs = function(){
-        return [{className: "ckbx text_data viewbx caseview", "targets": [0]},
+        return [{className: "ckbx text_data viewbx caseview expansion-toggle", "targets": [0]},
                     {className: "ckbx shopping-cart-holder", "targets": [1]},
                     {className: "ckbx", "targets": [2]},
 
@@ -274,13 +274,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     const projectTableColumns = function(){
         var caret_col= { "type": "html", "orderable": false, render: function (data) {
                     if (('state' in window.selProjects[data]) && ('view' in window.selProjects[data]['state']) && (window.selProjects[data]['state']['view'] )) {
-                        return '<a role="button">'+
+                        return '<a role="button" title="Display cases in this collection below.">'+
                             '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                             '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                     }
                     else {
-                        return '<a role="button">'+
+                        return '<a role="button" title="Display cases in this collection below.">'+
                             '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                             '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
                     }
@@ -639,7 +639,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     const caseTableColDefs = function(){
         return [
-            {className: "ckbx studyview", "targets": [0]},
+            {className: "ckbx studyview expansion-toggle", "targets": [0]},
             {className: "ckbx", "targets": [1]},
             {className: "ckbx", "targets":[2]},
             {className: "col1 project-name", "targets": [3]},
@@ -654,12 +654,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 collection_id=row['collection_id'][0]
                 if ((collection_id in window.selProjects) && (PatientID in window.selProjects[collection_id].selCases) && (window.selProjects[collection_id].selCases[PatientID]['state']['view'] )) {
                     //return '<input type="checkbox" checked>'
-                   return '<a role="button">'+
+                   return '<a role="button" title="Display studies in this case below.">'+
                         '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                         '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                 } else {
-                    return '<a role="button">'+
+                    return '<a role="button" title="Display studies in this case below.">'+
                         '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                         '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
                 }
@@ -1095,7 +1095,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         }
        return updateret;
     }
-    
+
     window.updateStudyTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables,studyID) {
         let nonViewAbleModality= new Set([""]);
         $('#studies_tab').data('rowsremoved',rowsRemoved);
@@ -1208,7 +1208,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     });
                 },
                 "columnDefs": [
-                    {className: "ckbx seriesview", "targets": [0]},
+                    {className: "ckbx seriesview expansion-toggle", "targets": [0]},
                     {className: "ckbx", "targets": [1]},
                     {className: "ckbx", "targets": [2]},
                     {className: "col1 case-id", "targets": [3]},
@@ -1226,13 +1226,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             var collection_id=row['collection_id']
                             if ( (StudyInstanceUID in window.selProjects[collection_id].selCases[PatientID].selStudies) && ('view' in window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID]['state']) && window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID]['state']['view']) {
                                 //return '<input type="checkbox" checked>'
-                               return '<a role="button">'+
+                               return '<a role="button" title="Display series in this study below.">'+
                                     '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                                     '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
-                            }
-                            else {
-                                return '<a role="button">'+
+                            } else {
+                                return '<a role="button" title="Display series in this study below.">'+
                                     '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                                     '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
@@ -1240,7 +1239,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         }
                     },
                    {"type": "html", "orderable": false, render: function () {
-                       return '<i class=" fa-solid  fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
+                       return '<i class=" fa-solid fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
 
                   }
                }, {
