@@ -26,7 +26,8 @@ require.config({
         tree_graph: 'visualizations/createTreeGraph',
         stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
-        typeahead : 'libs/typeahead'
+        typeahead : 'libs/typeahead',
+        bootstrap: 'libs/bootstrap.bundle.min'
     },
     shim: {
         'typeahead':{
@@ -38,7 +39,8 @@ require.config({
         'bloodhound': {
            deps: ['jquery'],
            exports: 'Bloodhound'
-        }
+        },
+        'bootstrap': ['jquery']
     }
 });
 
@@ -889,7 +891,7 @@ require([
             firstSelect = false;
         });
 
-        createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
+        //createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
     };
 
     var set_prog_filter_height = function(height_percentage) {

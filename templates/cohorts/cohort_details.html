@@ -47,7 +47,7 @@
                     <button class="show-flyout btn btn-info" title="Show Comments">Comments</button>
                 </li>
                 <li class="menu-item">
-                    <button class="btn btn-info" data-toggle="modal"
+                    <button class="btn btn-info" data-bs-toggle="modal"
                             data-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
                         {% if cohort.perm.perm == 'OWNER' %}
                             Delete
@@ -63,11 +63,11 @@
                 {% if cohort.perm.perm == 'OWNER' %}
                     <li class="separator"></li>
                     <li class="menu-item">
-                        <button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share
+                        <button class="btn btn-info" data-bs-toggle="modal" data-target="#share-cohort-modal">Share
                         </button>
                     </li>
                     <li class="separator"></li>
-                    <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared
+                    <li class="menu-item"><a data-target="#share-cohort-modal" data-bs-toggle="modal" class="btn btn-link">Shared
                         with (<span class="share-count">{{ shared_with_users|length }}</span>)</a></li>
                     <li class="separator"></li>
                     <li class="menu-item">
@@ -208,7 +208,7 @@
                         {% for program in programs %}
                             <li role="presentation"
                                 class="program-tab{% if not program.id|program_is_in_cohort:programs_this_cohort %} disabled{% elif program|program_is_first_in_cohort:cohort_programs %} active{% endif %}">
-                                <a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data"
+                                <a href="#{{ program.id }}-data" role="tab" data-bs-toggle="tab" title="ISB-CGC Data"
                                    data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                         {% endfor %}
                     </ul>

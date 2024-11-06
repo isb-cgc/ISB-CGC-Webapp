@@ -19,9 +19,10 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-
+       bootstrap: 'libs/bootstrap.bundle.min'
     },
     shim: {
+        'bootstrap': ['jquery']
     }
 });
 
