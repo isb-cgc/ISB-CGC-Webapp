@@ -26,11 +26,9 @@ require.config({
         tree_graph: 'visualizations/createTreeGraph',
         stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
-        typeahead : 'libs/typeahead',
-        tokenfield: 'libs/bootstrap-tokenfield.min'
+        typeahead : 'libs/typeahead'
     },
     shim: {
-        'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],
             init: function ($) {
@@ -56,7 +54,6 @@ require([
     'underscore',
     'base',
     'typeahead',
-    'tokenfield',
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart'

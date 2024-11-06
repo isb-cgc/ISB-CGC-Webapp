@@ -19,10 +19,9 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        tokenfield: 'libs/bootstrap-tokenfield.min',
+
     },
     shim: {
-        'tokenfield': ['jquery', 'jqueryui'],
     }
 });
 
@@ -32,8 +31,7 @@ require([
     'underscore',
     'jqueryui',
     'bootstrap',
-    'session_security',
-    'tokenfield'
+    'session_security'
 ], function ($, base, _) {
 
     // For manaaging filter changes
