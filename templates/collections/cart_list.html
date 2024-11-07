@@ -68,7 +68,7 @@
 </div>
 <!-- Include footer here instead of base.html so it can be hidden by default -->
 {% include 'share/site_footer.html' with hide="False" %}
-    {% include "idc/cart-details-modal.html" %}
+{% include "idc/cart-details-modal.html" %}
 
 {% url 'get_explore_manifest' as export_uri %}
 
@@ -78,21 +78,12 @@
 
 {% block js_file %}
 
-
     {{ carthist|json_script:"carthist" }}
     {{ mxstudies|json_script:"mxstudies" }}
     {{ mxseries|json_script:"mxseries" }}
-
 	{{ block.super }}
-
-        //const projcnts = JSON.parse(document.getElementById('projcnts').textContent);
-
-
     <script type="text/javascript" src="{% static 'js/cart_page.js' %}?v={{ APP_VERSION }}"></script>
-     <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
-   <!-- <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script> -->
-
-    <!-- <script type="text/javascript" src="{% static 'js/cohorts/cart-description-man.js' %}?v={{ APP_VERSION }}"></script> !-->
+    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
 
 {% endblock %}
 

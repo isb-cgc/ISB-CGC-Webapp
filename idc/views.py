@@ -970,82 +970,40 @@ def warn_page(request):
 def about_page(request):
     return render(request, 'idc/about.html', {'request': request})
 
+
 def cart_page(request):
-  status = 200
-  context = {'request': request}
+    context = {'request': request}
 
-  if not request.session.exists(request.session.session_key):
-      request.session.create()
+    if not request.session.exists(request.session.session_key):
+        request.session.create()
 
-  try:
-      req = request.GET if request.GET else request.POST
-      carthist = json.loads(req.get('carthist', '{}'))
-      mxseries = req.get('mxseries',0)
-      mxstudies = req.get('mxstudies',0)
-      stats = req.get('stats','');
+    try:
+        req = request.GET if request.GET else request.POST
+        carthist = json.loads(req.get('carthist', '{}'))
+        mxseries = req.get('mxseries',0)
+        mxstudies = req.get('mxstudies',0)
+        stats = req.get('stats', '')
 
-      context['carthist'] =carthist
-      context['mxseries'] = mxseries
-      context['mxstudies'] = mxstudies
-      context['stats'] = stats
+        context['carthist'] = carthist
+        context['mxseries'] = mxseries
+        context['mxstudies'] = mxstudies
+        context['stats'] = stats
 
-  except Exception as e:
-      logger.error("[ERROR] While loading cartvpage:")
-      logger.exception(e)
-      status = 400
+    except Exception as e:
+        logger.error("[ERROR] While loading cartvpage:")
+        logger.exception(e)
 
-
-  '''
-  versions = []
-  versions = ImagingDataCommonsVersion.objects.filter(
-      version_number__in=versions
-  ).get_data_versions(active=True) if len(versions) else ImagingDataCommonsVersion.objects.filter(
-      active=True
-  ).get_data_versions(active=True)
-
-  aggregate_level = "StudyInstanceUID"
-
-  data_types = [DataSetType.IMAGE_DATA, DataSetType.ANCILLARY_DATA, DataSetType.DERIVED_DATA]
-  data_sets = DataSetType.objects.filter(data_type__in=data_types)
-  aux_sources = data_sets.get_data_sources().filter(
-      source_type=DataSource.SOLR,
-      aggregate_level__in=["case_barcode", "sample_barcode", aggregate_level],
-      id__in=versions.get_data_sources().filter(source_type=DataSource.SOLR).values_list("id", flat=True)
-  ).distinct()
-
-  sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-      active=True, source_type=DataSource.SOLR,
-      aggregate_level=aggregate_level
-  )
-
-  custom_facets = {"per_id": {"type": "terms", "field": "collection_id", "limit": 500,
-                                  "facet": {"unique_patient": "unique(PatientID)",
-                                            "unique_study": "unique(StudyInstanceUID)",
-                                            "unique_series": "unique(SeriesInstanceUID)"}},
-                       "tot_series": {"type": "terms", "field": "collection_id", "limit": 500,
-                                      "facet": {"unique_series": "unique(SeriesInstanceUID)"},
-                                      "domain": {"query": "*.*"}}
-                       }
-
-  cntRecs = get_collex_metadata(
-      {}, ['collection_id'], record_limit=500, sources=sources, collapse_on='collection_id', counts_only=True,
-    records_only=False, filtered_needed=False, custom_facets=custom_facets, raw_format=True, aux_sources=aux_sources,
-    default_facets=False)
-
-  context['projcnts'] = cntRecs['facets']['per_id']['buckets']
-  '''
-
-  return render(request, 'collections/cart_list.html', context)
+    return render(request, 'collections/cart_list.html', context)
 
 
 def cart_data(request):
-    status=200
-    response={}
-    field_list=["collection_id", "PatientID", "StudyInstanceUID","SeriesInstanceUID", "Modality"]
+    status = 200
+    response = {}
+    field_list = ['collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID', 'aws_bucket']
     try:
         req = request.GET if request.GET else request.POST
         filtergrp_list = json.loads(req.get('filtergrp_list', '{}'))
-        aggregate_level = req.get('aggregate_level','StudyInstanceUID')
+        aggregate_level = req.get('aggregate_level', 'StudyInstanceUID')
         results_level = req.get('results_level', 'StudyInstanceUID')
 
         partitions = json.loads(req.get('partitions', '{}'))
@@ -1057,19 +1015,18 @@ def cart_data(request):
 
         if ((len(partitions)>0) and (aggregate_level == 'StudyInstanceUID')):
             response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
-
         elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
-            response = get_cart_data(filtergrp_list, partitions, ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID'],limit, offset)
-
+            response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
         else:
             response['numFound'] = 0
             response['docs'] = []
     except Exception as e:
         logger.error("[ERROR] While loading cart:")
         logger.exception(e)
-        status=400
+        status = 400
 
     return JsonResponse(response, status=status)
+
 
 def test_page(request, mtch):
     pg=request.path[:-1]+'.html'

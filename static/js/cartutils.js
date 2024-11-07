@@ -646,7 +646,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             form.appendChild(input);
             document.body.appendChild(form)
             form.submit();
-
     };
 
      window.updatePartitionsFromScratch =function(){
@@ -775,11 +774,9 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                             }
                         }
                     }
-
                 }
             }
         }
-
     }
 
     const fixpartitions = function(){
@@ -812,14 +809,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
           if (nfilts.length ==0){
               window.partitions[i].null = true;
           }
-         /* else if (window.partitions[i].id.length>2){
-              var studyid = window.partitions[i].id[2]
-              if (!studyid in window.glblcart){
-                  window.partitions[i].null = true;
-              }
-          }*/
       }
-
     }
     const formcartdata = function(){
         var partitions = new Array();
@@ -859,8 +849,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         }
         return(filtStrings);
     }
-
-
 
 
     // not really needed, but used to creating the solr string in on the client side
@@ -941,12 +929,9 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
          if (firstPgWhichStartsWithFirstStudy>0) {
              var prevPageIndex = window.cartPgLocator[firstPgWhichStartsWithFirstStudy-1];
              seriesTblOffset = window.seriesTalley[prevPageIndex]['talley']
-         }
-         else{
+         } else {
              seriesTblOffset = 0;
          }
-
-
 
          // the ids of the studies in these pages
          var studyArr = [];
@@ -970,11 +955,9 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                             xhr.setRequestHeader("X-CSRFToken", csrftoken);
                         },
                         success: function (data) {
-
                             try {
                                 console.log(" data received");
                                 var numFound =0;
-
                                 var dataset = new Array();
                                 for (var i=0;i<data['res'].length;i++){
                                     var isFound = false;
@@ -988,8 +971,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                             if (((numFound+seriesTblOffset)>seriesTblStrt) && ((numFound+seriesTblOffset)<=(seriesTblStrt+seriesTblLimit))){
                                                 isFound = true;
                                             }
-                                        }
-                                        else {
+                                        } else {
                                             var seriesid = row['SeriesInstanceUID'];
                                             if (('sel' in window.glblcart[studyid]) && (window.glblcart[studyid]['sel'].has(seriesid))){
                                                 numFound++;
@@ -1002,9 +984,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                     if (isFound){
                                         dataset.push(row)
                                     }
-
                                 }
-
                             }
                              catch(err){
                             console.log('error processing data');
@@ -1020,8 +1000,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                         }
                     });
           return deferred.promise();
-
-    }
+    };
 
     const updateCartTable = function() {
          var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
@@ -1081,11 +1060,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
                 "columnDefs": [],
                 "columns": [
-                    /*{
-                        "type": "html", "orderable": false, "data": "PatientID", render: function (data) {
-                            return '<input type="checkbox">';
-                        }
-                    },*/
                     {
                         "type": "html", "orderable": false, "data": "collection_id", render: function (data) {
                             return data;

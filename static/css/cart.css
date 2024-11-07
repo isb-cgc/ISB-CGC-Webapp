@@ -15,3 +15,7 @@
 .viewer-toggle .viewer-menu a:hover {
     background-color: #d5d5d5;
 }
+
+.export-button:hover, .btnGroupDropViewers:hover {
+    cursor: pointer;
+}
