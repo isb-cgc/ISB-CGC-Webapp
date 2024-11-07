@@ -199,7 +199,7 @@ require([
         $('#external-web-warning').modal('hide');
     });
 
-    $('#body').on('click', '.copy-this, .copy-this-table', function(){
+    $('#body').on('click', '.copy-this, .copy-this-table', function(e){
         let content = $(this).attr('content');
         navigator.clipboard.writeText(content).then(
             () => {

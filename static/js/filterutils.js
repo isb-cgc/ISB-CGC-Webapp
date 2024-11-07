@@ -877,7 +877,7 @@ define(['jquery', 'base'], function($, base) {
         }
         if (oStringA.length > 0) {
             var oString = oStringA.join(" AND");
-            document.getElementById("search_def").innerHTML = '<p>' + buttxt + oString + infotxt +'</p>';
+            document.getElementById("search_def").innerHTML = '<p>' + buttxt + oString /*+ infotxt*/ +'</p>';
             document.getElementById('filt_txt').value=oString;
             $('#search_def').removeClass('notDisp');
 

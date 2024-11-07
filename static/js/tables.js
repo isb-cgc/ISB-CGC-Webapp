@@ -261,7 +261,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     // classes for project(collection) table columns
     var projectTableColDefs = function(){
-        return [{className: "ckbx text_data viewbx caseview expansion-toggle", "targets": [0]},
+        return [{className: "ckbx text_data viewbx caseview", "targets": [0]},
                     {className: "ckbx shopping-cart-holder", "targets": [1]},
                     {className: "ckbx", "targets": [2]},
 
@@ -284,21 +284,23 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                             '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
                     }
-                   }
+                   },
+                        createdCell: function(td) {
+                            $(td).attr("title", "Display cases in this collection below.");
+                            $(td).addClass('expansion-toggle');
+                        }
                 };
 
         var cart_col = {"type": "html", "orderable": false, render: function () {
-                       return '<i class=" fa-solid  fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
-
-                  }
-               };
+               return '<i class=" fa-solid  fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
+          }
+       };
         var cartnum_col={"type": "html", "orderable": false, render: function(){return ('<span class="cartnum cartnum_style">0</span>');}};
         var collection_col = {"type": "html", "orderable": true, render: function (td, data, row){
-                 return '<span id="'+row[0]+'"class="collection_name value">'+row[3]+'</span>\n' +
+                 return '<span id="'+row[0]+'" class="collection_name value">'+row[3]+'</span>\n' +
                      '<span><i class="collection_info fa-solid fa-info-circle" value="'+row[0]+'" data-filter-display-val="'+row[3]+'"></i></span>'+
                      ' <a class="copy-this-table" role="button" content="' + row[0] +
                      '" title="Copy the IDC collection_id to the clipboard"><i class="fa-solid fa-copy"></i></a>'
-
                    }};
         var case_col = {"type": "num", orderable: true};
         var dyn_case_col ={"type": "num", orderable: true, "createdCell": function (td, data, row) {
@@ -386,22 +388,18 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         }
                     }
 
-                    $(row).find('.caseview').on('click', function(event){
+                    $(row).find('.expansion-toggle').on('click', function(event){
                         var elem = event.target;
+                        $(this).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
                         updateProjectViewSelection([$(row)]);
                     })
                     $(row).find('.shopping-cart').parent().on('click', function(event){
                         clickProjectTableShopping(event, row, data)
-
-
                     });
-
-                     $(row).on('click', function(event) {
-                        var elem = event.target;
-
-                       if ($(elem).hasClass('collection_info')){
-                           window.displayInfo($(elem));
-                       }
+                     $(row).on('click', '.collection_info', function(e) {
+                         window.displayInfo($(this));
+                         e.preventDefault();
+                         return false;
                     });
 
                      $(row).find('.collection_info').on("mouseenter", function(e){
@@ -639,7 +637,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     const caseTableColDefs = function(){
         return [
-            {className: "ckbx studyview expansion-toggle", "targets": [0]},
+            {
+                className: "ckbx studyview",
+                "targets": [0]
+            },
             {className: "ckbx", "targets": [1]},
             {className: "ckbx", "targets":[2]},
             {className: "col1 project-name", "targets": [3]},
@@ -654,7 +655,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 collection_id=row['collection_id'][0]
                 if ((collection_id in window.selProjects) && (PatientID in window.selProjects[collection_id].selCases) && (window.selProjects[collection_id].selCases[PatientID]['state']['view'] )) {
                     //return '<input type="checkbox" checked>'
-                   return '<a role="button" title="Display studies in this case below.">'+
+                   return '<a role="button">'+
                         '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                         '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
@@ -663,6 +664,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                         '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
                 }
+            },
+            createdCell: function(td) {
+                $(td).attr("title", "Display studies in this case below.");
+                $(td).addClass('expansion-toggle');
             }
         };
 
@@ -781,9 +786,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         content: content
                     });
 
-                    $(row).find('.studyview').on('click', function(event){
+                    $(row).find('.expansion-toggle').on('click', function(event){
                         var elem = event.target;
                         var rowsAdded= ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false;
+                        $(this).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
                         if (rowsAdded){
                             $(row).find('.fa-caret-down').removeClass('notDisp');
                             $(row).find('.fa-caret-right').addClass('notDisp');
@@ -1134,8 +1140,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                      }
                     window.selProjects[projid].selCases[caseid].selStudies[studyid]['studymp']=data['studymp'];
 
-                    var cnt =0;
-                    var content=""
+                    var cnt = 0;
+                    var content = ""
                     if (studyid in window.glblcart) {
                         $(row).addClass('someInCart');
                         window.selProjects[projid].selCases[caseid].selStudies[studyid]['someInCart']=true;
@@ -1168,9 +1174,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                       content: content
                     });
                     $(row).find('.cartnum').html(cnt);
-                    $(row).find('.seriesview').on('click', function(event){
+                    $(row).find('.expansion-toggle').on('click', function(event){
                         var elem = event.target;
-                        var rowsAdded= ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false
+                        var rowsAdded = ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false
+                        $(this).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
                         if (rowsAdded){
                             $(row).find('.fa-caret-down').removeClass('notDisp');
                             $(row).find('.fa-caret-right').addClass('notDisp');
@@ -1190,10 +1197,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         if ('extraInFilt' in window.selProjects[projid].selCases[caseid].selStudies[studyid]) {
                             //more to add
                             addingToCart= true;
-                        } else{
+                        } else {
                             // no more to add
                             addingToCart = false;
-
                         }
                         var numSeries = window.selProjects[projid].selCases[caseid].selStudies[studyid].studymp[studyid]['cnt'];
                         var mp=new Object();
@@ -1208,7 +1214,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     });
                 },
                 "columnDefs": [
-                    {className: "ckbx seriesview expansion-toggle", "targets": [0]},
+                    {className: "ckbx seriesview", "targets": [0]},
                     {className: "ckbx", "targets": [1]},
                     {className: "ckbx", "targets": [2]},
                     {className: "col1 case-id", "targets": [3]},
@@ -1217,32 +1223,41 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "col1 study-description", "targets": [6]},
                     {className: "col1 numrows", "targets": [7]},
                     {className: "ohif open-viewer", "targets": [8]},
-
                 ],
                 "columns": [
                     {
-                        "type": "html", "orderable": false, "data":"StudyInstanceUID", render: function (StudyInstanceUID, type, row) {
+                        "type": "html",
+                        "orderable": false,
+                        "data": "StudyInstanceUID",
+                        render: function (StudyInstanceUID, type, row) {
                             var PatientID= row['PatientID']
                             var collection_id=row['collection_id']
                             if ( (StudyInstanceUID in window.selProjects[collection_id].selCases[PatientID].selStudies) && ('view' in window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID]['state']) && window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID]['state']['view']) {
                                 //return '<input type="checkbox" checked>'
-                               return '<a role="button" title="Display series in this study below.">'+
+                               return '<a role="button">'+
                                     '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                                     '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                             } else {
-                                return '<a role="button" title="Display series in this study below.">'+
+                                return '<a role="button">'+
                                     '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                                     '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                             }
+                        },
+                        createdCell: function(td) {
+                            $(td).attr("title", "Display series in this study below.");
+                            $(td).addClass('expansion-toggle');
                         }
                     },
-                   {"type": "html", "orderable": false, render: function () {
-                       return '<i class=" fa-solid fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
+                   {
+                       "type": "html",
+                       "orderable": false,
+                       render: function () {
+                            return '<i class=" fa-solid fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
 
-                  }
-               }, {
+                       }
+                    }, {
                         "type": "html", "orderable": false, "data": "StudyInstanceUID", render: function (data) {
                             var cnt =0;
                             if (data in window.glblcart) {
@@ -1338,7 +1353,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                           "type":"html",
                           "orderable": false,
                           data: 'StudyInstanceUID', render: function (data, type, row){
-                              return '<i class="fa fa-download study-export" data-series-count="'+row['unique_series']
+                              return '<i class="fa fa-download study-export export-button" data-series-count="'+row['unique_series']
                                   +'" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
                           }
 
@@ -1673,7 +1688,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                       "type":"html",
                       "orderable": false,
                       data: 'SeriesInstanceUID', render: function (data){
-                          return '<i class="fa fa-download series-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          return '<i class="fa fa-download series-export export-button" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
                       }
                   }
             ],

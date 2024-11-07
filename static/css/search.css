@@ -386,8 +386,17 @@ tr {
     display: table;
     width: 100%; }
 
+.expansion-toggle.open {
+    background-color: #c5b9d5;
+}
+
 .expansion-toggle:hover {
+    cursor: pointer;
     background-color: #b7cfe5;
+}
+
+.export-button:hover {
+    cursor: pointer;
 }
 
 #projects_table td.cartnum, #projects_table_head th.cartnum{
