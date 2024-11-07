@@ -1161,8 +1161,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                 }
                                 return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                     '<div class="dropdown viewer-toggle">' +
-                                    '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
-                                    '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
+                                    '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
+                                    '<ul class="dropdown-menu viewer-menu">' +
                                     v2_element +
                                     '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
                                     volView_element +
