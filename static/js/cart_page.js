@@ -50,7 +50,7 @@ require.config({
         'underscore': {exports: '_'},
         'session_security': ['jquery'],
         'cartutils': ['jquery'],
-        'exportmanifest':['jquery']
+        'export-manifest':['jquery']
     }
 });
 
@@ -166,6 +166,5 @@ require([
          $('#download-s5cmd').addClass('iscart');
          $('#download-idc-index').addClass('iscart');
          $('#export-manifest-form').attr('action','/explore/manifest/');
-
     });
 });

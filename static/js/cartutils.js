@@ -1179,7 +1179,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                         success: function (data) {
                             console.log(" data received");
                             var dataset = data["docs"];
-
+                            $('input[name="async_download"]').val(data['numFound'] > 65000 ? "True" : "False");
                              callback({
                                  "data": dataset,
                                  "recordsTotal": data['numFound'],
