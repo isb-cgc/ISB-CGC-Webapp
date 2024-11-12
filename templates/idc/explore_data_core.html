@@ -649,6 +649,15 @@
                 <div class="tabpanel data-tab-content-panel">
                 <div class="panel panel-default filter-display-panel">
                     <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3>
+                    <button
+                        class="btn btn-small btn-special copy-this copy-url"
+                        disabled
+                        role="button"
+                        title="Select a filter to enable this feature.">URL<i class="fa-solid fa-copy"></i>
+                    </button>
+                    <button class="btn btn-small btn-default bq-string-copy" disabled data-toggle="modal"
+                       title= "Select a filter to enable this feature." >SQL<i class="fa-solid fa-copy"></i>
+                    </button>
                               {%  if is_cohort %}
                                 <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
                                     <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
@@ -668,18 +677,8 @@
                             </div>
 
                     <div class="filter-url-container space-top-10 space-top-10">
-                    <button
-                                        class="btn btn-small btn-special copy-this copy-url"
-                                        disabled
-                                        role="button"
-                                        title="Select a filter to enable this feature.">URL<i class="fa-solid fa-copy"></i></button>
-
-
-                                <button class="btn btn-small btn-default   bq-string-copy" disabled data-toggle="modal"
-                                   title= "Select a filter to enable this feature." >SQL<i class="fa-solid fa-copy"></i>
-                             </button>
                                 <button class="btn btn-small cart-view" role="button"
-                                        title="Get cart details." onclick="viewcart()"><i class="fa-solid fa-cart-shopping"></i></button>
+                                        title="Get cart details." onclick="viewcart()">View Cart <i class="fa-solid fa-cart-shopping"></i></button>
                                <span id="cart_stats"></span>
                                 <pre class="filter-url code is-hidden" style="display:none;"></pre>
 

@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2020, Institute for Systems Biology
+   Copyright 2024, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/spinner.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
-
 {% endblock %}
 
 
@@ -70,16 +69,16 @@
                  data-uri="{% url 'account_login' %}" disabled="disabled"> Log in to Save Cohort
             </button>
             {% endif %}
-
             <button id="export-manifest" class="btn btn-special pull-right" disabled="disabled" data-toggle="modal"
                 data-target="#export-manifest-modal"
                 title="Select a filter to enable this feature."
-            > Download Images
+            > Download Cohort
             </button>
-            <button class="btn btn-special pull-right cart-view" disabled="disabled"
-            onclick="viewcart()"> View Cart<i class="fa-solid fa-cart-shopping"></i>
+            <button id="export-manifest-cart" class="btn btn-special pull-right" disabled="disabled" data-toggle="modal"
+                data-target="#export-manifest-modal"
+                title="Add items to the cart to enable this feature."
+            > Download Cart
             </button>
-
         </div>
     </div>
 {% endblock %}
@@ -105,7 +104,7 @@
 {% endblock %}
 
 {% block js_file %}
-     {{ collection_tooltips|json_script:"collection_tooltips" }}
+    {{ collection_tooltips|json_script:"collection_tooltips" }}
     {{ analysis_results_tooltips|json_script:"analysis_results_tooltips" }}
     {{ filters_for_load|json_script:"filters_for_load" }}
     {{ collections|json_script:"collections" }}
@@ -147,7 +146,6 @@
         var showWarning = true;
         var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
         var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
-
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
