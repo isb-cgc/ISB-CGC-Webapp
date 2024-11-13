@@ -69,11 +69,10 @@ require([
 
      var ajaxtriggered = false;
 
-
     window.resetCartPageView = function(){
         window.cartHist = new Array();
         window.updatePartitionsFromScratch();
-        let ret =cartutils.formcartdata();
+        let ret = cartutils.formcartdata();
         window.partitions = ret[0];
         window.filtergrp_lst = ret[1];
         window.glblcart = new Object();

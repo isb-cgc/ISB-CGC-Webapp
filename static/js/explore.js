@@ -80,8 +80,6 @@ require([
     //sesssionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
     window.partitions = new Array();
 
-
-
     window.studymp=new Object();
     window.projstudymp = new Object();
     window.casestudymp = new Object();

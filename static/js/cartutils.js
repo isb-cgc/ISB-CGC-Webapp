@@ -277,17 +277,13 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         }
     }
 
-
-// remove all items from the cart. clear the glblcart, carHist, cartDetails
+    // remove all items from the cart. clear the glblcart, carHist, cartDetails
     window.resetCart = function(){
         window.cart = new Object();
         window.glblcart = new Object();
         window.cartHist = new Array();
-
-        window.cartStep=1;
-
-        window.partitions= new Array();
-
+        window.cartStep = 1;
+        window.partitions = new Array();
         let cartSel = new Object();
         var parsedFiltObj = filterutils.parseFilterObj();;
         cartSel['filter']= parsedFiltObj;
@@ -304,7 +300,12 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
          $('#cart_stats').addClass('is-hidden');
          $('#export-manifest-cart').attr('disabled','disabled');
          $('.cart-view').attr('disabled','disabled');
+         $('.clear-cart').attr('disabled','disabled');
     }
+
+    $('.clear-cart').on('click', function(){
+        window.resetCart();
+    });
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel, addingToCart,studymp,updateSource){

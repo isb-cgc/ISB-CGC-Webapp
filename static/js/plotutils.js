@@ -112,17 +112,19 @@ define(['sliderutils','filterutils','jquery', 'base'], function(sliderutils,filt
 
     window.toggleCharts=function(cntrl){
         if (cntrl==="hide"){
-            $('.chart-content').addClass('hidden');
-            $('.showchrt').removeClass('hidden');
-            $('.hidechrt').addClass('hidden');
+            $('.chart-content').addClass('is-hidden');
+            $('.showchrt').removeClass('is-hidden');
+            $('.hidechrt').addClass('is-hidden');
+            $('.tooltip_filter_info').hide();
         }
         else if (cntrl==="show"){
-            $('.chart-content').removeClass('hidden');
-            $('.hidechrt').removeClass('hidden');
-            $('.showchrt').addClass('hidden');
+            $('.chart-content').removeClass('is-hidden');
+            $('.hidechrt').removeClass('is-hidden');
+            $('.showchrt').addClass('is-hidden');
+            $('.tooltip_filter_info').show();
         }
-
     }
+
     window.showGraphs = function(selectElem){
         $(selectElem).parent().siblings('.graph-set').show();
         $(selectElem).parent().siblings('.less-graphs').show();
