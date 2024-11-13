@@ -535,6 +535,8 @@ tr {
 .filter-url {
     display: inline-block;
     vertical-align: top;
+    max-width: 95%;
+    padding: 3px;
 }
 
 table {

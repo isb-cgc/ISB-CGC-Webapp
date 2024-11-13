@@ -93,7 +93,6 @@ require([
         $('.modal-title').text("Export Cart Manifest");
         $('#export-manifest-form').append('<input type="hidden" name="from_cart">')
         $('#export-manifest-form').find('input[name="from_cart"]').val("True");
-
         $('#export-manifest-form').append('<input type="hidden" name="filtergrp_list">')
         $('#export-manifest-form').find('input[name="filtergrp_list"]').val(JSON.stringify(filtergrp_list));
         $('#export-manifest-form').append('<input type="hidden" name="partitions">')

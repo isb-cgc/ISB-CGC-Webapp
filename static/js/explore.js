@@ -305,9 +305,9 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid  fa-cart-shopping shopping-cart " style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>All series from this collection are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid  fa-cart-shopping shopping-cart case2" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>Some series from this collection are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid  fa-cart-shopping shopping-cart case3" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>No series from this collection are in the cart</span></div>'+
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid fa-cart-shopping shopping-cart"></i></span> <span>All series from this collection are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this collection are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this collection are in the cart</span></div>'+
             '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to studies with the given collection that match the current filter</div>'
     });
 
@@ -317,9 +317,9 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid  fa-cart-shopping shopping-cart " style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>All series from this case are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid  fa-cart-shopping shopping-cart case2" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>Some series from this case are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid  fa-cart-shopping shopping-cart case3" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>No series from this case are in the cart</span></div>'+
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this case are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this case are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this case are in the cart</span></div>'+
             '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to studies within the given case that match the current filter</div>'
     });
 
@@ -329,9 +329,9 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid  fa-cart-shopping shopping-cart " style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>All series from this study are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid  fa-cart-shopping shopping-cart case2" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>Some series from this study are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid  fa-cart-shopping shopping-cart case3" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>No series from this study are in the cart</span></div>'
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this study are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this study are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this study are in the cart</span></div>'
     });
 
     tippy.delegate('#series_table_head', {
@@ -340,8 +340,8 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid  fa-cart-shopping shopping-cart " style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>This series is in the cart</span></div>'+
-             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid  fa-cart-shopping shopping-cart case3" style="font-family :\'Font Awesome 6 Free\'"></i></span> <span>This series is not the cart</span></div>'
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>This series is in the cart</span></div>'+
+             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>This series is not the cart</span></div>'
     });
 
     tippy('.case-info', {
@@ -419,7 +419,7 @@ require([
         maxWidth: 130
     });
 
-    window.sqlinstance = tippy('.bq-string-copy',{
+    tippy('.bq-string-copy',{
         content: 'Copied!',
         theme: 'blue',
         placement: 'right',
@@ -433,6 +433,7 @@ require([
         },
         maxWidth: 85
     });
+
     tippy.delegate('.series-table', {
         content: 'Copied!',
         theme: 'blue',

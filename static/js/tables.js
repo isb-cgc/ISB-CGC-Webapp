@@ -275,14 +275,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var caret_col= { "type": "html", "orderable": false, render: function (data) {
                     if (('state' in window.selProjects[data]) && ('view' in window.selProjects[data]['state']) && (window.selProjects[data]['state']['view'] )) {
                         return '<a role="button" title="Display cases in this collection below.">'+
-                            '<i class="fa fa-solid fa-caret-right is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                            '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
-
+                            '<i class="fa fa-solid fa-caret-right is-hidden"></i>' +
+                            '<i class="fa fa-solid fa-caret-down"></i></a>'
                     }
                     else {
                         return '<a role="button" title="Display cases in this collection below.">'+
-                            '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                            '<i class="fa fa-solid fa-caret-down is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
+                            '<i class="fa fa-solid fa-caret-right"></i>' +
+                            '<i class="fa fa-solid fa-caret-down is-hidden"></i></a>'
                     }
                    },
                         createdCell: function(td) {
@@ -292,7 +291,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 };
 
         var cart_col = {"type": "html", "orderable": false, render: function () {
-               return '<i class=" fa-solid  fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
+               return '<i class="fa-solid fa-cart-shopping shopping-cart"></i>'
           }
        };
         var cartnum_col={"type": "html", "orderable": false, render: function(){return ('<span class="cartnum cartnum_style">0</span>');}};
@@ -672,7 +671,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         };
 
        var cart_col = {"type": "html", "orderable": false, render: function () {
-               return '<i class=" fa-solid  fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
+               return '<i class="fa-solid fa-cart-shopping shopping-cart"></i>'
           }
        };
 
@@ -1254,7 +1253,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                        "type": "html",
                        "orderable": false,
                        render: function () {
-                            return '<i class=" fa-solid fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
+                            return '<i class="fa-solid fa-cart-shopping shopping-cart"></i>'
 
                        }
                     }, {
@@ -1585,7 +1584,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                  ],
                   "columns": [
                       {"type": "html", "orderable": false, render: function () {
-                       return '<i class=" fa-solid  fa-cart-shopping shopping-cart style="font-family :\'Font Awesome 6 Free\"></i>'
+                       return '<i class="fa-solid fa-cart-shopping shopping-cart"></i>'
 
                   }
                },
@@ -1962,7 +1961,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
               $(row).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
 
               if ('someInCart' in window.selProjects[projid]) {
-
                   delete (window.selProjects[projid]['someInCart']);
               }
               if ('extraInCart' in window.selProjects[projid]) {
