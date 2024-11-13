@@ -528,7 +528,7 @@ tr {
 }
 
 .copy-url {
-    padding: 9px 12px;
+    padding: 6px 9px;
     vertical-align: top;
 }
 
@@ -536,7 +536,8 @@ tr {
     display: inline-block;
     vertical-align: top;
     max-width: 95%;
-    padding: 3px;
+    padding: 6px;
+    overflow-x: auto;
 }
 
 table {

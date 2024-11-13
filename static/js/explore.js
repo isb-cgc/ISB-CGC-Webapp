@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021, Institute for Systems Biology
+ * Copyright 2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -276,39 +276,20 @@ require([
         $('#collection-modal').css("display","none");
     });
 
-/*
-    tippy.delegate('table#proj_table', {
-        content: function(reference) {
-            let collection_id=$(reference).parent('tr').data('projectid');
-            let tooltip = collection_tooltips[collection_id];
-            if(tooltip) {
-                return '<div class="collection-tooltip">' + tooltip + '</div>';
-            }
-            return '<span></span>';
-        },
-        theme: 'light',
-        placement: 'right-end',
-        arrow: false,
-        allowHTML: true,
-        interactive: true,
-        target: 'td.collex_name',
-        interactiveBorder: 10,
-        maxWidth: 600,
-    });
-*/
-    const temp='<html><strong>now</strong></html>';
-
-    //tippy.delegate('#projects_table_head')
     tippy.delegate('#projects_table_head', {
         interactive: true,
         target:'.cart-info',
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid fa-cart-shopping shopping-cart"></i></span> <span>All series from this collection are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this collection are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this collection are in the cart</span></div>'+
-            '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to studies with the given collection that match the current filter</div>'
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart"></i></span> <span>All series from this collection are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this collection are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this collection are in the cart</span></div>'+
+            '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to ' +
+            'studies with the given collection that match the current filter</div>'
     });
 
     tippy.delegate('#cases_table_head', {
@@ -317,10 +298,14 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this case are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this case are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this case are in the cart</span></div>'+
-            '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to studies within the given case that match the current filter</div>'
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this case are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this case are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this case are in the cart</span></div>'+
+            '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to ' +
+            'studies within the given case that match the current filter</div>'
     });
 
     tippy.delegate('#studies_table_head', {
@@ -329,9 +314,12 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this study are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2"><i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this study are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this study are in the cart</span></div>'
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this study are in the cart</span></div>'+
+            '<div class="cart-info-div"><span class="cart-info-tip case2">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this study are in the cart</span></div>' +
+             '<div class="cart-info-div"><span class="cart-info-tip case3">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this study are in the cart</span></div>'
     });
 
     tippy.delegate('#series_table_head', {
@@ -340,8 +328,10 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1"><i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>This series is in the cart</span></div>'+
-             '<div class="cart-info-div"><span class="cart-info-tip case3"><i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>This series is not the cart</span></div>'
+        content: '<div class="cart-info-div"><span class="cart-info-tip case1">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>This series is in the cart</span></div>'+
+             '<div class="cart-info-div"><span class="cart-info-tip case3">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>This series is not the cart</span></div>'
     });
 
     tippy('.case-info', {
@@ -352,19 +342,26 @@ require([
     tippy('.explainer', {
         interactive: true,
         allowHTML:true,
-        content: 'As some attributes have non mutually exclusive values the charts may contain non zero counts for these values even when they are not selected in the left hand panel. See <a href="https://learn.canceridc.dev/portal/data-exploration-and-cohorts/exploring-imaging-data#understanding-counts-in-the-search-results" target="_blank" rel="noopener noreferrer">here</a> for a detailed explanation.'
+        content: 'As some attributes have non mutually exclusive values the charts may contain non zero counts for these ' +
+            'values even when they are not selected in the left hand panel. ' +
+            'See <a href="https://learn.canceridc.dev/portal/data-exploration-and-cohorts/exploring-imaging-data#understanding-counts-in-the-search-results" target="_blank" rel="noopener noreferrer">here</a> for a detailed explanation.'
     });
 
     tippy('.tooltip_filter_info',{
-        content: 'Each chart below reports the number of cases (or patients) for all values within a given attribute, given the currently defined filter set. Once a case is selected, all series for that case, including those that do not meet the search criteria, are included. For example, cases selected based on the presence of CT modality may also contain PET modality, and thus counts for both values will appear in the chart, and the manifest.',
+        content: 'Each chart below reports the number of cases (or patients) for all values within a given attribute, ' +
+            'given the currently defined filter set. Once a case is selected, all series for that case, including those ' +
+            'that do not meet the search criteria, are included. For example, cases selected based on the presence of CT ' +
+            'modality may also contain PET modality, and thus counts for both values will appear in the chart, and the ' +
+            'manifest.',
         theme: 'light',
         placement: 'right-end',
         arrow: false
     });
 
     tippy('.tooltip_chart_info',{
-        content: 'Counts shown below are the number of cases (or patients) for each attribute value. Counts for each attribute (e.g. Modality) '+
-            'are unchanged by the values (e.g. PET) selected (checked) for that attribute. They only change based on the values selected for all other attributes.',
+        content: 'Counts shown below are the number of cases (or patients) for each attribute value. Counts for each ' +
+            'attribute (e.g. Modality) are unchanged by the values (e.g. PET) selected (checked) for that attribute. ' +
+            'They only change based on the values selected for all other attributes.',
         theme: 'light',
         placement: 'right-end',
         arrow: false
@@ -540,6 +537,4 @@ require([
     $('.download-link').on('click', function(){
         $('#download-images').modal("hide");
     });
-
-
 });

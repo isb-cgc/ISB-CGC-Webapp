@@ -648,8 +648,33 @@
                 {% endif %}
                 <div class="tabpanel data-tab-content-panel">
                 <div class="panel panel-default filter-display-panel">
-                    <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3>
+                    <div class="panel-heading clearfix">
+                        {%  if is_cohort %}
+                            <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
+                                <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
+                        {% else %}
+                            <span class="filter-placeholder">
+                                <i class="fa fa-solid fa-arrow-left"></i> Select a filter.
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="panel-body">
+                        <input id="filt_txt" type="hidden" value="">
+                        <div id="search_def"><span class="placeholder"></span></div>
+                        <div id="search_def_stats">&nbsp;</div>
+                        <div id="search_def_warn" style="display:none">
+                            Note: TCGA.* filters only apply to TCGA collections
+                        </div>
+                        <div id="search_def_access" class="is-hidden" style="color:red">
+                            This cohort includes collections with limited access. The DICOM files of these
+                            collections are not publicly available
+                        </div>
                         <div class="space-top-10">
+                            <button id="export-manifest" class="btn btn-primary btn-small" disabled data-toggle="modal"
+                                data-target="#export-manifest-modal"
+                                title="Select a filter to enable this feature."
+                            > Download <i class="fa fa-solid fa-download"></i>
+                            </button>
                             <button class="btn btn-small btn-default bq-string-display" disabled data-toggle="modal"
                                 data-target="#bq-string-display" title= "Select a filter to enable this feature." >SQL
                             </button>
@@ -669,27 +694,26 @@
                             </button>
                             <pre class="filter-url code"></pre>
                         </div>
-                        {%  if is_cohort %}
-                            <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
-                                <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
-                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                <div class="panel panel-default shopping-cart-panel">
+                    <div class="panel-heading clearfix">
+                            <span id="cart_stats">Your cart is currently empty.</span>
                     </div>
                     <div class="panel-body">
-                        <input id="filt_txt" type="hidden" value="">
-                        <div id="search_def"><span class="placeholder"></span></div>
-                        <div id="search_def_stats" class="is-hidden">No Text</div>
-                        <div id="search_def_warn" style="display:none">
-                            Note: TCGA.* filters only apply to TCGA collections
-                        </div>
-                        <div id="search_def_access" class="is-hidden" style="color:red">
-                            This cohort includes collections with limited access. The DICOM files of these
-                            collections are not publicly available
-                        </div>
                         <div class="cart-container space-top-10">
-                            <button class="btn btn-small btn-default cart-view" role="button" title="Get cart details." disabled
-                                onclick="viewcart()">View Cart <i class="fa-solid fa-cart-shopping"></i>
+                            <button id="export-manifest-cart" class="btn btn-primary cart-export-from-cp btn-small" disabled data-toggle="modal"
+                                data-target="#export-manifest-modal"
+                                title="Add items to the cart to enable this feature."
+                            > Manifest <i class="fa fa-solid fa-download"></i>
                             </button>
-                            <span id="cart_stats"></span>
+                            <button class="btn btn-small btn-default cart-view" role="button" title="Get cart details." disabled
+                                onclick="viewcart()">View <i class="fa-solid fa-cart-shopping"></i>
+                            </button>
+                            <button class="btn btn-small btn-special clear-cart" role="button" disabled
+                                    title="Empty your cart.">Empty <i class="fa-solid fa-rotate-left"></i>
+                            </button>
                         </div>
                     </div>
                 </div>

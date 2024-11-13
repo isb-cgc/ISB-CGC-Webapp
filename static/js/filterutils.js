@@ -85,6 +85,7 @@ define(['jquery', 'base'], function($, base) {
     var update_filter_url = function() {
         let filters = parseFilterObj();
         if (Object.keys(filters).length <= 0) {
+            $('.filter-placeholder').show();
             $('.get-filter-uri').attr("disabled","disabled");
             $('#export-manifest').attr("disabled","disabled");
             $('#export-manifest').attr("data-no-filters", "true");
@@ -102,6 +103,7 @@ define(['jquery', 'base'], function($, base) {
                 $('#export-manifest-form').data('uri-base')
             );
         } else {
+            $('.filter-placeholder').hide();
             $('.get-filter-uri').removeAttr("disabled");
             $('#export-manifest').removeAttr("data-no-filters");
             if(!$('#export-manifest').attr('data-pending-manifest')) {

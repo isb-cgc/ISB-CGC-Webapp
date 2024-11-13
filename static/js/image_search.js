@@ -117,8 +117,9 @@ require([
     window.updateFacetsData = function (newFilt) {
         var url = '/explore/'
         var parsedFiltObj = filterutils.parseFilterObj();
+        let isFiltered = Boolean($('#search_def p').length > 0);
         url = encodeURI('/explore/')
-
+        $('#search_def_stats').html(isFiltered ? "Gathering cohort statistics...": "&nbsp;");
         ndic = {
             'totals': JSON.stringify(["PatientID", "StudyInstanceUID", "SeriesInstanceUID"]),
             'counts_only': 'False',
@@ -140,9 +141,7 @@ require([
             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 try {
-                    //cartutils.setCartHistWinFromLocal();
                     let curInd = window.cartHist.length-1;
-                    let isFiltered = Boolean($('#search_def p').length > 0);
                     if (cartHist[curInd].selections.length>0){
                         let cartSel = new Object();
                         cartSel['filter']= parsedFiltObj;
@@ -154,7 +153,6 @@ require([
                         window.cartHist[curInd]['filter'] = parsedFiltObj;
                         window.cartHist[curInd]['pageid'] = parsedFiltObj;
                     }
-                    //cartutils.setLocalFromCartHistWin();
                     if(data.total <= 0) {
                         base.showJsMessage(
                            "warning zero-results",
@@ -171,11 +169,6 @@ require([
                     let async_download = (data.total > 0 && data.totals.SeriesInstanceUID > 65000);
                     $('#search_def_stats').attr('filter-series-count',(data.total > 0 ? data.totals.SeriesInstanceUID: 0));
                     let totals = data.totals;
-                    $('#search_def_stats').html(totals.PatientID.toString() +
-                            " Cases, " + totals.StudyInstanceUID.toString() +
-                            " Studies, and " + totals.SeriesInstanceUID.toString() +
-                            " Series in this cohort. " +
-                            "Size on disk: " + totals.disk_size);
                     $('input[name="async_download"]').val(
                         async_download ? "True" : "False"
                     );
@@ -190,16 +183,14 @@ require([
                         $('.access_warn').addClass('is-hidden');
                     }
                     if(is_cohort || (isFiltered && data.total > 0)) {
-                        $('#search_def_stats').removeClass('is-hidden');
                         $('#search_def_stats').html(data.totals.PatientID.toString() + " Cases, " +
                             data.totals.StudyInstanceUID.toString() + " Studies, and " +
                             data.totals.SeriesInstanceUID.toString() + " Series in this cohort. " +
                             "Size on disk: " + data.totals.disk_size);
                     } else if(isFiltered && data.total <= 0) {
-                        $('#search_def_stats').removeClass('is-hidden');
                         $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                     } else {
-                        $('#search_def_stats').addClass('is-hidden');
+                        $('#search_def_stats').html("&nbsp;");
                     }
                     if (is_cohort) {
                         (async_download && !user_is_social)  && $('#need-social-account').show();
@@ -630,11 +621,13 @@ require([
             if (gtotals[0]>0){
                 $('#cart_stats').removeClass('is-hidden');
                 $('.cart-view').removeAttr('disabled');
+                $('.clear-cart').removeAttr('disabled');
                 $('#export-manifest-cart').removeAttr('disabled');
             } else{
                 $('#cart_stats').addClass('is-hidden');
                 $('.cart-view').attr('disabled', 'disabled');
                 $('#export-manifest-cart').attr('disabled','disabled');
+                $('.clear-cart').attr('disabled','disabled');
             }
         }
         else if ("cartHist" in localStorage){

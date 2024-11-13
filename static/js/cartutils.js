@@ -259,7 +259,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     const updateTableCountsAndGlobalCartCounts = function(){
         window.updateTableCounts();
         var gtotals = getGlobalCounts();
-        var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
+        var content = gtotals[3]+" series selected from "+gtotals[0]+" collections, "+ gtotals[1]+" cases, "+gtotals[2]+ " studies in the cart"
 
         localStorage.setItem('cartNumStudies', gtotals[2]);
         localStorage.setItem('cartNumSeries', gtotals[3]);
@@ -268,10 +268,12 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             $('#cart_stats').removeClass('is-hidden');
             $('#export-manifest-cart').removeAttr('disabled');
             $('.cart-view').removeAttr('disabled');
+            $('.clear-cart').removeAttr('disabled');
         } else {
             $('#cart_stats').addClass('is-hidden');
             $('#export-manifest-cart').attr('disabled','disabled');
             $('.cart-view').attr('disabled','disabled');
+            $('.clear-cart').attr('disabled','disabled');
         }
     }
 
@@ -326,9 +328,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 if (differenceFound){
                     newHistSel.push(selections[i]);
                 }
-
-            }
-            else{
+            } else{
                 newHistSel.push(selections[i]);
             }
         }
@@ -336,47 +336,26 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.cartHist[curInd]['selections'] =  newHistSel;
         window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
 
-        //was used to track a global cart accross multiple tabs. Just too slow to be practical
-        //setLocalFromCartHistWin();
-
-        /*
-        if (updatedElsewhere) {
-            refreshCartAndFiltersFromScratch(false);
-        } else {
-            var projid = newSel['sel'][0];
-            updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource);
-        }
-
-         */
         var projid = newSel['sel'][0];
         updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource);
-        //$('.spinner').hide();
     }
 
     const updateCartAndCartMetrics = function(addingToCart,projid,studymp,updateSource){
-
-
         if (updateSource == 'project' && addingToCart){
             updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries'], 0, window.selProjects[projid]['mxstudies'] ).then(function(){
                 $('.spinner').show();
                 updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
                 updateTableCountsAndGlobalCartCounts();
                 $('.spinner').hide();
-
             })
-        }
-        else if (updateSource == "cartPg"){
+        } else if (updateSource == "cartPg"){
             updateGlobalCart(addingToCart, studymp, 'series');
-        }
-
-        else {
+        } else {
             $('.spinner').show();
             updateGlobalCart(addingToCart, studymp, updateSource);
             updateTableCountsAndGlobalCartCounts();
             $('.spinner').hide();
         }
-
-
     }
 
     //was used to track cart across mutiple tabs or page refresh. Its too slow!
@@ -388,9 +367,9 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.filtergrp_lst = ret[1];
         window.glblcart = new Object();
 
-         var projDone={}
+        var projDone={}
         var serieslim=1;
-         var studylim=1;
+        var studylim=1;
         for (var j=0; j<window.partitions.length;j++){
             var projid = window.partitions[j]['id'][0];
             if (!(projid in projDone)){
@@ -399,10 +378,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 serieslim+=parseInt(dataset.mxseries);
                 studylim+=parseInt(dataset.mxstudies);
             }
-
-
         }
-
 
         Promise.resolve(getCartData('', studylim, 'StudyInstanceUID', 'StudyInstanceUID')).then(function (ret) {
             //var j = 1;
@@ -434,7 +410,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 } else {
                     window.glblcart[studyid]['all'] = true;
                     newcnt =cnt;
-                        }
+                }
 
                 window.projstudymp[collection_id][studyid] = cnt;
                 window.studymp[studyid] = {}
@@ -442,7 +418,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 window.studymp[studyid]['PatientID'] = patientid;
                 window.studymp[studyid]['cnt'] = cnt;
                 window.studymp[studyid]['val'] = [];
-
             }
 
             if (checkFilters) {
@@ -467,10 +442,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                         updateTableCountsAndGlobalCartCounts();
                     });
                 }
-
             }
         })
-
     }
 
     const removeSeriesFromTalley = function(seriesid,studyid,curind){
@@ -490,14 +463,11 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                   pgLocInd=nxtind;
               }
         }
-
-
     }
 
     // make partitions from table selections
     const mkOrderedPartitions = function(selections){
-        parts=new Array();
-
+        parts = new Array();
         possibleParts = new Array();
         for (var i=0;i<selections.length;i++){
             cursel = selections[i]['sel'];
@@ -506,15 +476,13 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 nxt = [...nxt]
                 nxt.push(cursel[j])
                 possibleParts.push(nxt);
-
             }
         }
 
         for (var i=0;i<possibleParts.length;i++){
             nxtpart = possibleParts[i];
             var inserted = false;
-
-           for (j =0; j< parts.length;j++){
+            for (j =0; j< parts.length;j++){
                var eql = true;
                var lt = false;
                var curpart = parts[j];
@@ -535,8 +503,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                    parts.splice(insertInd, 0, nxtpart)
                    inserted = true;
                    break;
-               }
-               else if (eql && (nxtpart.length==curpart.length)){
+               } else if (eql && (nxtpart.length==curpart.length)){
                  inserted = true;
                  break;
                }
@@ -547,12 +514,9 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
            if (!inserted){
                parts.push(nxtpart);
            }
-
         }
         return parts;
     }
-
-
 
     // go from the explorer to the cart page with datastructure to be used in creating a series level view of the cart
      window.viewcart = function(){
@@ -574,51 +538,50 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             mxNumStudies+= window.selProjects[proj].mxstudies;
         }
 
-            if ($('#cart-view-elem').length>0) {
-                document.getElementById("cart-view-elem").remove();
-            }
-
-            var csrftoken = $.getCookie('csrftoken');
-            var form = document.createElement('form');
-            form.id = "cart-view-elem";
-            form.style.visibility = 'hidden'; // no user interaction is necessary
-            form.method = 'POST'; // forms by default use GET query strings
-            //form.action = '/explore/cart/';
-            form.action = '/cart/';
-            //form.append(csrftoken);
-            var input = document.createElement('input');
-            input.name = "csrfmiddlewaretoken";
-            input.value =csrftoken;
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "carthist";
-            input.value = JSON.stringify(window.cartHist);
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "filtergrp_list";
-            input.value = JSON.stringify(filterSets);
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "partitions";
-            input.value = JSON.stringify(partitions);
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "mxseries";
-            input.value = mxNumSeries;
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "mxstudies";
-            input.value = mxNumStudies;
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "stats";
-            input.value = $('#cart_stats').text();
-            form.appendChild(input);
-            document.body.appendChild(form)
-            form.submit();
+        if ($('#cart-view-elem').length>0) {
+            document.getElementById("cart-view-elem").remove();
+        }
+        var csrftoken = $.getCookie('csrftoken');
+        var form = document.createElement('form');
+        form.id = "cart-view-elem";
+        form.style.visibility = 'hidden'; // no user interaction is necessary
+        form.method = 'POST'; // forms by default use GET query strings
+        //form.action = '/explore/cart/';
+        form.action = '/cart/';
+        //form.append(csrftoken);
+        var input = document.createElement('input');
+        input.name = "csrfmiddlewaretoken";
+        input.value =csrftoken;
+        form.appendChild(input);
+        var input = document.createElement('input');
+        input.name = "carthist";
+        input.value = JSON.stringify(window.cartHist);
+        form.appendChild(input);
+        var input = document.createElement('input');
+        input.name = "filtergrp_list";
+        input.value = JSON.stringify(filterSets);
+        form.appendChild(input);
+        var input = document.createElement('input');
+        input.name = "partitions";
+        input.value = JSON.stringify(partitions);
+        form.appendChild(input);
+        var input = document.createElement('input');
+        input.name = "mxseries";
+        input.value = mxNumSeries;
+        form.appendChild(input);
+        var input = document.createElement('input');
+        input.name = "mxstudies";
+        input.value = mxNumStudies;
+        form.appendChild(input);
+        var input = document.createElement('input');
+        input.name = "stats";
+        input.value = $('#cart_stats').text();
+        form.appendChild(input);
+        document.body.appendChild(form)
+        form.submit();
     };
 
-     window.updatePartitionsFromScratch =function(){
+     window.updatePartitionsFromScratch = function(){
         window.partitions = new Array();
 
         for (var i=0;i<window.cartHist.length;i++){
@@ -634,7 +597,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         var solrStr = createSolrString(filtStrings);
         window.solrStr = solrStr;
         var ii=1;
-    }
+    };
 
     //looking across the history of cart selections, create one set of exclusive partitions of the imaging data
     const updateGlobalPartitions = function(newparts){
@@ -667,13 +630,10 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                    inserted = true;
                    addNewPartition(nxtpart, insertInd, basefilt)
                    break;
-               }
-                else if (eql && (nxtpart.length==curpart.length)){
+               } else if (eql && (nxtpart.length==curpart.length)){
                  inserted = true;
                  break;
-               }
-
-                else if (eql && (nxtpart.length==curpart.length+1)){
+               } else if (eql && (nxtpart.length==curpart.length+1)){
 
                  if (window.partitions[j]['not'].indexOf(nxtpart[nxtpart.length-1])<0){
                     window.partitions[j]['not'].push(nxtpart[nxtpart.length-1]);
@@ -690,7 +650,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                addNewPartition(nxtpart, -1, basefilt);
            }
         }
-
     }
 
     // add a new partition. basefilt is the active filter when this partition is first encountered
@@ -702,16 +661,13 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         newPart['null'] = true;
         if (pos > -1) {
            window.partitions.splice(pos, 0, newPart);
-         }
-        else{
+        } else {
             window.partitions.push(newPart);
         }
     }
 
-
     // update the filter array for each partition
     const refilterGlobalPartitions= function(cartHist,cartnum){
-
         var selections = cartHist['selections'];
         var checkedA = new Array()
         for (var i=0;i<selections.length;i++){
@@ -747,15 +703,14 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 }
             }
         }
-    }
+    };
 
     const fixpartitions = function(){
       var isempty = new Array();
       for (var i=0;i<window.cartHist.length;i++){
           if (Object.keys(window.cartHist[i].filter).length==0){
               isempty.push(true);
-          }
-          else{
+          } else {
               isempty.push(false);
           }
       }
@@ -820,7 +775,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         return(filtStrings);
     }
 
-
     // not really needed, but used to creating the solr string in on the client side
     const createSolrString = function(filtStringA){
         var solrStr=''
@@ -832,17 +786,15 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 var curPartStr = parsePartitionStrings(curPart);
                 for (var j = 0; j < curPartAttStrA.length; j++) {
                     if (curPartAttStrA[j].length > 0) {
-
-                    solrA.push('(' + curPartStr + ')(' + curPartAttStrA[j] + ')')
-                    }
-                    else{
+                        solrA.push('(' + curPartStr + ')(' + curPartAttStrA[j] + ')')
+                    } else{
                         solrA.push(curPartStr);
                     }
                 }
             }
         }
         solrA = solrA.map(x => '('+x+')');
-       var solrStr = solrA.join(' OR ')
+        var solrStr = solrA.join(' OR ')
         return solrStr
     }
 
@@ -863,7 +815,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                         tmpA.push('NOT ('+filtStr+')')
                     }
                 }
-
             }
             attStrA.push(tmpA.join(' AND '))
         }
@@ -916,70 +867,69 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
          url = encodeURI(url);
          let deferred = $.Deferred();
          $.ajax({
-                        url: url,
-                        dataType: 'json',
-                        data: ndic,
-                        type: 'post',
-                        contentType: 'application/x-www-form-urlencoded',
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                        },
-                        success: function (data) {
-                            try {
-                                console.log(" data received");
-                                var numFound =0;
-                                var dataset = new Array();
-                                for (var i=0;i<data['res'].length;i++){
-                                    var isFound = false;
-                                    var row = data['res'][i];
-                                    var studyid = row['StudyInstanceUID'];
-                                    // we are getting all series for the study. Need to filter out series not in cart.
-                                    // Also some series may lie before or after the pages we need to return to the table
-                                    if (studyid in window.glblcart){
-                                        if (window.glblcart[studyid]['all']){
-                                            numFound++;
-                                            if (((numFound+seriesTblOffset)>seriesTblStrt) && ((numFound+seriesTblOffset)<=(seriesTblStrt+seriesTblLimit))){
-                                                isFound = true;
-                                            }
-                                        } else {
-                                            var seriesid = row['SeriesInstanceUID'];
-                                            if (('sel' in window.glblcart[studyid]) && (window.glblcart[studyid]['sel'].has(seriesid))){
-                                                numFound++;
-                                                if (((numFound+seriesTblOffset)>seriesTblStrt) && ((numFound+seriesTblOffset)<=(seriesTblStrt+seriesTblLimit))){
-                                                  isFound = true;
-                                              }
-                                            }
-                                        }
-                                    }
-                                    if (isFound){
-                                        dataset.push(row)
-                                    }
+            url: url,
+            dataType: 'json',
+            data: ndic,
+            type: 'post',
+            contentType: 'application/x-www-form-urlencoded',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                try {
+                    console.log(" data received");
+                    var numFound =0;
+                    var dataset = new Array();
+                    for (var i=0;i<data['res'].length;i++){
+                        var isFound = false;
+                        var row = data['res'][i];
+                        var studyid = row['StudyInstanceUID'];
+                        // we are getting all series for the study. Need to filter out series not in cart.
+                        // Also some series may lie before or after the pages we need to return to the table
+                        if (studyid in window.glblcart){
+                            if (window.glblcart[studyid]['all']){
+                                numFound++;
+                                if (((numFound+seriesTblOffset)>seriesTblStrt) && ((numFound+seriesTblOffset)<=(seriesTblStrt+seriesTblLimit))){
+                                    isFound = true;
+                                }
+                            } else {
+                                var seriesid = row['SeriesInstanceUID'];
+                                if (('sel' in window.glblcart[studyid]) && (window.glblcart[studyid]['sel'].has(seriesid))){
+                                    numFound++;
+                                    if (((numFound+seriesTblOffset)>seriesTblStrt) && ((numFound+seriesTblOffset)<=(seriesTblStrt+seriesTblLimit))){
+                                      isFound = true;
+                                  }
                                 }
                             }
-                             catch(err){
-                            console.log('error processing data');
-                            alert("There was an error processing the server data. Please alert the systems administrator")
-                          }
-                        finally {
-                          deferred.resolve(dataset);
-                          }
-                        },
-                        error: function () {
-                            console.log("problem getting data");
-                            alert("There was an error fetching server data. Please alert the systems administrator");
                         }
-                    });
+                        if (isFound){
+                            dataset.push(row)
+                        }
+                    }
+                }
+                 catch(err){
+                console.log('error processing data');
+                alert("There was an error processing the server data. Please alert the systems administrator")
+              }
+            finally {
+              deferred.resolve(dataset);
+              }
+            },
+            error: function () {
+                console.log("problem getting data");
+                alert("There was an error fetching server data. Please alert the systems administrator");
+            }
+         });
           return deferred.promise();
     };
 
     const updateCartTable = function() {
-         var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
+        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
         var slimViewAbleModality=new Set(["SM"])
         if ($('.cart-wrapper').find('.dataTables_controls').length>0){
             var pageRows = parseInt($('.cart-wrapper').find('.dataTables_length select').val());
             var pageCur = parseInt($('.cart-wrapper').find('.dataTables_paginate').find('.current').text());
-        }
-        else {
+        } else {
             var pageRows = 10;
             var pageCur=1;
         }
@@ -1115,7 +1065,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                             }
                         }
                     }
-
                 ],
                 "processing": true,
                 "serverSide": true,
@@ -1155,7 +1104,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                  "recordsTotal": data['numFound'],
                                  "recordsFiltered": data['numFound']
                              });
-
                              var txt =$('#cart-table_info').text().replace('entries','studies');
                              $('#cart-table_info').text(txt);
                         },
@@ -1171,14 +1119,13 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         }
     }
 
-
      const pretty_print_id = function (id) {
         var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);
         return newId;
     }
 
     return {
-       mkOrderedPartitions: mkOrderedPartitions,
+        mkOrderedPartitions: mkOrderedPartitions,
         formcartdata: formcartdata,
         updateCartSelections: updateCartSelections,
         updateGlobalCart: updateGlobalCart,
@@ -1190,6 +1137,5 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         updateTableCountsAndGlobalCartCounts: updateTableCountsAndGlobalCartCounts,
         refreshCartAndFiltersFromScratch: refreshCartAndFiltersFromScratch,
         updateCartTable: updateCartTable
-
     };
 });
