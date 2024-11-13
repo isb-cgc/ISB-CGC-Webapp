@@ -649,6 +649,9 @@
                 <div class="tabpanel data-tab-content-panel">
                 <div class="panel panel-default filter-display-panel">
                     <div class="panel-heading clearfix">
+                        <h4>Cohort Filters</h4>
+                    </div>
+                    <div class="panel-body">
                         {%  if is_cohort %}
                             <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
                                 <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
@@ -657,8 +660,6 @@
                                 <i class="fa fa-solid fa-arrow-left"></i> Select a filter.
                             </span>
                         {% endif %}
-                    </div>
-                    <div class="panel-body">
                         <input id="filt_txt" type="hidden" value="">
                         <div id="search_def"><span class="placeholder"></span></div>
                         <div id="search_def_stats">&nbsp;</div>
@@ -702,9 +703,10 @@
                 <div>
                 <div class="panel panel-default shopping-cart-panel">
                     <div class="panel-heading clearfix">
-                            <span id="cart_stats">Your cart is currently empty.</span>
+                        <h4>Cart</h4>
                     </div>
                     <div class="panel-body">
+                        <p><span id="cart_stats" class="empty-cart">Your cart is currently empty.</span></p>
                         <div class="cart-container space-top-10">
                             <button id="export-manifest-cart" class="btn btn-primary cart-export-from-cp btn-small" disabled data-toggle="modal"
                                 data-target="#export-manifest-modal"

@@ -259,18 +259,19 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     const updateTableCountsAndGlobalCartCounts = function(){
         window.updateTableCounts();
         var gtotals = getGlobalCounts();
-        var content = gtotals[3]+" series selected from "+gtotals[0]+" collections, "+ gtotals[1]+" cases, "+gtotals[2]+ " studies in the cart"
+        var content = "Cart contents: " + gtotals[3]+" series from "+gtotals[0]+" collections / "+ gtotals[1]+" cases / "+gtotals[2]+ " studies";
 
         localStorage.setItem('cartNumStudies', gtotals[2]);
         localStorage.setItem('cartNumSeries', gtotals[3]);
         $('#cart_stats').html(content) ;
         if (gtotals[0]>0){
-            $('#cart_stats').removeClass('is-hidden');
+            $('#cart_stats').removeClass('empty-cart');
             $('#export-manifest-cart').removeAttr('disabled');
             $('.cart-view').removeAttr('disabled');
             $('.clear-cart').removeAttr('disabled');
         } else {
-            $('#cart_stats').addClass('is-hidden');
+            $('#cart_stats').addClass('empty-cart');
+            $('#cart_stats').html("Your cart is currently empty.");
             $('#export-manifest-cart').attr('disabled','disabled');
             $('.cart-view').attr('disabled','disabled');
             $('.clear-cart').attr('disabled','disabled');
@@ -285,7 +286,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.cartStep = 1;
         window.partitions = new Array();
         let cartSel = new Object();
-        var parsedFiltObj = filterutils.parseFilterObj();;
+        var parsedFiltObj = filterutils.parseFilterObj();
         cartSel['filter']= parsedFiltObj;
         cartSel['selections']= new Array();
         cartSel['partitions']= new Array();
@@ -297,7 +298,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.cartStep++;
 
          window.updateTableCounts();
-         $('#cart_stats').addClass('is-hidden');
+         $('#cart_stats').addClass('empty-cart');
+         $('#cart_stats').html("Your cart is currently empty.");
          $('#export-manifest-cart').attr('disabled','disabled');
          $('.cart-view').attr('disabled','disabled');
          $('.clear-cart').attr('disabled','disabled');

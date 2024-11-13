@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021, Institute for Systems Biology
+ * Copyright 2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,10 +183,12 @@ require([
                         $('.access_warn').addClass('is-hidden');
                     }
                     if(is_cohort || (isFiltered && data.total > 0)) {
-                        $('#search_def_stats').html(data.totals.PatientID.toString() + " Cases, " +
-                            data.totals.StudyInstanceUID.toString() + " Studies, and " +
-                            data.totals.SeriesInstanceUID.toString() + " Series in this cohort. " +
-                            "Size on disk: " + data.totals.disk_size);
+                        $('#search_def_stats').html("Cohort filter contents: " +
+                            data.totals.SeriesInstanceUID.toString() + " series from " +
+                            data.totals.PatientID.toString() + " cases / " +
+                            data.totals.StudyInstanceUID.toString() + " studies (Size on disk: " +
+                            data.totals.disk_size + ")"
+                        );
                     } else if(isFiltered && data.total <= 0) {
                         $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                     } else {
@@ -574,11 +576,7 @@ require([
     }
 
     updatecartedits = function(){
-
         if (("cartedits" in localStorage) && (localStorage.getItem("cartedits") == "true")) {
-
-            //window.cartHist = JSON.parse(sessionStorage.getItem("cartHist"));
-            //setCartHistWinFromLocal();
             var edits = window.cartHist[window.cartHist.length - 1]['selections'];
 
             var filt = Object();
@@ -602,29 +600,23 @@ require([
             }
             if ("seriesdel" in sessionStorage) {
                 window.seriesdel = JSON.parse(sessionStorage.getItem("seriesdel"));
-
             }
 
             cartutils.updateGlobalCart(false, studymp, 'series')
             window.updateTableCounts(1);
             var gtotals = cartutils.getGlobalCounts();
-            //var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-            var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
+            var content = "Cart contents: " + gtotals[3]+" series from "+gtotals[0]+" collections / "+ gtotals[1]+" cases / "+gtotals[2]+ " studies";
 
-            /* tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });*/
-            $('#cart_stats').html(cart) ;
+            $('#cart_stats').html(content) ;
 
             if (gtotals[0]>0){
-                $('#cart_stats').removeClass('is-hidden');
+                $('#cart_stats').removeClass('empty-cart');
                 $('.cart-view').removeAttr('disabled');
                 $('.clear-cart').removeAttr('disabled');
                 $('#export-manifest-cart').removeAttr('disabled');
             } else{
-                $('#cart_stats').addClass('is-hidden');
+                $('#cart_stats').addClass('empty-cart');
+                $('#cart_stats').html('Your cart is currently empty.');
                 $('.cart-view').attr('disabled', 'disabled');
                 $('#export-manifest-cart').attr('disabled','disabled');
                 $('.clear-cart').attr('disabled','disabled');
@@ -659,7 +651,6 @@ require([
         max = Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
         min = Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
 
-        //quantElem=['#SliceThickness', '#min_PixelSpacing', '#max_TotalPixelMatrixColumns', '#max_TotalPixelMatrixRows','#age_at_diagnosis']
         quantElem=['#SliceThickness', '#age_at_diagnosis']
         quantElem.forEach(function(elem){
             $(elem).addClass('isQuant');
@@ -707,7 +698,6 @@ require([
 
         });
 
-        //cartutils.updateLocalCartAfterSessionChng();
         var cartSel = new Object();
         cartSel['filter']=new Object();
         cartSel['pageid'] = window.pageid
@@ -715,21 +705,8 @@ require([
         cartSel['partitions']= new Array();
 
         setCartHist = false;
-        /*( setCartHist = cartutils.setCartHistWinFromLocal();
-        if (!setCartHist){
-              window.cartHist = new Array();
-        }*/
         window.cartHist = new Array();
         window.cartHist.push(cartSel);
-
-        /*
-        if ('cartHist' in localStorage){
-            cartutils.refreshCartAndFiltersFromScratch(true);
-        }
-        else {
-            filterutils.load_preset_filters();
-        }
-        */
 
         filterutils.load_preset_filters();
         $('.hide-filter-uri').on('click',function() {

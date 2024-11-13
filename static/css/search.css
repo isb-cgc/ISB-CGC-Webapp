@@ -536,8 +536,12 @@ tr {
     display: inline-block;
     vertical-align: top;
     max-width: 95%;
-    padding: 6px;
+    padding: 7px;
     overflow-x: auto;
+}
+
+.empty-cart {
+    font-style: italic;
 }
 
 table {
