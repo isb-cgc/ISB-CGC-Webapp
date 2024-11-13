@@ -8,8 +8,8 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                            data-target="#main-navbar-collapse" aria-expanded="false">
+                    <button type="button" class="navbar-toggle collapsed" data-bs-toggle="collapse"
+                            data-bs-target="#main-navbar-collapse" aria-expanded="false">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
@@ -27,7 +27,7 @@
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button" class="dropdown-toggle navbar-item__text" id="db-dropdown"
-                               data-toggle="dropdown" aria-label="Data Browsers Dropdown" aria-expanded="true">
+                               data-bs-toggle="dropdown" aria-label="Data Browsers Dropdown" aria-expanded="true">
                                 Data Browsers <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="db-dropdown">
@@ -43,7 +43,7 @@
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button" class="dropdown-toggle navbar-item__text" id="res-dropdown"
-                               data-toggle="dropdown" aria-label="Resource Dropdown" aria-expanded="true">
+                               data-bs-toggle="dropdown" aria-label="Resource Dropdown" aria-expanded="true">
                                 Resources<span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="res-dropdown">
@@ -86,7 +86,7 @@
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button" class="dropdown-toggle navbar-item__text" id="help-dropdown"
-                               data-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
+                               data-bs-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
                                 Help <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="help-dropdown">
@@ -113,7 +113,7 @@
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button" class="dropdown-toggle navbar-item__text" id="cohorts-dropdown"
-                               data-toggle="dropdown" aria-label="User Cohorts Dropdown" aria-expanded="true">
+                               data-bs-toggle="dropdown" aria-label="User Cohorts Dropdown" aria-expanded="true">
                                 Cohorts <span class="caret"></span>
                             </a>
                         <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="cohorts-dropdown">
@@ -143,14 +143,14 @@
 
                             <div class="dropdown">
                                 <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown"
-                                   data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
+                                   data-bs-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
                                     {{ user.first_name }} <span class="caret"></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
                                     <li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i
                                             class="fa fa-cog"></i></a></li>
-                                    <li role="menuitem"><a href="#logout-modal" data-toggle="modal"
-                                                           data-target="#logout-modal" title="Sign Out">Sign Out <i
+                                    <li role="menuitem"><a href="#logout-modal" data-bs-toggle="modal"
+                                                           data-bs-target="#logout-modal" title="Sign Out">Sign Out <i
                                             class="fa fa-sign-out"></i></a></li>
                                 </ul>
                             </div>

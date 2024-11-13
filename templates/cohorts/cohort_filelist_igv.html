@@ -6,7 +6,7 @@
                 <ul class="list-group" id="metadata-data-accordian-igv" role="tablist" aria-multiselectable="true">
                     <li class="list-group-item">
                         <div id="heading-igv-case-id" class="list-group-item__heading">
-                            <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
+                            <a role="button" data-bs-toggle="collapse" data-parent="#metadata-data-accordian-all"
                                href="#collapse-igv-case-id" aria-expanded="false"
                                aria-controls="collapse-igv-case-id">
                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
@@ -31,7 +31,7 @@
                     {% for attr_name, attr in metadata_data_attr.items %}
                         <li class="list-group-item">
                             <div id="heading-igv-{{attr.name}}" class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-igv" href="#collapse-igv-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-igv-{{ attr.name }}">
+                                <a role="button" data-bs-toggle="collapse" data-parent="#metadata-data-accordian-igv" href="#collapse-igv-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-igv-{{ attr.name }}">
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                 </a>
                             </div>
@@ -149,7 +149,7 @@
                     </div>
                 </div>
                 <div class="column-inputs">
-                    <a role="button" data-toggle="collapse" href="#column-toggle-div-igv" aria-expanded="false" aria-controls="column-toggle-div-igv">
+                    <a role="button" data-bs-toggle="collapse" href="#column-toggle-div-igv" aria-expanded="false" aria-controls="column-toggle-div-igv">
                         Choose Columns to Display <i class="fa fa-caret-down"></i><i class="fa fa-caret-up"></i>
                     </a>
                     <div id="column-toggle-div-igv" class="column-collapse collapse">
