@@ -19,6 +19,22 @@
 {% endblock %}
 
 {% block content %}
+    <div class="panel panel-default">
+                    <ul class="nav nav-tabs nav-tabs-files" role="tablist">
+                        <li role="presentation" class="file-browser-tab"><a href="#all-files" class="active" aria-selected="true"  role="tab" data-bs-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
+                        <li role="presentation" class="file-browser-tab"><a href="#pdf-files" aria-selected="false" class="selected" role="tab" data-bs-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
+                        <li role="presentation" class="file-browser-tab"><a href="#dicom-files" aria-selected="false" role="tab" data-bs-toggle="tab" title="Browse Viewable Image Files" data-file-type="dicom">Viewable Images</a></li>
+                    </ul>
+                </div>
+
+
+    <div>
+      <ul class="nav nav-tabs nav-tabs-files" role="tablist">
+                <li role="presentation" class="nav-item active"><a role="tab" class="nav-link"  data-bs-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
+                <li role="presentation" class="nav-item "><a role="tab" class="nav-link" data-bs-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
+                <li role="presentation" class="nav-item "><a role="tab" class="nav-link"  data-bs-toggle="tab" title="Browse Viewable Image Files" data-file-type="dicom">Viewable Images</a></li>
+             </ul>
+    </div>
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -34,6 +50,21 @@
                     Last deployed to version {{ version.version }} on {{ version.date }}
                 {% endif %}
             </div>
+
+        <div>
+            <ul class="nav nav-tabs nav-tabs-files" role="tablist">
+                        <li role="presentation" class="nav-item file-browser-tab active"><a role="tab" class="nav-link" data-toggle="tab"  data-bs-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
+                        <li role="presentation" class="nav-item  file-browser-tab"><a role="tab" class="nav-link" data-toggle="tab" data-bs-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
+                        <li role="presentation" class="nav-item file-browser-tab"><a role="tab" class="nav-link" data-toggle="tab" data-bs-toggle="tab" title="Browse Viewable Image Files" data-file-type="dicom">Viewable Images</a></li>
+                    </ul>
+
+            <nav class="nav">
+  <a class="nav-link active" aria-current="page" href="#">Active</a>
+  <a class="nav-link" href="#">Link</a>
+  <a class="nav-link" href="#">Link</a>
+  <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+</nav>
+        </div>
         </div>
         <div class="row">
             <div class="col-lg-12">

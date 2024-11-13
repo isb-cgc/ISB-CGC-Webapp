@@ -151,7 +151,7 @@ require([
         $(this).closest('table').find('input[type="checkbox"]').attr('checked', false);
         item.click();
 
-        $(modalName + ' a[data-target="#shared-with-pane"]').tab('show');
+        $(modalName + ' a[data-bs-target="#shared-with-pane"]').tab('show');
     });
 
     // Remove shared user

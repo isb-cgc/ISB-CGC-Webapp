@@ -219,7 +219,7 @@ require([
         if (reject_load) {
             return;
         }
-        var active_tab = $('ul.nav-tabs-files li.active a').data('file-type');
+        var active_tab = $('ul.nav-tabs-files li a.active').data('file-type');
         var tab_selector ='#'+active_tab+'-files';
         if (!$(tab_selector).length) {
             reject_load = true;
@@ -276,10 +276,10 @@ require([
     };
 
     // Detect tab change and load the panel
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         browser_tab_load(cohort_id);
     });
-    $('a[data-toggle="tab"]').on('click', function (e) {
+    $('a[data-bs-toggle="tab"]').on('click', function (e) {
         if (reject_load) {
             e.preventDefault();
             e.stopPropagation();
@@ -603,7 +603,7 @@ require([
         // Update the Launch buttons
         $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
 
-        $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
+        //$('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
 
         $(tab_selector).find('.prev-page').removeClass('disabled');
         $(tab_selector).find('.next-page').removeClass('disabled');
