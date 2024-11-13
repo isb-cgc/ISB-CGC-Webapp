@@ -69,8 +69,7 @@ require([
         var button = $(event.relatedTarget)
         if (button.hasClass('series-export') || button.hasClass('study-export')){
             update_export_modal_for_mini(button);
-        }
-        else if (button.hasClass('cart-export')){
+        } else if (button.hasClass('cart-export')){
             updatePartitionsFromScratch();
             var partitions = new Array();
             for (var i=0; i< window.partitions.length;i++) {
@@ -83,13 +82,12 @@ require([
                filterSets.push(window.cartHist[i]['filter'])
             }
             update_export_modal_for_cart(partitions, filterSets);
-        }
-        else if (button.hasClass('cart-export-from-cp')){
+        } else if (button.hasClass('cart-export-from-cp')){
             update_export_modal_for_cart(window.partitions, window.filtergrp_lst);
         }
     });
 
-    var update_export_modal_for_cart= function(partitions, filtergrp_list, mxstudies, mxseries){
+    var update_export_modal_for_cart = function(partitions, filtergrp_list, mxstudies, mxseries){
         is_cohort = false;
         var name_base='';
         $('.modal-title').text("Export Cart Manifest");
