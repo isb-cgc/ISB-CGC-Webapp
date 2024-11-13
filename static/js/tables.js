@@ -275,14 +275,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var caret_col= { "type": "html", "orderable": false, render: function (data) {
                     if (('state' in window.selProjects[data]) && ('view' in window.selProjects[data]['state']) && (window.selProjects[data]['state']['view'] )) {
                         return '<a role="button" title="Display cases in this collection below.">'+
-                            '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
+                            '<i class="fa fa-solid fa-caret-right is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                             '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                     }
                     else {
                         return '<a role="button" title="Display cases in this collection below.">'+
                             '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                            '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
+                            '<i class="fa fa-solid fa-caret-down is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
                     }
                    },
                         createdCell: function(td) {
@@ -474,9 +474,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         totalStudies =$(row).attr('totalstudy');
         totalSeries =$(row).attr('totalseries');
 
-        if ($(row).find('.fa-caret-down.notDisp').length>0){
-            $(row).find('.fa-caret-right').addClass('notDisp');
-            $(row).find('.fa-caret-down').removeClass('notDisp');
+        if ($(row).find('.fa-caret-down.is-hidden').length>0){
+            $(row).find('.fa-caret-right').addClass('is-hidden');
+            $(row).find('.fa-caret-down').removeClass('is-hidden');
             if (!(projid in window.selProjects)) {
                 window.selProjects[projid]=new Object();
                 window.selProjects[projid]['selCases']=new Object();
@@ -502,8 +502,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
              //mxseries=mxseries+window.selProjects[projid]['mxseries'];
              //mxstudies=mxstudies+window.selProjects[projid]['mxstudies'];
         } else {
-            $(row).find('.fa-caret-right').removeClass('notDisp');
-            $(row).find('.fa-caret-down').addClass('notDisp');
+            $(row).find('.fa-caret-right').removeClass('is-hidden');
+            $(row).find('.fa-caret-down').addClass('is-hidden');
             if (( projid in window.selProjects) && (window.selProjects[projid]['state']['view'])==true) {
                 rowsRemoved = true;
                 //window.selProjects[projid]['state']['view'] = false;
@@ -656,13 +656,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 if ((collection_id in window.selProjects) && (PatientID in window.selProjects[collection_id].selCases) && (window.selProjects[collection_id].selCases[PatientID]['state']['view'] )) {
                     //return '<input type="checkbox" checked>'
                    return '<a role="button">'+
-                        '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
+                        '<i class="fa fa-solid fa-caret-right is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                         '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                 } else {
                     return '<a role="button" title="Display studies in this case below.">'+
                         '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                        '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
+                        '<i class="fa fa-solid fa-caret-down is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
                 }
             },
             createdCell: function(td) {
@@ -788,15 +788,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
                     $(row).find('.expansion-toggle').on('click', function(event){
                         var elem = event.target;
-                        var rowsAdded= ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false;
+                        var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
                         $(this).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
                         if (rowsAdded){
-                            $(row).find('.fa-caret-down').removeClass('notDisp');
-                            $(row).find('.fa-caret-right').addClass('notDisp');
+                            $(row).find('.fa-caret-down').removeClass('is-hidden');
+                            $(row).find('.fa-caret-right').addClass('is-hidden');
                         }
                         if (!rowsAdded){
-                            $(row).find('.fa-caret-down').addClass('notDisp');
-                            $(row).find('.fa-caret-right').removeClass('notDisp');
+                            $(row).find('.fa-caret-down').addClass('is-hidden');
+                            $(row).find('.fa-caret-right').removeClass('is-hidden');
                         }
                         updateCasesOrStudiesViewSelection([$(row)], 'cases', rowsAdded)
                     });
@@ -1176,14 +1176,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     $(row).find('.cartnum').html(cnt);
                     $(row).find('.expansion-toggle').on('click', function(event){
                         var elem = event.target;
-                        var rowsAdded = ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false
+                        var rowsAdded = ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false
                         $(this).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
                         if (rowsAdded){
-                            $(row).find('.fa-caret-down').removeClass('notDisp');
-                            $(row).find('.fa-caret-right').addClass('notDisp');
+                            $(row).find('.fa-caret-down').removeClass('is-hidden');
+                            $(row).find('.fa-caret-right').addClass('is-hidden');
                         } else{
-                            $(row).find('.fa-caret-down').addClass('notDisp');
-                            $(row).find('.fa-caret-right').removeClass('notDisp');
+                            $(row).find('.fa-caret-down').addClass('is-hidden');
+                            $(row).find('.fa-caret-right').removeClass('is-hidden');
                         }
                         updateCasesOrStudiesViewSelection([$(row)], 'studies', rowsAdded)
                     });
@@ -1235,13 +1235,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             if ( (StudyInstanceUID in window.selProjects[collection_id].selCases[PatientID].selStudies) && ('view' in window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID]['state']) && window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID]['state']['view']) {
                                 //return '<input type="checkbox" checked>'
                                return '<a role="button">'+
-                                    '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
+                                    '<i class="fa fa-solid fa-caret-right is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                                     '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                             } else {
                                 return '<a role="button">'+
                                     '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                                    '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
+                                    '<i class="fa fa-solid fa-caret-down is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                             }
                         },

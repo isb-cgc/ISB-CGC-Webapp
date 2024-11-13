@@ -42,7 +42,7 @@
    color:#808080;
 }
 
-.notDisp {
+.is-hidden {
     display: none !important;
 }
 
@@ -252,8 +252,6 @@ bottom: 95%; /* At the top of the tooltip */
 .tooltip_ex:hover .tooltiptext_ex {
     visibility: visible; }
 
-
-
 .tooltip_info .tooltiptext_info {
     visibility: hidden;
     width: 500px;
@@ -364,8 +362,6 @@ td.greyout   {
     background-color: #333; color: #fff;
 
 }
-
-
 
 tbody.set_height {
     max-height: 200px;       /* Just for the demo          */
@@ -525,12 +521,20 @@ tr {
 .export-series-manifest.btn:hover {
     background-color: #98b4e9a1;
     color: black;
-
 }
-
 
 .btn-mini {
     padding: 4px 8px;
+}
+
+.copy-url {
+    padding: 9px 12px;
+    vertical-align: top;
+}
+
+.filter-url {
+    display: inline-block;
+    vertical-align: top;
 }
 
 table {

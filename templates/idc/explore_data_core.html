@@ -26,8 +26,8 @@
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
                                 <h4 class="panel-title">Search Scope</h4>
-                                <button class="notDisp" onclick="fetchscript()">press me</button>
-                                <button class="notDisp" onclick="testfunc()">press me</button>
+                                <button class="is-hidden" onclick="fetchscript()">press me</button>
+                                <button class="is-hidden" onclick="testfunc()">press me</button>
                             </div>
                             <div class="tab-content">
                                 <div id="program_set" class="tab-pane active" role="tabpanel">
@@ -47,7 +47,7 @@
                                             <div id="Program" data-filter-attr-nm="Program"
                                                  class="filter-panel collection-list collapse in" aria-expanded="true">
                                                 <input id="collection_search"
-                                                       class="collection-text-filter notDisp value-search" type="text"
+                                                       class="collection-text-filter is-hidden value-search" type="text"
                                                        placeholder="Search..." onkeyup="updateColl(true)">
                                                 <div class="sorter cntr">
                                                     <span>Sort by: <input
@@ -75,7 +75,7 @@
                                                     style="list-style: none;">
                                                     {% for progK, progV in programs.items|dictsort:0 %}
                                                         {% if progK != "All" and progK != "None" %}
-                                                            <li class="{{ progK }} list-group-item{% if forloop.counter >= 6 %} extra-values notDisp{% endif %}{% if progV.val == 0 %} zeroed{% endif %}">
+                                                            <li class="{{ progK }} list-group-item{% if forloop.counter >= 6 %} extra-values is-hidden{% endif %}{% if progV.val == 0 %} zeroed{% endif %}">
                                                                     <div id="{{ progK }}_heading"
                                                                          class="list-group-item__heading">
                                                                         <input data-filter-attr-id="{{ progV.prog_attr_id }}"
@@ -105,7 +105,7 @@
                                                                                         class="check-all">Check All</a> / <a
                                                                                         class="uncheck-all">Uncheck All</a></span>
                                                                                 </p>
-                                                                                <p class="less-checks notDisp"><a
+                                                                                <p class="less-checks is-hidden"><a
                                                                                         class="show-less">show
                                                                                     less</a><span class="checks"><a
                                                                                         class="check-all">Check All</a> / <a
@@ -123,7 +123,7 @@
                                                                             class="search-checkbox-list"
                                                                             style="list-style: none;">
                                                                             {% for proj, projD in progV.projects.items|dictsort:0 %}
-                                                                                <li class="checkbox {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projD.val == 0 %} zeroed {% endif %}">
+                                                                                <li class="checkbox {% if forloop.counter >= 6 %} extra-values is-hidden{% endif %} {% if projD.val == 0 %} zeroed {% endif %}">
                                                                                     <label class="lbl" data-click-for-info="false">
 
                                                                                         <input data-filter-attr-id="{{ progV.collex_attr_id }}"
@@ -165,7 +165,7 @@
                                                                 class="fa fa-solid fa-caret-down"></i> <span
                                                                 class="attDisp">Analysis Results
                                                             {% if attr.units %}({{ attr.units }}){% endif %}</span>
-                                                            <span class="notDisp noCase"> (0 cases)</span>
+                                                            <span class="is-hidden noCase"> (0 cases)</span>
                                                         </a>
 
                                                     <span class="controls">
@@ -179,7 +179,7 @@
                                                          class="collapse in list-group-item__body">
 
                                                     <input id="analysis_search"
-                                                       class="text-filter notDisp value-search" type="text"
+                                                       class="text-filter is-hidden value-search" type="text"
                                                        placeholder="Search..." onkeyup="updateFilters('analysis_results_id',{},false,true)">
 
                                                      <div class="sorter cntr">
@@ -206,7 +206,7 @@
                                                             style="list-style: none;">
                                                             {% for val in attr.values|check_for_order:attr.name %}
                                                                 {% with val.display_value|get_display_val:val.value as display_value %}
-                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
+                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values is-hidden{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
                                                                         <label>
                                                                             <input type="checkbox"
                                                                                    value="{{ val.value }}"
@@ -295,7 +295,7 @@
                                                                 class="fa fa-solid fa-caret-down"></i> <span
                                                                 class="attDisp">{{ attr.display_name }}
                                                             {% if attr.units %}({{ attr.units }}){% endif %}</span>
-                                                            <span class="notDisp noCase"> (0 cases)</span>
+                                                            <span class="is-hidden noCase"> (0 cases)</span>
                                                         </a>
                                                         <span class="controls">
                                                      <i class="fa-solid fa-cog" title="Sort results"></i>
@@ -322,7 +322,7 @@
 
                                                             {% endif %}
                                                         >
-                                                        <input class="text-filter value-search notDisp" type="text"
+                                                        <input class="text-filter value-search is-hidden" type="text"
                                                                placeholder="Search..."
                                                                onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
                                                         {% if attr.name == "Modality" %}
@@ -372,7 +372,7 @@
                                                             style="list-style: none;">
                                                             {% for val in attr.values|check_for_order:attr.name %}
                                                                 {% with val.display_value|get_display_val:val.value as display_value %}
-                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
+                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values is-hidden{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
                                                                         <label>
                                                                             <input type="checkbox"
                                                                                    value="{{ val.value }}"
@@ -424,7 +424,7 @@
                                                                             <span class="attDisp">{{ attr.display_name }}
                                                                                 {% if attr.units %}({{ attr.units }}
                                                                                     ){% endif %}</span> <span
-                                                                                class="notDisp noCase"> (0 cases)</span>
+                                                                                class="is-hidden noCase"> (0 cases)</span>
                                                                         </a>
 
                                                                         <span class="controls">
@@ -447,7 +447,7 @@
                                                                          data-curminrng="{{ attr.min_max.min|floor }}"
                                                                          data-curmaxrng="{{ attr.min_max.max|ceiling }}"
                                                                             {% endif %}>
-                                                                        <input class="text-filter value-search notDisp"
+                                                                        <input class="text-filter value-search is-hidden"
                                                                                type="text" placeholder="Search..."
                                                                                onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
                                                                         <div class="sorter cntr">
@@ -484,7 +484,7 @@
                                                                             style="list-style: none;">
                                                                             {% for val in attr.values|order_seg:attr_setK %}
                                                                                 {% with val.display_value|get_display_val:val.value as display_value %}
-                                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
+                                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values is-hidden{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
                                                                                         <label class="tooltip_ex{% if display_value == 'None' %} checkbox-none{% endif %}">
                                                                                             <input type="checkbox"
                                                                                                     {% if display_value == 'None' %}
@@ -539,7 +539,7 @@
                                                                     <span class="attDisp">{{ attr.display_name }}
                                                                         {% if attr.units %}({{ attr.units }}
                                                                             ){% endif %}</span> <span
-                                                                        class="notDisp noCase"> (0 TCGA cases)</span>
+                                                                        class="is-hidden noCase"> (0 TCGA cases)</span>
                                                                 </a>
                                                                 <span class="controls">
                                                          <i class="fa-solid fa-cog" title="Sort results"></i>
@@ -561,7 +561,7 @@
                                                                  data-curmaxrng="{{ attr.min_max.max|ceiling }}"
                                                                     {% endif %}>
                                                                 {% if attr.name != 'bmi' %}
-                                                                    <input class="text-filter value-search notDisp"
+                                                                    <input class="text-filter value-search is-hidden"
                                                                            type="text" placeholder="Search..."
                                                                            onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
                                                                     <div class="sorter cntr">
@@ -599,7 +599,7 @@
                                                                     class="search-checkbox-list"
                                                                     style="list-style: none;">
                                                                     {% for val in attr.values|check_for_order:attr.name %}
-                                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %}  {% if val.count == 0 %} zeroed {% endif %}">
+                                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values is-hidden{% endif %}  {% if val.count == 0 %} zeroed {% endif %}">
                                                                             <label>
                                                                                 <input type="checkbox"
                                                                                        data-filter-attr-id="{{ attr.id }}"
@@ -649,54 +649,56 @@
                 <div class="tabpanel data-tab-content-panel">
                 <div class="panel panel-default filter-display-panel">
                     <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3>
-                    <button
-                        class="btn btn-small btn-special copy-this copy-url"
-                        disabled
-                        role="button"
-                        title="Select a filter to enable this feature.">URL<i class="fa-solid fa-copy"></i>
-                    </button>
-                    <button class="btn btn-small btn-default bq-string-copy" disabled data-toggle="modal"
-                       title= "Select a filter to enable this feature." >SQL<i class="fa-solid fa-copy"></i>
-                    </button>
-                              {%  if is_cohort %}
-                                <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
-                                    <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
-                              {% endif %}
-
+                        <div class="space-top-10">
+                            <button class="btn btn-small btn-default bq-string-display" disabled data-toggle="modal"
+                                data-target="#bq-string-display" title= "Select a filter to enable this feature." >SQL
+                            </button>
+                            <button
+                                class="btn btn-small btn-special get-filter-uri" disabled role="button"
+                                title="Select a filter to enable this feature.">URL <i class="fa fa-angles-right"></i>
+                            </button>
+                            <button class="btn btn-small btn-special hide-filter-uri" role="button"
+                                title="Hide the filter query URL." style="display: none;">URL <i class="fa fa-angles-down"></i>
+                            </button>
                         </div>
+                        <div class="filter-url-container space-top-10 is-hidden">
+                            <button role="button" class="btn btn-primary copy-this copy-url"
+                                    title="Copy Filter URL to clipboard" style=""
+                                    content="">
+                                <i class="fa-solid fa-copy" aria-hidden="true"></i>
+                            </button>
+                            <pre class="filter-url code"></pre>
+                        </div>
+                        {%  if is_cohort %}
+                            <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
+                                <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
+                        {% endif %}
+                    </div>
                     <div class="panel-body">
                         <input id="filt_txt" type="hidden" value="">
                         <div id="search_def"><span class="placeholder"></span></div>
-
-                             <div id="search_def_stats" class="notDisp">No Text</div>
-
-                            <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA
-                                collections
-                            </div>
-                            <div id="search_def_access" class="notDisp" style="color:red">This cohort includes collections with limited access. The DICOM files of these collections are not publicly available
-                            </div>
-
-                    <div class="filter-url-container space-top-10 space-top-10">
-                                <button class="btn btn-small cart-view" role="button"
-                                        title="Get cart details." onclick="viewcart()">View Cart <i class="fa-solid fa-cart-shopping"></i></button>
-                               <span id="cart_stats"></span>
-                                <pre class="filter-url code is-hidden" style="display:none;"></pre>
-
+                        <div id="search_def_stats" class="is-hidden">No Text</div>
+                        <div id="search_def_warn" style="display:none">
+                            Note: TCGA.* filters only apply to TCGA collections
+                        </div>
+                        <div id="search_def_access" class="is-hidden" style="color:red">
+                            This cohort includes collections with limited access. The DICOM files of these
+                            collections are not publicly available
+                        </div>
+                        <div class="cart-container space-top-10">
+                            <button class="btn btn-small btn-default cart-view" role="button" title="Get cart details." disabled
+                                onclick="viewcart()">View Cart <i class="fa-solid fa-cart-shopping"></i>
+                            </button>
+                            <span id="cart_stats"></span>
+                        </div>
                     </div>
-
-                    </div>
-
                 </div>
 
                  <div id="res" class=" filter-panel" role="tabpanel">
-
                           <div class=" filter-panel" role="tabpanel">
-
                             <div class="tab-content">
-
                                 <div id="chart" class="tab-pane active panel-default" role="tabpanel">
                                     <div class="panel-heading clearfix">
-
                                 <h4 class="panel-title">
                                     <a class="hidechrt hidden" data-toggle="collapse" aria-label="hideit" onclick="toggleCharts('hide')"><i class="fa fa-angle-up"></i></a>
                                     <a class="showchrt" data-toggle="collapse" aria-label="showit" onclick="toggleCharts('show')"><i class="fa fa-angle-down"></i></a>

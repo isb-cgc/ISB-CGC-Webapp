@@ -142,6 +142,7 @@ require([
                 try {
                     //cartutils.setCartHistWinFromLocal();
                     let curInd = window.cartHist.length-1;
+                    let isFiltered = Boolean($('#search_def p').length > 0);
                     if (cartHist[curInd].selections.length>0){
                         let cartSel = new Object();
                         cartSel['filter']= parsedFiltObj;
@@ -163,10 +164,11 @@ require([
                         $('#export-manifest, #save-cohort-btn').attr('disabled', 'disabled');
                     } else {
                         $('.zero-results').remove();
-                        $('#export-manifest, #save-cohort-btn').removeAttr('disabled');
+                        if(isFiltered) {
+                            $('#export-manifest, #save-cohort-btn').removeAttr('disabled');
+                        }
                     }
                     let async_download = (data.total > 0 && data.totals.SeriesInstanceUID > 65000);
-                    let isFiltered = Boolean($('#search_def p').length > 0);
                     $('#search_def_stats').attr('filter-series-count',(data.total > 0 ? data.totals.SeriesInstanceUID: 0));
                     let totals = data.totals;
                     $('#search_def_stats').html(totals.PatientID.toString() +
@@ -181,23 +183,23 @@ require([
                         ('access' in data['filtered_counts']['origin_set']['All']['attributes']) &&
                         ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) &&
                         (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
-                        $('#search_def_access').removeClass('notDisp');
-                        $('.access_warn').removeClass('notDisp');
+                        $('#search_def_access').removeClass('is-hidden');
+                        $('.access_warn').removeClass('is-hidden');
                     } else {
-                        $('#search_def_access').addClass('notDisp');
-                        $('.access_warn').addClass('notDisp');
+                        $('#search_def_access').addClass('is-hidden');
+                        $('.access_warn').addClass('is-hidden');
                     }
                     if(is_cohort || (isFiltered && data.total > 0)) {
-                        $('#search_def_stats').removeClass('notDisp');
+                        $('#search_def_stats').removeClass('is-hidden');
                         $('#search_def_stats').html(data.totals.PatientID.toString() + " Cases, " +
                             data.totals.StudyInstanceUID.toString() + " Studies, and " +
                             data.totals.SeriesInstanceUID.toString() + " Series in this cohort. " +
                             "Size on disk: " + data.totals.disk_size);
                     } else if(isFiltered && data.total <= 0) {
-                        $('#search_def_stats').removeClass('notDisp');
+                        $('#search_def_stats').removeClass('is-hidden');
                         $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                     } else {
-                        $('#search_def_stats').addClass('notDisp');
+                        $('#search_def_stats').addClass('is-hidden');
                     }
                     if (is_cohort) {
                         (async_download && !user_is_social)  && $('#need-social-account').show();
@@ -373,8 +375,8 @@ require([
 
         $('#' + filterId).find('.show-more').on('click', function () {
             $(this).parent().parent().children('.less-checks').show();
-            $(this).parent().parent().children('.less-checks').removeClass('notDisp');
-            $(this).parent().parent().children('.more-checks').addClass('notDisp');
+            $(this).parent().parent().children('.less-checks').removeClass('is-hidden');
+            $(this).parent().parent().children('.more-checks').addClass('is-hidden');
 
             $(this).parent().hide();
             var extras = $(this).closest('.list-group-item__body, .collection-list, .list-group-sub-item__body').children('.search-checkbox-list').children('.extra-values')
@@ -382,16 +384,16 @@ require([
             if ( ($('#'+filterId).closest('.search-configuration').find('.hide-zeros').length>0)  && ($('#'+filterId).closest('.search-configuration').find('.hide-zeros').prop('checked'))){
                 extras=extras.not('.zeroed');
             }
-            extras.removeClass('notDisp');
+            extras.removeClass('is-hidden');
         });
 
         $('#' + filterId).find('.show-less').on('click', function () {
             $(this).parent().parent().children('.more-checks').show();
-            $(this).parent().parent().children('.more-checks').removeClass('notDisp');
-            $(this).parent().parent().children('.less-checks').addClass('notDisp');
+            $(this).parent().parent().children('.more-checks').removeClass('is-hidden');
+            $(this).parent().parent().children('.less-checks').addClass('is-hidden');
 
             $(this).parent().hide();
-            $(this).closest('.list-group-item__body, .collection-list, .list-group-sub-item__body').children('.search-checkbox-list').children('.extra-values').addClass('notDisp');
+            $(this).closest('.list-group-item__body, .collection-list, .list-group-sub-item__body').children('.search-checkbox-list').children('.extra-values').addClass('is-hidden');
         });
 
         $('#' + filterId).find('.check-all').on('click', function () {
@@ -501,25 +503,25 @@ require([
 
     $('.fa-cog').on("click",function(){
          let srt = $(this).parent().parent().parent().find('.cntr')
-         if (srt.hasClass('notDisp')) {
-             srt.removeClass('notDisp');
+         if (srt.hasClass('is-hidden')) {
+             srt.removeClass('is-hidden');
          } else {
-             srt.addClass('notDisp');
+             srt.addClass('is-hidden');
          }
-         $(this).parent().parent().parent().find('.text-filter, .collection-text-filter').addClass('notDisp');
+         $(this).parent().parent().parent().find('.text-filter, .collection-text-filter').addClass('is-hidden');
      });
 
     $('.fa-search').on("click",function(){
          //alert('hi');
          srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter, .analysis-text-filter');
 
-         if (srch.hasClass('notDisp')) {
-             srch.removeClass('notDisp');
+         if (srch.hasClass('is-hidden')) {
+             srch.removeClass('is-hidden');
              srch[0].focus();
          } else {
-             srch.addClass('notDisp');
+             srch.addClass('is-hidden');
          }
-         $(this).parent().parent().parent().find('.cntr').addClass('notDisp');
+         $(this).parent().parent().parent().find('.cntr').addClass('is-hidden');
     });
 
     const myObserver = new ResizeObserver(entries => {
@@ -626,14 +628,13 @@ require([
             $('#cart_stats').html(cart) ;
 
             if (gtotals[0]>0){
-                $('#cart_stats').removeClass('notDisp');
+                $('#cart_stats').removeClass('is-hidden');
+                $('.cart-view').removeAttr('disabled');
                 $('#export-manifest-cart').removeAttr('disabled');
-                $('#view-cart').removeAttr('disabled');
-            }
-            else{
-                $('#cart_stats').addClass('notDisp');
+            } else{
+                $('#cart_stats').addClass('is-hidden');
+                $('.cart-view').attr('disabled', 'disabled');
                 $('#export-manifest-cart').attr('disabled','disabled');
-                $('#view-cart').attr('disabled','disabled');
             }
         }
         else if ("cartHist" in localStorage){
@@ -741,17 +742,15 @@ require([
         $('.hide-filter-uri').on('click',function() {
             $(this).hide();
             $('.get-filter-uri').show();
-            $('.copy-url').hide();
-            $('.filter-url').hide();
-            $('.filter-url').addClass("is-hidden");
+            $('.filter-url-container').hide();
+            $('.filter-url-container').addClass("is-hidden");
         });
 
         $('.get-filter-uri').on('click',function(){
             $(this).hide();
             $('.hide-filter-uri').show();
-            $('.copy-url').show();
-            $('.filter-url').show();
-            $('.filter-url').removeClass("is-hidden");
+            $('.filter-url-container').show();
+            $('.filter-url-container').removeClass("is-hidden");
         });
 
         $('.filter-url-container').append(

@@ -658,21 +658,19 @@ define(['jquery', 'base'], function($, base) {
 
     window.resetFilters = function(){
         $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
-            $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
-            $('.ui-slider').each(function(){
-                setSlider(this.id,true,0,0,true, false);
-            })
-            $('#search_def_warn').hide();
-            window.filterObj= {};
-            window.handleFilterSelectionUpdate(null, true, true);
+        $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
+        $('.ui-slider').each(function(){
+            setSlider(this.id,true,0,0,true, false);
+        })
+        $('#search_def_warn').hide();
+        window.filterObj= {};
+        window.handleFilterSelectionUpdate(null, true, true);
     }
 
 
     window.handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
-
         var promise =  null
-        if (!(filterElem ===null))
-        {
+        if (!(filterElem ===null)) {
             checkFilters(filterElem);
         }
 
@@ -750,7 +748,7 @@ define(['jquery', 'base'], function($, base) {
     const mkFiltText = function () {
 
         var isfiltered = true;
-        var buttxt = '<button class="btn filter-type clear-filters" role="button" title="Select a filter to enable this feature."><i class="fa fa-rotate-left"></i></a> </button>';
+        var buttxt = '<button class="btn filter-type clear-filters" role="button" title="Clear the current filter set."><i class="fa fa-rotate-left"></i></a> </button>';
         var infotxt = '<i class="fa-solid fa-info-circle cohort-summary"></i>';
         var hasTcga = false;
         var tcgaColSelected = false;
@@ -820,7 +818,6 @@ define(['jquery', 'base'], function($, base) {
                     if ('none' in filterObj[curKey]) {
                         fStr += 'None';
                     }
-
                     var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
                     oStringA.push(nstr);
                 }
@@ -879,7 +876,7 @@ define(['jquery', 'base'], function($, base) {
             var oString = oStringA.join(" AND");
             document.getElementById("search_def").innerHTML = '<p>' + buttxt + oString /*+ infotxt*/ +'</p>';
             document.getElementById('filt_txt').value=oString;
-            $('#search_def').removeClass('notDisp');
+            $('#search_def').removeClass('is-hidden');
 
             $('.clear-filters').on('click', function () {
                 window.resetFilters();
@@ -888,7 +885,7 @@ define(['jquery', 'base'], function($, base) {
 
         } else {
             document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
-            $('#search_def').addClass('notDisp');
+            $('#search_def').addClass('is-hidden');
             document.getElementById('filt_txt').value="";
             isfiltered = false;
         }
@@ -1083,7 +1080,7 @@ define(['jquery', 'base'], function($, base) {
         }
         var checkedFilters=allFilters.children('li').children().children('input:checked');
         var showExtras = false;
-        if ( ($('#' + filterCat).children('.more-checks').length>0) && $('#' + filterCat).children('.more-checks').hasClass("notDisp")) {
+        if ( ($('#' + filterCat).children('.more-checks').length>0) && $('#' + filterCat).children('.more-checks').hasClass("is-hidden")) {
             showExtras = true;
         }
         //var allUnchecked = ((checkedFilters.length == 0) ? true : false)
@@ -1129,7 +1126,7 @@ define(['jquery', 'base'], function($, base) {
             }
             let allChildrenHidden = false;
             if ( $(elem).parent().siblings().filter('.list-group-sub-item__body').length>0 ){
-                if ($(elem).parent().siblings().filter('.list-group-sub-item__body').find('.checkbox').not('.notDisp').length===0){
+                if ($(elem).parent().siblings().filter('.list-group-sub-item__body').find('.checkbox').not('.is-hidden').length===0){
                     allChildrenHidden = true;
                 }
             }
@@ -1146,31 +1143,31 @@ define(['jquery', 'base'], function($, base) {
             }
 
             if ( thisAttrAvail && (showExtras || (numAttrAvail<6)) ) {
-                  $(elem).parent().parent().removeClass('notDisp');
+                  $(elem).parent().parent().removeClass('is-hidden');
             } else {
-                $(elem).parent().parent().addClass('notDisp');
+                $(elem).parent().parent().addClass('is-hidden');
             }
         }
 
         if (hasFilters){
             if (numNonZero===0){
                 $('#' + filterCat+'_heading').children('a').children().addClass('greyText');
-                $('#' + filterCat+'_heading').children('a').children('.noCase').removeClass('notDisp');
+                $('#' + filterCat+'_heading').children('a').children('.noCase').removeClass('is-hidden');
 
             } else {
                 $('#' + filterCat+'_heading').children('a').children().removeClass('greyText');
-                $('#' + filterCat+'_heading').children('a').children('.noCase').addClass('notDisp');
+                $('#' + filterCat+'_heading').children('a').children('.noCase').addClass('is-hidden');
             }
 
             var numMore = filterList.children('li').filter('.extra-values').length;
             if ($('#' + filterCat).children('.more-checks').children('.show-more').length>0){
                 $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText = "show " + numMore.toString() + " more";
                 if (numMore>0){
-                    $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('notDisp');
-                    $('#' + filterCat).children('.less-checks').children('.show-less').removeClass('notDisp');
+                    $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('is-hidden');
+                    $('#' + filterCat).children('.less-checks').children('.show-less').removeClass('is-hidden');
                 } else {
-                    $('#' + filterCat).children('.more-checks').children('.show-more').addClass('notDisp');
-                    $('#' + filterCat).children('.less-checks').children('.show-less').addClass('notDisp');
+                    $('#' + filterCat).children('.more-checks').children('.show-more').addClass('is-hidden');
+                    $('#' + filterCat).children('.less-checks').children('.show-less').addClass('is-hidden');
                 }
             }
             if ( numAttrAvail < 1)  {
@@ -1211,10 +1208,10 @@ define(['jquery', 'base'], function($, base) {
                     parentVal=$('#'+filterCats[j]).siblings().filter('.list-group-item__heading').find('.case_count');
                     parentVal[0].innerHTML=ret[1];
                     if (ret[0]===0){
-                         $('#'+filterCats[j]).addClass('notDisp')
+                         $('#'+filterCats[j]).addClass('is-hidden')
                     }
                     else{
-                        $('#'+filterCats[j]).removeClass('notDisp')
+                        $('#'+filterCats[j]).removeClass('is-hidden')
                     }
                 }
             }

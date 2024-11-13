@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2020, Institute for Systems Biology
+ * Copyright 2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,6 @@ require.config({
         filterutils:'filterutils',
         tippy: 'libs/tippy-bundle.umd.min',
         '@popperjs/core': 'libs/popper.min',
-
-
-
     },
     shim: {
         '@popperjs/core': {
@@ -51,8 +48,6 @@ require.config({
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
         'filterutils':['jquery']
-
-
     }
 });
 
@@ -76,10 +71,9 @@ require([
 
 // Return an object for consts/methods used by most views
 define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tippy, base) {
-
     var seriesTblOffset = 0;
     var seriesTblLimit = 0;
-    var seriesTblStrt =0;
+    var seriesTblStrt = 0;
 
     // we were maintaining a view of the cart in local storage. But its been too slow so we are aborting for now
     const setCartHistWinFromLocal = function () {
@@ -92,7 +86,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 cartHistSet = true;
             }
         }
-       return cartHistSet;
+        return cartHistSet;
     }
     // we were maintaining a view of the cart in local storage. But its been too slow so we are aborting for now
     const setLocalFromCartHistWin = function(){
@@ -129,23 +123,18 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 if (cartHist.length > 0) {
                   cartObj[sessionid] = cartHist;
                   localStorage.setItem("cartHist", JSON.stringify(cartObj));
-                }
-                else{
+                } else{
                     localStorage.removeItem("cartHist");
                 }
                 localStorage.removeItem("presessionid")
-            }
-            else {
+            } else {
                 localStorage.removeItem("cartHist")
             }
         }
-
-    }
-
+    };
 
     // given a dic with studyid as keys, add or subtract series from the cart
     const updateGlobalCart = function(cartAdded, studymp, lvl){
-
         for (studyid in studymp){
            if (lvl=="series") {
                var seriesArr = studymp[studyid];
@@ -163,40 +152,33 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                            window.glblcart[studyid]['sel'] = new Set();
                        }
                    } else {
-
-                       if (studyid in window.glblcart)
-                       {
+                       if (studyid in window.glblcart) {
                            if (window.glblcart[studyid]['all']) {
                                window.glblcart[studyid]['all'] = false;
                                window.glblcart[studyid]['sel'] = new Set([...window.studymp[studyid]['val']]);
                            }
-                         window.glblcart[studyid]['sel'].delete(seriesid);
+                            window.glblcart[studyid]['sel'].delete(seriesid);
                          if (window.glblcart[studyid]['sel'].size == 0) {
                              delete window.glblcart[studyid];
                          }
-                   }
+                    }
                   }
                }
-           }
-         else{
+           } else{
              if (cartAdded){
-
                  window.glblcart[studyid]=new Object();
                  window.glblcart[studyid]['all'] = true;
                  window.glblcart[studyid]['sel'] = new Set();
-
-             }
-             else{
+             } else {
                  if (studyid in window.glblcart){
                      delete(window.glblcart[studyid]);
                  }
              }
-
+           }
         }
-       }
-    }
+    };
 
-    //calculate the tot # of projects, cases, studies, and series in the cart
+    // calculate the tot # of projects, cases, studies, and series in the cart
     const getGlobalCounts= function(){
         tots=[0,0,0,0]
         for (projid in window.projstudymp){
@@ -208,99 +190,87 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 }
             }
         }
-            for (caseid in window.casestudymp){
-                for (studyid in window.casestudymp[caseid]) {
-                    if (studyid in window.glblcart) {
-                        tots[1]++;
-                        break;
-                    }
+        for (caseid in window.casestudymp){
+            for (studyid in window.casestudymp[caseid]) {
+                if (studyid in window.glblcart) {
+                    tots[1]++;
+                    break;
                 }
             }
-
+        }
         tots[2] = Object.keys(window.glblcart).length;
         for (studyid in window.glblcart){
             if (window.glblcart[studyid]['all']){
                 tots[3]=tots[3]+window.studymp[studyid]['cnt'];
-            }
-            else{
+            } else{
                 tots[3]=tots[3]+window.glblcart[studyid]['sel'].size;
             }
         }
         return tots;
-    }
+    };
 
     const getCartData = function(offset, limit, aggregate_level, results_level){
+        let url = '/cart_data/';
+        url = encodeURI(url);
+        var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
 
-                    let url = '/cart_data/';
-                    url = encodeURI(url);
-                    var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
+        if (parseInt(offset)>0) {
+            ndic['offset'] = offset;
+        }
+        if (parseInt(limit)>0){
+          ndic['limit'] = limit;
+        }
+        if (aggregate_level.length>0){
+          ndic['aggregate_level'] = aggregate_level;
+        }
+        if (results_level.length>0){
+          ndic['results_level'] = results_level;
+        }
 
-                    if (parseInt(offset)>0) {
-                        ndic['offset'] = offset;
-                    }
-                    if (parseInt(limit)>0){
-                      ndic['limit'] = limit;
-                    }
-                    if (aggregate_level.length>0){
-                      ndic['aggregate_level'] = aggregate_level;
-                    }
-                    if (results_level.length>0){
-                      ndic['results_level'] = results_level;
-                    }
-
-                    let csrftoken = $.getCookie('csrftoken');
-                    let deferred = $.Deferred();
-                    $.ajax({
-                        url: url,
-                        dataType: 'json',
-                        data: ndic,
-                        type: 'post',
-                        contentType: 'application/x-www-form-urlencoded',
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                        },
-                        success: function (data) {
-                            console.log(" data received");
-                            var dataset = data["docs"];
-                            deferred.resolve(
-                             {
-                                 "data": dataset,
-                                 "recordsTotal": data["numFound"],
-                                 "recordsFiltered": data["numFound"]
-                             });
-                        },
-                        error: function () {
-                            console.log("problem getting data");
-                            alert("There was an error fetching server data. Please alert the systems administrator");
-                        }
-                    });
-                    return deferred.promise();
-    }
+        let csrftoken = $.getCookie('csrftoken');
+        let deferred = $.Deferred();
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            data: ndic,
+            type: 'post',
+            contentType: 'application/x-www-form-urlencoded',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                console.log(" data received");
+                var dataset = data["docs"];
+                deferred.resolve(
+                 {
+                     "data": dataset,
+                     "recordsTotal": data["numFound"],
+                     "recordsFiltered": data["numFound"]
+                 });
+            },
+            error: function () {
+                console.log("problem getting data");
+                alert("There was an error fetching server data. Please alert the systems administrator");
+            }
+        });
+        return deferred.promise();
+    };
 
     const updateTableCountsAndGlobalCartCounts = function(){
         window.updateTableCounts();
-        var gtotals =getGlobalCounts();
-        //var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
+        var gtotals = getGlobalCounts();
         var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
 
-        /* tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-        }); */
         localStorage.setItem('cartNumStudies', gtotals[2]);
         localStorage.setItem('cartNumSeries', gtotals[3]);
         $('#cart_stats').html(content) ;
         if (gtotals[0]>0){
-            $('#cart_stats').removeClass('notDisp');
+            $('#cart_stats').removeClass('is-hidden');
             $('#export-manifest-cart').removeAttr('disabled');
-            $('#view-cart').removeAttr('disabled');
             $('.cart-view').removeAttr('disabled');
-        }
-        else{
-            $('#cart_stats').addClass('notDisp');
+        } else {
+            $('#cart_stats').addClass('is-hidden');
             $('#export-manifest-cart').attr('disabled','disabled');
-            $('#view-cart').attr('disabled','disabled');
             $('.cart-view').attr('disabled','disabled');
         }
     }
@@ -308,7 +278,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
 // remove all items from the cart. clear the glblcart, carHist, cartDetails
     window.resetCart = function(){
-        window.cart= new Object();
+        window.cart = new Object();
         window.glblcart = new Object();
         window.cartHist = new Array();
 
@@ -329,9 +299,9 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.cartStep++;
 
          window.updateTableCounts();
-         $('#cart_stats').addClass('notDisp');
+         $('#cart_stats').addClass('is-hidden');
          $('#export-manifest-cart').attr('disabled','disabled');
-         $('#view-cart').attr('disabled','disabled');
+         $('.cart-view').attr('disabled','disabled');
     }
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
