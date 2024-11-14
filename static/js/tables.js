@@ -1169,7 +1169,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             addingToCart = false;
                         }
                         var numSeries = window.selProjects[projid].selCases[caseid].selStudies[studyid].studymp[studyid]['cnt'];
-                        var mp=new Object();
+                        var mp = new Object();
                         mp[studyid]=numSeries;
 
                        //var curInd = window.cartHist.length - 1;
@@ -1918,7 +1918,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     window.updateTableCounts = function() {
 
         $('#proj_table').DataTable().rows().every(function() {
-          //$('#projects_table').find('tr').each(function () {
               var row = this.node();
               var projid = $(row).attr('data-projectid')
               $(row).find('.cartnum').text('0');
@@ -1933,12 +1932,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
               if ('extraInCart' in window.selProjects[projid]) {
                   delete (window.selProjects[projid]['extraInCart']);
               }
-
-                  window.selProjects[projid]['extraInFilt']=true;
-
-
+              window.selProjects[projid]['extraInFilt']=true;
               window.selProjects[projid]['extraInItem'] = true;
-
               if ('studymp' in window.selProjects[projid]){
                   delete (window.selProjects[projid]['extraInFilt']);
                  $(row).removeClass('extraInFilt');
@@ -1956,39 +1951,37 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
            $('#cases_table').find('tr').each(function () {
                if (this.hasAttribute('data-caseid')) {
+                   $(this).find('.cartnum').text('0');
+                   var projid = $(this).attr('data-projectid');
+                   var caseid = $(this).attr('data-caseid');
 
-               $(this).find('.cartnum').text('0');
-               var projid = $(this).attr('data-projectid');
-               var caseid = $(this).attr('data-caseid');
+                   $(this).removeClass('extraInFilt');
+                    $(this).removeClass('someInCart');
+                    $(this).removeClass('extraInCart');
 
-               $(this).removeClass('extraInFilt');
-                $(this).removeClass('someInCart');
-                $(this).removeClass('extraInCart');
+                    $(this).addClass('extraInItem');
+                    window.selProjects[projid].selCases[caseid]['extraInItem']=true;
 
-                $(this).addClass('extraInItem');
-                window.selProjects[projid].selCases[caseid]['extraInItem']=true;
+                    if ('someInCart' in window.selProjects[projid].selCases[caseid]){
+                      delete(window.selProjects[projid].selCases[caseid]['someInCart']);
+                    }
+                    if ('extraInCart' in window.selProjects[projid].selCases[caseid]){
+                      delete(window.selProjects[projid].selCases[caseid]['extraInCart']);
+                    }
+                    if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
+                      delete(window.selProjects[projid].selCases[caseid]['extraInFilt']);
+                      $(this).removeClass('willAdd');
+                    }
 
-                if ('someInCart' in window.selProjects[projid].selCases[caseid]){
-                  delete(window.selProjects[projid].selCases[caseid]['someInCart']);
-                }
-                if ('extraInCart' in window.selProjects[projid].selCases[caseid]){
-                  delete(window.selProjects[projid].selCases[caseid]['extraInCart']);
-                }
-                if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
-                  delete(window.selProjects[projid].selCases[caseid]['extraInFilt']);
-                  $(row).removeClass('willAdd');
-                }
-
-                for (studyid in window.selProjects[projid].selCases[caseid].studymp) {
-                    if (!(studyid in window.glblcart) || !(window.glblcart[studyid]['all'])) {
-                        $(this).addClass('extraInFilt');
-                        $(row).addClass('willAdd');
-                        window.selProjects[projid].selCases[caseid]['extraInFilt']=true;
-                        break;
-                         }
-                }
+                    for (studyid in window.selProjects[projid].selCases[caseid].studymp) {
+                        if (!(studyid in window.glblcart) || !(window.glblcart[studyid]['all'])) {
+                            $(this).addClass('extraInFilt');
+                            $(this).addClass('willAdd');
+                            window.selProjects[projid].selCases[caseid]['extraInFilt']=true;
+                            break;
+                        }
+                    }
                }
-
            });
 
            $('#studies_table').find('tr').each(function () {
