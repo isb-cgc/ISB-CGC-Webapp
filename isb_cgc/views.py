@@ -71,7 +71,7 @@ IDP = None
 
 def _needs_redirect(request):
     appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROJECT_ID.lower())
-    return re.search(appspot_host, request.META.get('HTTP_HOST', '')) and not re.search(appspot_host, settings.BASE_URL)
+    return re.search(appspot_host, request.headers.get('host', '')) and not re.search(appspot_host, settings.BASE_URL)
 
 
 def convert(data):
