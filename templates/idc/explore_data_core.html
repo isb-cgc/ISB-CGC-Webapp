@@ -630,7 +630,7 @@
                 </div>
             </div>
             <div id="rh_panel" class="col-lg-9 col-md-9 main_cols">
-                <div id="show_lh" class="filter-panel panel data-tab-content-panel rh hidden">
+                <div id="show_lh" class="filter-panel panel data-tab-content-panel rh is-hidden">
                     <a data-toggle="collapse" aria-label="showit" onclick="showPanel()"><i
                             class="show fa fa-angle-double-right"></i></a>
                 </div>
@@ -731,13 +731,13 @@
                                 <div id="chart" class="tab-pane active panel-default" role="tabpanel">
                                     <div class="panel-heading clearfix">
                                 <h4 class="panel-title">
-                                    <a class="hidechrt hidden" data-toggle="collapse" aria-label="hideit" onclick="toggleCharts('hide')"><i class="fa fa-angle-up"></i></a>
-                                    <a class="showchrt" data-toggle="collapse" aria-label="showit" onclick="toggleCharts('show')"><i class="fa fa-angle-down"></i></a>
+                                    <a class="hidechrt is-hidden" data-toggle="collapse" aria-label="hideit" onclick="toggleCharts('hide')"><i class="fa fa-angle-down"></i></a>
+                                    <a class="showchrt" data-toggle="collapse" aria-label="showit" onclick="toggleCharts('show')"><i class="fa fa-angle-right"></i></a>
                                     Charts
                                     <div class="tooltip_filter_info" style="float:right"><i
                                             class="fa-solid fa-info-circle"></i></div>
                                 </h4>
-                                <div style="display:none">
+                                <div class="is-hidden">
                                     <label>Chart Type:</label>
                                     <select id="plot_type" onchange="updatePlots(this)">
                                         <option selected value="pie">Pie</option>
@@ -747,7 +747,7 @@
                                         labels?</label>
                                 </div>
                             </div>
-                                   <div class="chart-content hidden">
+                           <div class="chart-content is-hidden">
                               <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                                 <li id="results_orig" role="presentation" class="filter-tab active"><a
                                         href="#results_orig_set" role="tab" data-toggle="tab" title="orig"
