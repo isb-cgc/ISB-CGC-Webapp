@@ -620,11 +620,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     const caseTableColDefs = function(){
         return [
-            {
-                className: "ckbx studyview",
-                "targets": [0]
-            },
-            {className: "ckbx", "targets": [1]},
+            {className: "ckbx studyview","targets": [0]},
+            {className: "ckbx shopping-cart-holder", "targets": [1]},
             {className: "ckbx", "targets":[2]},
             {className: "col1 project-name", "targets": [3]},
             {className: "col1 case-id", "targets": [4]},
@@ -1182,7 +1179,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 },
                 "columnDefs": [
                     {className: "ckbx seriesview", "targets": [0]},
-                    {className: "ckbx", "targets": [1]},
+                    {className: "ckbx shopping-cart-holder", "targets": [1]},
                     {className: "ckbx", "targets": [2]},
                     {className: "col1 case-id", "targets": [3]},
                     {className: "col2 study-id study-id-col study-id-tltp", "targets": [4]},
@@ -1539,7 +1536,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     });
                  },
                 "columnDefs": [
-                    {className: "ckbx", "targets": [0]},
+                    {className: "ckbx shopping-cart-holder", "targets": [0]},
                     {className: "col1 study-id study-id-col study-id-tltp", "targets": [1]},
                     {className: "series-id series-id-tltp", "targets": [2]},
                     {className: "series-number", "targets": [3]},
