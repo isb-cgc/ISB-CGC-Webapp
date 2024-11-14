@@ -619,89 +619,74 @@ svg {
     background-color: #d5d5d5;
 }
 
-td.cartnum.incart{
+td.cartnum.incart {
     background-color:grey;
     color:white;
 }
 
-
-
-tr:not(.someInCart).ckbx:has(.fa-cart-shopping){
-    background-color:transparent;
-}
-.cart-info-tip.case1{
-    background-color:green;
-}
-
-
-.cart-info-tip.case2{
-    background-color:yellow;
-}
-
-.cart-info-tip.case3{
+tr:not(.someInCart).ckbx:has(.fa-cart-shopping) {
     background-color:transparent;
 }
 
-#projects_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping
-{
+.cart-info-tip.case1 {
     background-color:green;
 }
 
-#projects_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping
-{
+.cart-info-tip.case2 {
     background-color:yellow;
 }
 
+.cart-info-tip.case3 {
+    background-color:transparent;
+}
 
-#cases_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping
-{
+#projects_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping {
     background-color:green;
 }
 
-#cases_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping
-{
+#projects_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping {
     background-color:yellow;
 }
 
-#studies_table tr.someInCart:not(.extraInFilt) .ckbx .fa-cart-shopping
-{
+#cases_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping {
     background-color:green;
 }
 
-#studies_table tr.someInCart.extraInFilt .ckbx .fa-cart-shopping
-{
+#cases_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping {
     background-color:yellow;
 }
 
-
-#series_table tr.someInCart .ckbx .fa-cart-shopping
-{
+#studies_table tr.someInCart:not(.extraInFilt) .ckbx .fa-cart-shopping {
     background-color:green;
+}
 
+#studies_table tr.someInCart.extraInFilt .ckbx .fa-cart-shopping {
+    background-color:yellow;
+}
+
+#series_table tr.someInCart .ckbx .fa-cart-shopping {
+    background-color:green;
 }
 
 .curfilt {
   background-color: lightgrey;
 }
 
-.filts:not(.curfilt):hover{
+.filts:not(.curfilt):hover {
     text-decoration:underline;
-                    }
+}
 
-
-
-.filtermoddisp{
+.filtermoddisp {
     display:block !important;
     visibility: visible;
     z-index:1050;
 }
 
-
-.filternotdisp{
-
+.filternotdisp {
     z-index:-1;
 }
-li.cartlist{
+
+li.cartlist {
     display: list-item !important;
   list-style-position: inside !important;
 }
@@ -711,76 +696,36 @@ li.cartlist{
   max-width: 960px; // Optional, maximum width
 }
 
-
-
 .ckbx:has(.fa-caret-right){
   font-size:18px;
     text-align:center;
     vertical-align: middle !important;
 }
 
-
-/*
- .ckbx:has(.fa-cart-shopping) {
-    #border: solid 1px #000;
-    border-radius: 12px;
-    #padding: 5px;
-     font-size: 18px;
-     text-align:center;
-    box-shadow: inset 0 0 0 0.5px grey;
-     vertical-align: middle !important;
-
-}*/
-
- .ckbx .fa-cart-shopping {
+.ckbx .fa-cart-shopping {
     #border: solid 1px #000;
     border-radius: 7px;
     padding: 4px 5px;
-     font-size: 13px;
-     text-align:center;
+    font-size: 13px;
+    text-align:center;
     box-shadow: inset 0 0 0 0.5px grey;
-     vertical-align: middle !important;
-
+    vertical-align: middle !important;
 }
 
  .cart-info-tip {
- #border: solid 1px #000;
     border-radius: 7px;
     padding: 4px 5px;
-     font-size: 13px;
-     text-align:center;
+    font-size: 13px;
+    text-align:center;
     box-shadow: inset 0 0 0 0.5px grey;
-     vertical-align: middle !important;
-
+    vertical-align: middle !important;
  }
 
- .cart-info-div{
- margin-bottom:10px !important;
- }
+.cart-info-div{
+    margin-bottom:10px !important;
+}
 
-
- tbody .cartnum {
-     #font-size: 11.2px !important;
-     #font-weight: 500 !important;
-     #border-radius: 7px !important;
-     #line-height: 16px !important;
-     #text-align: right !important;
-     #padding-botton: 2px !important;
-     #padding-left: 5px !important;
-     #padding-right: 5px !important;
-     #padding-top: 2px !important;
-     #text-size-adjust: 100% !important;
-     #padding: 2px 5px !important;
-
-     #color:white;
-     #background-color: #818181 !important;
-     #padding-top: 20px;
-     #vertical-align: middle !important;
-
- }
-
-
- .cartnum_style {
+.cartnum_style {
     background-color: #818181;
     color: white;
     color: white;
@@ -788,25 +733,19 @@ li.cartlist{
     font-size: 11.2px;
     padding: 4px 5px;
     text-align: right;
-     vertical-align: middle;
-     font-weight:500;
+    vertical-align: middle;
+    font-weight:500;
 }
 
-
-
-
- .cohort-summary{
+.cohort-summary{
      font-size: 16px !important;
      color: #2A537A !important;
      padding-left: 2px !important;
-
-
  }
 
  thead .cart-info {
      text-align: center !important;
      font-size: 18px;
-
  }
 
 #export-manifest-modal .modal-dialog {

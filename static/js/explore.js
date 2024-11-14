@@ -274,20 +274,24 @@ require([
         $('#collection-modal').css("display","none");
     });
 
+    var cart_info = function(type) {
+        return '<p><span class="cart-info-tip case1">' +
+            `<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this ${type} are in the cart</span></p>`+
+            '<p><span class="cart-info-tip case2">' +
+            `<i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this ${type} are in the cart</span></p>` +
+             '<p><span class="cart-info-tip case3">' +
+            `<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this ${type} are in the cart</span></p>`+
+            '<p>Note: clicking the cart icons only add or remove series belonging to ' +
+            '<b>studies</b> that match the current filter</p>';
+    };
+
     tippy.delegate('#projects_table_head', {
         interactive: true,
         target:'.cart-info',
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart"></i></span> <span>All series from this collection are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this collection are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this collection are in the cart</span></div>'+
-            '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to ' +
-            'studies with the given collection that match the current filter</div>'
+        content: cart_info("collection")
     });
 
     tippy.delegate('#cases_table_head', {
@@ -296,14 +300,7 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this case are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this case are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this case are in the cart</span></div>'+
-            '<div class="cart-info-div cart-exp">Note: clicking the cart icons only add or remove series belonging to ' +
-            'studies within the given case that match the current filter</div>'
+        content: cart_info("case")
     });
 
     tippy.delegate('#studies_table_head', {
@@ -312,12 +309,7 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this study are in the cart</span></div>'+
-            '<div class="cart-info-div"><span class="cart-info-tip case2">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this study are in the cart</span></div>' +
-             '<div class="cart-info-div"><span class="cart-info-tip case3">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this study are in the cart</span></div>'
+        content: cart_info("study")
     });
 
     tippy.delegate('#series_table_head', {
@@ -326,10 +318,10 @@ require([
         allowHTML:true,
         theme:'light',
         placement:'right',
-        content: '<div class="cart-info-div"><span class="cart-info-tip case1">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>This series is in the cart</span></div>'+
-             '<div class="cart-info-div"><span class="cart-info-tip case3">' +
-            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>This series is not the cart</span></div>'
+        content: '<p><span class="cart-info-tip case1">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>This series is in the cart</span></p>'+
+             '<p><span class="cart-info-tip case3">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>This series is not the cart</span></p>'
     });
 
     tippy('.case-info', {
@@ -475,6 +467,77 @@ require([
         },
         trigger: "click",
         maxWidth: 85
+    });
+
+    const dynamicCartTip = {
+        fn: (instance) => ({
+            onShow() {
+                instance.setContent(instance.props.dynamicTip(instance.reference));
+            }
+        })
+    };
+
+    tippy.delegate('.projects-table', {
+        dynamicTip: function(ref){
+            if($(ref).parent().hasClass('extraInFilt') ||
+                ($(ref).parent().hasClass('extraInItem') && $(ref).parent().hasClass('someInCart'))) {
+                return "add series to cart"
+            }
+            return "remove series from cart"
+        },
+        interactive: true,
+        allowHTML: true,
+        placement: 'right',
+        content: 'add series to cart', // placeholder text
+        target: '.shopping-cart-holder',
+        plugins: [dynamicCartTip]
+    });
+
+    tippy.delegate('.cases-table', {
+        dynamicTip: function(ref){
+            if($(ref).parent().hasClass('extraInFilt') ||
+                ($(ref).parent().hasClass('extraInItem') && $(ref).parent().hasClass('someInCart'))) {
+                return "add series to cart"
+            }
+            return "remove series from cart"
+        },
+        interactive: true,
+        allowHTML: true,
+        placement: 'right',
+        content: 'add series to cart', // placeholder text
+        target: '.shopping-cart-holder',
+        plugins: [dynamicCartTip]
+    });
+
+    tippy.delegate('.series-table', {
+        dynamicTip: function(ref){
+            if($(ref).parent().hasClass('extraInFilt') ||
+                ($(ref).parent().hasClass('extraInItem') && $(ref).parent().hasClass('someInCart'))) {
+                return "add series to cart"
+            }
+            return "remove series from cart"
+        },
+        interactive: true,
+        allowHTML: true,
+        placement: 'right',
+        content: 'add series to cart', // placeholder text
+        target: '.shopping-cart-holder',
+        plugins: [dynamicCartTip]
+    });
+
+    tippy.delegate('.studies-table', {
+        dynamicTip: function(ref){
+            if($(ref).parent().hasClass('willAdd')) {
+                return "add series to cart"
+            }
+            return "remove series from cart"
+        },
+        interactive: true,
+        allowHTML: true,
+        placement: 'right',
+        content: 'add series to cart', // placeholder text
+        target: '.shopping-cart-holder',
+        plugins: [dynamicCartTip]
     });
 
     tippy.delegate('.cases-table', {
