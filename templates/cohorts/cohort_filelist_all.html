@@ -16,7 +16,7 @@
                     <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
                         <li class="list-group-item">
                             <div id="heading-all-case-id" class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
+                                <a role="button" data-bs-toggle="collapse" data-parent="#metadata-data-accordian-all"
                                    href="#collapse-all-case-id" aria-expanded="false"
                                    aria-controls="collapse-all-case-id">
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
@@ -41,7 +41,7 @@
                         {% for attr in metadata_data_attr|get_sorted_items %}
                             <li class="list-group-item">
                                 <div id="heading-all-{{attr.name}}" class="list-group-item__heading">
-                                    <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr.name }}">
+                                    <a role="button" data-bs-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr.name }}">
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                     </a>
                                 </div>
@@ -98,10 +98,10 @@
     <div id="all-file-panel" class="file-panel col-lg-9 col-md-9 col-sm-9">
             <div class="filelist-panel panel">
                 <div class="alert alert-info alert-dismissable export-result" style="display: none;">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 </div>
                 <div class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     The maximum number of file records which can be downloaded is <span class="file-list-limit">{{ file_list_max }}</span>. Your selections currently total
                     <span class="file-list-total">#</span>. If you download the list now, it will be arbitrarily cut off after the maximum. Please consider using the filter
                     panel to the left to limit the record count.

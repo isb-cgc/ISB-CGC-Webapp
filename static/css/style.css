@@ -1,6 +1,6 @@
 @import url("./font-awesome.min.css");
 @import url("./vendor.css");
-@import url("./bootstrap-tokenfield.min.css");
+/* @import url("./bootstrap-tokenfield.min.css"); */
 @import url("./jquery-ui.min.css");
 /********************************************
  * Generic style resets
@@ -317,9 +317,9 @@ h1, h2, h3, h4, h5, h6 {
     .column-inputs .column-collapse p {
       color: #676767;
       font-size: 12px; }
-  .column-inputs *[data-toggle="collapse"][aria-expanded="false"] .fa-caret-up {
+  .column-inputs *[data-bs-toggle="collapse"][aria-expanded="false"] .fa-caret-up {
     display: none; }
-  .column-inputs *[data-toggle="collapse"][aria-expanded="true"] .fa-caret-down {
+  .column-inputs *[data-bs-toggle="collapse"][aria-expanded="true"] .fa-caret-down {
     display: none; }
 
 /********************************************
@@ -1289,10 +1289,10 @@ a#user-dropdown:hover {
   position: absolute;
   width: 1px; }
 
-.list-group *[data-toggle="collapse"][aria-expanded="false"] .fa-caret-down {
+.list-group *[data-bs-toggle="collapse"][aria-expanded="false"] .fa-caret-down {
   display: none; }
 
-.list-group *[data-toggle="collapse"][aria-expanded="true"] .fa-caret-right {
+.list-group *[data-bs-toggle="collapse"][aria-expanded="true"] .fa-caret-right {
   display: none; }
 
 .list-group .list-group-item {
@@ -1448,7 +1448,7 @@ a#user-dropdown:hover {
   .nav-tabs > li.active > a, .nav-tabs > li > a > li.active > a, .nav-tabs li.active > a:focus > li.active > a, .nav-tabs.nav-stacked > li.active > a > li.active > a, .nav-tabs.nav-stacked > li:hover > a > li.active > a, .nav-tabs li.active > a:focus, .nav-tabs > li > a li.active > a:focus, .nav-tabs.nav-stacked li.active > a:focus li.active > a:focus {
     border: none;
     color: #a66206; }
-    .nav-tabs > li.active > a:after, .nav-tabs > li > a > li.active > a:after, .nav-tabs li.active > a:focus > li.active > a:after, .nav-tabs.nav-stacked > li.active > a > li.active > a:after, .nav-tabs.nav-stacked > li:hover > a > li.active > a:after, .nav-tabs li.active > a:focus:after, .nav-tabs > li > a li.active > a:focus:after, .nav-tabs li.active > a:focus li.active > a:focus:after {
+    .nav-tabs > li > a.active:after, .nav-tabs > li.active > a:after, .nav-tabs > li > a > li.active > a:after, .nav-tabs li.active > a:focus > li.active > a:after, .nav-tabs.nav-stacked > li.active > a > li.active > a:after, .nav-tabs.nav-stacked > li:hover > a > li.active > a:after, .nav-tabs li.active > a:focus:after, .nav-tabs > li > a li.active > a:focus:after, .nav-tabs li.active > a:focus li.active > a:focus:after {
       transform: scale(1);
       transform-origin: left;
       transition: transform 0.25s ease-in-out; }
@@ -3172,7 +3172,7 @@ span.code {
 
 #program_list .study .name-col {
   overflow: visible; }
-  #program_list .study .name-col a[data-toggle="dropdown"] {
+  #program_list .study .name-col a[data-bs-toggle="dropdown"] {
     width: 20px;
     vertical-align: middle;
     line-height: 0em; }

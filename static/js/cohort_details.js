@@ -27,10 +27,9 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
-        tokenfield: 'libs/bootstrap-tokenfield.min'
+        bootstrap: 'libs/bootstrap.bundle.min'
     },
     shim: {
-        'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],
             init: function ($) {
@@ -40,7 +39,8 @@ require.config({
         'bloodhound': {
            deps: ['jquery'],
            exports: 'Bloodhound'
-        }
+        },
+        'bootstrap': ['jquery']
     }
 });
 
@@ -56,7 +56,6 @@ require([
     'underscore',
     'base',
     'typeahead',
-    'tokenfield',
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart'
@@ -472,13 +471,13 @@ require([
         }
     };
 
-    $('button[data-target="#apply-edits-modal"]').on('click',function(e){
+    $('button[data-bs-target="#apply-edits-modal"]').on('click',function(e){
         // Clear previous 'bad name' alerts
         $('#unallowed-chars-alert').hide();
     });
 
     // Event: Save Cohort button click
-    $('button[data-target="#create-cohort-modal"]').on('click',function(e){
+    $('button[data-bs-target="#create-cohort-modal"]').on('click',function(e){
         // Clear previous alerts
         $('#unallowed-chars-alert').hide();
         $('#at-least-one-filter-alert').hide();
@@ -645,12 +644,12 @@ require([
     });
 
     var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
-    var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
+    var save_changes_btn = $('button[data-bs-target="#apply-filters-modal"]');
 
     var check_for_changes = function() {
         let save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
-        let save_changes_btn = $('button[data-target="#apply-filters-modal"]');
-        let save_new_cohort_btn = $('button[data-target="#create-cohort-modal"]');
+        let save_changes_btn = $('button[data-bs-target="#apply-filters-modal"]');
+        let save_new_cohort_btn = $('button[data-bs-target="#create-cohort-modal"]');
         let log_in_to_save_btn = $('#log-in-to-save-btn');
         let totalCases = 0;
 
@@ -702,12 +701,12 @@ require([
         save_changes_btn_modal.prop('disabled', 'disabled');
     });
 
-    $('a[data-target="#share-cohort-modal"]').on('click',function(){
-        $('#share-cohort-modal a[data-target="#shared-pane"]').tab('show');
+    $('a[data-bs-target="#share-cohort-modal"]').on('click',function(){
+        $('#share-cohort-modal a[data-bs-target="#shared-pane"]').tab('show');
     });
 
-    $('button[data-target="#share-cohort-modal"]').on('click',function(){
-        $('#share-cohort-modal a[data-target="#share-cohort-pane"]').tab('show');
+    $('button[data-bs-target="#share-cohort-modal"]').on('click',function(){
+        $('#share-cohort-modal a[data-bs-target="#share-cohort-pane"]').tab('show');
     });
 
     // Share with user click
@@ -892,7 +891,7 @@ require([
             firstSelect = false;
         });
 
-        createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
+        //createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
     };
 
     var set_prog_filter_height = function(height_percentage) {
@@ -1338,7 +1337,7 @@ require([
     // we need to stop the tab from responding to clicks for Issue
     // #1950 fix, so we introduce the next function...
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         ACTIVE_PROGRAM_ID = $('ul.nav-tabs-data li.active a').data('program-id');
         filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID);
     });
@@ -1346,7 +1345,7 @@ require([
     // Clicking on the tab will have no effect if another tab
     // is loading....
 
-    $('a[data-toggle="tab"]').on('click', function (e) {
+    $('a[data-bs-toggle="tab"]').on('click', function (e) {
         if (reject_load) {
             e.preventDefault();
             e.stopPropagation();

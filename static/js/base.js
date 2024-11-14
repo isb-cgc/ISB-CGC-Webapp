@@ -20,7 +20,7 @@ require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         'jquery': ['libs/jquery-3.5.1.min'],
-        'bootstrap': ['libs/bootstrap.min'],
+        'bootstrap': ['libs/bootstrap.bundle.min'],
         'jqueryui': ['libs/jquery-ui.min'],
         'session_security': ['session_security/script'],
         'underscore': ['libs/underscore-min'],
@@ -112,7 +112,7 @@ require([
         var message_obj = $('<div class="row">' +
                             '<div class="col-lg-12">' +
                             '<div class="alert alert-'+messageType+' alert-dismissible">' +
-                            '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
+                            '<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
                             + message + '</div></div></div>');
         message_obj.prependTo('main > .container-fluid');
     };
