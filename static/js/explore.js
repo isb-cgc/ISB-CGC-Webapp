@@ -479,8 +479,7 @@ require([
 
     tippy.delegate('.projects-table', {
         dynamicTip: function(ref){
-            if($(ref).parent().hasClass('extraInFilt') ||
-                ($(ref).parent().hasClass('extraInItem') && $(ref).parent().hasClass('someInCart'))) {
+            if($(ref).parent().hasClass('willAdd')) {
                 return "add series to cart"
             }
             return "remove series from cart"
@@ -495,8 +494,7 @@ require([
 
     tippy.delegate('.cases-table', {
         dynamicTip: function(ref){
-            if($(ref).parent().hasClass('extraInFilt') ||
-                ($(ref).parent().hasClass('extraInItem') && $(ref).parent().hasClass('someInCart'))) {
+            if($(ref).parent().hasClass('willAdd')) {
                 return "add series to cart"
             }
             return "remove series from cart"
@@ -511,8 +509,7 @@ require([
 
     tippy.delegate('.series-table', {
         dynamicTip: function(ref){
-            if($(ref).parent().hasClass('extraInFilt') ||
-                ($(ref).parent().hasClass('extraInItem') && $(ref).parent().hasClass('someInCart'))) {
+            if($(ref).parent().hasClass('willAdd')) {
                 return "add series to cart"
             }
             return "remove series from cart"

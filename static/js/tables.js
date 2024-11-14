@@ -258,7 +258,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     }
 
-
     // classes for project(collection) table columns
     var projectTableColDefs = function(){
         return [{className: "ckbx text_data viewbx caseview", "targets": [0]},
@@ -1502,13 +1501,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     if (!(seriesid in window.selProjects[collection_id].selCases[PatientID].selStudies[studyid].selSeries)) {
                         initSeriesData(collection_id, PatientID, studyid, seriesid);
                      }
-                    var target = $(row).find('.shopping-cart').parent()[0];
-                     tippy(target, {
-                       interactive: true,
-                       allowHTML:true,
-                       placement:'right',
-                      content: ''
-                    });
 
                     updateSeriesRowCount(row);
 
@@ -1531,7 +1523,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                        var newSel = new Object();
                        newSel['added'] = addingToCart;
                        newSel['sel'] = [collection_id, PatientID, studyid, seriesid];
-                       //window.cartHist[curInd]['selections'].push(newSel);
                        cartutils.updateCartSelections(newSel,addingToCart, mp, 'series');
                     });
                  },
