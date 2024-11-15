@@ -3121,6 +3121,10 @@ input[type="button"].btn-block {
   .fade.in {
     opacity: 1; }
 
+  .fade.show {
+    opacity: 1; }
+
+
 .collapse {
   display: none; }
   .collapse.in {
@@ -5098,6 +5102,14 @@ button.close {
     -ms-transform: translate(0, 0);
     -o-transform: translate(0, 0);
     transform: translate(0, 0); }
+
+
+  .modal.show .modal-dialog {
+    -webkit-transform: translate(0, 0);
+    -ms-transform: translate(0, 0);
+    -o-transform: translate(0, 0);
+    transform: translate(0, 0); }
+
 
 .modal-open .modal {
   overflow-x: hidden;
