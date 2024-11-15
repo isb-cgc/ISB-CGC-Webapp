@@ -619,6 +619,10 @@ svg {
     background-color: #d5d5d5;
 }
 
+.tooltip_filter_info {
+    float: right;
+}
+
 td.cartnum.incart {
     background-color:grey;
     color:white;
