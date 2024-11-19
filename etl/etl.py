@@ -54,6 +54,8 @@ ATTR_SET = {}
 DISPLAY_VALS = {}
 SEPARATOR = "[]"
 
+ERRORS_SEEN = []
+
 COLLECTION_HEADER_CHK = "collection_uuid"
 
 FIELD_MAP = {x: i for i, x in enumerate([
@@ -169,10 +171,12 @@ def add_data_sets(sets_set):
         try:
             obj, created = DataSetType.objects.update_or_create(name=dss['name'], data_type=dss['data_type'], set_type=dss['set_type'])
 
-            print("Data Set Type created:")
+            print("[STATUS] Data Set Type created:")
             print(obj)
         except Exception as e:
-            logger.error("[ERROR] Data Version {} may not have been added!".format(dss['name']))
+            msg = "Data Version {} may not have been added!".format(dss['name'])
+            ERRORS_SEEN.append(msg)
+            logger.error("[ERROR] {}".format(msg))
             logger.exception(e)
 
 
@@ -199,7 +203,9 @@ def add_data_versions(idc_version, create_set, associate_set):
         logger.info("[STATUS] Current Active data versions:")
         logger.info("{}".format(DataVersion.objects.filter(active=True)))
     except Exception as e:
-        logger.error("[ERROR] Data Versions may not have been added!")
+        msg = "Data Versions may not have been added!"
+        ERRORS_SEEN.append(msg)
+        logger.error("[ERROR] {}".format(msg))
         logger.exception(e)
 
 
@@ -217,7 +223,9 @@ def add_programs(program_set):
             results[obj.short_name] = obj
 
         except Exception as e:
-            logger.error("[ERROR] Program {} may not have been added!".format(prog['short_name']))
+            msg = "Program {} may not have been added!".format(prog['short_name'])
+            ERRORS_SEEN.append(msg)
+            logger.error("[ERROR] {}".format(msg))
             logger.exception(e)
     return results
 
@@ -271,9 +279,11 @@ def add_data_source(name, count_col, source_type, versions, programs, aggregate_
             )
         copy_attrs([attr_from], [name], attr_exclude)
 
-        print("DataSource entry created: {}".format(obj.name))
+        print("[STATUS] DataSource entry created for: {}".format(obj.name))
     except Exception as e:
-        logger.error("[ERROR] DataSource {} may not have been added!".format(obj.name if obj else 'Unknown'))
+        msg = "DataSource {} may not have been added!".format(obj.name if obj else 'Unknown')
+        ERRORS_SEEN.append(msg)
+        logger.error("[ERROR] {}".format(msg))
         logger.exception(e)
 
 
@@ -345,7 +355,9 @@ def load_collections(filename, data_version="8.0"):
                         line[field_map['program']], line[field_map['name']]
                     ))
                 except Exception as e:
-                    logger.error("[ERROR] While attempting to look up program {}:".format(line[field_map['program']]))
+                    msg = "While attempting to look up program {}:".format(line[field_map['program']])
+                    ERRORS_SEEN.append(msg)
+                    logger.error("[ERROR] {}".format(msg))
                     logger.exception(e)
             try:
                 Collection.objects.get(collection_uuid=line[field_map['collection_uuid']])
@@ -360,6 +372,7 @@ def load_collections(filename, data_version="8.0"):
         load_tooltips(Collection.objects.filter(owner=idc_superuser, active=True, collection_type=Collection.ORIGINAL_COLLEX), "collection_id", "description")
         load_tooltips(Collection.objects.filter(owner=idc_superuser, active=True, collection_type=Collection.ANALYSIS_COLLEX), "analysis_results_id", "description", "collection_id")
     except Exception as e:
+        ERRORS_SEEN.append("Error seen while processing the collections file, check logs for line.")
         logger.error("[ERROR] While processing collections file {}:".format(filename))
         logger.exception(e)
         logger.error("Line: {}".format(line))
@@ -400,6 +413,7 @@ def add_collections(new, update):
             Collection.objects.bulk_update(updated_collex, fields)
 
     except Exception as e:
+        ERRORS_SEEN.append("Error seen while adding/updating collections, check logs.")
         logger.error("[ERROR] While adding/updating collections:")
         logger.exception(e)
 
@@ -534,13 +548,17 @@ def add_attributes(attr_set):
                     )
 
         except Exception as e:
-            logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
+            msg = "Attribute {} may not have been added!".format(attr['name'])
+            ERRORS_SEEN.append(msg)
+            logger.error("[ERROR] {}".format(msg))
             logger.exception(e)
 
 
 def copy_attrs(from_data_sources, to_data_sources, attr_excludes):
     to_sources = DataSource.objects.filter(name__in=to_data_sources)
     from_sources = DataSource.objects.filter(name__in=from_data_sources)
+    if not len(from_sources):
+        raise Exception("[ERROR] Data source '{}' to copy attributes from was not found!".format(from_data_sources))
     to_sources_attrs = to_sources.get_source_attrs()
     bulk_add = []
 
@@ -555,6 +573,9 @@ def copy_attrs(from_data_sources, to_data_sources, attr_excludes):
         for attr in from_source_attrs:
             for ds in to_sources:
                 bulk_add.append(Attribute.data_sources.through(attribute_id=attr.id, datasource_id=ds.id))
+
+    if not len(bulk_add):
+        raise Exception("[ERROR] Attributes from '{}' were not found for copying!".format(from_data_sources))
 
     Attribute.data_sources.through.objects.bulk_create(bulk_add)
 
@@ -602,6 +623,7 @@ def deactivate_data_versions(versions, idc_version):
             dv.active=False
             dv.save()
     except Exception as e:
+        ERRORS_SEEN.append("Error seen while attempting to deactivate tooltips, check logs.")
         logger.error("[ERROR] While deactivating versions:")
         logger.exception(e)
 
@@ -618,6 +640,7 @@ def load_programs(filename):
                 logger.info("[STATUS] Program {} added.".format(obj))
 
     except Exception as e:
+        ERRORS_SEEN.append("Error seen while attempting to add a program, check logs.")
         logger.error("[ERROR] While adding programs:")
         logger.exception(e)
 
@@ -681,6 +704,7 @@ def load_tooltips(source_objs, attr_name, source_tooltip, obj_attr=None):
         if not len(new_tooltips) and not len(updated_tooltips):
             logger.info("[STATUS] No new or changed tooltips found.")
     except Exception as e:
+        ERRORS_SEEN.append("Error seen while attempting to load tooltips, check logs.")
         logger.error("[ERROR] While attempting to load tooltips:")
         logger.exception(e)
 
@@ -704,6 +728,7 @@ def load_display_vals(filename):
 
         attr_vals_file.close()
     except Exception as e:
+        ERRORS_SEEN.append("Error seen while attempting to load display values, check logs.")
         logger.error("[ERROR] While attempting to load display values:")
         logger.exception(e)
     return display_vals
@@ -793,9 +818,15 @@ def main():
             for src in make_solr:
                 create_solr_params(src[0], src[1])
 
+        if len(ERRORS_SEEN):
+            raise Exception("Captured errors while parsing ETL.")
+
     except Exception as e:
-        logger.error("[ERROR] While parsing ETL:")
+        logger.error("[ERROR] During ETL run:")
         logger.exception(e)
+        if len(ERRORS_SEEN):
+            for err in ERRORS_SEEN:
+                print("-> {}".format(err))
 
 
 if __name__ == "__main__":
