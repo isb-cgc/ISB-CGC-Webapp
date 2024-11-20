@@ -80,7 +80,8 @@ def landing_page(request):
         "Marrow and Blood": "Blood",
         "Testicles": "Testis",
         "Adrenal Glands": "Adrenal Gland",
-        "Adrenal": "Adrenal Gland"
+        "Adrenal": "Adrenal Gland",
+        "Lymph Node": "Lymph Nodes"
     }
 
     skip = [
