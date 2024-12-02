@@ -47,8 +47,8 @@
                     <button class="show-flyout btn btn-info" title="Show Comments">Comments</button>
                 </li>
                 <li class="menu-item">
-                    <button class="btn btn-info" data-toggle="modal"
-                            data-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
+                    <button class="btn btn-info" data-bs-toggle="modal"
+                            data-bs-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
                         {% if cohort.perm.perm == 'OWNER' %}
                             Delete
                         {% else %}
@@ -63,11 +63,11 @@
                 {% if cohort.perm.perm == 'OWNER' %}
                     <li class="separator"></li>
                     <li class="menu-item">
-                        <button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share
+                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#share-cohort-modal">Share
                         </button>
                     </li>
                     <li class="separator"></li>
-                    <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared
+                    <li class="menu-item"><a data-bs-target="#share-cohort-modal" data-bs-toggle="modal" class="btn btn-link">Shared
                         with (<span class="share-count">{{ shared_with_users|length }}</span>)</a></li>
                     <li class="separator"></li>
                     <li class="menu-item">
@@ -101,13 +101,13 @@
             <div class="col-lg-12">
                 <div class="panel panel-default">
                     <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                        <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span
                                 class="sr-only">Close</span></button>
                         You have selected too many filters. The current counts shown will not be accurate until one or
                         more filter options are removed.
                     </div>
                     <div id="export-result" class="alert alert-info alert-dismissable" style="display: none;">
-                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                        <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span
                                 class="sr-only">Close</span></button>
                     </div>
                 </div>
@@ -208,7 +208,7 @@
                         {% for program in programs %}
                             <li role="presentation"
                                 class="program-tab{% if not program.id|program_is_in_cohort:programs_this_cohort %} disabled{% elif program|program_is_first_in_cohort:cohort_programs %} active{% endif %}">
-                                <a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data"
+                                <a href="#{{ program.id }}-data" role="tab" data-bs-toggle="tab" title="ISB-CGC Data"
                                    data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                         {% endfor %}
                     </ul>
@@ -248,7 +248,7 @@
                     {% csrf_token %}
                     <div id="unallowed-chars-alert-comment" class="alert alert-warning alert-dismissable"
                          style="display: none;">
-                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                        <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span
                                 class="sr-only">Close</span></button>
                         Your comment contains invalid characters (<span id="unallowed-chars-comment"></span>). Please
                         adjust the content accordingly.
@@ -268,7 +268,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title" id="deleteCohortModal">Delete Cohort</h4>
                     </div>
@@ -282,7 +282,7 @@
                         <div class="modal-footer">
                             {% csrf_token %}
                             <input type="submit" value="Delete" class="btn btn-primary"/>
-                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -295,7 +295,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title" id="remove-cohort-header">Remove Yourself from this Cohort?</h4>
                     </div>
@@ -303,7 +303,7 @@
                         {% csrf_token %}
                         <div class="modal-footer">
                             <input type="submit" value="Remove" class="btn btn-primary"/>
-                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
                         </div>
                     </form>
                 </div>
