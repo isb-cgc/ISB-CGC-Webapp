@@ -719,13 +719,6 @@ if DEBUG and DEBUG_TOOLBAR:
 # you can skip installing the middleware and use your own views.
 MIDDLEWARE.append('axes.middleware.AxesMiddleware',)
 
-##################
-# OHIF_SETTINGS
-##################
-#
-# default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !
-APPEND_SLASH = False
-
 OHIF_V2_PATH=os.environ.get('OHIF_V2_PATH','')
 OHIF_V3_PATH=os.environ.get('OHIF_V3_PATH','')
 VOLVIEW_PATH=os.environ.get('VOLVIEW_PATH','')
