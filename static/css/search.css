@@ -763,3 +763,8 @@ li.cartlist {
         margin: 30px auto;
     }
 }
+
+#projects_table:hover, #cases_table:hover, #studies_table:hover{
+    cursor:pointer;
+
+}
