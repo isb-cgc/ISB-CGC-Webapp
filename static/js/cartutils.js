@@ -999,7 +999,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                     {
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
-                                ' <a class="copy-table" role="button" content="' + data +
+                                ' <a class="copy-this" role="button" content="' + data +
                                 '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         }
                     },
