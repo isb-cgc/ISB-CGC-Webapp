@@ -87,7 +87,7 @@ require([
         placement: 'right',
         arrow: true,
         interactive: true, // This is required for any table tooltip to show at the appropriate spot!
-        target: '.copy-this-table',
+        target: '.copy-this',
         onShow(instance) {
             setTimeout(function() {
                 instance.hide();
