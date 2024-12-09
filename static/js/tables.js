@@ -295,7 +295,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var collection_col = {"type": "html", "orderable": true, render: function (td, data, row){
              return '<span id="'+row[0]+'" class="collection_name value">'+row[3]+'</span>\n' +
                  '<span><i class="collection_info fa-solid fa-info-circle" value="'+row[0]+'" data-filter-display-val="'+row[3]+'"></i></span>'+
-                 ' <a class="copy-this-table" role="button" content="' + row[0] +
+                 ' <a class="copy-this" role="button" content="' + row[0] +
                  '" title="Copy the IDC collection_id to the clipboard"><i class="fa-solid fa-copy"></i></a>'
                }};
         var case_col = { "type": "num", orderable: true };
@@ -378,19 +378,28 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         }
                     }
 
-                    $(row).find('.expansion-toggle').on('click', function(event){
+                    $(row).on('click', function(event) {
                         var elem = event.target;
-                        $(this).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
-                        updateProjectViewSelection([$(row)]);
-                    })
-                    $(row).find('.shopping-cart').parent().on('click', function(event){
-                        clickProjectTableShopping(event, row, data)
+                        if ($(elem).hasClass('collection_info')) {
+                            displayInfo($(elem));
+                        }
+                        else if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
+                            //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
+                        }
+
+                        else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
+                            clickProjectTableShopping(event, row, data)
+                        }
+
+                        // click anywhere else open the cases table
+                        else {
+                            var toggle_elem = $(row).find('.expansion-toggle')[0]
+                            $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
+                            updateProjectViewSelection([$(row)]);
+
+                        }
                     });
-                     $(row).on('click', '.collection_info', function(e) {
-                         window.displayInfo($(this));
-                         e.preventDefault();
-                         return false;
-                    });
+
 
                      $(row).find('.collection_info').on("mouseenter", function(e){
                         $(e.target).addClass('fa-lg');
@@ -664,7 +673,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         const collection_col =  {"type": "text", "orderable": true, data: 'collection_id', render: function (data) {var projectNm = $('#' + data).filter('.collection_name')[0].innerText; return projectNm;}};
         const case_col = {"type": "text", "orderable": true, data: 'PatientID', render: function (data) {
             return data +
-            ' <a class="copy-this-table" role="button" content="' + data +
+            ' <a class="copy-this" role="button" content="' + data +
                 '" title="Copy Case ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
         }};
         const study_col  = {"type": "num", "orderable": true, data: 'unique_study'};
@@ -756,42 +765,53 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         }
                     }
 
-                    $(row).find('.expansion-toggle').on('click', function(event){
+                    $(row).on('click', function(event) {
                         var elem = event.target;
-                        var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
-                        $(this).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
-                        if (rowsAdded){
-                            $(row).find('.fa-caret-down').removeClass('is-hidden');
-                            $(row).find('.fa-caret-right').addClass('is-hidden');
+                         if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
+                            //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
                         }
-                        if (!rowsAdded){
-                            $(row).find('.fa-caret-down').addClass('is-hidden');
-                            $(row).find('.fa-caret-right').removeClass('is-hidden');
-                        }
-                        updateCasesOrStudiesViewSelection([$(row)], 'cases', rowsAdded)
-                    });
 
-                    $(row).find('.shopping-cart').parent().on('click', function(event){
-                        $('.spinner').show();
-                        var elem = event.target;
-                        if ($(elem).hasClass('ckbx')){
+                        else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
+                            $('.spinner').show();
+                           var elem = event.target;
+                           if ($(elem).hasClass('ckbx')){
                             elem=$(elem).find('.shopping-cart')[0];
-                        }
-                        var addingToCart;
-                        if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
+                           }
+                           var addingToCart;
+                           if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
                             // cart is clear
                             addingToCart = true;
 
-                        } else {
+                           } else {
                             //cart is green or yellow. pressing deletes
-                            addingToCart= false;
+                              addingToCart= false;
+                          }
+
+                          var newSel = new Object();
+                          newSel['added'] = addingToCart;
+                          newSel['sel'] = [projid, caseid];
+                          cartutils.updateCartSelections(newSel, addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case');
+
                         }
 
-                       var newSel = new Object();
-                       newSel['added'] = addingToCart;
-                       newSel['sel'] = [projid, caseid];
-                       cartutils.updateCartSelections(newSel, addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case');
-                   });
+                        // click anywhere else open the studies table
+                        else {
+                            var toggle_elem = $(row).find('.expansion-toggle')[0]
+                             var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
+                           $(toggle_elem).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
+                           if (rowsAdded){
+                               $(row).find('.fa-caret-down').removeClass('is-hidden');
+                               $(row).find('.fa-caret-right').addClass('is-hidden');
+                           }
+                           else{
+                              $(row).find('.fa-caret-down').addClass('is-hidden');
+                              $(row).find('.fa-caret-right').removeClass('is-hidden');
+                           }
+                        updateCasesOrStudiesViewSelection([$(row)], 'cases', rowsAdded)
+                        }
+                    });
+
+
                 },
                 "columnDefs": [...caseTableColDefs()],
                 "columns": [...caseTableColumns()],
@@ -1137,44 +1157,56 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         $(row).addClass('willAdd');
                     }
                     $(row).find('.cartnum').html(cnt);
-                    $(row).find('.expansion-toggle').on('click', function(event){
+
+
+                    $(row).on('click', function(event) {
                         var elem = event.target;
-                        var rowsAdded = ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false
-                        $(this).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
-                        if (rowsAdded){
-                            $(row).find('.fa-caret-down').removeClass('is-hidden');
-                            $(row).find('.fa-caret-right').addClass('is-hidden');
-                        } else{
-                            $(row).find('.fa-caret-down').addClass('is-hidden');
-                            $(row).find('.fa-caret-right').removeClass('is-hidden');
-                        }
-                        updateCasesOrStudiesViewSelection([$(row)], 'studies', rowsAdded)
-                    });
 
-                    $(row).find('.shopping-cart').parent().on('click', function(event){
-                       var elem = event.target;
-                        if ($(elem).hasClass('ckbx')) {
+                         if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
+                            //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
+                        }
+
+                        else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
+                            var elem = event.target;
+                           if ($(elem).hasClass('ckbx')) {
                             elem=$(elem).find('.shopping-cart')[0];
-                        }
-                        var addingToCart;
-                        if ('extraInFilt' in window.selProjects[projid].selCases[caseid].selStudies[studyid]) {
+                           }
+                          var addingToCart;
+                           if ('extraInFilt' in window.selProjects[projid].selCases[caseid].selStudies[studyid]) {
                             //more to add
-                            addingToCart= true;
-                        } else {
+                              addingToCart= true;
+                           } else {
                             // no more to add
-                            addingToCart = false;
-                        }
-                        var numSeries = window.selProjects[projid].selCases[caseid].selStudies[studyid].studymp[studyid]['cnt'];
-                        var mp = new Object();
-                        mp[studyid]=numSeries;
+                             addingToCart = false;
+                           }
+                           var numSeries = window.selProjects[projid].selCases[caseid].selStudies[studyid].studymp[studyid]['cnt'];
+                           var mp = new Object();
+                           mp[studyid]=numSeries;
 
-                       //var curInd = window.cartHist.length - 1;
-                       var newSel = new Object();
-                       newSel['added'] = addingToCart;
-                       newSel['sel'] = [projid, caseid, studyid];
-                       cartutils.updateCartSelections(newSel, addingToCart, mp, 'study');
-                       //window.cartHist[curInd]['selections'].push(newSel);
+
+                          var newSel = new Object();
+                          newSel['added'] = addingToCart;
+                         newSel['sel'] = [projid, caseid, studyid];
+                          cartutils.updateCartSelections(newSel, addingToCart, mp, 'study');
+                        }
+
+                        // click anywhere else open the series table
+                        else {
+                            var toggle_elem = $(row).find('.expansion-toggle')[0]
+                             var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
+                           $(toggle_elem).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
+                           if (rowsAdded){
+                               $(row).find('.fa-caret-down').removeClass('is-hidden');
+                               $(row).find('.fa-caret-right').addClass('is-hidden');
+                           }
+                           else {
+                              $(row).find('.fa-caret-down').addClass('is-hidden');
+                              $(row).find('.fa-caret-right').removeClass('is-hidden');
+                           }
+                        updateCasesOrStudiesViewSelection([$(row)], 'studies', rowsAdded)
+                        }
                     });
+
                 },
                 "columnDefs": [
                     {className: "ckbx seriesview", "targets": [0]},
@@ -1239,7 +1271,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     }, {
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
-                            ' <a class="copy-this-table" role="button" content="' + data +
+                            ' <a class="copy-this" role="button" content="' + data +
                                 '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         },
                         "createdCell": function (td, data) {
@@ -1548,7 +1580,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                   {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
-                            ' <a class="copy-this-table" role="button" content="' + data +
+                            ' <a class="copy-this" role="button" content="' + data +
                                 '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
@@ -1557,7 +1589,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 }, {
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
-                            ' <a class="copy-this-table" role="button" content="' + data +
+                            ' <a class="copy-this" role="button" content="' + data +
                                 '"  title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
