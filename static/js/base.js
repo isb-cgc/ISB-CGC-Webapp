@@ -112,7 +112,7 @@ require([
         var message_obj = $('<div class="row">' +
                             '<div class="col-lg-12">' +
                             '<div class="alert alert-'+messageType+' alert-dismissible">' +
-                            '<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
+                            '<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>'
                             + message + '</div></div></div>');
         message_obj.prependTo('main > .container-fluid');
     };
@@ -201,7 +201,7 @@ require([
     }
 
     // change no of entries per page
-    $('.panel-body').on('change', '.items-per-page', function () {
+    $('.isb-panel-body').on('change', '.items-per-page', function () {
         items_per_page = parseInt($('.items-per-page :selected').val());
         goto_table_page(1);
     });
@@ -279,7 +279,7 @@ require([
         update_table_display();
     }
 
-    $('.panel-body').on('click', '.goto-page-button', function () {
+    $('.isb-panel-body').on('click', '.goto-page-button', function () {
         var page_no_input = $(this).siblings('.goto-page-number').val();
         if (page_no_input == "")
             return;
@@ -295,7 +295,7 @@ require([
         }
     });
 
-    $('.panel-body').on('click', '.paginate_button', function () {
+    $('.isb-panel-body').on('click', '.paginate_button', function () {
         var page_no;
         if ($(this).hasClass('next-page')) {
             page_no = parseInt(page) + 1;

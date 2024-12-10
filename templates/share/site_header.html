@@ -3,6 +3,143 @@
 {% load custom_tags %}
 {% load project_custom_tags %}
 
+<header class="site-header navbar-fixed-top fixed-top navbar-isb" role="menubar">
+     <div class="container">
+    <div class="row">
+    <div class="col-lg-12">
+    <!-- <nav class="navbar navbar-fixed-top navbar-expand-lg "> -->
+        <nav class="navbar navbar-expand-lg ">
+          <a class="navbar-brand" href="/" title="Home Page">
+                         <img class="isblogo" src="/static/img/isblogo.png" alt="ISB Logo" loading="lazy">
+                        <span>ISB-CGC</span>
+                    </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navbar-collapse" aria-controls="main-navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+        <div class="collapse navbar-collapse " id="main-navbar-collapse">
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a  class="dropdown-toggle nav-link" id="db-dropdown" data-bs-toggle="dropdown" aria-label="Data Browsers Dropdown" aria-expanded="true">
+                                Data Browsers
+                            </a>
+                        <div class="dropdown-menu dropdown-menu-left" aria-labelledby="db-dropdown">
+
+                                <a class="dropdown-item" href="/bq_meta_search/">BigQuery Table Search</a>
+
+                                <a class="dropdown-item" href="/cohorts/filelist/">Cancer Data File Browser</a>
+                                <a class="dropdown-item" href="https://mitelmandatabase.isb-cgc.org" target="_blank" rel="“noreferrer”">Chromosomal
+                                    Aberrations &amp; Gene Fusions DB</a>
+
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown">
+
+                            <a role="button" class="dropdown-toggle nav-link" id="res-dropdown" data-bs-toggle="dropdown" aria-label="Resource Dropdown" aria-expanded="true">
+                                Resources
+                            </a>
+
+                            <div class="dropdown-menu dropdown-menu-left" role="menu" aria-label="res-dropdown">
+                                <a class="dropdown-item" href="/cohorts/new_cohort/">Cohort Builder / Data Explorer</a>
+
+                                    <a class="dropdown-item" href="/programmatic_access/">
+                                        Pipelines and APIs</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">&nbsp;&nbsp;Notebook</h6>
+
+                                <a class="dropdown-item" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html" target="_blank" rel="“noreferrer”">Statistical
+                                </a>
+                                <a class="dropdown-item" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html" target="_blank" rel="“noreferrer”">Community
+                                </a>
+                                <a class="dropdown-item" href="https://github.com/isb-cgc/Community-Notebooks" target="_blank" rel="“noreferrer”">GitHub Repo
+                                </a>
+                            </div>
+
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank" rel="“noreferrer”" >Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"  href="/about/">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"  href="/citations/">Publications</a>
+                    </li>
+
+                    <li class=" nav-item dropdown">
+
+                            <a role="button" class="dropdown-toggle nav-link" id="help-dropdown" data-bs-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">Help
+
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="help-dropdown">
+                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html" target="_blank" rel="“noreferrer”" >How To Get Started<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li ><a class="nav-link"  href="/how_to_discover/" target="_blank" rel="“noreferrer”">How to Discover Cancer Data Through ISB-CGC<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li ><a class="nav-link"  href="/videotutorials/" target="_blank" rel="“noreferrer”">Video
+                                    Tutorials<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#i-m-a-novice-how-do-i" target="_blank" rel="“noreferrer”" class="sr-set">Getting Started Notebooks<span class="visually-hidden"> opens a new tab</span></a></li>
+
+
+
+                                <li><a class="nav-link" href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new" target="_blank" rel="“noreferrer”" >Submit GitHub Issue<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li ><a class="nav-link"  href="/contact_us/" target="_blank" rel="“noreferrer”" class="visually-hidden">Contact Us<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/office_hours.html" target="_blank" rel="“noreferrer”">ISB-CGC Office Hours<span class="visually-hidden"> opens a new tab</span></a></li>
+                            </ul>
+
+                    </li>
+
+
+                </ul>
+
+            <ul class="navbar-nav ms-auto" >
+
+                {% if user.is_authenticated %}
+                        <li id="user-login" class="navbar-item">
+                             <a class="avatar-link" href="{% url 'user_detail' user.id %}">
+                                {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
+                                    {% if avatar_url %}
+                                        <img src="{{ avatar_url }}" width="32" height="32" alt="Avatar">
+                                    {% else %}
+                                        <i class="fa fa-user basic-avatar"> </i>
+                                    {% endif %}
+                                {% endwith %}
+                            </a>
+
+                            <div class="dropdown">
+                                <a role="button" class="dropdown-toggle navbar-item__text text-decoration-none" id="user-dropdown"
+                                   data-bs-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
+                                    {{ user.first_name }} <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
+                                    <li role="menuitem"><a href="{% url 'user_detail' user.id %}" class="text-decoration-none">Account Details<i class="fa fa-cog"></i></a></li>
+                                    <li role="menuitem"><a href="#logout-modal" data-bs-toggle="modal" class="text-decoration-none"
+                                                           data-bs-target="#logout-modal" title="Sign Out">Sign Out<i class="fa fa-sign-out"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    {% else %}
+
+                        <li id="user-login" class="navbar-item">
+                            <i class="fa fa-sign-in" style="font-family :'FontAwesome' !important"></i>
+                            <a class="login-link text-decoration-none" href="/accounts/login/" title="Sign" >Sign In</a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+        </div>
+
+
+    </nav>
+
+        </div>
+    </div>
+    </div>
+</header>
+
+{%  comment %}
 <header class="navbar navbar-fixed-top site-header" role="menubar">
     <nav class="container">
         <div class="row">
@@ -10,7 +147,7 @@
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle collapsed" data-bs-toggle="collapse"
                             data-bs-target="#main-navbar-collapse" aria-expanded="false">
-                        <span class="sr-only">Toggle navigation</span>
+                        <span class="visually-hidden">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
@@ -168,3 +305,4 @@
         </div>
     </nav>
 </header>
+{%  endcomment %}

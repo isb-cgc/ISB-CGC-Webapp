@@ -1,5 +1,6 @@
 @import url("./font-awesome.min.css");
- @import url("./vendor.css"); 
+ @import url("./vendor.css");
+@import url("./isb-panel.css");
 /* @import url("./bootstrap.css"); */
 /* @import url("./bootstrap-tokenfield.min.css"); */
 @import url("./jquery-ui.min.css");
@@ -139,9 +140,9 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 10px;
   margin-bottom: 10px; }
 
-.navbar {
+.navbar-isb {
   border-bottom: 1px solid lightgrey; }
-  .navbar .icon-bar {
+  .navbar-isb .icon-bar {
     background-color: #888; }
 
 #secondary-nav {
@@ -746,22 +747,22 @@ ul.errorlist {
     #search .search-right-column .results-box .save-data-modal {
       margin-top: 10px; }
 
-#search .panel {
+#search .card {
   border-radius: 1px;
   margin-bottom: 0px; }
 
-#search .last-panel .panel-body ul {
+#search .last-panel .card-body ul {
   list-style: disc;
   margin-left: 25px; }
 
-#search .panel-heading {
+#search .card-heading {
   padding: 0px; }
-  #search .panel-heading h5 {
+  #search .card-heading h5 {
     margin: 0px; }
-  #search .panel-heading a {
+  #search .card-heading a {
     padding: 10px 15px;
     display: block; }
-  #search .panel-heading a:hover {
+  #search .card-heading a:hover {
     text-decoration: none; }
 
 #search .result-item .result-selector {
@@ -930,10 +931,9 @@ body {
 .navbar-fixed-top .navbar-collapse {
   max-height: none; }
 
-.navbar {
+.navbar-isb {
   font-family: 'Open Sans', sans-serif; }
-  .navbar ul {
-    margin-top: 8px; }
+
   .navbar > .subnav ul {
     margin-top: 0; }
     .navbar > .subnav ul .sub-menu {
@@ -954,12 +954,18 @@ body {
   .navbar .badge {
     background-color: #9d9d9d; }
 
-.navbar-brand img {
+  .navbar ul {
+    margin-top: -10px;
+  }
+.navbar-brand  img {
   height: 40px;
   margin-top: -10px;
   vertical-align: top;
   width: auto;
   display: inline-block; }
+
+
+
 
 nav, .site-header {
   background: #fff; }
@@ -1150,17 +1156,17 @@ a#user-dropdown:hover {
   .menu-item.has-drop-down__more {
     display: none; } }
 
-.panel {
+card {
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15);
   border: none; }
-  .panel-invisible {
+  .card-invisible {
     margin-bottom: 30px; }
-  .panel-heading a:hover {
+  .card-heading a:hover {
     color: inherit;
     text-decoration: none; }
-  .panel-primary .panel-heading .dropdown > a {
+  .card-primary .card-heading .dropdown > a {
     color: #fff; }
-  .panel-default .panel-body {
+  .card-default .card-body {
     padding-top: 5px; }
 
 .dropdown.open > .dropdown-toggle.btn-primary {
@@ -1478,7 +1484,7 @@ a#user-dropdown:hover {
     border-right: 2px transparent solid; }
 
 .tab-content {
-  background-color: #FFF;
+  /* background-color: #FFF; */
   padding: 5px 10px; }
 
 .nav-tabs_excel {
@@ -1747,7 +1753,7 @@ a#user-dropdown:hover {
 #bq-meta-searcher .pagination {
   margin: 0; }
 
-#bq-meta-searcher .panel-body {
+#bq-meta-searcher .card-body {
   padding: 20px 15px; }
 
 #bq-meta-searcher .chosen-container-multi .chosen-choices {
@@ -1980,7 +1986,7 @@ section .min-max {
 
 #sample_analyses .analysis {
   height: 450px; }
-  #sample_analyses .analysis .panel-footer {
+  #sample_analyses .analysis .card-footer {
     position: absolute;
     bottom: 50px;
     right: 20px;
@@ -2080,7 +2086,7 @@ section .min-max {
     visibility: visible;
     display: inline-block; }
 
-#genes_list .panel-body, #variable_list .panel-body {
+#genes_list .card-body, #variable_list .card-body {
   margin-bottom: 50px; }
 
 #variable_list .dropdown-menu li > span {
@@ -2102,7 +2108,7 @@ section .min-max {
     padding: 10px 8px;
     display: block; }
 
-#variable_edit .user-data-panel .panel-body {
+#variable_edit .user-data-panel .card-body {
   overflow: hidden;
   position: relative;
   height: 110px; }
@@ -2142,23 +2148,23 @@ section .min-max {
     margin: 0;
     overflow-y: auto;
     overflow-x: hidden; }
-  .worksheet .panel-heading div, .worksheet .panel-footing div {
+  .worksheet .card-heading div, .worksheet .card-footing div {
     padding: 5px; }
-  .worksheet .panel-heading .bq-tables, .worksheet .panel-footing .bq-tables {
+  .worksheet .card-heading .bq-tables, .worksheet .card-footing .bq-tables {
     margin: 0 10px; }
-    .worksheet .panel-heading .bq-tables ul, .worksheet .panel-footing .bq-tables ul {
+    .worksheet .card-heading .bq-tables ul, .worksheet .card-footing .bq-tables ul {
       background-color: #F8F8F8;
       border-radius: 3px;
       padding: 7px 10px; }
-      .worksheet .panel-heading .bq-tables ul li, .worksheet .panel-footing .bq-tables ul li {
+      .worksheet .card-heading .bq-tables ul li, .worksheet .card-footing .bq-tables ul li {
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap; }
-  .worksheet .panel-heading .options-bar, .worksheet .panel-footing .options-bar {
+  .worksheet .card-heading .options-bar, .worksheet .card-footing .options-bar {
     float: left;
     width: 50%;
     margin-bottom: 10px; }
-  .worksheet .panel-heading .alert, .worksheet .panel-footing .alert {
+  .worksheet .card-heading .alert, .worksheet .card-footing .alert {
     clear: both; }
   .worksheet .fly-out {
     position: absolute;
@@ -2325,7 +2331,7 @@ section .min-max {
   #cohort-details .pending-right i, #cohort-filelist .pending-right i {
     margin-left: 4px; }
 
-#cohort-details #placeholder .panel-body, #cohort-filelist #placeholder .panel-body {
+#cohort-details #placeholder .card-body, #cohort-filelist #placeholder .card-body {
   height: 210px;
   position: relative;
   overflow: hidden; }
@@ -2516,29 +2522,29 @@ section .min-max {
 
 #cohort-details .filter-panel .tab-content, #cohort-filelist .filter-panel .tab-content {
   padding: 0px; }
-  #cohort-details .filter-panel .tab-content .panel-group, #cohort-filelist .filter-panel .tab-content .panel-group {
+  #cohort-details .filter-panel .tab-content .card-group, #cohort-filelist .filter-panel .tab-content .card-group {
     margin: 0px; }
-  #cohort-details .filter-panel .tab-content .panel, #cohort-filelist .filter-panel .tab-content .panel {
+  #cohort-details .filter-panel .tab-content .panel, #cohort-filelist .filter-panel .tab-content card {
     margin: 0px;
     border: none;
     border-radius: 0px;
     border-bottom: 1px solid #D5D5D5; }
-    #cohort-details .filter-panel .tab-content .panel .panel-heading, #cohort-filelist .filter-panel .tab-content .panel .panel-heading {
+    #cohort-details .filter-panel .tab-content card .card-heading, #cohort-filelist .filter-panel .tab-content card .card-heading {
       font-size: 13px;
       border-bottom: none;
       text-transform: uppercase; }
-      #cohort-details .filter-panel .tab-content .panel .panel-heading i, #cohort-filelist .filter-panel .tab-content .panel .panel-heading i {
+      #cohort-details .filter-panel .tab-content card .card-heading i, #cohort-filelist .filter-panel .tab-content card .card-heading i {
         width: 10px; }
-    #cohort-details .filter-panel .tab-content .panel .panel-body, #cohort-filelist .filter-panel .tab-content .panel .panel-body {
+    #cohort-details .filter-panel .tab-content card .card-body, #cohort-filelist .filter-panel .tab-content card .card-body {
       padding: 0px 10px; }
-      #cohort-details .filter-panel .tab-content .panel .panel-body ul, #cohort-filelist .filter-panel .tab-content .panel .panel-body ul {
+      #cohort-details .filter-panel .tab-content card .card-body ul, #cohort-filelist .filter-panel .tab-content card .card-body ul {
         list-style: none;
         padding-left: 10px; }
-    #cohort-details .filter-panel .tab-content .panel > a:hover, #cohort-filelist .filter-panel .tab-content .panel > a:hover {
+    #cohort-details .filter-panel .tab-content card > a:hover, #cohort-filelist .filter-panel .tab-content card > a:hover {
       text-decoration: none; }
-      #cohort-details .filter-panel .tab-content .panel > a:hover .panel-heading, #cohort-filelist .filter-panel .tab-content .panel > a:hover .panel-heading {
+      #cohort-details .filter-panel .tab-content card > a:hover .card-heading, #cohort-filelist .filter-panel .tab-content card > a:hover .card-heading {
         background-color: #DFEBFE; }
-    #cohort-details .filter-panel .tab-content .panel > a:focus, #cohort-filelist .filter-panel .tab-content .panel > a:focus {
+    #cohort-details .filter-panel .tab-content card > a:focus, #cohort-filelist .filter-panel .tab-content card > a:focus {
       text-decoration: none; }
 
 #cohort-details .filter-panel .list-group h5, #cohort-filelist .filter-panel .list-group h5 {
@@ -2549,12 +2555,12 @@ section .min-max {
   list-style: none;
   padding: 0px; }
 
-#cohort-details .filter-panel .list-group .panel, #cohort-filelist .filter-panel .list-group .panel {
+#cohort-details .filter-panel .list-group .panel, #cohort-filelist .filter-panel .list-group card {
   margin: 0px; }
-  #cohort-details .filter-panel .list-group .panel .panel-body, #cohort-filelist .filter-panel .list-group .panel .panel-body {
+  #cohort-details .filter-panel .list-group card .card-body, #cohort-filelist .filter-panel .list-group card .card-body {
     padding: 0px 15px 0px 15px; }
 
-#cohort-details .filter-panel .list-group .panel-collapse, #cohort-filelist .filter-panel .list-group .panel-collapse {
+#cohort-details .filter-panel .list-group .card-collapse, #cohort-filelist .filter-panel .list-group .card-collapse {
   max-height: 100px; }
 
 #cohort-details .filter-panel .list-group .sel-gene, #cohort-filelist .filter-panel .list-group .sel-gene {
@@ -2585,7 +2591,7 @@ section .min-max {
   max-height: 100px;
   overflow-y: scroll; }
 
-#cohort-details .case-trees .panel-body, #cohort-details .user-data-trees .panel-body, #cohort-filelist .case-trees .panel-body, #cohort-filelist .user-data-trees .panel-body {
+#cohort-details .case-trees .card-body, #cohort-details .user-data-trees .card-body, #cohort-filelist .case-trees .card-body, #cohort-filelist .user-data-trees .card-body {
   position: relative;
   overflow: hidden;
   height: 750px; }
@@ -2625,7 +2631,7 @@ section .min-max {
 
 #cohort-details .parallel-sets, #cohort-filelist .parallel-sets {
   margin-top: 30px; }
-  #cohort-details .parallel-sets .panel-body, #cohort-filelist .parallel-sets .panel-body {
+  #cohort-details .parallel-sets .card-body, #cohort-filelist .parallel-sets .card-body {
     position: relative;
     overflow: hidden;
     min-height: 210px; }
@@ -2654,7 +2660,7 @@ section .min-max {
   margin-left: 10px;
   float: left; }
 
-#cohort-details .cohort-info .panel-body span.total-values, #cohort-filelist .cohort-info .panel-body span.total-values {
+#cohort-details .cohort-info .card-body span.total-values, #cohort-filelist .cohort-info .card-body span.total-values {
   font-weight: 700; }
 
 #cohort-details .cohort-info ul, #cohort-filelist .cohort-info ul {
@@ -2803,7 +2809,7 @@ section .min-max {
   font-size: 0.9em;
   padding-left: 5px; }
 
-#cohort-filelist #placeholder .panel-body {
+#cohort-filelist #placeholder .card-body {
   height: 500px;
   position: relative;
   overflow: hidden; }
@@ -2851,12 +2857,12 @@ section .min-max {
   padding: 0 20px;
   color: black; }
 
-#cohort-filelist #filter-panel .panel .panel-heading {
+#cohort-filelist #filter-panel card .card-heading {
   background-color: #fff; }
 
-#cohort-filelist #filter-panel .panel .panel-body {
+#cohort-filelist #filter-panel card .card-body {
   padding: 10px 10px 10px 10px; }
-  #cohort-filelist #filter-panel .panel .panel-body ul {
+  #cohort-filelist #filter-panel card .card-body ul {
     list-style: none;
     padding-left: 10px; }
 
@@ -3231,19 +3237,19 @@ span.code {
     background-color: #9e9e9e; }
   #landing .jumbotron-fluid {
     padding-bottom: 8px; }
-  #landing .panel-heading {
+  #landing .card-heading {
     padding: 5px 10px;
     min-height: 77px; }
-    #landing .panel-heading a {
+    #landing .card-heading a {
       text-decoration: none; }
-    #landing .panel-heading img {
+    #landing .card-heading img {
       padding: 0;
       max-width: 100px; }
-  #landing .panel-body {
+  #landing .card-body {
     padding: 5px 10px;
     margin-bottom: 70px;
     min-height: 120px; }
-  #landing .panel-footer {
+  #landing .card-footer {
     position: absolute;
     bottom: 15px;
     padding: 5px 10px;
@@ -3253,7 +3259,7 @@ span.code {
     align-items: stretch;
     display: flex;
     flex-direction: column; }
-    #landing .panel-footer a {
+    #landing .card-footer a {
       text-decoration: none; }
   #landing .landing-icon {
     background-size: contain;
@@ -3270,7 +3276,7 @@ span.code {
     display: flex;
     flex-wrap: wrap;
     justify-content: center; }
-  #landing .panel {
+  #landing .card {
     margin-left: auto;
     margin-right: auto;
     border-radius: 10px;
@@ -3285,7 +3291,7 @@ span.code {
     flex-direction: column;
     align-items: stretch;
     display: flex; }
-    #landing .panel h4 {
+    #landing .card h4 {
       margin: 0; }
   #landing .dbrowser-div {
     background-color: #e2ebf3; }
@@ -3293,13 +3299,13 @@ span.code {
       color: #2b537b; }
     #landing .dbrowser-div h4, #landing .dbrowser-div i {
       color: #226caa; }
-    #landing .dbrowser-div .panel {
+    #landing .dbrowser-div card {
       border-color: #2b537b; }
-    #landing .dbrowser-div .panel-footer a:hover .learn-icon {
+    #landing .dbrowser-div .card-footer a:hover .learn-icon {
       background-image: url("../img/blue-lightbulb-hover.png"); }
-    #landing .dbrowser-div .panel-footer a:hover .launch-icon {
+    #landing .dbrowser-div .card-footer a:hover .launch-icon {
       background-image: url("../img/blue-rocket-hover.png"); }
-    #landing .dbrowser-div .panel-footer a:hover .icon-caption {
+    #landing .dbrowser-div .card-footer a:hover .icon-caption {
       color: #2b537b; }
     #landing .dbrowser-div .learn-icon {
       background-image: url("../img/blue-lightbulb.png"); }
@@ -3315,19 +3321,19 @@ span.code {
       color: #925122; }
     #landing .resources-div h4, #landing .resources-div i {
       color: #f18621; }
-    #landing .resources-div .panel {
+    #landing .resources-div card {
       border-color: #925122; }
-    #landing .resources-div .panel-footer a:hover .learn-icon {
+    #landing .resources-div .card-footer a:hover .learn-icon {
       background-image: url("../img/orange-lightbulb-hover.png"); }
-    #landing .resources-div .panel-footer a:hover .launch-icon {
+    #landing .resources-div .card-footer a:hover .launch-icon {
       background-image: url("../img/orange-rocket-hover.png"); }
-    #landing .resources-div .panel-footer a:hover .statistical-icon {
+    #landing .resources-div .card-footer a:hover .statistical-icon {
       background-image: url("../img/orange-statistical-hover.png"); }
-    #landing .resources-div .panel-footer a:hover .community-icon {
+    #landing .resources-div .card-footer a:hover .community-icon {
       background-image: url("../img/orange-community-hover.png"); }
-    #landing .resources-div .panel-footer a:hover .github-icon {
+    #landing .resources-div .card-footer a:hover .github-icon {
       background-image: url("../img/orange-github-hover.png"); }
-    #landing .resources-div .panel-footer a:hover .icon-caption {
+    #landing .resources-div .card-footer a:hover .icon-caption {
       color: #925122; }
     #landing .resources-div .learn-icon {
       background-image: url("../img/orange-lightbulb.png"); }
@@ -3403,21 +3409,21 @@ span.code {
   border: 4px solid #71a0ce;
   color: grey; }
 
-#user-details .panel {
+#user-details card {
   width: 100%;
 }
 
-#user-details .panel-heading {
+#user-details .card-heading {
   color: white;
   background-color: #2b537b;
   border-top-right-radius: 3px;
   border-top-left-radius: 3px; }
 
-#user-details .panel i {
+#user-details card i {
   margin-right: 5px;
 }
 
-#user-details .panel-body {
+#user-details .card-body {
   padding: 20px; }
 
 #user-details .avatar {
@@ -3438,7 +3444,7 @@ span.code {
   width: 100%;
   text-align: center;
   margin: 20px 0; }
-  #user-details .row .panel {
+  #user-details .row card {
     display: inline-block;
     margin: 10px 0;
     text-align: left;
@@ -3463,7 +3469,7 @@ span.code {
       #user-details .row a.sm_btn:hover {
         background-color: #226caa;
         color: white; }
-  #user-details .row .panel-heading a {
+  #user-details .row .card-heading a {
     color: white; }
   #user-details .row .gcp-panel a {
     display: inline-block; }
@@ -4195,9 +4201,9 @@ span.code {
 #video-tutorials .vid-desc-text {
   color: dimgrey; }
 
-#video-tutorials .panel .row {
+#video-tutorials card .row {
   padding: 25px; }
-  #video-tutorials .panel .row .col-md-4 {
+  #video-tutorials card .row .col-md-4 {
     padding: 0 20px; }
 
 #video-tutorials .vid-container {
@@ -4240,12 +4246,12 @@ span.code {
 #programmatic_access .container.width-80 {
   width: 80%; }
 
-#programmatic_access .panel-heading {
+#programmatic_access .card-heading {
   font-weight: bold;
   text-align: center;
   background-color: #7e7e7e;
   color: white; }
-  #programmatic_access .panel-heading i {
+  #programmatic_access .card-heading i {
     margin-right: 5px; }
 
 #programmatic_access .thumbnail {

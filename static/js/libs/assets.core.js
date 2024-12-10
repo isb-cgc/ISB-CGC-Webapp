@@ -7,9 +7,9 @@ var debugON = false;
 /*******************************************************************************
     Required assistive technology text, can be abstracted for bi-lingual support
 ********************************************************************************/
-var exitText = '<span class="sr-only"> opens a new tab</span>',
+var exitText = '<span class="visually-hidden"> opens a new tab</span>',
     //insert same span but with visible image on page
-    exitTextImage = '<span class="fa fa-external-link fa-spacing"><span class="adobeBlank" aria-hidden="true">New Window icon</span></span><span class="sr-only">This link opens a new window or tab</span>',
+    exitTextImage = '<span class="fa fa-external-link fa-spacing"><span class="adobeBlank" aria-hidden="true">New Window icon</span></span><span class="visually-hidden">This link opens a new window or tab</span>',
     //policy text
     policyText = '<a href="http://www.medicare.gov/sharedresources/shared/pages/external-link-disclaimer.aspx" class="fa fa-external-link non-gov-notice" title="Medicare\' External Link Policy" target="_blank"><span class="adobeBlank">New Window icon</span></a>',
     //use hidden text to note where user is located
@@ -61,8 +61,8 @@ var A11y = {
         ********************************************/
         //add live region for anything to use for announcements to screen readers
         if ($('#liveText').length === 0) {
-            $('body').prepend('<div id="liveText" class="sr-only" aria-live="assertive"></div>');
-            $('body').prepend('<div id="liveText-polite" class="sr-only" aria-live="polite"></div>');
+            $('body').prepend('<div id="liveText" class="visually-hidden" aria-live="assertive"></div>');
+            $('body').prepend('<div id="liveText-polite" class="visually-hidden" aria-live="polite"></div>');
         }
 
         /*******************************************
@@ -107,9 +107,9 @@ var A11y = {
             });
             $('.ui-accordion-header-active').next('div').attr('aria-live', 'polite');
 
-            $('.ui-accordion-header').append('<span class="sr-only sr-section-alert"> section is collapsed</span>').children('.ui-accordion-header-icon');
+            $('.ui-accordion-header').append('<span class="visually-hidden sr-section-alert"> section is collapsed</span>').children('.ui-accordion-header-icon');
             if ($('html').hasClass('ui-helper-nocustomfonts') && ($('html').hasClass('lt-ie9') || $('html').hasClass('ie9') || $('html').hasClass('ie10') || $('html').hasClass('ie11'))) {
-                $('.ui-accordion-header').append('<span class="sr-only sr-section-alert"> section is collapsed</span>').children('.ui-accordion-header-icon').html('<span class="adobeBlank arrow-icon" aria-hidden="true">Collapsed arrow icon</span>');
+                $('.ui-accordion-header').append('<span class="visually-hidden sr-section-alert"> section is collapsed</span>').children('.ui-accordion-header-icon').html('<span class="adobeBlank arrow-icon" aria-hidden="true">Collapsed arrow icon</span>');
             }
             A11y.accordionHelper();
 
@@ -343,7 +343,7 @@ var A11y = {
             dialog.find('.ui-dialog-content').attr('aria-hidden', 'false');
             //wrap dialog inner elements
             if (dialog.find(contents).length === 0) {
-                dialog.wrapInner("<div class='dialog-contents' tabindex='-1' role='document'></div>").prepend("<p class='sr-only ui-dialog-hint'>Start of Dialog</p>").append("<p class='sr-only ui-dialog-hint'>End of Dialog</p>");;
+                dialog.wrapInner("<div class='dialog-contents' tabindex='-1' role='document'></div>").prepend("<p class='visually-hidden ui-dialog-hint'>Start of Dialog</p>").append("<p class='visually-hidden ui-dialog-hint'>End of Dialog</p>");;
             }
             //add attributes to close button
             titleBar.find('.ui-button').attr({
@@ -351,7 +351,7 @@ var A11y = {
                     "aria-label": "Close"
                 }).addClass("fa fa-times-circle icon_circle_remove pull-right")
                 .removeClass("ui-dialog-titlebar-close ui-button-icon-only")
-                .find('.ui-button-text').addClass("sr-only");
+                .find('.ui-button-text').addClass("visually-hidden");
 
             //make title element focusable and set up as H1 
             titleBar.find('.ui-dialog-title').attr({
@@ -364,7 +364,7 @@ var A11y = {
         }
         if ($("#progressDialog").is('.ui-dialog-content')) {
             if ($('#progressbarText').length === 0) {
-                $('.ui-dialog-content').append('<div id="progressbarText" class="sr-only" role="status" aria-live="assertive"></div>');
+                $('.ui-dialog-content').append('<div id="progressbarText" class="visually-hidden" role="status" aria-live="assertive"></div>');
             }
         };
     },
@@ -904,8 +904,8 @@ $.widget("ui.tabs", $.ui.tabs, {
     _create: function(event, ui) {
         if (debugON) console.log('Custom Tabs Widget');
         //applying the live regiions for page load because the A11y.Core function is not called at time of execution of the tabs widget
-        $('body').prepend('<div id="liveText" class="sr-only" aria-live="assertive"></div>');
-        $('body').prepend('<div id="liveText-polite" class="sr-only" aria-live="polite"></div>');
+        $('body').prepend('<div id="liveText" class="visually-hidden" aria-live="assertive"></div>');
+        $('body').prepend('<div id="liveText-polite" class="visually-hidden" aria-live="polite"></div>');
         return this._super();
     },
     _refresh: function() {
@@ -1288,7 +1288,7 @@ $.datepicker._attachments = function(input, inst) {
                             title: buttonText
                         });
                     } else {
-                        return $("<span/>").html('<span class="' + buttonClass + '"><span class="adobeBlank">Calendar icon</span></span><span class="sr-only">' + buttonText + '</span>');
+                        return $("<span/>").html('<span class="' + buttonClass + '"><span class="adobeBlank">Calendar icon</span></span><span class="visually-hidden">' + buttonText + '</span>');
                     }
                 })
             ));

@@ -29,44 +29,54 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}"/>
 
     <div class="container">
-        <ol class="breadcrumb">
+     <div class="row">
+     <div class="col-lg-12 col-md-12">
+         <ol class="breadcrumb">
             {% if user.is_authenticated %}
                 <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
             {% else %}
                 <br>
             {% endif %}
         </ol>
-        <h1 class="page-header pull-left">Create Cohort</h1>
+     </div>
+     <div class="col-lg-6 col-md-6">
+
+
+        <h1 class="page-header float-start">Create Cohort</h1>
+     </div>
+     <div class="col-lg-6 col-md-6">
         {% if user.is_authenticated %}
-            <button class="btn btn-primary pull-right" data-bs-toggle="modal" data-target="#create-cohort-modal"
-                    title="Please select at least one filter." disabled> Save As New Cohort
+            <button class="btn btn-secondary float-end" data-bs-toggle="modal" data-bs-target="#create-cohort-modal"
+                    title="Please select at least one filter." > Save As New Cohort
             </button>
         {% else %}
-            <button class="btn btn-primary pull-right" id="log-in-to-save-btn"
+            <button class="btn btn-secondary float-end" id="log-in-to-save-btn"
                     title="Please select at least one filter."
 {#                        onclick="location.href='{% url 'account_login' %}'"#}
                     disabled>Log In to Save New Cohort
             </button>
         {% endif %}
+     </div>
+    </div>
     </div>
 
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12">
-                <div class="panel panel-default">
+                <div class="isb-panel isb-panel-default">
                     <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
                         <button type="button" class="close" data-bs-hide="alert"><span
-                                aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
                         You have selected too many filters. The current counts shown will not be accurate until one or
                         more filter options are removed.
                     </div>
                     <div id="at-least-one-filter-alert" class="alert alert-warning alert-dismissable"
                          style="display: none;">
                         <button type="button" class="close" data-bs-hide="alert"><span
-                                aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
                         You must choose at least one filter to include samples in your cohort.
                     </div>
                 </div>
@@ -75,12 +85,12 @@
 
         <div class="row">
             <!-- Select Program Panel -->
-            <div class="col-lg-3 col-md-3 col-sm-12">
-            <div class="panel panel-default" role="tabpanel">
-                <div class="panel-heading clearfix">
-                    <h4 class="panel-title pull-left">Select Program</h4>
+            <div class="col-lg-3 col-md-3 col-sm-12 me-auto">
+            <div class="isb-panel isb-panel-default" role="tabpanel">
+                <div class="isb-panel-heading clearfix">
+                    <h4 class="isb-panel-title pull-left">Select Program</h4>
                 </div>
-                <div class="panel-body">
+                <div class="isb-panel-body">
                     <div>
                         <!-- Grouped by program -->
                         <select class="sort-by-program dataset-select-box form-control">
@@ -100,12 +110,12 @@
             <!-- Selected Filters Panel -->
             {% if not cohort.id %}
             <div class="col-lg-9 col-md-9 col-sm-12">
-            <div class="all-selected-filters panel panel-default">
-                <div class="panel-heading clearfix">
-                    <h4 class="panel-title pull-left">Selected Filters</h4>
-                    <a class="pull-right clear-filters" role="button">Clear All</a>
+            <div class="all-selected-filters isb-panel isb-panel-default">
+                <div class="isb-panel-heading clearfix">
+                    <h4 class="isb-panel-title pull-left">Selected Filters</h4>
+                    <a class="pull-right clear-filters text-decoration-none" role="button">Clear All</a>
                 </div>
-                <div class="panel-body"></div>
+                <div class="isb-panel-body"></div>
             </div>
             </div>
             {% endif %}
@@ -115,9 +125,9 @@
             <div class="tab-content data-tab-content program-tabs">
                 <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
                     <div class="col-md-12 data-tab-content-panel spinner-panel">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                        <div class="isb-panel isb-panel-default">
+                            <div class="isb-panel-body">
+                                <div class="spinner"><i class="fa fa-spinner fa-spin d-none"></i></div>
                             </div>
                         </div>
                     </div>
@@ -150,14 +160,14 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
+
                         <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
+
                         <div class="modal-js-messages" id="create-cohort-modal-js-messages">
                             <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable"
                                  style="display: none;">
                                 <button type="button" class="close" data-bs-hide="alert"><span
-                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
                                 Your cohort contains cases from multiple programs. Please note that filters will only
                                 apply to cases from the program indicated by the tab they were chosen on - they will
                                 not apply to cases from other programs in
@@ -166,17 +176,19 @@
                             <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable"
                                  style="display: none;">
                                 <button type="button" class="close" data-bs-hide="alert"><span
-                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
                                 Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>).
                                 Please choose another name.
                             </div>
                             <div id="at-least-one-filter-alert-modal" class="alert alert-warning alert-dismissable"
                                  style="display: none;">
                                 <button type="button" class="close" data-bs-hide="alert"><span
-                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
                                 You must choose at least one filter to include samples in your cohort.
                             </div>
                         </div>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
                     </div>
                     <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
