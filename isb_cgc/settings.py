@@ -37,9 +37,6 @@ if not exists(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH))):
 
 dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
-APP_ENGINE_FLEX = 'aef-'
-APP_ENGINE = 'Google App Engine/'
-
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
