@@ -1,8 +1,6 @@
 @import url("./font-awesome.min.css");
- @import url("./vendor.css");
-@import url("./isb-panel.css");
-/* @import url("./bootstrap.css"); */
-/* @import url("./bootstrap-tokenfield.min.css"); */
+@import url("./isb-bs3-legacy.css");
+@import url("./bootstrap.min.css"); 
 @import url("./jquery-ui.min.css");
 /********************************************
  * Generic style resets
