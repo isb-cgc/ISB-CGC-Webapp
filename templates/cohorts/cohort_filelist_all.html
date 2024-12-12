@@ -1,22 +1,29 @@
 <div id="all-files" class="tab-pane data-tab" data-file-type="all" role="tabpanel">
+
     <div class="col-lg-3 col-md-3 col-sm-pull-0"></div>
-    <div class="col-lg-9 col-md-9 col-sm-12 right">
-        <div class="selected-filters-all panel panel-default">
-            <div class="panel-heading clearfix">
-                <h4 class="panel-title pull-left">Selected Filters</h4>
-                <a class="pull-right clear-filters" role="button">Clear All</a>
-            </div>
-            <div class="panel-body"></div>
-        </div>
+    <div class="row">
+      <div class="col-lg-9 col-md-9 col-sm-12 ms-auto">
+          <div class="isb-panel selected-filters-all isb-panel-default">
+              <div class="clearfix isb-panel-heading">
+                    <h4 class="isb-panel-title float-start">Selected Filters</h4>
+                    <a  class="clear-filters float-end text-decoration-none" role="button">Clear All</a>
+                 </div>
+              <div class="isb-panel-body"></div>
+
+
+          </div>
+       </div>
     </div>
+
+    <div class="row">
     <div id="all-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
-            <div class="panel filter-panel panel-default">
-                <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 cases</div>
-                <div class="panel-body tab-content filter-build-panel" id="all-filter-panel">
+            <div class="isb-panel filter-panel isb-panel-default">
+                <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 casess</div>
+                <div class="isb-panel-body tab-content filter-build-panel" id="all-filter-panel">
                     <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
                         <li class="list-group-item">
                             <div id="heading-all-case-id" class="list-group-item__heading">
-                                <a role="button" data-bs-toggle="collapse" data-parent="#metadata-data-accordian-all"
+                                <a role="button" class="text-decoration-none" data-bs-toggle="collapse" data-parent="#metadata-data-accordian-all"
                                    href="#collapse-all-case-id" aria-expanded="false"
                                    aria-controls="collapse-all-case-id">
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
@@ -41,7 +48,7 @@
                         {% for attr in metadata_data_attr|get_sorted_items %}
                             <li class="list-group-item">
                                 <div id="heading-all-{{attr.name}}" class="list-group-item__heading">
-                                    <a role="button" data-bs-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr.name }}">
+                                    <a role="button" class="text-decoration-none" data-bs-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr.name }}">
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                     </a>
                                 </div>
@@ -96,17 +103,17 @@
             </div>
         </div>
     <div id="all-file-panel" class="file-panel col-lg-9 col-md-9 col-sm-9">
-            <div class="filelist-panel panel">
+            <div class="filelist-panel isb-panel">
                 <div class="alert alert-info alert-dismissable export-result" style="display: none;">
-                    <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
                 </div>
                 <div class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
-                    <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close float-end" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
                     The maximum number of file records which can be downloaded is <span class="file-list-limit">{{ file_list_max }}</span>. Your selections currently total
                     <span class="file-list-total">#</span>. If you download the list now, it will be arbitrarily cut off after the maximum. Please consider using the filter
                     panel to the left to limit the record count.
                 </div>
-                <div class="panel-heading">
+                <div class="isb-panel-heading">
                     <div class="file-panel-toggle">
                         <a class="fa fa-angle-double-left" title="Click to hide the filters"></a>
                         <a class="fa fa-angle-double-right" title ="Click to see the filters"></a>
@@ -140,11 +147,11 @@
                         </ul>
                     </div>
                 </div>
-                <div class="panel-body">
+                <div class="isb-panel-body">
                     <div class="dataTables_info">
                         <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
                         <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
-                        <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                         <span class="spinner"><i class="fa fa-spin fa-spinner d-none"></i></span>
                     </div>
                     <div>
                         <div class="dataTables_length files-per-page">
@@ -211,7 +218,9 @@
             </div>
         </div>
     </div>
-</div>
+
+   </div>
+
 
 
 
