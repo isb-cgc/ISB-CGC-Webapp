@@ -190,5 +190,10 @@ body {
      position: absolute;
      bottom: 15px;
 
+ }
 
+ /* #needed for bs3-> b5 migration. Avoid extra margins on a row in a row */
+ .row-in-row{
+     margin-left:0px!important;
+     margin-right:0px!important;
  }
