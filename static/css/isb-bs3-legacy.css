@@ -190,5 +190,24 @@ body {
      position: absolute;
      bottom: 15px;
 
-
  }
+
+ /* #needed for bs3-> b5 migration. Avoid extra margins on a row in a row */
+ .row-in-row{
+     margin-left:0px!important;
+     margin-right:0px!important;
+ }
+
+ #cohort-details #placeholder .isb-panel-body, #cohort-filelist #placeholder .isb-panel-body {
+    height: 210px;
+    position: relative;
+    overflow: hidden;
+}
+
+.isb-panel-default .isb-panel-body{
+    passing-top:5px;
+}
+
+.isb-panel-body {
+    padding:15px;
+}
