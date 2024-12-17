@@ -1,0 +1,213 @@
+.isb-panel {
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: none;
+  border-radius: 2px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); }
+
+.isb-panel-body {
+  padding: 15px; }
+  .panel-body:before, .panel-body:after {
+    content: " ";
+    display: table; }
+  .panel-body:after {
+    clear: both; }
+
+.isb-panel-heading {
+  padding: 10px 15px;
+  border-bottom: 1px solid transparent;
+  border-top-right-radius: 1px;
+  border-top-left-radius: 1px; }
+  .panel-heading > .dropdown .dropdown-toggle {
+    color: inherit; }
+
+.isb-panel-title {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 16px;
+  color: inherit; }
+  .panel-title > a,
+  .panel-title > small,
+  .panel-title > .small,
+  .panel-title > small > a,
+  .panel-title > .small > a {
+    color: inherit; }
+
+.isb-panel-footer {
+  padding: 10px 15px;
+  background-color: #fff;
+  border-top: 1px solid transparent;
+  border-bottom-right-radius: 1px;
+  border-bottom-left-radius: 1px; }
+
+
+.alert-dismissable .close, .alert-dismissible .close {
+    position: relative;
+    top: -2px;
+    right: -21px;
+    color: inherit;
+}
+
+button.close {
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    -webkit-appearance: none;
+}
+
+.close {
+    float: right;
+    font-size: 21px;
+    font-weight: bold;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.2;
+    filter: alpha(opacity = 20);
+}
+
+.btn.btn-info{
+
+    color: #fff;
+    background-color: #2B7388;
+    border-color: #2B7388;
+
+}
+
+.nav > li > a {
+
+    #padding-bottom: 10px;
+    padding-top: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.nav-tabs{
+    border-bottom-width: 0px!important;
+    border-bottom-style: none!important;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+.nav-tabs > li{
+    border-bottom-width: 0px!important;
+    border-bottom-style: none!important;
+
+}
+
+.nav-tabs > li > a {
+    text-decoration:none!important;
+    border-bottom-width: 0px!important;
+    border-bottom-style: none!important;
+    display: block!important;
+
+}
+
+.nav-tabs > li > a:after {
+    content: '';
+    height: 2px;
+    background: #F7991B;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    bottom: -10px!important;
+    transform: scale(0);
+}
+
+.nav-tabs > li > a.active {
+    transform: scale(1);
+    transform-origin: left;
+    transition: transform 0.25s ease-in-out;
+}
+ #cohort-filelist .nav-tabs > li > a.active {
+     color: #a66206 !important;
+ }
+
+.isb-panel, .site-header{
+    background-color:white!important;
+
+}
+
+.isb-panel-default .isb-panel-heading{
+        color: #2A537A;
+
+}
+
+.container{
+    padding-left:0px!important;
+    padding-right:0px!important;
+}
+body {
+    background-color:#F8F8F8!important;
+}
+
+ .modal-header{
+    justify-content:space-between;
+}
+
+ #landing .isb-panel-heading {
+         padding: 5px 10px;
+    min-height: 103px;
+ }
+
+ #landing .isb-panel-footer{
+
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 10px;
+    width: calc(100% - 20px);
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+   }
+
+ #landing .isb-panel {
+     margin-left: auto;
+     margin-right: auto;
+     border-radius: 10px;
+     max-width: 400px;
+     min-width: 250px;
+     box-shadow: none;
+     border-width: 1px;
+     border-style: solid;
+     font-size: 16px;
+     padding: 10px;
+     position: relative;
+     flex-direction: column;
+     align-items: stretch;
+     display: flex
+ }
+
+
+ #landing .isb-panel-body {
+    padding: 5px 10px;
+    margin-bottom: 70px;
+    min-height: 180px;
+}
+ #landing .isb-panel-footer {
+     position: absolute;
+     bottom: 15px;
+
+ }
+
+ /* #needed for bs3-> b5 migration. Avoid extra margins on a row in a row */
+ .row-in-row{
+     margin-left:0px!important;
+     margin-right:0px!important;
+ }
+
+ #cohort-details #placeholder .isb-panel-body, #cohort-filelist #placeholder .isb-panel-body {
+    height: 210px;
+    position: relative;
+    overflow: hidden;
+}
+
+.isb-panel-default .isb-panel-body{
+    passing-top:5px;
+}
+
+.isb-panel-body {
+    padding:15px;
+}

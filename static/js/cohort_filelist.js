@@ -141,7 +141,7 @@ require([
                 }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
                 // Don't re-add the token and filter if it already exists
-                if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+                if($(selFilterPanel+' .isb-panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
                     token.append(
                         $('<a>').addClass('delete-x filter-label label label-default')
                             .text(tokenFeatDisplName + ': ' + tokenValDisplName)
@@ -153,7 +153,7 @@ require([
                         'select-filters-item': token.clone(true)
                     });
 
-                    $(selFilterPanel + ' .panel-body').append($this.data('select-filters-item'));
+                    $(selFilterPanel + ' .isb-panel-body').append($this.data('select-filters-item'));
                 }
             } else {
                 $(selFilterPanel+' span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').remove();
@@ -172,7 +172,7 @@ require([
     $('.data-tab-content').on('click', '.clear-filters', function() {
         let activeDataTab = $('.data-tab.active').data('file-type');
 
-        $(this).parents('.selected-filters-'+activeDataTab).find('.panel-body').empty();
+        $(this).parents('.selected-filters-'+activeDataTab).find('.isb-panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
@@ -276,7 +276,8 @@ require([
     };
 
     // Detect tab change and load the panel
-    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+
+     $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         browser_tab_load(cohort_id);
     });
     $('a[data-bs-toggle="tab"]').on('click', function (e) {
@@ -415,7 +416,7 @@ require([
 
         $(tab_selector).find('.prev-page').addClass('disabled');
         $(tab_selector).find('.next-page').addClass('disabled');
-        $(tab_selector).find('.filelist-panel .spinner i').removeClass('hidden');
+        $(tab_selector).find('.filelist-panel .spinner i').removeClass('d-none');
 
         $.ajax({
             url: url,
@@ -427,7 +428,7 @@ require([
             },
             error: function(e) {
                 console.log(e);
-                $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
+                $(tab_selector).find('.filelist-panel .spinner i').addClass('d-none');
             }
         });
 
@@ -470,8 +471,8 @@ require([
             $(tab_selector).find('.sortable_table th').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
-            $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-            $(tab_selector).find('.filelist-panel .panel-body .paginate_button_space').html(html_page_button);
+            $(tab_selector).find('.filelist-panel .isb-panel-body .total-file-count').html(total_files.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+            $(tab_selector).find('.filelist-panel .isb-panel-body .paginate_button_space').html(html_page_button);
         }
 
         $(tab_selector).find('.filelist-panel table tbody').empty();
@@ -613,7 +614,7 @@ require([
         if (parseInt(page) * files_per_page >= total_files) {
             $(tab_selector).find('.next-page').addClass('disabled');
         }
-        $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
+        $(tab_selector).find('.filelist-panel .spinner i').addClass('d-none');
     }
 
     function goto_table_page(tab, page_no){
@@ -688,7 +689,7 @@ require([
         active_file_panel.toggleClass('col-lg-9 col-md-9 col-sm-9');
         active_file_panel.toggleClass('col-lg-12 col-md-12 col-sm-12');
         $(this).toggleClass('open');
-        active_file_panel.prev('.side-filter-panel').toggleClass('hidden');
+        active_file_panel.prev('.side-filter-panel').toggleClass('d-none');
     });
 
     //toggle column display
@@ -822,7 +823,7 @@ require([
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
             }
             UPDATE_PENDING = true;
-            $('#'+active_tab+'-files').find('.filelist-panel .spinner i').removeClass('hidden');
+            $('#'+active_tab+'-files').find('.filelist-panel .spinner i').removeClass('d-none');
             $.ajax({
                 type: 'GET',
                 url: url,

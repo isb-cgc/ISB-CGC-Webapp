@@ -1,48 +1,59 @@
 {# Public Data Set Filter Template #}
 {% with prog_nodes=node_case_attr|get_nodes_string %}
-<div id="{{ program.id }}-data" node-id="{{ node_id }}" class="tab-pane data-tab" role="tabpanel"
-    data-prog-nodes="{{ prog_nodes }}">
+<div id="{{ program.id }}-data" node-id="{{ node_id }}" class="tab-pane data-tab " role="tabpanel"
+    data-prog-nodes="{{ prog_nodes }}" >
 {% endwith %}
+    <div class="row row-in-row" >
     <div class="col-lg-3 " role="tabpanel">
         <div>
             <!-- Filter Panel -->
-            <div id="{{ program.id }}-data-filter-panel" class="panel panel-default filter-panel"
+            <div id="{{ program.id }}-data-filter-panel" class="isb-panel isb-panel-default filter-panel"
                  role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}
                  data-prog-id="{{ program.id }}" data-node-id="{{ node_id }}" data-prog-displ-name="{{ program.name }}">
-                <div class="panel-heading clearfix">
-                    <h4 class="panel-title pull-left">Select Filters</h4>
+                <div class="isb-panel-heading clearfix">
+                    <h4 class="isb-panel-title pull-left">Select Filters</h4>
                 </div>
+               <div class="isb-panel-body">
                 <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
                 <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                    <li role="presentation" class="filter-tab"><a href="#case-filters-{{ program.id }}" role="tab" class="active" aria-selected="true" data-bs-toggle="tab" title="Case Filters">Case</a></li>
+                   <li role="presentation" class="filter-tab"> <a href="#case-filters-{{ program.id }}" role="tab"  class="active" aria-selected="true" data-bs-toggle="tab" title="Case Filters">Case</a></li>
+
                     <li role="presentation" class="filter-tab {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}"  role="tab" aria-selected="false" data-bs-toggle="tab" title="Data Type Filters">Data</a></li>
+
                     <li role="presentation" class="filter-tab {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters" href="#p-{{ program.id }}-molecular-filters" role="tab" aria-selected="false" data-bs-toggle="tab" title="Molecular Filters">Molec.</a></li>
                 </ul>
                 <div class="tab-content">
-                    <!-- case filters tab -->
+
+                     <!-- case filters tab -->
                     <div role="tabpanel" class="tab-pane active" id="case-filters-{{ program.id }}">
+
                         <ul class="list-group" id="case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                             {% for node, case_attr in node_case_attr|sort_nodes %}
+
                             <li class="list-group-item">
-                                <div id="{{ node }}-{{ program.id }}-case-heading" class="list-group-item__heading collapse in node-filter-heading">
-                                    <a role="button" data-bs-toggle="collapse" href="#{{ node }}-{{ program.id }}-case" aria-expanded="false"
-                                       aria-controls="{{ node }}-{{ program.id }}-case"
-                                    >
+
+                                <div id="{{ node }}-{{ program.id }}-case-heading" class="list-group-item__heading in node-filter-heading">
+                                    <a role="button" class="text-decoration-none" data-bs-toggle="collapse" href="#{{ node }}-{{ program.id }}-case" aria-expanded="false"
+                                       aria-controls="{{ node }}-{{ program.id }}-case">
                                         <i class="fa fa-solid fa-caret-right"></i><i class="fa fa-solid fa-caret-down"></i>{{ node }}
                                     </a>
                                 </div>
+
                                 <div id="{{ node }}-{{ program.id }}-case" class="list-group-item__body collapse" aria-expanded="false">
                                     <ul class="list-group values" id="{{ node }}-case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                                         {% for attr in case_attr|get_sorted_items %}
-                                            {% if not attr.name|attr_is_hidden and attr_counts|list_contains_name:attr.name %}
+
+
+                                        {% if not attr.name|attr_is_hidden and attr_counts|list_contains_name:attr.name %}
                                                 <li class="list-group-item">
-                                        <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
-                                            <a role="button" data-bs-toggle="collapse" data-parent="#case-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}"
-                                               aria-expanded="false" aria-controls="collapse-{{ attr.name }}"
-                                            >
+
+                                                    <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
+                                            <a role="button" class="text-decoration-none" data-bs-toggle="collapse" data-parent="#case-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}"
+                                               aria-expanded="false" aria-controls="collapse-{{ attr.name }}">
                                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }} {% if attr.units is not None %}({{ attr.units }}){% endif %}
                                             </a>
                                         </div>
+
                                         <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
                                              aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
                                              data-feature-id="{{ attr.id }}"
@@ -70,23 +81,30 @@
                                                 {% endwith %}
                                             </ul>
                                         </div>
+
                                     </li>
                                             {% endif %}
+
                                         {% endfor %}
                                     </ul>
                                 </div>
+
+
                             </li>
                             {% endfor %}
+
                         </ul>
+
                     </div>
-    {#              <!-- data filters tab -->#}
-                    <div role="tabpanel" class="tab-pane" id="data-filters-{{ program.id }}">
+
+                   <!-- data filters tab -->
+                   <div role="tabpanel" class="tab-pane" id="data-filters-{{ program.id }}">
                         <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
                             {% for attr in data_types|get_sorted_items %}
                                 {% if attr_counts|list_contains_name:attr.name %}
                                         <li class="list-group-item">
                                     <div class="list-group-item__heading" role="tab" id="{{ program.id }}-heading-{{ attr.name }}">
-                                        <a role="button" data-bs-toggle="collapse" data-bs-parent="#data-type-accordion" href="#{{ program.id }}-collapse-{{ attr.name }}"
+                                        <a role="button" class="text-decoration-none" data-bs-toggle="collapse" data-bs-parent="#data-type-accordion" href="#{{ program.id }}-collapse-{{ attr.name }}"
                                            aria-expanded="false" aria-controls="collapse-{{ attr.name }}" {% if 'mRNA' in attr.name or 'miRNA' in attr.name %}style="text-transform:none!important"{% endif %}>
                                             <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name|check_special_casing }}
                                         </a>
@@ -120,7 +138,9 @@
                             {% endfor %}
                         </ul>
                     </div>
-    {#                <!-- molecular filters tab -->#}
+
+
+                      <!-- molecular filters tab -->
                     {% if molecular_attr.keys|length > 0 %}
                     <div role="tabpanel" class="tab-pane" id="p-{{ program.id }}-molecular-filters">
                         <ul class="list-group molecular-accordion" id="p-{{ program.id }}-molecular-accordion" role="tablist" aria-multiselectable="true">
@@ -143,7 +163,7 @@
                             </li>
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="p-{{ program.id }}-heading-gene-mutation-status">
-                                    <a class="collapse-gene-mutation-status" role="button" data-bs-toggle="collapse" data-bs-parent="#data-type-accordion" href="#p-{{ program.id }}-collapse-gene-mutation-status" aria-expanded="false" aria-controls="collapse-gene-mutation-status">
+                                    <a class="collapse-gene-mutation-status text-decoration-none" role="button" data-bs-toggle="collapse" data-bs-parent="#data-type-accordion" href="#p-{{ program.id }}-collapse-gene-mutation-status" aria-expanded="false" aria-controls="collapse-gene-mutation-status">
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> GENE MUTATION STATUS
                                     </a>
                                 </div>
@@ -247,6 +267,7 @@
                     </div>
                     {% endif %}
                 </div>
+               </div>
             </div>
         </div>
     </div>
@@ -254,45 +275,49 @@
     <div class="col-lg-9 data-tab-content-panel">
         <!-- Selected Filters Panel -->
         {% if not cohort.id %}
-        <div class="selected-filters panel panel-default">
-            <div class="panel-heading clearfix">
-                <h4 class="panel-title pull-left">Selected Filters</h4>
-                <a class="pull-right clear-filters" role="button">Clear All</a>
+        <div class="selected-filters isb-panel isb-panel-default">
+            <div class="isb-panel-heading clearfix">
+                <h4 class="isb-panel-title pull-left">Selected Filters</h4>
+                <a class="pull-right clear-filters text-decoration-none" role="button">Clear All</a>
             </div>
-            <div class="panel-body"></div>
+            <div class="isb-panel-body"></div>
         </div>
         {% endif %}
 
         <!-- Program Details Panel -->
-        <div class="cohort-info panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">{{ program.name }} Details</h4>
+        <div class="cohort-info isb-panel isb-panel-default">
+            <div class="isb-panel-heading">
+                <h4 class="isb-panel-title">{{ program.name }} Details</h4>
             </div>
-            <div class="panel-body">
-                <div class="row col-md-6">
+            <div class="isb-panel-body">
+                <div class="row">
+                <div class="col-md-6">
                     <span class="detail-label">Total Number of Cases:</span>
                     <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                     <span class="total-values total-cases" data-prog-id="{{ program.id }}" id="p-{{ program.id }}-data-total-participants">{{ metadata_counts.cases|format_num_with_commmas }}</span>
                 </div>
-                <div class="row col-md-6">
+                <div class="col-md-6">
                     <span class="detail-label">Total Number of Samples:</span>
                     <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                     <span class="total-values total-samples" id="p-{{ program.id }}-data-total-samples">{{ metadata_counts.samples|format_num_with_commmas }}</span>
                 </div>
             </div>
+            </div>
         </div>
 
         <!-- Clinical Features Treemap Panel -->
-        <div class="case-trees panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">{{ program.name }} Clinical Features</h4>
+        <div class="case-trees isb-panel isb-panel-default">
+            <div class="isb-panel-heading">
+                <h4 class="isb-panel-title">{{ program.name }} Clinical Features</h4>
             </div>
-            <div class="panel-body">
+            <div class="isb-panel-body">
                 <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="tree-graph-case-{{ program.id }}" class="tree-graph-case"></div>
             </div>
         </div>
     </div>
+    </div>
+
 </div>
 <script type="text/javascript">
     var total_samples = {{ total_samples|safe }};
