@@ -311,7 +311,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel, addingToCart,studymp,updateSource){
-        $('.spinner').show();
         var curInd = window.cartHist.length - 1;
         var curPageid= window.cartHist[curInd]['pageid'];
         var selections = window.cartHist[curInd]['selections'];
@@ -340,25 +339,28 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
 
         var projid = newSel['sel'][0];
-        updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource);
+        updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource).then(function(){
+            $('.shopping-cart-holder').trigger('shopping-cart:update-complete');
+        });
     }
 
     const updateCartAndCartMetrics = function(addingToCart,projid,studymp,updateSource){
+        let deferred = $.Deferred();
         if (updateSource == 'project' && addingToCart){
             updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries'], 0, window.selProjects[projid]['mxstudies'] ).then(function(){
-                $('.spinner').show();
                 updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
                 updateTableCountsAndGlobalCartCounts();
-                $('.spinner').hide();
+                deferred.resolve();
             })
         } else if (updateSource == "cartPg"){
             updateGlobalCart(addingToCart, studymp, 'series');
+            deferred.resolve();
         } else {
-            $('.spinner').show();
             updateGlobalCart(addingToCart, studymp, updateSource);
             updateTableCountsAndGlobalCartCounts();
-            $('.spinner').hide();
+            deferred.resolve();
         }
+        return deferred.promise();
     }
 
     //was used to track cart across mutiple tabs or page refresh. Its too slow!

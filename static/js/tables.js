@@ -77,6 +77,23 @@ require([
 
 define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils, filterutils, tippy, $, base) {
 
+    $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('preInit.dt', function(){
+        $('.spinner').show();
+    });
+
+    $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('draw.dt', function(){
+        $('.spinner').hide();
+    });
+
+    $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('shopping-cart:update-started', '.shopping-cart-holder', function(){
+        $('.spinner').show();
+    });
+
+    $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('shopping-cart:update-complete', '.shopping-cart-holder', function(){
+        $('.spinner').hide();
+    });
+
+
     // Update the rows in the Projects Table, clear the other tables.
     window.updateTablesAfterFilter = function (collFilt, collectionsData, collectionStats){
         var usedCollectionData = new Array();
@@ -87,15 +104,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             var projId=cRow[0];
             if ( (projId in collectionsData) && (!hasColl || (collFilt.indexOf(projId)>-1)) ){
                 cRow[3] = collectionsData[projId]['count'];
-            }
-            else {
+            } else {
                cRow[3] = 0;
             }
 
             if (cRow[3]>0) {
                 usedCollectionData.push(cRow);
             }
-
         }
 
         for (projid in window.selProjects) {
@@ -113,10 +128,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     delete(window.selProjects[projid].selCases[caseid].selStudies[studyid]['state']['view']);
                     }
                 }
-
-
             }
-
         }
 
         updateProjectTable(usedCollectionData,collectionStats);
@@ -126,7 +138,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $('#series_tab').DataTable().destroy();
         var rmSelCases=[];
         updateCaseTable(false, false, true, [true,true], rmSelCases,'',-1, -1);
-
     }
 
     // initialize cases, studies, and series cache data
@@ -163,8 +174,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var updateNeeded = true;
         if (request.draw ===1){
             updateNeeded = true;
-        }
-        else {
+        } else {
             if (type === 'cases') {
                 cache = window.casesCache;
             } else if (type === 'studies') {
@@ -176,15 +186,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             if ((cache.lastRequest.order[0]['column'] === request.order[0]['column']) && (cache.lastRequest.order[0]['dir'] === request.order[0]['dir'])) {
                 if ( (cache.backendReqStrt<=request.start) && ( (cache.backendReqStrt+cache.backendReqLength) >= (request.start+request.length)  )){
                     updateNeeded=false;
-                }
-                else {
+                } else {
                     updateNeeded = true;
                 }
             } else if (cache.cacheLength===cache.recordsTotal){
                 updateNeeded = false;
                 reorderNeeded=true;
-            }
-            else {
+            } else {
                 updateNeeded = true;
             }
         }
@@ -200,7 +208,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         cache.recordsTotal = data['cnt'];
         cache.data = data['res'];
         cache.colOrder = colOrder;
-
     }
 
     // reorder cache data
@@ -209,8 +216,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             var cmp=0;
             if (isNum){
                 cmp=parseFloat(a[col])- parseFloat(b[col]);
-            }
-            else {
+            } else {
                 cmp=(a[col]>b[col] ? 1 :  a[col]==b[col]? 0: -1)
             }
 
@@ -221,11 +227,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             if ((cmp === 0) && hasAux){
                 if (auxIsNum){
                     cmp=parseFloat(a[auxCol])- parseFloat(b[auxCol]);
-                }
-                else {
+                } else {
                     cmp=(a[auxCol]>b[auxCol] ? 1 :  a[auxCol]==b[auxCol]? 0: -1)
                 }
-
             }
             if (cmp==0){
                 cmp=1;
@@ -247,15 +251,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             auxColId = parseInt($(thead.children('tr').children().get(colId)).data('auxid'));
             auxCol = cache.colOrder[auxColId]
             auxIsNum = ( $(thead.children('tr').children().get(auxColId)).hasClass('numeric_data') ? true: false);
-        }
-        else {
+        } else {
             auxColId=-1
             auxCol=''
             auxIsNum= false;
         }
-
          cache.data.sort((a,b)=> compCols(a,b,col,dir,isNum,hasAux,auxCol,auxIsNum))
-
     }
 
     // classes for project(collection) table columns
@@ -281,10 +282,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     '<i class="fa fa-solid fa-caret-down is-hidden"></i></a>'
             }
        },
-        createdCell: function(td) {
-            $(td).attr("title", "Display cases in this collection below.");
-            $(td).addClass('expansion-toggle');
-        }
+            createdCell: function(td) {
+                $(td).attr("title", "Display cases in this collection below.");
+                $(td).addClass('expansion-toggle');
+                if ($(td).find('.fa-caret-right.is-hidden').length > 0) {
+                    $(td).addClass('open');
+                }
+            }
         };
 
         var cart_col = {"type": "html", "orderable": false, render: function () {
@@ -385,6 +389,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         } else if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
                         } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
+                            $('.shopping-cart-holder').trigger('shopping-cart:update-started');
                             clickProjectTableShopping(event, row, data)
                         } else {
                             let toggle_elem = $(row).find('.expansion-toggle')[0]
@@ -411,7 +416,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $('#projects_table_head').find('th').each(function() {
             this.style.width = null;
         });
-
     }
 
     // initialize data structuers used to track which projects(collections) have items added to the cart,
@@ -520,7 +524,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     //process a click of a project(collection) table cart button row.
     // Calls updateProjStudyMp to update relevant studymps.
     const clickProjectTableShopping = function(event, row, data){
-        $('.spinner').show();
         var oldCount = parseInt($(row).find('.cartnum').text());
         var elem = event.target;
         if ($(elem).hasClass('ckbx')){
@@ -648,6 +651,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             createdCell: function(td) {
                 $(td).attr("title", "Display studies in this case below.");
                 $(td).addClass('expansion-toggle');
+                if ($(td).find('.fa-caret-right.is-hidden').length > 0) {
+                    $(td).addClass('open');
+                }
             }
         };
 
@@ -762,19 +768,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                          if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
                         } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
-                            $('.spinner').show();
+                             $('.shopping-cart-holder').trigger('shopping-cart:update-started');
                            var elem = event.target;
                            if ($(elem).hasClass('ckbx')){
                             elem=$(elem).find('.shopping-cart')[0];
                            }
-                           var addingToCart;
-                           if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
-                            // cart is clear
-                            addingToCart = true;
-                           } else {
-                            //cart is green or yellow. pressing deletes
-                              addingToCart= false;
-                          }
+                           var addingToCart = ('extraInFilt' in window.selProjects[projid].selCases[caseid]) ? true : false;
 
                           var newSel = new Object();
                           newSel['added'] = addingToCart;
@@ -788,7 +787,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                            if (rowsAdded){
                                $(row).find('.fa-caret-down').removeClass('is-hidden');
                                $(row).find('.fa-caret-right').addClass('is-hidden');
-                           } else{
+                           } else {
                               $(row).find('.fa-caret-down').addClass('is-hidden');
                               $(row).find('.fa-caret-right').removeClass('is-hidden');
                            }
@@ -1150,6 +1149,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         }
 
                         else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
+                            $('.shopping-cart-holder').trigger('shopping-cart:update-started');
                             var elem = event.target;
                            if ($(elem).hasClass('ckbx')) {
                             elem=$(elem).find('.shopping-cart')[0];
@@ -1189,7 +1189,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         updateCasesOrStudiesViewSelection([$(row)], 'studies', rowsAdded)
                         }
                     });
-
                 },
                 "columnDefs": [
                     {className: "ckbx seriesview", "targets": [0]},
@@ -1226,6 +1225,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         createdCell: function(td) {
                             $(td).attr("title", "Display series in this study below.");
                             $(td).addClass('expansion-toggle');
+                            if ($(td).find('.fa-caret-right.is-hidden').length > 0) {
+                                $(td).addClass('open');
+                            }
                         }
                     },
                    {
@@ -1772,13 +1774,11 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $('#series_tab').children('tbody').attr('id','series_table');
         $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'series_tab_wrapper\')">Go</button></div>');
         $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Series Instance UID:</strong><input class="seriesID_inp" type="text-box" value="'+seriesID+'"><button onclick="filterTable(\'series_tab_wrapper\',\'seriesID\')">Go</button></div>');
-
     }
     const initSeriesData =function(projid, caseid, studyid, seriesid){
         window.selProjects[projid].selCases[caseid].selStudies[studyid].selSeries[seriesid] = new Object();
         window.selProjects[projid].selCases[caseid].selStudies[studyid].selSeries[seriesid]['state'] = new Object();
         window.selProjects[projid].selCases[caseid].selStudies[studyid].selSeries[seriesid]['state']['incart']=false;
-
     }
 
 
@@ -1919,7 +1919,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     // update the cartnums, classes on the cart columns of all rows of all tables
     window.updateTableCounts = function() {
-
         $('#proj_table').DataTable().rows().every(function() {
               var row = this.node();
               var projid = $(row).attr('data-projectid')
@@ -1999,7 +1998,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
               }
            });
 
-
         for (studyid in window.glblcart){
             var seriesMissing = false;
             var cnt=0;
@@ -2066,12 +2064,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                    if (nval.toString()=='NaN'){
                        alert('her');
                    }
-
                });
-
             }
         }
-
 
     }
     const updateStudyRowCount= function(row){
