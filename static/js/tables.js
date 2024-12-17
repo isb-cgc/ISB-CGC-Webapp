@@ -379,27 +379,19 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     }
 
                     $(row).on('click', function(event) {
-                        var elem = event.target;
+                        let elem = event.target;
                         if ($(elem).hasClass('collection_info')) {
                             displayInfo($(elem));
-                        }
-                        else if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
+                        } else if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
-                        }
-
-                        else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
+                        } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
                             clickProjectTableShopping(event, row, data)
-                        }
-
-                        // click anywhere else open the cases table
-                        else {
-                            var toggle_elem = $(row).find('.expansion-toggle')[0]
+                        } else {
+                            let toggle_elem = $(row).find('.expansion-toggle')[0]
                             $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
                             updateProjectViewSelection([$(row)]);
-
                         }
                     });
-
 
                      $(row).find('.collection_info').on("mouseenter", function(e){
                         $(e.target).addClass('fa-lg');
@@ -769,9 +761,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         var elem = event.target;
                          if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
-                        }
-
-                        else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
+                        } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
                             $('.spinner').show();
                            var elem = event.target;
                            if ($(elem).hasClass('ckbx')){
@@ -781,7 +771,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                            if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
                             // cart is clear
                             addingToCart = true;
-
                            } else {
                             //cart is green or yellow. pressing deletes
                               addingToCart= false;
@@ -791,27 +780,21 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                           newSel['added'] = addingToCart;
                           newSel['sel'] = [projid, caseid];
                           cartutils.updateCartSelections(newSel, addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case');
-
-                        }
-
-                        // click anywhere else open the studies table
-                        else {
-                            var toggle_elem = $(row).find('.expansion-toggle')[0]
+                        } else {
+                             var toggle_elem = $(row).find('.expansion-toggle')[0]
                              var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
-                           $(toggle_elem).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
+                             console.debug("Has open class: "+$(toggle_elem).hasClass('open'))
+                             $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
                            if (rowsAdded){
                                $(row).find('.fa-caret-down').removeClass('is-hidden');
                                $(row).find('.fa-caret-right').addClass('is-hidden');
-                           }
-                           else{
+                           } else{
                               $(row).find('.fa-caret-down').addClass('is-hidden');
                               $(row).find('.fa-caret-right').removeClass('is-hidden');
                            }
                         updateCasesOrStudiesViewSelection([$(row)], 'cases', rowsAdded)
                         }
                     });
-
-
                 },
                 "columnDefs": [...caseTableColDefs()],
                 "columns": [...caseTableColumns()],
@@ -1194,7 +1177,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         else {
                             var toggle_elem = $(row).find('.expansion-toggle')[0]
                              var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
-                           $(toggle_elem).hasClass('open') ? $(this).removeClass('open') : $(this).addClass('open');
+                           $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
                            if (rowsAdded){
                                $(row).find('.fa-caret-down').removeClass('is-hidden');
                                $(row).find('.fa-caret-right').addClass('is-hidden');
