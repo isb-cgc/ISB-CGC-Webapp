@@ -65,14 +65,6 @@ require([
 
 ], function (image_search, tables,$, tippy, base) {
 
-    $(document).ajaxStart(function(){
-        $('.spinner').show();
-    });
-
-    $(document).ajaxStop(function(){
-        $('.spinner').hide();
-    });
-
     window.selProjects= new Object();
     window.glblcart = new Object();
     window.partitions= new Array();
