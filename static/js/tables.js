@@ -77,14 +77,16 @@ require([
 
 define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils, filterutils, tippy, $, base) {
 
-    $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('preInit.dt', function(){
+    // TODO: adjust these to have specific table load visual
+    $('#proj_table, #cases_tab, #studies_tab, #series_tab, #cart-table').on('preInit.dt', function(){
         $('.spinner').show();
     });
 
-    $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('draw.dt', function(){
+    $('#proj_table, #cases_tab, #studies_tab, #series_tab, #cart-table').on('draw.dt', function(){
         $('.spinner').hide();
     });
 
+    // TODO: Adjust these to indicate cart update
     $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('shopping-cart:update-started', '.shopping-cart-holder', function(){
         $('.spinner').show();
     });
