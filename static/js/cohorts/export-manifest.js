@@ -180,9 +180,9 @@ require([
 
     var reset_after_cart = function(){
         $('#export-manifest-modal').find('input[name="from_cart"]').remove();
-      $('#export-manifest-modal').find('input[name="partitions"]').remove();
-      $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
-      $('.modal-title').text('Export Manifest');
+        $('#export-manifest-modal').find('input[name="partitions"]').remove();
+        $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
+        $('.modal-title').text('Export Manifest');
     }
 
     $('#export-manifest-modal').on('hidden.bs.modal', function() {
@@ -285,6 +285,7 @@ require([
         }
 
         if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val() !== "True") {
+            console.debug($('#export-manifest-form').find('input[name="partitions"]').val());
             $('#export-manifest-form').trigger('submit');
         } else {
             $('#export-manifest').attr('disabled','disabled');

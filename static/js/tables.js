@@ -392,7 +392,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
                         } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
                             $(row).find('.shopping-cart-holder').trigger('shopping-cart:update-started');
-                            setTimeout(function(){ clickProjectTableShopping(event, row, data); }, 0);
+                            setTimeout(function(){ clickProjectTableShopping(event, row, data); }, 100);
                         } else {
                             let toggle_elem = $(row).find('.expansion-toggle')[0]
                             $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
@@ -777,7 +777,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 newSel['added'] = addingToCart;
                                 newSel['sel'] = [projid, caseid];
                                 cartutils.updateCartSelections(newSel, addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case', $(row).find('.shopping-cart-holder'));
-                            }, 0);
+                            }, 100);
                         } else {
                              var toggle_elem = $(row).find('.expansion-toggle')[0]
                              var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
@@ -789,7 +789,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                               $(row).find('.fa-caret-down').addClass('is-hidden');
                               $(row).find('.fa-caret-right').removeClass('is-hidden');
                            }
-                        updateCasesOrStudiesViewSelection([$(row)], 'cases', rowsAdded)
+                            updateCasesOrStudiesViewSelection([$(row)], 'cases', rowsAdded);
                         }
                     });
                 },
@@ -1166,7 +1166,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 newSel['added'] = addingToCart;
                                 newSel['sel'] = [projid, caseid, studyid];
                                 cartutils.updateCartSelections(newSel, addingToCart, mp, 'study', $(row).find('.shopping-cart-holder'));
-                            }, 0);
+                            }, 100);
                         } else {
                             var toggle_elem = $(row).find('.expansion-toggle')[0]
                              var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
@@ -1179,7 +1179,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                               $(row).find('.fa-caret-down').addClass('is-hidden');
                               $(row).find('.fa-caret-right').removeClass('is-hidden');
                            }
-                        updateCasesOrStudiesViewSelection([$(row)], 'studies', rowsAdded)
+                            updateCasesOrStudiesViewSelection([$(row)], 'studies', rowsAdded);
                         }
                     });
                 },
@@ -1536,7 +1536,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                            newSel['added'] = addingToCart;
                            newSel['sel'] = [collection_id, PatientID, studyid, seriesid];
                            cartutils.updateCartSelections(newSel,addingToCart, mp, 'series', $(row).find('.shopping-cart-holder'));
-                         }, 0);
+                         }, 100);
                     });
                  },
                 "columnDefs": [
