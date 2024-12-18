@@ -389,8 +389,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         } else if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
                         } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
-                            $('.shopping-cart-holder').trigger('shopping-cart:update-started');
-                            clickProjectTableShopping(event, row, data)
+                            $(row).find('.shopping-cart-holder').trigger('shopping-cart:update-started');
+                            setTimeout(function(){ clickProjectTableShopping(event, row, data); }, 0);
                         } else {
                             let toggle_elem = $(row).find('.expansion-toggle')[0]
                             $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
@@ -547,7 +547,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         newSel['added'] = addingToCart;
         newSel['sel'] = [projid]
         //window.cartHist[curInd]['selections'].push(newSel)
-        cartutils.updateCartSelections(newSel,addingToCart, window.selProjects[projid].studymp, 'project');
+        cartutils.updateCartSelections(newSel,addingToCart, window.selProjects[projid].studymp, 'project', $(row).find('.shopping-cart-holder'));
     }
 
     // defines the studymp for selected projects(collections). Also adds data to the window.casestudymp and window.studymp.
@@ -571,9 +571,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
-        console.time('ajax');
-        console.time('mp');
-        console.timeLog('ajax');
         $.ajax({
             url: url,
             dataType: 'json',
@@ -583,8 +580,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 try {
-                    console.timeEnd('ajax')
-                    console.timeLog('mp')
                     for (var i = 0; i < projidA.length; i++) {
                         projid = projidA[i];
                         if (!(projid in window.projstudymp)) {
@@ -768,21 +763,22 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                          if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
                         } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
-                             $('.shopping-cart-holder').trigger('shopping-cart:update-started');
-                           var elem = event.target;
-                           if ($(elem).hasClass('ckbx')){
-                            elem=$(elem).find('.shopping-cart')[0];
-                           }
-                           var addingToCart = ('extraInFilt' in window.selProjects[projid].selCases[caseid]) ? true : false;
+                            $(row).find('.shopping-cart-holder').trigger('shopping-cart:update-started');
+                            setTimeout(function() {
+                                var elem = event.target;
+                                if ($(elem).hasClass('ckbx')) {
+                                    elem = $(elem).find('.shopping-cart')[0];
+                                }
+                                var addingToCart = ('extraInFilt' in window.selProjects[projid].selCases[caseid]) ? true : false;
 
-                          var newSel = new Object();
-                          newSel['added'] = addingToCart;
-                          newSel['sel'] = [projid, caseid];
-                          cartutils.updateCartSelections(newSel, addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case');
+                                var newSel = new Object();
+                                newSel['added'] = addingToCart;
+                                newSel['sel'] = [projid, caseid];
+                                cartutils.updateCartSelections(newSel, addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case', $(row).find('.shopping-cart-holder'));
+                            }, 0);
                         } else {
                              var toggle_elem = $(row).find('.expansion-toggle')[0]
                              var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
-                             console.debug("Has open class: "+$(toggle_elem).hasClass('open'))
                              $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
                            if (rowsAdded){
                                $(row).find('.fa-caret-down').removeClass('is-hidden');
@@ -1140,41 +1136,36 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     }
                     $(row).find('.cartnum').html(cnt);
 
-
                     $(row).on('click', function(event) {
                         var elem = event.target;
 
                          if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
-                        }
+                        } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
+                            $(row).find('.shopping-cart-holder').trigger('shopping-cart:update-started');
+                            setTimeout(function(){
+                                var elem = event.target;
+                                if ($(elem).hasClass('ckbx')) {
+                                    elem=$(elem).find('.shopping-cart')[0];
+                                }
+                                var addingToCart;
+                                if ('extraInFilt' in window.selProjects[projid].selCases[caseid].selStudies[studyid]) {
+                                //more to add
+                                    addingToCart= true;
+                                } else {
+                                // no more to add
+                                    addingToCart = false;
+                               }
+                               var numSeries = window.selProjects[projid].selCases[caseid].selStudies[studyid].studymp[studyid]['cnt'];
+                               var mp = new Object();
+                               mp[studyid]=numSeries;
 
-                        else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
-                            $('.shopping-cart-holder').trigger('shopping-cart:update-started');
-                            var elem = event.target;
-                           if ($(elem).hasClass('ckbx')) {
-                            elem=$(elem).find('.shopping-cart')[0];
-                           }
-                          var addingToCart;
-                           if ('extraInFilt' in window.selProjects[projid].selCases[caseid].selStudies[studyid]) {
-                            //more to add
-                              addingToCart= true;
-                           } else {
-                            // no more to add
-                             addingToCart = false;
-                           }
-                           var numSeries = window.selProjects[projid].selCases[caseid].selStudies[studyid].studymp[studyid]['cnt'];
-                           var mp = new Object();
-                           mp[studyid]=numSeries;
-
-
-                          var newSel = new Object();
-                          newSel['added'] = addingToCart;
-                         newSel['sel'] = [projid, caseid, studyid];
-                          cartutils.updateCartSelections(newSel, addingToCart, mp, 'study');
-                        }
-
-                        // click anywhere else open the series table
-                        else {
+                                var newSel = new Object();
+                                newSel['added'] = addingToCart;
+                                newSel['sel'] = [projid, caseid, studyid];
+                                cartutils.updateCartSelections(newSel, addingToCart, mp, 'study', $(row).find('.shopping-cart-holder'));
+                            }, 0);
+                        } else {
                             var toggle_elem = $(row).find('.expansion-toggle')[0]
                              var rowsAdded= ($(row).find('.fa-caret-down.is-hidden').length>0 )?true:false;
                            $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
@@ -1522,25 +1513,28 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     updateSeriesRowCount(row);
 
                      $(row).find('.shopping-cart').parent().on('click', function(event){
-                        var elem = event.target;
-                        if ($(elem).hasClass('ckbx')){
-                            elem=$(elem).find('.shopping-cart')[0];
-                        }
-                        var addingToCart = true;
-                        if ($(elem).parentsUntil('tr').parent().hasClass('someInCart')) {
-                            addingToCart = false;
-                        } else {
-                            addingToCart = true;
-                        }
+                         $(row).find('.shopping-cart-holder').trigger('shopping-cart:update-started');
+                         setTimeout(function(){
+                            var elem = event.target;
+                            if ($(elem).hasClass('ckbx')){
+                                elem=$(elem).find('.shopping-cart')[0];
+                            }
+                            var addingToCart = true;
+                            if ($(elem).parentsUntil('tr').parent().hasClass('someInCart')) {
+                                addingToCart = false;
+                            } else {
+                                addingToCart = true;
+                            }
 
-                        mp = new Object();
-                        mp[studyid]=[seriesid];
+                            mp = new Object();
+                            mp[studyid]=[seriesid];
 
-                       //var curInd = window.cartHist.length - 1;
-                       var newSel = new Object();
-                       newSel['added'] = addingToCart;
-                       newSel['sel'] = [collection_id, PatientID, studyid, seriesid];
-                       cartutils.updateCartSelections(newSel,addingToCart, mp, 'series');
+                           //var curInd = window.cartHist.length - 1;
+                           var newSel = new Object();
+                           newSel['added'] = addingToCart;
+                           newSel['sel'] = [collection_id, PatientID, studyid, seriesid];
+                           cartutils.updateCartSelections(newSel,addingToCart, mp, 'series', $(row).find('.shopping-cart-holder'));
+                         }, 0);
                     });
                  },
                 "columnDefs": [
@@ -2067,7 +2061,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                });
             }
         }
-
     }
     const updateStudyRowCount= function(row){
         if ($(row).find('.cartnum').length > 0) {

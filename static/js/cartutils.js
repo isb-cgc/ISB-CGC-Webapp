@@ -179,7 +179,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     };
 
     // calculate the tot # of projects, cases, studies, and series in the cart
-    const getGlobalCounts= function(){
+    const getGlobalCounts = function(){
         tots=[0,0,0,0]
         for (projid in window.projstudymp){
             for (studyid in window.projstudymp[projid]){
@@ -239,7 +239,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
             success: function (data) {
-                console.log(" data received");
                 var dataset = data["docs"];
                 deferred.resolve(
                  {
@@ -310,7 +309,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     });
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
-    const updateCartSelections = function(newSel, addingToCart,studymp,updateSource){
+    const updateCartSelections = function(newSel, addingToCart,studymp,updateSource,completeObj){
         var curInd = window.cartHist.length - 1;
         var curPageid= window.cartHist[curInd]['pageid'];
         var selections = window.cartHist[curInd]['selections'];
@@ -340,7 +339,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
         var projid = newSel['sel'][0];
         updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource).then(function(){
-            $('.shopping-cart-holder').trigger('shopping-cart:update-complete');
+            completeObj && completeObj.trigger('shopping-cart:update-complete');
         });
     }
 
@@ -352,7 +351,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 updateTableCountsAndGlobalCartCounts();
                 deferred.resolve();
             })
-        } else if (updateSource == "cartPg"){
+        } else if (updateSource == "cartpage"){
             updateGlobalCart(addingToCart, studymp, 'series');
             deferred.resolve();
         } else {
