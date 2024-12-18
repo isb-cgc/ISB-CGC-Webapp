@@ -567,12 +567,15 @@ require([
         }
     }
 
-
     initSort = function(sortVal){
-        var sortdivs=$('body').find('.sorter')
-        for (div in sortdivs){
-            $(div).find(":input[value='" + sortVal + "']").click();
-        }
+        $('.spinner').show();
+        setTimeout(function(){
+            var sortdivs=$('body').find('.sorter');
+            for (div in sortdivs){
+                $(div).find(":input[value='" + sortVal + "']").click();
+            }
+            $('.spinner').hide();
+        }, 0);
     }
 
     updatecartedits = function(){
@@ -735,7 +738,6 @@ require([
                     +'&times;</span><span class="sr-only">Close</span></button>'
                 ).attr("style","display: none;")
         );
-
 
         initSort('num');
         if (document.contains(document.getElementById('history'))){

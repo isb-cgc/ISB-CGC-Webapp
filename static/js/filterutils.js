@@ -328,9 +328,7 @@ define(['jquery', 'base'], function($, base) {
                 updateFacetsData(true);
             }
         }
-
-
-
+        
         const updateCollectionTotals = function(listId, progDic){
         var reformDic = new Object();
         reformDic[listId] = new Object();
