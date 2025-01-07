@@ -113,7 +113,6 @@ require([
         $('#rh_panel').addClass('col-md-9');
     };
 
-
     window.updateFacetsData = function (newFilt) {
         var url = '/explore/'
         var parsedFiltObj = filterutils.parseFilterObj();
@@ -131,7 +130,7 @@ require([
         }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
-        $('.spinner').show();
+        window.show_spinner();
         $.ajax({
             url: url,
             data: ndic,
@@ -281,7 +280,7 @@ require([
                 console.log('error loading data');
             },
             complete: function() {
-                $('.spinner').hide();
+                window.hide_spinner();
             }
         });
         return deferred.promise();
@@ -568,13 +567,13 @@ require([
     }
 
     initSort = function(sortVal){
-        $('.spinner').show();
+        window.show_spinner();
         setTimeout(function(){
             var sortdivs=$('body').find('.sorter');
             for (div in sortdivs){
                 $(div).find(":input[value='" + sortVal + "']").click();
             }
-            $('.spinner').hide();
+            window.hide_spinner();
         }, 0);
     }
 

@@ -77,27 +77,33 @@ require([
 
 define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils, filterutils, tippy, $, base) {
 
-    // TODO: adjust these to have specific table load visual
     $('#proj_table, #cases_tab, #studies_tab, #series_tab, #cart-table').on('preInit.dt', function(){
-        $('.spinner').show();
+        window.show_spinner();
     });
 
     $('#proj_table, #cases_tab, #studies_tab, #series_tab, #cart-table').on('draw.dt', function(){
-        $('.spinner').hide();
+        window.hide_spinner();
     });
 
     // TODO: Adjust these to indicate cart update
     $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('shopping-cart:update-started', '.shopping-cart-holder', function(){
-        $('.spinner').show();
+        window.show_spinner();
     });
 
     $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('shopping-cart:update-complete', '.shopping-cart-holder', function(){
-        $('.spinner').hide();
+        window.hide_spinner();
     });
 
+    $(document).on('study-map:update-started', function(){
+        window.show_spinner();
+    });
+    $(document).on('study-map:update-complete', function(){
+        window.hide_spinner();
+    });
 
     // Update the rows in the Projects Table, clear the other tables.
     window.updateTablesAfterFilter = function (collFilt, collectionsData, collectionStats){
+        window.show_spinner();
         var usedCollectionData = new Array();
         rmCases = []
         var hasColl = collFilt.length>0 ? true : false;
@@ -140,6 +146,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $('#series_tab').DataTable().destroy();
         var rmSelCases=[];
         updateCaseTable(false, false, true, [true,true], rmSelCases,'',-1, -1);
+        window.hide_spinner();
     }
 
     // initialize cases, studies, and series cache data
@@ -502,25 +509,30 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             }
         });
 
+        let projStudyMapUpdate = $.Deferred();
         if (projUpdate.length>0){
             limit= mxstudies;
             offset = 0;
-            updateProjStudyMp(projUpdate, mxstudies, mxseries, offset, limit);
+            projStudyMapUpdate = updateProjStudyMp(projUpdate, mxstudies, mxseries, offset, limit);
+        } else {
+            projStudyMapUpdate.resolve();
         }
 
-        var caseID='';
-        if ($('#cases_panel').find('.caseID_inp').length>0){
-            caseID = $('#cases_panel').find('.caseID_inp').val().trim();
-        }
-        var viewProjects = getKeysByState(window.selProjects,'view');
-        mxseries = 0;
-        mxstudies = 0;
-        for (var i=0;i<viewProjects.length;i++){
-            projid=viewProjects[i];
-            mxseries=mxseries+window.selProjects[projid]['mxseries'];
-            mxstudies=mxstudies+window.selProjects[projid]['mxstudies'];
-        }
-        updateCaseTable(rowsAdded, rowsRemoved, false, purgeChildSelections,[],caseID, parseInt(mxstudies), parseInt(mxseries));
+        projStudyMapUpdate.then(function(){
+            var caseID='';
+            if ($('#cases_panel').find('.caseID_inp').length>0){
+                caseID = $('#cases_panel').find('.caseID_inp').val().trim();
+            }
+            var viewProjects = getKeysByState(window.selProjects,'view');
+            mxseries = 0;
+            mxstudies = 0;
+            for (var i=0;i<viewProjects.length;i++){
+                projid=viewProjects[i];
+                mxseries=mxseries+window.selProjects[projid]['mxseries'];
+                mxstudies=mxstudies+window.selProjects[projid]['mxstudies'];
+            }
+            updateCaseTable(rowsAdded, rowsRemoved, false, purgeChildSelections,[],caseID, parseInt(mxstudies), parseInt(mxseries));
+        });
     };
 
     //process a click of a project(collection) table cart button row.
@@ -556,6 +568,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     // Called when the user clicks a cart OR a chevron in the projects(collections) table
     window.updateProjStudyMp = function(projidA, mxStudies, mxSeries, offset, limit) {
         var curFilterObj = JSON.parse(JSON.stringify(filterutils.parseFilterObj()));
+        $(document).trigger('study-map:update-started');
         curFilterObj.collection_id = projidA;
         var filterStr = JSON.stringify(curFilterObj);
         let url = '/studymp/';
@@ -610,6 +623,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     alert("There was an error processing the server data. Please alert the systems administrator")
                 } finally {
                     deferred.resolve('studymp');
+                    $(document).trigger('study-map:update-complete');
                 }
             }, error: function () {
                 console.log("problem getting data");
