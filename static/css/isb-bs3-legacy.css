@@ -192,7 +192,6 @@ body {
 
  }
 
- /* #needed for bs3-> b5 migration. Avoid extra margins on a row in a row */
 
  #cohort-details #placeholder .isb-panel-body, #cohort-filelist #placeholder .isb-panel-body {
     height: 210px;
@@ -207,18 +206,6 @@ body {
 .isb-panel-body {
     padding:15px;
 }
-
-/* .row{
-	margin-left:-15px!important;
-	margin-right:-15px!important;
-}
-
-@media (min-width: 920px) {
-    .container {
-      width: 750px!important;
-      } }
-
-*/
 
 
 .widen-landing-page{
@@ -262,13 +249,6 @@ body {
     padding-left:15px!important;
     padding-right:15px!important;
 }
-/*
-.widen-content-view{
-    --bs-gutter-x: 1.5rem;
-     margin-right: calc(  (var(--bs-gutter-x) * -0.5))!important;
-     margin-left: calc(  (var(--bs-gutter-x) * -0.5))!important;
-}
-*/
 
 
 
