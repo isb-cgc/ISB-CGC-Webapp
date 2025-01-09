@@ -55,21 +55,6 @@ require([
 
     A11y.Core();
 
-    window.pending_count = 0;
-
-    window.show_spinner = function() {
-        window.pending_count += 1;
-        $('.spinner').show();
-    };
-
-    window.hide_spinner = function() {
-        window.pending_count -= 1;
-        if(window.pending_count <= 0) {
-            $('.spinner').hide();
-            window.pending_count = 0;
-        }
-    };
-
     // Menu toggle
 
     $('#subnav').on('hide.bs.collapse', function () {
@@ -247,6 +232,22 @@ require([
 
 // Return an object for consts/methods used by most views
 define(['jquery', 'utils'], function($, utils) {
+    window.pending_count = 0;
+
+    window.show_spinner = function() {
+        window.pending_count += 1;
+        $('.spinner').show();
+    };
+
+    window.hide_spinner = function() {
+        window.pending_count -= 1;
+        if(window.pending_count <= 0) {
+            $('.spinner').hide();
+            window.pending_count = 0;
+        }
+    };
+
+
     // Resets forms in modals on hide. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
         if(!$(this).prop("saving")) {
