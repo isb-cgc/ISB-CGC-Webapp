@@ -232,9 +232,9 @@ define(['jquery', 'base'], function($, base) {
                  // Re-enable checkboxes for export manifest dialog, unless not using social login
                  $('#export-manifest-modal input').removeAttr('disabled');
 
-                 $('input#hide-zeros').prop("disabled", "");
-                 $('input#hide-zeros').prop("checked", true);
-                 $('input#hide-zeros').each(function(){$(this).triggerHandler('change')});
+                 $('input.hide-zeros').prop("disabled", "");
+                 $('input.hide-zeros').prop("checked", true);
+                 $('input.hide-zeros').each(function(){$(this).triggerHandler('change')});
                  $('div.ui-slider').siblings('button').prop("disabled", true);
                  $('.noneBut').find('input:checkbox').prop("disabled",true);
              });
@@ -657,8 +657,8 @@ define(['jquery', 'base'], function($, base) {
 
 
     window.resetFilters = function(){
-        $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
-        $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
+        $('input:checkbox').not('.hide-zeros').not('.tbl-sel').prop('checked',false);
+        $('input:checkbox').not('.hide-zeros').not('.tbl-sel').prop('indeterminate',false);
         $('.ui-slider').each(function(){
             setSlider(this.id,true,0,0,true, false);
         })
@@ -980,7 +980,7 @@ define(['jquery', 'base'], function($, base) {
         var showZeros = true;
         var searchDomain = $('#'+filterCat).closest('.search-configuration, #program_set, #analysis_set');
 
-        if ((searchDomain.find('#hide-zeros').length>0) && (searchDomain.find('#hide-zeros').prop('checked'))){
+        if ((searchDomain.find('.hide-zeros').length>0) && (searchDomain.find('.hide-zeros').prop('checked'))){
             showZeros = false;
         }
         var textFilt=false;

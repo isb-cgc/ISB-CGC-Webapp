@@ -353,7 +353,7 @@ require([
            $(e.target).removeClass('fa-lg');
        });
 
-        $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function (e) {
+        $('#' + filterId).find('input:checkbox').not('.hide-zeros').on('click', function (e) {
             var targ=e.target;
             if ($(e.target).parent().find('.collection_info.fa-lg, .analysis_info.fa-lg').length>0){
                 $(targ).prop("checked",!$(targ).prop("checked"));
