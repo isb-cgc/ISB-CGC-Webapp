@@ -49,12 +49,20 @@
             <button class="btn btn-secondary float-end" data-bs-toggle="modal" data-bs-target="#create-cohort-modal"
                     title="Please select at least one filter." > Save As New Cohort
             </button>
+            <button class="btn btn-secondary float-end"
+                    title="Please select at least one filter." > Download Cohort
+            </button>
+
         {% else %}
             <button class="btn btn-secondary float-end" id="log-in-to-save-btn"
                     title="Please select at least one filter."
 {#                        onclick="location.href='{% url 'account_login' %}'"#}
                     disabled>Log In to Save New Cohort
             </button>
+            <button class="btn btn-secondary float-end"
+                    title="Please select at least one filter." > Download Cohort
+            </button>
+
         {% endif %}
      </div>
 
