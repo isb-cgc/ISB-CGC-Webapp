@@ -29,6 +29,5 @@ def additional_context(request):
             'FILE_SIZE_UPLOAD_MAX': settings.FILE_SIZE_UPLOAD_MAX,
             'CONTACT_EMAIL': settings.SERVER_EMAIL,
             'MITELMAN_URL': settings.MITELMAN_URL,
-            'TP53_URL': settings.TP53_URL,
             'BQ_SEARCH_URL': settings.BQ_SEARCH_URL
     }
