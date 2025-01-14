@@ -38,7 +38,7 @@
         {% endif %}
         <h3 class="page-header">Cancer Data File Browser
             {% if cohort %}
-                : <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
+                 <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
             {% endif %}
         </h3>
         <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
@@ -70,7 +70,7 @@
                     <div class="col-md-12 data-tab-content-panel spinner-panel">
                         <div class="panel isb-panel-default">
                             <div class="isb-panel-body">
-                                <div class="spinner"><i class="fa fa-spinner fa-spin d-none"></i></div>
+                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
                             </div>
                         </div>
                     </div>
