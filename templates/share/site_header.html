@@ -23,11 +23,9 @@
                                 Data Browsers
                             </a>
                         <div class="dropdown-menu dropdown-menu-left" aria-labelledby="db-dropdown">
-
                                 <a class="dropdown-item" href="{% url 'bq_meta_search' %}">BigQuery Table Search</a>
-
-                                <a class="dropdown-item" href="/cohorts/filelist/">Cancer Data File Browser</a>
-                                <a class="dropdown-item" href="https://mitelmandatabase.isb-cgc.org" target="_blank" rel="“noreferrer”">Chromosomal
+                                <a class="dropdown-item" href="{% url 'filelist' %}">Cancer Data File Browser</a>
+                                <a class="dropdown-item" href="{{ MITELMAN_URL }}" target="_blank" rel="noreferrer">Chromosomal
                                     Aberrations &amp; Gene Fusions DB</a>
                         </div>
                     </li>
@@ -44,17 +42,17 @@
                                 <div class="dropdown-divider"></div>
                                 <h6 class="dropdown-header">&nbsp;&nbsp;Notebook</h6>
 
-                                <a class="dropdown-item" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html" target="_blank" rel="“noreferrer”">Statistical
+                                <a class="dropdown-item" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html" target="_blank" rel="noreferrer">Statistical
                                 </a>
-                                <a class="dropdown-item" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html" target="_blank" rel="“noreferrer”">Community
+                                <a class="dropdown-item" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html" target="_blank" rel="noreferrer">Community
                                 </a>
-                                <a class="dropdown-item" href="https://github.com/isb-cgc/Community-Notebooks" target="_blank" rel="“noreferrer”">GitHub Repo
+                                <a class="dropdown-item" href="https://github.com/isb-cgc/Community-Notebooks" target="_blank" rel="noreferrer">GitHub Repo
                                 </a>
                             </div>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank" rel="“noreferrer”" >Documentation</a>
+                        <a class="nav-link" href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank" rel="noreferrer" >Documentation</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"  href="{% url 'about_page' %}">About</a>
@@ -67,14 +65,14 @@
                             <a role="button" class="dropdown-toggle nav-link" id="help-dropdown" data-bs-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">Help
                             </a>
                             <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="help-dropdown">
-                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html" target="_blank" rel="“noreferrer”" >How To Get Started<span class="visually-hidden"> opens a new tab</span></a></li>
-                                <li ><a class="nav-link"  href="{% url 'how_to_discover' %}" target="_blank" rel="“noreferrer”">How to Discover Cancer Data Through ISB-CGC<span class="visually-hidden"> opens a new tab</span></a></li>
-                                <li ><a class="nav-link"  href="{% url 'vid_tutorials' %}"  target="_blank" rel="“noreferrer”">Video
+                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html" target="_blank" rel="noreferrer" >How To Get Started<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li ><a class="nav-link"  href="{% url 'how_to_discover' %}" target="_blank" rel="noreferrer">How to Discover Cancer Data Through ISB-CGC<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li ><a class="nav-link"  href="{% url 'vid_tutorials' %}"  target="_blank" rel="noreferrer">Video
                                     Tutorials<span class="visually-hidden"> opens a new tab</span></a></li>
-                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#i-m-a-novice-how-do-i" target="_blank" rel="“noreferrer”" class="sr-set">Getting Started Notebooks<span class="visually-hidden"> opens a new tab</span></a></li>
-                                <li><a class="nav-link" href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new" target="_blank" rel="“noreferrer”" >Submit GitHub Issue<span class="visually-hidden"> opens a new tab</span></a></li>
-                                <li ><a class="nav-link" href="{% url 'contact_us' %}"  target="_blank" rel="“noreferrer”" class="visually-hidden">Contact Us<span class="visually-hidden"> opens a new tab</span></a></li>
-                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/office_hours.html" target="_blank" rel="“noreferrer”">ISB-CGC Office Hours<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#i-m-a-novice-how-do-i" target="_blank" rel="noreferrer" class="sr-set">Getting Started Notebooks<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li><a class="nav-link" href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new" target="_blank" rel="noreferrer" >Submit GitHub Issue<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li ><a class="nav-link" href="{% url 'contact_us' %}"  target="_blank" rel="noreferrer" class="visually-hidden">Contact Us<span class="visually-hidden"> opens a new tab</span></a></li>
+                                <li><a class="nav-link"  href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/office_hours.html" target="_blank" rel="noreferrer">ISB-CGC Office Hours<span class="visually-hidden"> opens a new tab</span></a></li>
                             </ul>
                     </li>
                      {% if user.is_authenticated %}
