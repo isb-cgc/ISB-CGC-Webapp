@@ -254,6 +254,58 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         });
         return deferred.promise();
     };
+    window.getCartDataStats = function(){
+        setCartHistWinFromLocal();
+        window.updatePartitionsFromScratch();
+        var ret =formcartdata();
+        window.partitions = ret[0];
+        window.filtergrp_lst = ret[1];
+        window.glblcart = new Object();
+
+        var projDone={}
+        var serieslim=1;
+        var studylim=1;
+        for (var j=0; j<window.partitions.length;j++){
+            var projid = window.partitions[j]['id'][0];
+            if (!(projid in projDone)){
+                projDone[projid]=1
+                var dataset = window.selProjects[projid]
+                serieslim+=parseInt(dataset.mxseries);
+                studylim+=parseInt(dataset.mxstudies);
+            }
+        }
+
+        let url = '/cart_data_stats/';
+        url = encodeURI(url);
+        var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
+        ndic['limit'] = studylim;
+
+        var parsedFiltObj = filterutils.parseFilterObj();
+        ndic['filters']=JSON.stringify(parsedFiltObj);
+
+        let csrftoken = $.getCookie('csrftoken');
+        let deferred = $.Deferred();
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            data: ndic,
+            type: 'post',
+            contentType: 'application/x-www-form-urlencoded',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                var k=1
+                deferred.resolve({});
+            },
+            error: function () {
+                console.log("problem getting data");
+                alert("There was an error fetching server data. Please alert the systems administrator");
+            }
+        });
+        return deferred.promise();
+    };
+
 
     const updateTableCountsAndGlobalCartCounts = function(){
         window.updateTableCounts();
@@ -347,6 +399,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         let deferred = $.Deferred();
         if (updateSource == 'project' && addingToCart){
             updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries'], 0, window.selProjects[projid]['mxstudies'] ).then(function(){
+
                 updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
                 updateTableCountsAndGlobalCartCounts();
                 deferred.resolve();

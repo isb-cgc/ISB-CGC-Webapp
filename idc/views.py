@@ -37,7 +37,7 @@ from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips, DataSetType
-from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data, get_cart_data_studylvl
+from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data, get_cart_and_filterset_stats, get_cart_data_studylvl
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
@@ -999,6 +999,41 @@ def cart_page(request):
         logger.exception(e)
 
     return render(request, 'collections/cart_list.html', context)
+
+
+def cart_data_stats(request):
+    status = 200
+    response = {}
+    field_list = ['collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID', 'aws_bucket']
+    try:
+
+        req = request.GET if request.GET else request.POST
+        current_filters = json.loads(req.get('filters', '{}'))
+        filtergrp_list = json.loads(req.get('filtergrp_list', '{}'))
+        aggregate_level = req.get('aggregate_level', 'StudyInstanceUID')
+        results_level = req.get('results_level', 'StudyInstanceUID')
+
+        partitions = json.loads(req.get('partitions', '{}'))
+
+        limit = int(req.get('limit', 1000))
+        offset = int(req.get('offset', 0))
+        length = int(req.get('length', 100))
+        mxseries = int(req.get('mxseries',1000))
+
+        response = get_cart_and_filterset_stats(current_filters,filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
+        '''if ((len(partitions)>0) and (aggregate_level == 'StudyInstanceUID')):
+            response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
+        elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
+            response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
+        else:
+            response['numFound'] = 0
+            response['docs'] = []'''
+    except Exception as e:
+        logger.error("[ERROR] While loading cart:")
+        logger.exception(e)
+        status = 400
+
+    return JsonResponse(response, status=status)
 
 
 def cart_data(request):
