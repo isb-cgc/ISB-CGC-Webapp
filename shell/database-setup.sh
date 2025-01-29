@@ -79,12 +79,16 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
 # python3 ${HOMEROOT}/manage.py makemigrations
 
+# TODO: Check for migrations table, if not found, migrate and add IPs
+
 # Now run migrations
 echo "Running Migrations..."
 python3 ${HOMEROOT}/manage.py migrate --noinput
 
 echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
+
+# TODO: check for metadata via record found of eg. attributes or projects, if not found, load
 
 # Load your SQL table file
 # Looks for cgc_metadata.sql, if this isn't found, it downloads a file from GCS and saves it as
@@ -110,6 +114,8 @@ fi
 echo "Applying CGC Metadata SQL Table File..."
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/cgc_metadata.sql
 
+# Rename this script to 'add site and social data' and fold in the socialapp setup
+# TODO: Check for socialaccount settings before adding
 echo "Adding Site Data..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py
 

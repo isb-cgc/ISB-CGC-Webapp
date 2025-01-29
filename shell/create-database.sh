@@ -39,6 +39,9 @@ if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
   exit 1
 fi
 
+# TODO: check for MySQL server installation, if not found, install
+# TODO: If MySQL found but not database, make database
+
 # MySQL Install
 echo "Installing MySQL"
 echo "Note that you can ignore the \"root@localhost is created with an empty password\" message, which is due to root"
