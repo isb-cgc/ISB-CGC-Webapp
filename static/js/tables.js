@@ -330,18 +330,24 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             var stats = {}
             if (('patient_per_collec' in collectionStats) && (projid in collectionStats['patient_per_collec'])) {
                 stats['mxcases'] = collectionStats['patient_per_collec'][projid]
+                stats['cases_in_filter'] = collectionStats['patient_per_collec'][projid]
             } else {
                 stats['mxcases'] = 0
+                stats['cases_in_filter']=0
             }
             if (('study_per_collec' in collectionStats) && (projid in collectionStats['study_per_collec'])) {
                 stats['mxstudies'] = collectionStats['study_per_collec'][projid]
+                stats['studies_in_filter'] = collectionStats['study_per_collec'][projid];
             } else {
-                stats['mxstudies'] = 0
+                stats['mxstudies'] = 0;
+                stats['studies_in_filter']=0
             }
             if (('series_per_collec' in collectionStats) && (projid in collectionStats['series_per_collec'])) {
                 stats['mxseries'] = collectionStats['series_per_collec'][projid]
+                stats['series_in_filter']=collectionStats['series_per_collec'][projid];
             } else {
                 stats['mxseries'] = 0
+                stats['series_in_filter'] =0;
             }
 
 
@@ -371,7 +377,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                   else{
                   stats[item + '_in_cart'] = 0;
                   stats[item + '_in_filter_and_cart'] = 0;
-                  stats[item + '_in_filter'] = 0;
+                  //stats[item + '_in_filter'] = 0;
                   }
             }
 
@@ -1024,7 +1030,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         for (projid in window.openCases) {
             viewCases = viewCases.concat(Object.keys(window.openCases[projid]));
         }
-        viewCollections = Object.keys(window.openProjects);
+        var viewCollections = Object.keys(window.openProjects);
         if ($('#studies_tab_wrapper').find('.dataTables_controls').length>0){
             pageRows = parseInt($('#studies_tab_wrapper').find('.dataTables_length select').val());
         } else {
@@ -1711,25 +1717,25 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                        var seriesinboth = 0;
                        var newseries = 0;
                        if (this.hasAttribute("series_in_filter_and_cart")) {
-                           seriesinboth = $(this).attr("series_in_filter_and_cart");
-                           newseries = $(this).attr("series_in_filter") - $(this).attr("series_in_filter_and_cart");
+                           seriesinboth = parseInt($(this).attr("series_in_filter_and_cart"));
+                           newseries = parseInt($(this).attr("series_in_filter")) - parseInt($(this).attr("series_in_filter_and_cart"));
                           }
                        else {
                            seriesinboth = 0
-                           newseries = $(this).attr("series_in_filter");
+                           newseries = parseInt($(this).attr("series_in_filter"));
                           }
                        $(this).attr("series_in_filter_and_cart", seriesinboth + newseries);
                        var incart = 0;
                        if (this.hasAttribute("series_in_cart")) {
-                           incart = $(this).attr("series_cart");
+                           incart = parseInt($(this).attr("series_in_cart"));
                        }
-                       $(this).attr("series_cart", incart + newseries);
+                       $(this).attr("series_in_cart", incart + newseries);
                        $(this).find(".cartnum").text((incart + newseries).toString());
                    } else {
                        var seriesremoved = 0;
                        if (this.hasAttribute("series_in_filter_and_cart")) {
-                           seriesremoved = $(this).attr("series_in_filter_and_cart");
-                           var incart = $(this).attr("series_in_cart");
+                           seriesremoved = parseInt($(this).attr("series_in_filter_and_cart"));
+                           var incart = parseInt($(this).attr("series_in_cart"));
 
                            $(this).attr("series_in_filter_and_cart", 0);
                            $(this).attr("series_in_cart", incart - seriesremoved);
@@ -1737,7 +1743,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                        }
                    }
                    if (this.hasAttribute("series_in_cart")) {
-                       if (($(this).attr("series_in_cart")) < ($(this).attr("mxseries"))) {
+                       if (parseInt($(this).attr("series_in_cart")) < parseInt($(this).attr("mxseries"))) {
                            $(this).addClass('someInCart');
                            $(this).addClass('extraInItem');
                        } else {
@@ -1752,12 +1758,19 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                  }
 
                else{
-                   $(this).attr("incart",addingToCart);
+
                    if (addingToCart){
                      $(this).addClass('someInCart');
+                       if (parseInt($(this).attr('series_in_cart'))<parseInt($(this).attr('mxseries'))){
+                           $(this).addClass('extraInItem');
+                       }
+                       else{
+                           $(this).removeClass('extraInItem');
+                       }
                     }
                    else {
                        $(this).removeClass('someInCart');
+                       $(this).addClass('extraInItem')
                    }
                }
 
@@ -1778,7 +1791,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             var rowFound = true;
             var cacheArr = window[cacheset[i]]['data'];
 
-            for (cacheRow in cachArr){
+            for (cacheRow in cacheArr){
                 if ((projid == cacheRow['collection_id']) && (caseid == cacheRow['PatientID'])){
                     if ((ids.length<3) || (studyid == cacheRow['StudyInstanceUID'])) {
                         rowFound = true;
@@ -1877,15 +1890,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
              var series_in_cart=0;
              if (row.hasAttribute("series_in_cart")){
-                 series_in_cart=$(row).attr("series_in_cart");
+                 series_in_cart=parseInt($(row).attr("series_in_cart"));
              }
              var series_in_filter=0;
              if (row.hasAttribute("series_in_filter")) {
-                 series_in_filter = $(row).attr("series_in_filter");
+                 series_in_filter = parseInt($(row).attr("series_in_filter"));
              }
              var series_in_filter_and_cart=0;
              if (row.hasAttribute("series_in_filter_and_cart")) {
-                 series_in_filter_and_cart = $(row).attr("series_in_filter_and_cart");
+                 series_in_filter_and_cart = parseInt($(row).attr("series_in_filter_and_cart"));
              }
              var series_in_filter_not_cart = series_in_filter - series_in_filter_and_cart;
 
@@ -1893,7 +1906,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
              var series_added=0;
              if (addingToCart){
                   series_in_cart = series_in_filter_not_cart + series_in_cart;
-                 var series_in_filter_and_cart = series_in_filter_not_cart + series_in_filter_and_cart;
+                  series_in_filter_and_cart = series_in_filter_not_cart + series_in_filter_and_cart;
                  $(row).attr("series_in_cart", series_in_cart);
                  $(row).attr("series_in_filter_and_cart", series_in_filter_and_cart);
                  var seriesAdded = series_in_filter_not_cart;
