@@ -641,7 +641,8 @@ require([
      $(document).ready(function () {
         window.pageid = Math.random().toString(36).substr(2,8);
 
-        tables.initializeTableData();
+        tables.initializeTableCacheData();
+        tables.initializeTableViewedItemsData();
         filterItemBindings('access_set');
         filterItemBindings('program_set');
         filterItemBindings('analysis_set');
@@ -678,10 +679,10 @@ require([
         createPlots('search_derived_set');
         createPlots('tcga_clinical');
 
-        for (project in window.selProjects) {
+        /* for (project in window.selProjects) {
             tables.initProjectData(project);
-        }
-        updateProjectTable(window.collectionData,stats);
+        } */
+        updateProjectTable(window.collectionData,stats,{});
 
         $('.clear-filters').on('click', function () {
             $('input:checkbox').not('.hide-zeros').not('.tbl-sel').prop('checked',false);
@@ -696,7 +697,8 @@ require([
             var updateWait = false;
 
                updateFacetsData(true);
-               tables.initializeTableData();
+               tables.initializeTableCacheData();
+               tables.initializeTableViewedItemsData();
 
         });
 

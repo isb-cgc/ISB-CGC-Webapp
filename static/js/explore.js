@@ -68,6 +68,7 @@ require([
     window.selProjects= new Object();
     window.glblcart = new Object();
     window.partitions= new Array();
+    window.filtergrp_list=new Array();
 
     //sesssionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
     window.partitions = new Array();

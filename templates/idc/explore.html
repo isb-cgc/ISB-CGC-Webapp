@@ -116,7 +116,10 @@
         const stats = JSON.parse(document.getElementById('stats').textContent)
         const set_attributes =JSON.parse(document.getElementById('set_attributes').textContent)
         const urlParams = new URLSearchParams(window.location.search);
-        window.attMap={};
+        window.attMap = {};
+        window.openProjects = {};
+        window.openCases = {};
+        window.openStudies = {};
         var nsets=['origin_set', 'related_set', 'derived_set']
 
         for (var i=0; i<nsets.length;i++) {

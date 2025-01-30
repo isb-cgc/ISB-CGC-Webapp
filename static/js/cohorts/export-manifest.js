@@ -83,7 +83,7 @@ require([
             }
             update_export_modal_for_cart(partitions, filterSets);
         } else if (button.hasClass('cart-export-from-cp')){
-            update_export_modal_for_cart(window.partitions, window.filtergrp_lst);
+            update_export_modal_for_cart(window.partitions, window.filtergrp_list);
         }
     });
 
@@ -217,7 +217,7 @@ require([
     $('.get-manifest').on('click', function(e) {
         if(($(this).attr('data-export-type') === 's5cmd' || $(this).attr('data-export-type') === 'idc_index')
             &&  $(this).hasClass('iscart')) {
-            update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries);
+            update_export_modal_for_cart(window.partitions, window.filtergrp_list, window.mxstudies, window.mxseries);
         }
         download_manifest($(this).attr("data-export-type"), $(this), e)
     });

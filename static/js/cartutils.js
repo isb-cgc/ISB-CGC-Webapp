@@ -212,7 +212,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     const getCartData = function(offset, limit, aggregate_level, results_level){
         let url = '/cart_data/';
         url = encodeURI(url);
-        var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
+        var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_list), 'partitions': JSON.stringify(window.partitions)}
 
         if (parseInt(offset)>0) {
             ndic['offset'] = offset;
@@ -259,7 +259,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.updatePartitionsFromScratch();
         var ret =formcartdata();
         window.partitions = ret[0];
-        window.filtergrp_lst = ret[1];
+        window.filtergrp_list = ret[1];
         window.glblcart = new Object();
 
         var projDone={}
@@ -277,7 +277,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
         let url = '/cart_data_stats/';
         url = encodeURI(url);
-        var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
+        var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_list), 'partitions': JSON.stringify(window.partitions)}
         ndic['limit'] = studylim;
 
         var parsedFiltObj = filterutils.parseFilterObj();
@@ -361,7 +361,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     });
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
-    const updateCartSelections = function(newSel, addingToCart,studymp,updateSource,completeObj){
+    const updateCartSelections = function(newSel){
         var curInd = window.cartHist.length - 1;
         var curPageid= window.cartHist[curInd]['pageid'];
         var selections = window.cartHist[curInd]['selections'];
@@ -389,10 +389,10 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.cartHist[curInd]['selections'] =  newHistSel;
         window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
 
-        var projid = newSel['sel'][0];
+        /* var projid = newSel['sel'][0];
         updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource).then(function(){
             completeObj && completeObj.trigger('shopping-cart:update-complete');
-        });
+        }); */
     }
 
     const updateCartAndCartMetrics = function(addingToCart,projid,studymp,updateSource){
@@ -421,7 +421,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.updatePartitionsFromScratch();
         var ret =formcartdata();
         window.partitions = ret[0];
-        window.filtergrp_lst = ret[1];
+        window.filtergrp_list = ret[1];
         window.glblcart = new Object();
 
         var projDone={}
@@ -1021,12 +1021,12 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                         var newSel = new Object();
                         newSel['added'] = false;
                         newSel['sel'] = [collection_id, caseid, studyid, seriesid];
-                        cartutils.updateCartSelections(newSel,false, null, 'cartpage');
+                        //cartutils.updateCartSelections(newSel,false, null, 'cartpage');
 
                         window.updatePartitionsFromScratch();
                         var ret = cartutils.formcartdata();
                         window.partitions = ret[0];
-                        window.filtergrp_lst = ret[1];
+                        window.filtergrp_list = ret[1];
                         window.seriesdel.push(seriesid);
 
                         window.cartDetails = window.cartDetails + 'Removed SeriesInstanceUID = "' + seriesid.toString() + '" from the cart\n\n';
@@ -1128,7 +1128,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                  "ajax": function (request, callback) {
                     let url = '/cart_data/';
                     url = encodeURI(url);
-                    var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_lst), 'partitions': JSON.stringify(window.partitions)}
+                    var ndic = {'filtergrp_list': JSON.stringify(window.filtergrp_list), 'partitions': JSON.stringify(window.partitions)}
                      try {
                          ndic['offset'] = parseInt(request.start);
                      }

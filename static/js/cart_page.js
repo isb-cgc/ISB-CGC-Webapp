@@ -74,7 +74,7 @@ require([
         window.updatePartitionsFromScratch();
         let ret = cartutils.formcartdata();
         window.partitions = ret[0];
-        window.filtergrp_lst = ret[1];
+        window.filtergrp_list = ret[1];
         window.glblcart = new Object();
 
         localStorage.removeItem("cartHist")

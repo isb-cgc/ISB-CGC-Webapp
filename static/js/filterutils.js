@@ -678,7 +678,6 @@ define(['jquery', 'base'], function($, base) {
         //var isFiltered = Boolean($('#search_def p').length > 0);
 
         if (mkFilt) {
-
             isFiltered = mkFiltText();
             update_filter_url();
             update_bq_filters();
@@ -689,30 +688,25 @@ define(['jquery', 'base'], function($, base) {
                 first_filter_load = false;
             }
         }
-
-
         }
 
         if (doUpdate){
-            var projArr=[]
             var mxstudies = 0;
             var mxseries = 0;
 
-            for (var projid in window.projstudymp) {
-                for (var studyid in window.projstudymp[projid]) {
-                    if ( studyid in window.glblcart) {
-                    projArr.push(projid);
-                    mxstudies += window.selProjects[projid]['mxstudies'];
-                    mxseries += window.selProjects[projid]['mxseries'];
-                    break;
-                   }
-                }
-            }
-
+            var projArr=[];
             var serverdata = [updateFacetsData(true)];
-            if (projArr.length>0)
+            $('#projects_table').find('tr').each(function(){
+                if ($(this).hasClass('someInCart')){
+                   var projid = $(this).attr('data-projectid');
+                   projArr.push(projid)
+                }
+
+            });
+
+             if (projArr.length>0)
             {
-                serverdata.push(updateProjStudyMp(projArr, mxstudies, mxseries))
+                serverdata.push(getProjectCartStats(projArr));
             }
 
 
@@ -723,7 +717,20 @@ define(['jquery', 'base'], function($, base) {
                 var collectionData = ret[0][1];
                 var collectionStats = ret[0][2];
                 var totals = ret[0][3];
-                var numStudiesRet = totals.StudyInstanceUID;
+
+                var cartStats={}
+                if (ret.length>1){
+                    var cartStatsArr = ret[1]
+                    for (i=0;i<cartStatsArr.length;i++){
+                        row = cartStatsArr[i];
+                        collection_id = row['collection_id']
+                        cartStats[collection_id] = row
+                    }
+                }
+                else{
+                    cartStats={}
+                }
+                //var numStudiesRet = totals.StudyInstanceUID;
 
 
 
@@ -736,8 +743,9 @@ define(['jquery', 'base'], function($, base) {
                         addSliders('quantitative', false, true, 'quantitative.');
                         addSliders('tcga_clinical', false, true, 'tcga_clinical.');
                     }
-                updateTablesAfterFilter(collFilt, collectionData, collectionStats);
-                updateTableCounts(1)
+
+                updateTablesAfterFilter(collFilt, collectionData, collectionStats,cartStats);
+                //updateTableCounts(1)
             });
 
 
