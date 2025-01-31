@@ -130,7 +130,7 @@ require([
         }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
-        window.show_spinner();
+       // window.show_spinner();
         $.ajax({
             url: url,
             data: ndic,
@@ -141,16 +141,17 @@ require([
             success: function (data) {
                 try {
                     let curInd = window.cartHist.length-1;
+                    let tmp=filterutils.parseFilterObj()
+                    let filtObj=JSON.parse(JSON.stringify(tmp));
                     if (cartHist[curInd].selections.length>0){
                         let cartSel = new Object();
-                        cartSel['filter']= parsedFiltObj;
+                        cartSel['filter']= filtObj
                         cartSel['selections']= new Array();
                         cartSel['partitions']= new Array();
-                        cartSel['pageid'] = window.pageid;
+
                         window.cartHist.push(cartSel);
                     } else {
-                        window.cartHist[curInd]['filter'] = parsedFiltObj;
-                        window.cartHist[curInd]['pageid'] = parsedFiltObj;
+                        window.cartHist[curInd]['filter'] = filtObj;
                     }
                     if(data.total <= 0) {
                         base.showJsMessage(
@@ -280,7 +281,7 @@ require([
                 console.log('error loading data');
             },
             complete: function() {
-                window.hide_spinner();
+                //window.hide_spinner();
             }
         });
         return deferred.promise();
@@ -639,7 +640,6 @@ require([
     }
 
      $(document).ready(function () {
-        window.pageid = Math.random().toString(36).substr(2,8);
 
         tables.initializeTableCacheData();
         tables.initializeTableViewedItemsData();
@@ -704,13 +704,13 @@ require([
 
         var cartSel = new Object();
         cartSel['filter']=new Object();
-        cartSel['pageid'] = window.pageid
         cartSel['selections']= new Array();
         cartSel['partitions']= new Array();
 
         setCartHist = false;
         window.cartHist = new Array();
         window.cartHist.push(cartSel);
+        window.proj_in_cart = new Object();
 
         filterutils.load_preset_filters();
         $('.hide-filter-uri').on('click',function() {
@@ -828,5 +828,14 @@ require([
             updatecartedits();
         }
     }
+
+    $(document).ajaxStart(function(){
+        $('.spinner').show();
+    });
+
+    $(document).ajaxStop(function(){
+        $('.spinner').hide();
+    });
+
 });
 

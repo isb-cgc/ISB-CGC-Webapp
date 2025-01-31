@@ -155,7 +155,7 @@ require([
          window.partitions = ret[0];
          window.filtergrp_lst = ret[1];
 
-         window.pageid = Math.random().toString(36).substr(2, 8);
+
          ajaxtriggered = true;
 
         cartutils.updateCartTable();

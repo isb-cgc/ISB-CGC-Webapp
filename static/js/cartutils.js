@@ -307,6 +307,35 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     };
 
 
+    const updateCartCounts =function(){
+        if (Object.keys(window.proj_in_cart).length>0){
+            var nmprojs = 0;
+            var nmseries =0;
+            for (projid in window.proj_in_cart){
+                nmprojs++;
+                nmseries=nmseries+window.proj_in_cart[projid];
+            }
+
+            var content = "Cart contents: " + nmseries.toString()+" series from "+nmprojs.toString()+" collections ";
+
+
+        $('#cart_stats').html(content) ;
+            $('#cart_stats').removeClass('empty-cart');
+            $('#export-manifest-cart').removeAttr('disabled');
+            $('.cart-view').removeAttr('disabled');
+            $('.clear-cart').removeAttr('disabled');
+
+        }
+        else {
+
+            $('#cart_stats').addClass('empty-cart');
+            $('#cart_stats').html("Your cart is currently empty.");
+            $('#export-manifest-cart').attr('disabled', 'disabled');
+            $('.cart-view').attr('disabled', 'disabled');
+            $('.clear-cart').attr('disabled', 'disabled');
+        }
+
+    }
     const updateTableCountsAndGlobalCartCounts = function(){
         window.updateTableCounts();
         var gtotals = getGlobalCounts();
@@ -363,7 +392,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel){
         var curInd = window.cartHist.length - 1;
-        var curPageid= window.cartHist[curInd]['pageid'];
         var selections = window.cartHist[curInd]['selections'];
         var selection = newSel['sel'];
 
@@ -1193,6 +1221,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         updateLocalCartAfterSessionChng: updateLocalCartAfterSessionChng,
         updateTableCountsAndGlobalCartCounts: updateTableCountsAndGlobalCartCounts,
         refreshCartAndFiltersFromScratch: refreshCartAndFiltersFromScratch,
-        updateCartTable: updateCartTable
+        updateCartTable: updateCartTable,
+        updateCartCounts: updateCartCounts
     };
 });
