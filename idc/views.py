@@ -1022,21 +1022,6 @@ def cart_page(request):
     if not request.session.exists(request.session.session_key):
         request.session.create()
 
-<<<<<<< HEAD
-  try:
-      req = request.GET if request.GET else request.POST
-      carthist = json.loads(req.get('carthist', '{}'))
-      mxseries = req.get('mxseries',0)
-      mxstudies = req.get('mxstudies',0)
-      totseries = req.get('totseries', 0)
-      stats = req.get('stats','');
-
-      context['carthist'] =carthist
-      context['mxseries'] = mxseries
-      context['mxstudies'] = mxstudies
-      context['totseries'] = totseries
-      context['stats'] = stats
-=======
     try:
         req = request.GET if request.GET else request.POST
         carthist = json.loads(req.get('carthist', '{}'))
@@ -1048,7 +1033,6 @@ def cart_page(request):
         context['mxseries'] = mxseries
         context['mxstudies'] = mxstudies
         context['stats'] = stats
->>>>>>> c89969bcf698dfe20e3169d22f17f88bca367e41
 
     except Exception as e:
         logger.error("[ERROR] While loading cart_page:")

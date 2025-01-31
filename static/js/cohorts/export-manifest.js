@@ -74,13 +74,7 @@ require([
         //coming from explorer page series or study
         if (button.hasClass('series-export') || button.hasClass('study-export')){
             update_export_modal_for_mini(button);
-<<<<<<< HEAD
-        }
-        //coming from explorer page cart export
-        else if (button.hasClass('cart-export')){
-=======
         } else if (button.hasClass('cart-export')){
->>>>>>> c89969bcf698dfe20e3169d22f17f88bca367e41
             updatePartitionsFromScratch();
              window.updatePartitionsFromScratch();
              var ret =cartutils.formcartdata();
@@ -99,13 +93,7 @@ require([
                mxseries+= window.selProjects[proj].mxseries;
                mxstudies+= window.selProjects[proj].mxstudies;
             }
-<<<<<<< HEAD
-            //coming from cart page cart export
-            update_export_modal_for_cart(partitions, window.filtergrp_lst, mxstudies, mxseries);
-        }
-        else if (button.hasClass('cart-export-from-cp')){
-            update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries);
-=======
+
             var filterSets = new Array();
             for (var i=0; i< window.cartHist.length;i++) {
                filterSets.push(window.cartHist[i]['filter'])
@@ -113,7 +101,7 @@ require([
             update_export_modal_for_cart(partitions, filterSets);
         } else if (button.hasClass('cart-export-from-cp')){
             update_export_modal_for_cart(window.partitions, window.filtergrp_list);
->>>>>>> c89969bcf698dfe20e3169d22f17f88bca367e41
+
         }
     });
 
@@ -246,16 +234,13 @@ require([
         }
     });
 
-<<<<<<< HEAD
-
-=======
     var reset_after_cart = function(){
         $('#export-manifest-modal').find('input[name="from_cart"]').remove();
         $('#export-manifest-modal').find('input[name="partitions"]').remove();
         $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
         $('.modal-title').text('Export Manifest');
     }
->>>>>>> c89969bcf698dfe20e3169d22f17f88bca367e41
+
 
     $('#export-manifest-modal').on('hidden.bs.modal', function() {
       $('.manifest-file').show();
@@ -287,15 +272,12 @@ require([
     };
 
     $('.get-manifest').on('click', function(e) {
-        /* if(($(this).attr('data-export-type') === 's5cmd' || $(this).attr('data-export-type') === 'idc_index')
+         if(($(this).attr('data-export-type') === 's5cmd' || $(this).attr('data-export-type') === 'idc_index')
             &&  $(this).hasClass('iscart')) {
-<<<<<<< HEAD
+
             update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries);
-        } */
-=======
-            update_export_modal_for_cart(window.partitions, window.filtergrp_list, window.mxstudies, window.mxseries);
         }
->>>>>>> c89969bcf698dfe20e3169d22f17f88bca367e41
+
         download_manifest($(this).attr("data-export-type"), $(this), e)
     });
 
