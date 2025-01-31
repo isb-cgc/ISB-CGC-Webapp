@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2020, Institute for Systems Biology
+   Copyright 2024, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/spinner.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
-
 {% endblock %}
 
 
@@ -59,6 +58,9 @@
             </div>
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data </h3>
 
+            <button onClick="window.getCartDataStats()">Get Stats</button>
+           <span id="stats1">0</span><span id="stats2">0</span><span id="stats3">0</span>
+
             {% if request.user.is_authenticated %}
             <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"
                 data-target="#save-cohort-modal"
@@ -70,17 +72,6 @@
                  data-uri="{% url 'account_login' %}" disabled="disabled"> Log in to Save Cohort
             </button>
             {% endif %}
-
-
-            <button id="cart-manifest" class="btn btn-special pull-right get-manifest iscart cart-export" disabled="disabled"
-                    data-toggle="modal" data-target="#export-manifest-modal"> Download cart cohort
-            </button>
-            <button id="export-manifest" class="btn btn-special pull-right" disabled="disabled" data-toggle="modal"
-                data-target="#export-manifest-modal"
-                title="Select a filter to enable this feature."> Download filter cohort
-            </button>
-
-
         </div>
     </div>
 {% endblock %}
@@ -106,7 +97,7 @@
 {% endblock %}
 
 {% block js_file %}
-     {{ collection_tooltips|json_script:"collection_tooltips" }}
+    {{ collection_tooltips|json_script:"collection_tooltips" }}
     {{ analysis_results_tooltips|json_script:"analysis_results_tooltips" }}
     {{ filters_for_load|json_script:"filters_for_load" }}
     {{ collections|json_script:"collections" }}
@@ -125,7 +116,10 @@
         const stats = JSON.parse(document.getElementById('stats').textContent)
         const set_attributes =JSON.parse(document.getElementById('set_attributes').textContent)
         const urlParams = new URLSearchParams(window.location.search);
-        window.attMap={};
+        window.attMap = {};
+        window.openProjects = {};
+        window.openCases = {};
+        window.openStudies = {};
         var nsets=['origin_set', 'related_set', 'derived_set']
 
         for (var i=0; i<nsets.length;i++) {
@@ -148,7 +142,6 @@
         var showWarning = true;
         var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
         var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
-
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}

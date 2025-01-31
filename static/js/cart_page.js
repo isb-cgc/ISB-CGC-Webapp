@@ -50,7 +50,7 @@ require.config({
         'underscore': {exports: '_'},
         'session_security': ['jquery'],
         'cartutils': ['jquery'],
-        'exportmanifest':['jquery']
+        'export-manifest':['jquery']
     }
 });
 
@@ -69,21 +69,16 @@ require([
 
      var ajaxtriggered = false;
 
-
     window.resetCartPageView = function(){
         window.cartHist = new Array();
         window.updatePartitionsFromScratch();
-        let ret =cartutils.formcartdata();
+        let ret = cartutils.formcartdata();
         window.partitions = ret[0];
-        window.filtergrp_lst = ret[1];
-        //cartutils.updateCartTable([],[]);
+        window.filtergrp_list = ret[1];
         window.glblcart = new Object();
-        //window.cartPgLocator = new Array();
-        //window.seriesTalley = new Array();
 
         localStorage.removeItem("cartHist")
         window.location = window.location.protocol+'//'+window.location.host+'/explore/';
-        //history.back();
     }
 
     tippy.delegate('#cart-table', {
@@ -92,7 +87,7 @@ require([
         placement: 'right',
         arrow: true,
         interactive: true, // This is required for any table tooltip to show at the appropriate spot!
-        target: '.copy-this-table',
+        target: '.copy-this',
         onShow(instance) {
             setTimeout(function() {
                 instance.hide();
@@ -135,26 +130,20 @@ require([
                             selectext += ", study " + selec.sel[2]
                         }
                     }
-
                  contentArray.push(selectext);
                 }
             }
         }
-        content="<ol>"+contentArray.join('\n')+"</ol>";
+        content = "<ol>"+contentArray.join('\n')+"</ol>";
         $('#cart-description-modal').find('.modal-body').html(content);
-
-
     }
 
      $(document).ready(function () {
-
          let navelem = $("a[href='/explore/']");
          navelem.addClass('navexplore');
          if (document.referrer.includes('explore')){
              navelem.attr('href', 'javascript:window.history.back()')
          }
-
-
          window.mxseries = parseInt(JSON.parse(document.getElementById('mxseries').textContent));
          window.totseries = parseInt(JSON.parse(document.getElementById('totseries').textContent));
          window.mxstudies = parseInt(JSON.parse(document.getElementById('mxstudies').textContent));
@@ -167,24 +156,8 @@ require([
          window.partitions = ret[0];
          window.filtergrp_lst = ret[1];
 
-         window.pageid = Math.random().toString(36).substr(2, 8);
 
-        // localStorage no longer used in keeping cart data
-        /*
-        if (!(localStorage.getItem('cartNumStudies')==null)){
-           window.numStudies = parseInt(localStorage.getItem('cartNumStudies'));
-        }
-        else{
-            window.numStudies = 0;
-        }
-        if (!(localStorage.getItem('cartNumSeries')==null)){
-           window.numStudies = parseInt(localStorage.getItem('cartNumSeries'));
-        }
-        else{
-            window.numSeries = 0;
-        }
-        window.numSeries = parseInt(localStorage.getItem('cartNumSeries'));
-         */
+         ajaxtriggered = true;
 
         cartutils.updateCartTable();
          $('.filter-tab.manifest-file').hide();
@@ -193,36 +166,5 @@ require([
          $('#download-s5cmd').addClass('iscart');
          $('#download-idc-index').addClass('iscart');
          $('#export-manifest-form').attr('action','/explore/manifest/');
-
     });
-
-/*
-    window.onpageshow = function (){
-
-        //alert('show');
-        if (!ajaxtriggered) {
-            window.cartedits = false;
-            window.cartHist = new Array();
-            cartutils.setCartHistWinFromLocal()
-            if ("cartDetails" in sessionStorage) {
-                window.cartDetails = JSON.parse(sessionStorage.getItem("cartDetails"));
-            }
-            window.updatePartitionsFromScratch();
-            var ret = cartutils.formcartdata();
-            window.partitions = ret[0];
-            window.filtergrp_lst = ret[1];
-           // cartutils.updateCartTable();
-        }
-    }
-*/
-    $(document).ajaxStart(function(){
-        $('.spinner').show();
-    });
-
-    $(document).ajaxStop(function(){
-        $('.spinner').hide();
-    });
-
-
-
 });

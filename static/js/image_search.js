@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021, Institute for Systems Biology
+ * Copyright 2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,12 +113,12 @@ require([
         $('#rh_panel').addClass('col-md-9');
     };
 
-
     window.updateFacetsData = function (newFilt) {
         var url = '/explore/'
         var parsedFiltObj = filterutils.parseFilterObj();
+        let isFiltered = Boolean($('#search_def p').length > 0);
         url = encodeURI('/explore/')
-
+        $('#search_def_stats').html(isFiltered ? "Gathering cohort statistics...": "&nbsp;");
         ndic = {
             'totals': JSON.stringify(["PatientID", "StudyInstanceUID", "SeriesInstanceUID"]),
             'counts_only': 'False',
@@ -130,7 +130,7 @@ require([
         }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
-        $('.spinner').show();
+       // window.show_spinner();
         $.ajax({
             url: url,
             data: ndic,
@@ -140,21 +140,19 @@ require([
             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 try {
-                    //cartutils.setCartHistWinFromLocal();
                     let curInd = window.cartHist.length-1;
+                    let tmp=filterutils.parseFilterObj()
+                    let filtObj=JSON.parse(JSON.stringify(tmp));
                     if (cartHist[curInd].selections.length>0){
                         let cartSel = new Object();
-                        cartSel['filter']= JSON.parse(JSON.stringify(parsedFiltObj));
+                        cartSel['filter']= filtObj
                         cartSel['selections']= new Array();
                         cartSel['partitions']= new Array();
-                        cartSel['pageid'] = window.pageid;
+
                         window.cartHist.push(cartSel);
+                    } else {
+                        window.cartHist[curInd]['filter'] = filtObj;
                     }
-                    else{
-                        window.cartHist[curInd]['filter'] = JSON.parse(JSON.stringify(parsedFiltObj));
-                        window.cartHist[curInd]['pageid'] = window.pageid;
-                    }
-                    //cartutils.setLocalFromCartHistWin();
                     if(data.total <= 0) {
                         base.showJsMessage(
                            "warning zero-results",
@@ -168,17 +166,13 @@ require([
                     }
                     else {
                         $('.zero-results').remove();
-                        $('#export-manifest, #save-cohort-btn').removeAttr('disabled');
+                        if(isFiltered) {
+                            $('#export-manifest, #save-cohort-btn').removeAttr('disabled');
+                        }
                     }
                     let async_download = (data.total > 0 && data.totals.SeriesInstanceUID > 65000);
-                    let isFiltered = Boolean($('#search_def p').length > 0);
                     $('#search_def_stats').attr('filter-series-count',(data.total > 0 ? data.totals.SeriesInstanceUID: 0));
                     let totals = data.totals;
-                    $('#search_def_stats').html(totals.PatientID.toString() +
-                            " Cases, " + totals.StudyInstanceUID.toString() +
-                            " Studies, and " + totals.SeriesInstanceUID.toString() +
-                            " Series in this cohort. " +
-                            "Size on disk: " + totals.disk_size);
                     $('input[name="async_download"]').val(
                         async_download ? "True" : "False"
                     );
@@ -186,23 +180,23 @@ require([
                         ('access' in data['filtered_counts']['origin_set']['All']['attributes']) &&
                         ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) &&
                         (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
-                        $('#search_def_access').removeClass('notDisp');
-                        $('.access_warn').removeClass('notDisp');
+                        $('#search_def_access').removeClass('is-hidden');
+                        $('.access_warn').removeClass('is-hidden');
                     } else {
-                        $('#search_def_access').addClass('notDisp');
-                        $('.access_warn').addClass('notDisp');
+                        $('#search_def_access').addClass('is-hidden');
+                        $('.access_warn').addClass('is-hidden');
                     }
                     if(is_cohort || (isFiltered && data.total > 0)) {
-                        $('#search_def_stats').removeClass('notDisp');
-                        $('#search_def_stats').html(data.totals.PatientID.toString() + " Cases, " +
-                            data.totals.StudyInstanceUID.toString() + " Studies, and " +
-                            data.totals.SeriesInstanceUID.toString() + " Series in this cohort. " +
-                            "Size on disk: " + data.totals.disk_size);
+                        $('#search_def_stats').html("Cohort filter contents: " +
+                            data.totals.SeriesInstanceUID.toString() + " series from " +
+                            data.totals.PatientID.toString() + " cases / " +
+                            data.totals.StudyInstanceUID.toString() + " studies (Size on disk: " +
+                            data.totals.disk_size + ")"
+                        );
                     } else if(isFiltered && data.total <= 0) {
-                        $('#search_def_stats').removeClass('notDisp');
                         $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                     } else {
-                        $('#search_def_stats').addClass('notDisp');
+                        $('#search_def_stats').html("&nbsp;");
                     }
                     if (is_cohort) {
                         (async_download && !user_is_social)  && $('#need-social-account').show();
@@ -291,7 +285,7 @@ require([
                 console.log('error loading data');
             },
             complete: function() {
-                $('.spinner').hide();
+                //window.hide_spinner();
             }
         });
         return deferred.promise();
@@ -364,7 +358,7 @@ require([
            $(e.target).removeClass('fa-lg');
        });
 
-        $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function (e) {
+        $('#' + filterId).find('input:checkbox').not('.hide-zeros').on('click', function (e) {
             var targ=e.target;
             if ($(e.target).parent().find('.collection_info.fa-lg, .analysis_info.fa-lg').length>0){
                 $(targ).prop("checked",!$(targ).prop("checked"));
@@ -378,8 +372,8 @@ require([
 
         $('#' + filterId).find('.show-more').on('click', function () {
             $(this).parent().parent().children('.less-checks').show();
-            $(this).parent().parent().children('.less-checks').removeClass('notDisp');
-            $(this).parent().parent().children('.more-checks').addClass('notDisp');
+            $(this).parent().parent().children('.less-checks').removeClass('is-hidden');
+            $(this).parent().parent().children('.more-checks').addClass('is-hidden');
 
             $(this).parent().hide();
             var extras = $(this).closest('.list-group-item__body, .collection-list, .list-group-sub-item__body').children('.search-checkbox-list').children('.extra-values')
@@ -387,16 +381,16 @@ require([
             if ( ($('#'+filterId).closest('.search-configuration').find('.hide-zeros').length>0)  && ($('#'+filterId).closest('.search-configuration').find('.hide-zeros').prop('checked'))){
                 extras=extras.not('.zeroed');
             }
-            extras.removeClass('notDisp');
+            extras.removeClass('is-hidden');
         });
 
         $('#' + filterId).find('.show-less').on('click', function () {
             $(this).parent().parent().children('.more-checks').show();
-            $(this).parent().parent().children('.more-checks').removeClass('notDisp');
-            $(this).parent().parent().children('.less-checks').addClass('notDisp');
+            $(this).parent().parent().children('.more-checks').removeClass('is-hidden');
+            $(this).parent().parent().children('.less-checks').addClass('is-hidden');
 
             $(this).parent().hide();
-            $(this).closest('.list-group-item__body, .collection-list, .list-group-sub-item__body').children('.search-checkbox-list').children('.extra-values').addClass('notDisp');
+            $(this).closest('.list-group-item__body, .collection-list, .list-group-sub-item__body').children('.search-checkbox-list').children('.extra-values').addClass('is-hidden');
         });
 
         $('#' + filterId).find('.check-all').on('click', function () {
@@ -506,25 +500,25 @@ require([
 
     $('.fa-cog').on("click",function(){
          let srt = $(this).parent().parent().parent().find('.cntr')
-         if (srt.hasClass('notDisp')) {
-             srt.removeClass('notDisp');
+         if (srt.hasClass('is-hidden')) {
+             srt.removeClass('is-hidden');
          } else {
-             srt.addClass('notDisp');
+             srt.addClass('is-hidden');
          }
-         $(this).parent().parent().parent().find('.text-filter, .collection-text-filter').addClass('notDisp');
+         $(this).parent().parent().parent().find('.text-filter, .collection-text-filter').addClass('is-hidden');
      });
 
     $('.fa-search').on("click",function(){
          //alert('hi');
          srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter, .analysis-text-filter');
 
-         if (srch.hasClass('notDisp')) {
-             srch.removeClass('notDisp');
+         if (srch.hasClass('is-hidden')) {
+             srch.removeClass('is-hidden');
              srch[0].focus();
          } else {
-             srch.addClass('notDisp');
+             srch.addClass('is-hidden');
          }
-         $(this).parent().parent().parent().find('.cntr').addClass('notDisp');
+         $(this).parent().parent().parent().find('.cntr').addClass('is-hidden');
     });
 
     const myObserver = new ResizeObserver(entries => {
@@ -577,20 +571,19 @@ require([
         }
     }
 
-
     initSort = function(sortVal){
-        var sortdivs=$('body').find('.sorter')
-        for (div in sortdivs){
-            $(div).find(":input[value='" + sortVal + "']").click();
-        }
+        window.show_spinner();
+        setTimeout(function(){
+            var sortdivs=$('body').find('.sorter');
+            for (div in sortdivs){
+                $(div).find(":input[value='" + sortVal + "']").click();
+            }
+            window.hide_spinner();
+        }, 0);
     }
 
     updatecartedits = function(){
-
         if (("cartedits" in localStorage) && (localStorage.getItem("cartedits") == "true")) {
-
-            //window.cartHist = JSON.parse(sessionStorage.getItem("cartHist"));
-            //setCartHistWinFromLocal();
             var edits = window.cartHist[window.cartHist.length - 1]['selections'];
 
             var filt = Object();
@@ -614,31 +607,26 @@ require([
             }
             if ("seriesdel" in sessionStorage) {
                 window.seriesdel = JSON.parse(sessionStorage.getItem("seriesdel"));
-
             }
 
             cartutils.updateGlobalCart(false, studymp, 'series')
             window.updateTableCounts(1);
             var gtotals = cartutils.getGlobalCounts();
-            //var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
-            var content = gtotals[3]+" series selected from "+gtotals[0]+" collections/"+ gtotals[1]+" Cases/"+gtotals[2]+ " studies in the cart"
+            var content = "Cart contents: " + gtotals[3]+" series from "+gtotals[0]+" collections / "+ gtotals[1]+" cases / "+gtotals[2]+ " studies";
 
-            /* tippy('.cart-view', {
-                           interactive: true,
-                           allowHTML:true,
-                          content: content
-                        });*/
-            $('#cart_stats').html(cart) ;
+            $('#cart_stats').html(content) ;
 
             if (gtotals[0]>0){
-                $('#cart_stats').removeClass('notDisp');
+                $('#cart_stats').removeClass('empty-cart');
+                $('.cart-view').removeAttr('disabled');
+                $('.clear-cart').removeAttr('disabled');
                 $('#export-manifest-cart').removeAttr('disabled');
-                $('#view-cart').removeAttr('disabled');
-            }
-            else{
-                $('#cart_stats').addClass('notDisp');
+            } else{
+                $('#cart_stats').addClass('empty-cart');
+                $('#cart_stats').html('Your cart is currently empty.');
+                $('.cart-view').attr('disabled', 'disabled');
                 $('#export-manifest-cart').attr('disabled','disabled');
-                $('#view-cart').attr('disabled','disabled');
+                $('.clear-cart').attr('disabled','disabled');
             }
         }
         else if ("cartHist" in localStorage){
@@ -656,11 +644,9 @@ require([
     }
 
      $(document).ready(function () {
-        window.pageid = Math.random().toString(36).substr(2,8);
 
-        $('.tooltip_filter_info').hide();
-
-        tables.initializeTableData();
+        tables.initializeTableCacheData();
+        tables.initializeTableViewedItemsData();
         filterItemBindings('access_set');
         filterItemBindings('program_set');
         filterItemBindings('analysis_set');
@@ -672,7 +658,6 @@ require([
         max = Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
         min = Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
 
-        //quantElem=['#SliceThickness', '#min_PixelSpacing', '#max_TotalPixelMatrixColumns', '#max_TotalPixelMatrixRows','#age_at_diagnosis']
         quantElem=['#SliceThickness', '#age_at_diagnosis']
         quantElem.forEach(function(elem){
             $(elem).addClass('isQuant');
@@ -698,10 +683,10 @@ require([
         createPlots('search_derived_set');
         createPlots('tcga_clinical');
 
-        for (project in window.selProjects) {
+        /* for (project in window.selProjects) {
             tables.initProjectData(project);
-        }
-        updateProjectTable(window.collectionData,stats);
+        } */
+        updateProjectTable(window.collectionData,stats,{});
 
         $('.clear-filters').on('click', function () {
             $('input:checkbox').not('.hide-zeros').not('.tbl-sel').prop('checked',false);
@@ -716,49 +701,34 @@ require([
             var updateWait = false;
 
                updateFacetsData(true);
-               tables.initializeTableData();
+               tables.initializeTableCacheData();
+               tables.initializeTableViewedItemsData();
 
         });
 
-        //cartutils.updateLocalCartAfterSessionChng();
         var cartSel = new Object();
         cartSel['filter']=new Object();
-        cartSel['pageid'] = window.pageid
         cartSel['selections']= new Array();
         cartSel['partitions']= new Array();
 
         setCartHist = false;
-        /*( setCartHist = cartutils.setCartHistWinFromLocal();
-        if (!setCartHist){
-              window.cartHist = new Array();
-        }*/
         window.cartHist = new Array();
         window.cartHist.push(cartSel);
-
-        /*
-        if ('cartHist' in localStorage){
-            cartutils.refreshCartAndFiltersFromScratch(true);
-        }
-        else {
-            filterutils.load_preset_filters();
-        }
-        */
+        window.proj_in_cart = new Object();
 
         filterutils.load_preset_filters();
         $('.hide-filter-uri').on('click',function() {
             $(this).hide();
             $('.get-filter-uri').show();
-            $('.copy-url').hide();
-            $('.filter-url').hide();
-            $('.filter-url').addClass("is-hidden");
+            $('.filter-url-container').hide();
+            $('.filter-url-container').addClass("is-hidden");
         });
 
         $('.get-filter-uri').on('click',function(){
             $(this).hide();
             $('.hide-filter-uri').show();
-            $('.copy-url').show();
-            $('.filter-url').show();
-            $('.filter-url').removeClass("is-hidden");
+            $('.filter-url-container').show();
+            $('.filter-url-container').removeClass("is-hidden");
         });
 
         $('.filter-url-container').append(
@@ -773,7 +743,6 @@ require([
                     +'&times;</span><span class="sr-only">Close</span></button>'
                 ).attr("style","display: none;")
         );
-
 
         initSort('num');
         if (document.contains(document.getElementById('history'))){
@@ -863,5 +832,14 @@ require([
             updatecartedits();
         }
     }
+
+    $(document).ajaxStart(function(){
+        $('.spinner').show();
+    });
+
+    $(document).ajaxStop(function(){
+        $('.spinner').hide();
+    });
+
 });
 

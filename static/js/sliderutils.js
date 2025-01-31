@@ -79,7 +79,7 @@ define(['filterutils','jquery', 'base'], function(filterutils, $, base) {
      };
 
     window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
-        $('#' + slideDiv).closest('.hasSlider').find('.slider-message').addClass('notDisp');
+        $('#' + slideDiv).closest('.hasSlider').find('.slider-message').addClass('is-hidden');
         parStr=$('#'+slideDiv).data("attr-par");
         var max = $('#' + slideDiv).slider("option", "max");
         var divName = slideDiv.replace("_slide","");
@@ -293,8 +293,7 @@ define(['filterutils','jquery', 'base'], function(filterutils, $, base) {
             let checked = ($(this).find('.noneBut').length>0) ? $(this).find('.noneBut').find(':input')[0].checked : false;
             let txtLower = ($(this).find('.sl_lower').length>0) ? $(this).find('.sl_lower').val():'';
             let txtUpper = ($(this).find('.sl_lower').length>0) ? $(this).find('.sl_upper').val():'';
-            let cntrNotDisp = ($(this).find('.cntr').length>0) ?$(this).find('.cntr').hasClass('notDisp'):true;
-
+            let cntrNotDisp = ($(this).find('.cntr').length>0) ?$(this).find('.cntr').hasClass('is-hidden'):true;
 
             if (initialCreation){
                 let heading = $(this).prop('id') + '_heading';
@@ -319,7 +318,6 @@ define(['filterutils','jquery', 'base'], function(filterutils, $, base) {
                 }
                 $(this).find('#' + slideDivId).remove();
                 $(this).find('.cntr').remove();
-                //$(this).find('.noneBut').remove();
                 let inpName = $(this).prop('id') + '_input';
                 $(this).find('#'+inpName).remove();
                 if (hideZeros) {
@@ -338,10 +336,10 @@ define(['filterutils','jquery', 'base'], function(filterutils, $, base) {
                             max = Math.max(upper, curmax);
                         }
                     } else {
-                            min = curmin;
-                            max = curmax;
-                            lower=min;
-                            upper=max;
+                        min = curmin;
+                        max = curmax;
+                        lower=min;
+                        upper=max;
                     }
                 } else if (!isActive){
                     lower=min;
@@ -357,47 +355,40 @@ define(['filterutils','jquery', 'base'], function(filterutils, $, base) {
                 let cntrlDiv = $('<div class="cntr"></div>');
                 cntrlDiv.append('<div class="sliderset" style="display:block;margin-bottom:8px">Lower: <input type="text" style="display:inline" size="5" class="sl_lower" value="'+ txtLower + '">' +
                     ' Upper: <input class="sl_upper" type="text" style="display:inline" size="5" class="upper" value="' + txtUpper + '">' +
-                    '<div class="slider-message notDisp" style="color:red"><br>Please set lower and upper bounds to numeric values with the upper value greater than the lower, then press Return in either text box. </div></div>')
+                    '<div class="slider-message is-hidden" style="color:red"><br>Please set lower and upper bounds to numeric values with the upper value greater than the lower, then press Return in either text box. </div></div>')
                 cntrlDiv.append(  '<button class="reset" style="display:block;" onclick=\'setSlider("'+ this.id + '_slide", true,0,0,true, true,"'+parStr+'")\'>Clear Slider</button>');
                 if (wNone){
                    cntrlDiv.append( '<span class="noneBut"><input type="checkbox"   onchange="addNone(this, \''+parStr+'\', true)"> None </span>');
                    cntrlDiv.find('.noneBut').find(':input')[0].checked = checked;
                 }
                 if (cntrNotDisp){
-                    cntrlDiv.addClass('notDisp');
+                    cntrlDiv.addClass('is-hidden');
                 }
                 $(this).append(cntrlDiv);
                 $(this).find('.sliderset').keypress(function(event){
                    var keycode = (event.keyCode ? event.keyCode : event.which);
                    if (keycode == '13'){
-
-                   try {
-                       let txtlower = parseFloat($(this).parent().find('.sl_lower').val());
-                       let txtupper = parseFloat($(this).parent().find('.sl_upper').val());
-                      if (txtlower<=txtupper){
-                        setSlider($(this).closest('.hasSlider')[0].id+"_slide", false, txtlower, txtupper, false,true);
-                      } else {
-                          $(this).closest('.hasSlider').find('.slider-message').removeClass('notDisp');
-
-                      }
-                   }
-                  catch(error){
-                    $(this).closest('.hasSlider').find('.slider-message').removeClass('notDisp');
-                    console.log(error);
-                  }
+                        try {
+                            let txtlower = parseFloat($(this).parent().find('.sl_lower').val());
+                            let txtupper = parseFloat($(this).parent().find('.sl_upper').val());
+                            if (txtlower<=txtupper){
+                                setSlider($(this).closest('.hasSlider')[0].id+"_slide", false, txtlower, txtupper, false,true);
+                            } else {
+                                  $(this).closest('.hasSlider').find('.slider-message').removeClass('is-hidden');
+                            }
+                        } catch(error){
+                            $(this).closest('.hasSlider').find('.slider-message').removeClass('is-hidden');
+                            console.log(error);
+                        }
                }
               });
-
             } else {
                 $(this).removeClass('hasSlider');
-
             }
-
         });
      };
 
-
     return {
-           FLOAT_SLIDERS: FLOAT_SLIDERS
-          }
+        FLOAT_SLIDERS: FLOAT_SLIDERS
+    }
 });

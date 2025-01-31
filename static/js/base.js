@@ -84,7 +84,6 @@ require([
 
     })
 
-
     $('.btn').click(function(event){
        var $ripple = $('<span class="btn__ripple"></span>');
         $ripple.appendTo(this).css({
@@ -199,7 +198,7 @@ require([
         $('#external-web-warning').modal('hide');
     });
 
-    $('#body').on('click', '.copy-this, .copy-this-table', function(){
+    $('#body').on('click', '.copy-this, .copy-this-table', function(e){
         let content = $(this).attr('content');
         navigator.clipboard.writeText(content).then(
             () => {
@@ -233,6 +232,20 @@ require([
 
 // Return an object for consts/methods used by most views
 define(['jquery', 'utils'], function($, utils) {
+    window.pending_count = 0;
+
+    window.show_spinner = function() {
+        window.pending_count += 1;
+        $('.spinner').show();
+    };
+
+    window.hide_spinner = function() {
+        window.pending_count -= 1;
+        if(window.pending_count <= 0) {
+            $('.spinner').hide();
+            window.pending_count = 0;
+        }
+    };
 
 
     // Resets forms in modals on hide. Suppressed warning when leaving page with dirty forms

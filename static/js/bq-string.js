@@ -31,7 +31,7 @@ require([
     'sqlFormatter'
 ], function($, base, sqlFormatter) {
 
-    function getBqString(bqStringUri, OP, payload, copynow) {
+    function getBqString(bqStringUri, OP, payload) {
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             url: bqStringUri,
@@ -53,18 +53,6 @@ require([
                 $('#bq-string-display .copy-this').attr('content', formattedSql);
                 $('#bq-string-display .bq-string').html(formattedSql);
                 $('#bq-string-display .unformatted').removeClass('unformatted');
-
-                if (copynow){
-                    navigator.clipboard.writeText(formattedSql).then(
-                     () => {
-                         window.sqlinstance[0].show();
-                         // Show clicked tooltip
-                      },
-                     () => {
-                      alert("Unable to write to clipboard--please make sure the browser has access!");
-                   },)
-                }
-
             },
             error: function (xhr) {
                 console.debug(xhr);
@@ -76,17 +64,15 @@ require([
         if($('#bq-string-display .bq-string').attr('cohort_id') !== $(this).data('cohort-id')) {
             $('#bq-string-display .bq-string').html("Loading...");
             $('#bq-string-display .bq-string').attr('cohort_id',$(this).data('cohort-id'));
-            getBqString($(this).data('bq-string-uri'), 'GET', null, false);
+            getBqString($(this).data('bq-string-uri'), 'GET', null);
         }
     });
 
-    $('.explore-container, .filter-display-panel').on('click', '.bq-string-copy', function() {
-        getBqString("/explore/bq_string/", 'POST', {"filters": $(this).attr('filter-params')}, true);
-        /* if($('#bq-string-display .bq-string').attr('filter-params') !== $(this).attr('filter-params')) {
+    $('.filter-display-panel').on('click', '.bq-string-display', function() {
+        if($('#bq-string-display .bq-string').attr('filter-params') !== $(this).attr('filter-params')) {
             $('#bq-string-display .bq-string').html("Loading...");
             $('#bq-string-display .bq-string').attr('filter-params',$(this).attr('filter-params'));
-            getBqString("/explore/bq_string/", 'POST', {"filters": $(this).attr('filter-params')}, true);
-        } */
-
+            getBqString("/explore/bq_string/", 'POST', {"filters": $(this).attr('filter-params')});
+        }
     });
 });

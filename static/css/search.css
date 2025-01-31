@@ -42,7 +42,7 @@
    color:#808080;
 }
 
-.notDisp {
+.is-hidden {
     display: none !important;
 }
 
@@ -252,8 +252,6 @@ bottom: 95%; /* At the top of the tooltip */
 .tooltip_ex:hover .tooltiptext_ex {
     visibility: visible; }
 
-
-
 .tooltip_info .tooltiptext_info {
     visibility: hidden;
     width: 500px;
@@ -365,8 +363,6 @@ td.greyout   {
 
 }
 
-
-
 tbody.set_height {
     max-height: 200px;       /* Just for the demo          */
     //overflow-y: scroll;
@@ -385,6 +381,23 @@ tr.hide {
 tr {
     display: table;
     width: 100%; }
+
+.expansion-toggle i {
+    font-size: larger;
+}
+
+.expansion-toggle.open {
+    background-color: #c5b9d5;
+}
+
+.expansion-toggle:hover {
+    cursor: pointer;
+    background-color: #b7cfe5;
+}
+
+.export-button:hover, .btnGroupDropViewers:hover {
+    cursor: pointer;
+}
 
 #projects_table td.cartnum, #projects_table_head th.cartnum{
     width: 5%;
@@ -508,12 +521,27 @@ tr {
 .export-series-manifest.btn:hover {
     background-color: #98b4e9a1;
     color: black;
-
 }
-
 
 .btn-mini {
     padding: 4px 8px;
+}
+
+.copy-url {
+    padding: 6px 9px;
+    vertical-align: top;
+}
+
+.filter-url {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 95%;
+    padding: 7px;
+    overflow-x: auto;
+}
+
+.empty-cart {
+    font-style: italic;
 }
 
 table {
@@ -591,89 +619,78 @@ svg {
     background-color: #d5d5d5;
 }
 
-td.cartnum.incart{
+.tooltip_filter_info {
+    float: right;
+}
+
+td.cartnum.incart {
     background-color:grey;
     color:white;
 }
 
-
-
-tr:not(.someInCart).ckbx:has(.fa-cart-shopping){
-    background-color:transparent;
-}
-.cart-info-tip.case1{
-    background-color:green;
-}
-
-
-.cart-info-tip.case2{
-    background-color:yellow;
-}
-
-.cart-info-tip.case3{
+tr:not(.someInCart).ckbx:has(.fa-cart-shopping) {
     background-color:transparent;
 }
 
-#projects_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping
-{
+.cart-info-tip.case1 {
     background-color:green;
 }
 
-#projects_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping
-{
+.cart-info-tip.case2 {
     background-color:yellow;
 }
 
+.cart-info-tip.case3 {
+    background-color:transparent;
+}
 
-#cases_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping
-{
+#projects_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping {
     background-color:green;
 }
 
-#cases_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping
-{
+#projects_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping {
     background-color:yellow;
 }
 
-#studies_table tr.someInCart:not(.extraInFilt) .ckbx .fa-cart-shopping
-{
+#cases_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping {
     background-color:green;
 }
 
-#studies_table tr.someInCart.extraInFilt .ckbx .fa-cart-shopping
-{
+#cases_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping {
     background-color:yellow;
 }
 
-
-#series_table tr.someInCart .ckbx .fa-cart-shopping
-{
+#studies_table tr.someInCart:not(.extraInFilt) .ckbx .fa-cart-shopping {
     background-color:green;
+}
 
+#studies_table tr.someInCart.extraInFilt .ckbx .fa-cart-shopping {
+    background-color:yellow;
+}
+
+#series_table tr.someInCart .ckbx .fa-cart-shopping {
+    background-color:green;
 }
 
 .curfilt {
   background-color: lightgrey;
 }
 
-.filts:not(.curfilt):hover{
+.filts:not(.curfilt):hover {
     text-decoration:underline;
-                    }
+}
 
-
-
-.filtermoddisp{
+.filtermoddisp {
     display:block !important;
     visibility: visible;
     z-index:1050;
 }
 
-
-.filternotdisp{
-
+.filternotdisp {
     z-index:-1;
 }
-li.cartlist{
+
+li.cartlist {
     display: list-item !important;
   list-style-position: inside !important;
 }
@@ -683,76 +700,36 @@ li.cartlist{
   max-width: 960px; // Optional, maximum width
 }
 
-
-
 .ckbx:has(.fa-caret-right){
   font-size:18px;
     text-align:center;
     vertical-align: middle !important;
 }
 
-
-/*
- .ckbx:has(.fa-cart-shopping) {
-    #border: solid 1px #000;
-    border-radius: 12px;
-    #padding: 5px;
-     font-size: 18px;
-     text-align:center;
-    box-shadow: inset 0 0 0 0.5px grey;
-     vertical-align: middle !important;
-
-}*/
-
- .ckbx .fa-cart-shopping {
+.ckbx .fa-cart-shopping {
     #border: solid 1px #000;
     border-radius: 7px;
     padding: 4px 5px;
-     font-size: 13px;
-     text-align:center;
+    font-size: 13px;
+    text-align:center;
     box-shadow: inset 0 0 0 0.5px grey;
-     vertical-align: middle !important;
-
+    vertical-align: middle !important;
 }
 
  .cart-info-tip {
- #border: solid 1px #000;
     border-radius: 7px;
     padding: 4px 5px;
-     font-size: 13px;
-     text-align:center;
+    font-size: 13px;
+    text-align:center;
     box-shadow: inset 0 0 0 0.5px grey;
-     vertical-align: middle !important;
-
+    vertical-align: middle !important;
  }
 
- .cart-info-div{
- margin-bottom:10px !important;
- }
+.cart-info-div{
+    margin-bottom:10px !important;
+}
 
-
- tbody .cartnum {
-     #font-size: 11.2px !important;
-     #font-weight: 500 !important;
-     #border-radius: 7px !important;
-     #line-height: 16px !important;
-     #text-align: right !important;
-     #padding-botton: 2px !important;
-     #padding-left: 5px !important;
-     #padding-right: 5px !important;
-     #padding-top: 2px !important;
-     #text-size-adjust: 100% !important;
-     #padding: 2px 5px !important;
-
-     #color:white;
-     #background-color: #818181 !important;
-     #padding-top: 20px;
-     #vertical-align: middle !important;
-
- }
-
-
- .cartnum_style {
+.cartnum_style {
     background-color: #818181;
     color: white;
     color: white;
@@ -760,25 +737,19 @@ li.cartlist{
     font-size: 11.2px;
     padding: 4px 5px;
     text-align: right;
-     vertical-align: middle;
-     font-weight:500;
+    vertical-align: middle;
+    font-weight:500;
 }
 
-
-
-
- .cohort-summary{
+.cohort-summary{
      font-size: 16px !important;
      color: #2A537A !important;
      padding-left: 2px !important;
-
-
  }
 
  thead .cart-info {
      text-align: center !important;
      font-size: 18px;
-
  }
 
 #export-manifest-modal .modal-dialog {
@@ -794,11 +765,7 @@ li.cartlist{
 }
 
 
+#projects_table:hover, #cases_table:hover, #studies_table:hover{
+    cursor:pointer;
 
-#filter_def_copy {
-    display:inline;
-    position:relative;
-    bottom: 5px;
-    margin: 5px;
 }
-

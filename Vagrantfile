@@ -32,6 +32,7 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder "../IDC-Common", "/home/vagrant/www/IDC-Common"
 
   config.vm.provision :shell, inline: "echo 'source /home/vagrant/www/shell/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
+  config.vm.provision :shell, inline: "if [[ -d /vagrant ]]; then echo \"/vagrant is linked to /home/vagrant/www\"; else ln -s /home/vagrant/www /vagrant; fi;", :run => 'always'
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'
