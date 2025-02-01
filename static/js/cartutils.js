@@ -180,12 +180,13 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
     // calculate the tot # of projects, cases, studies, and series in the cart
     const getGlobalCounts = function(){
+        // TODO: call Solr to get counts from facet based on partition
         tots=[0,0,0,0]
         for (projid in window.projstudymp){
             for (studyid in window.projstudymp[projid]){
                 if (studyid in window.glblcart){
                     tots[0]++;
-                    break;;
+                    break;
 
                 }
             }
@@ -256,6 +257,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     };
 
     const updateTableCountsAndGlobalCartCounts = function(){
+        let started = Date.now();
         window.updateTableCounts();
         var gtotals = getGlobalCounts();
         var content = "Cart contents: " + gtotals[3]+" series from "+gtotals[0]+" collections / "+ gtotals[1]+" cases / "+gtotals[2]+ " studies";
@@ -275,6 +277,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             $('.cart-view').attr('disabled','disabled');
             $('.clear-cart').attr('disabled','disabled');
         }
+        let elapsed = (Date.now()-started)/1000;
+        console.debug(`Elapsed time for updateTableCountsAndGlobalCartCounts: ${elapsed}s`);
     }
 
     // remove all items from the cart. clear the glblcart, carHist, cartDetails
@@ -314,7 +318,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         var curPageid= window.cartHist[curInd]['pageid'];
         var selections = window.cartHist[curInd]['selections'];
         var selection = newSel['sel'];
-
+        let started = Date.now();
         var newHistSel = new Array();
         for (var i=0;i<selections.length;i++) {
             var curselection = selections[i]['sel'];
@@ -339,6 +343,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
         var projid = newSel['sel'][0];
         updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource).then(function(){
+            let elapsed = (Date.now()-started)/1000;
+            console.debug(`Elapsed time for updateCartSelections: ${elapsed}s`);
             completeObj && completeObj.trigger('shopping-cart:update-complete');
         });
     }
@@ -346,7 +352,10 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     const updateCartAndCartMetrics = function(addingToCart,projid,studymp,updateSource){
         let deferred = $.Deferred();
         if (updateSource == 'project' && addingToCart){
-            updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries'], 0, window.selProjects[projid]['mxstudies'] ).then(function(){
+            updateProjStudyMp(
+                [projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries'],
+                0, window.selProjects[projid]['mxstudies']
+            ).then(function(){
                 updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
                 updateTableCountsAndGlobalCartCounts();
                 deferred.resolve();

@@ -567,6 +567,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     // defines the studymp for selected projects(collections). Also adds data to the window.casestudymp and window.studymp.
     // Called when the user clicks a cart OR a chevron in the projects(collections) table
     window.updateProjStudyMp = function(projidA, mxStudies, mxSeries, offset, limit) {
+        let started = Date.now();
         var curFilterObj = JSON.parse(JSON.stringify(filterutils.parseFilterObj()));
         $(document).trigger('study-map:update-started');
         curFilterObj.collection_id = projidA;
@@ -623,6 +624,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     alert("There was an error processing the server data. Please alert the systems administrator")
                 } finally {
                     deferred.resolve('studymp');
+                    let elapsed = (Date.now()-started)/1000;
+                    console.debug(`Elapsed time for updateProjectStudyMp: ${elapsed}s`);
                     $(document).trigger('study-map:update-complete');
                 }
             }, error: function () {
