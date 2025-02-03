@@ -371,7 +371,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         cartSel['selections']= new Array();
         cartSel['partitions']= new Array();
         window.cartHist.push(cartSel);
-        setLocalFromCartHistWin();
+        //setLocalFromCartHistWin();
         window.partitions = new Array();
         window.cartStep=0
         window.cartDetails = 'Current filter definition is '+JSON.stringify(parsedFiltObj)+'\n\n'
