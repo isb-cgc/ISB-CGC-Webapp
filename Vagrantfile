@@ -28,6 +28,9 @@ Vagrant.configure(2) do |config|
   config.vm.network "forwarded_port", guest: 8090, host: 8090
   config.vm.network "forwarded_port", guest: 9000, host: 9000
 
+  # Use 2300 and not 2200 to prevent collisions
+  config.vm.network "forwarded_port", guest: 22, host: 2300, id: "ssh"
+
   config.vm.synced_folder ".", "/home/vagrant/www"
   config.vm.synced_folder "../", "/home/vagrant/parentDir"
   config.vm.synced_folder "../secure_files", "/home/vagrant/secure_files"
