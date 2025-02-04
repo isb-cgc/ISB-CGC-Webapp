@@ -27,9 +27,18 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
-        bootstrap: 'libs/bootstrap.bundle.min'
+        bootstrap: 'libs/bootstrap.bundle.min',
+        tippy: 'libs/tippy-bundle.umd',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'typeahead':{
             deps: ['jquery'],
             init: function ($) {
@@ -55,11 +64,12 @@ require([
     'bloodhound',
     'underscore',
     'base',
+    'tippy',
     'typeahead',
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
+], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base, tippy) {
 
     var SELECTED_FILTERS = {};
 
@@ -1406,6 +1416,18 @@ require([
     let token = new Date().getTime();
     $('.export-token, .download-token').val(token);
     $('.download-ids-btn').attr('href',$('.download-ids-btn').attr('href')+'?downloadToken='+token);
+
+    tippy('.version-info',{
+        content: function(ref) {
+            return data_version_info.join("<br />\n");
+        },
+        theme: 'light',
+        placement: 'right',
+        interactive:true,
+        arrow: false,
+        trigger: "click",
+        allowHTML:true,
+    });
 
 });
 

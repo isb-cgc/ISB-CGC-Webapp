@@ -4185,16 +4185,9 @@ span.code {
   font-size: 25px;
   text-align: center; }
 
-/********************************************
- * IGV Styles
- *******************************************/
-#igv .header-igv-logo {
-  height: 55px; }
-
-#igv table.info-table {
-  margin-bottom: 15px; }
-  #igv table.info-table td:last-child {
-    padding: 0px 10px; }
+.version-info:hover {
+  cursor: pointer;
+}
 
 #video-tutorials .vid-desc-text {
   color: dimgrey; }
