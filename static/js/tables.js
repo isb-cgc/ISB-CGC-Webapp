@@ -331,29 +331,29 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         for (var collecid = 0;collecid<collectionData.length;collecid++) {
             var cur = collectionData[collecid];
             var projid = cur[0];
-            var stats = {}
+            var lclstats = {}
             if (('patient_per_collec' in collectionStats) && (projid in collectionStats['patient_per_collec'])) {
-                stats['mxcases'] = collectionStats['patient_per_collec'][projid]
-                stats['cases_in_filter'] = collectionStats['patient_per_collec'][projid]
+                lclstats['mxcases'] = collectionStats['patient_per_collec'][projid]
+                lclstats['cases_in_filter'] = collectionStats['patient_per_collec'][projid]
             } else {
-                stats['mxcases'] = 0
-                stats['cases_in_filter']=0
+                lclstats['mxcases'] = 0
+                lclstats['cases_in_filter']=0
             }
             if (('study_per_collec' in collectionStats) && (projid in collectionStats['study_per_collec'])) {
-                stats['mxstudies'] = collectionStats['study_per_collec'][projid]
-                stats['studies_in_filter'] = collectionStats['study_per_collec'][projid];
+                lclstats['mxstudies'] = collectionStats['study_per_collec'][projid]
+                lclstats['studies_in_filter'] = collectionStats['study_per_collec'][projid];
             } else {
-                stats['mxstudies'] = 0;
-                stats['studies_in_filter']=0
+                lclstats['mxstudies'] = 0;
+                lclstats['studies_in_filter']=0
             }
             if (('series_per_collec' in collectionStats) && (projid in collectionStats['series_per_collec'])) {
-                stats['mxseries'] = collectionStats['series_per_collec'][projid]
-                stats['series_in_filter']=collectionStats['series_per_collec'][projid];
+                //stats['mxseries'] = collectionStats['series_per_collec'][projid]
+                lclstats['series_in_filter']=collectionStats['series_per_collec'][projid];
             } else {
-                stats['mxseries'] = 0
-                stats['series_in_filter'] =0;
+                lclstats['mxseries'] = 0
+                lclstats['series_in_filter'] =0;
             }
-
+            lclstats['mxseries']=stats['series_per_collec'][projid]
 
             var items = ["cases", "studies", "series"]
             for (var itemid = 0; itemid < 3; itemid++) {
@@ -361,31 +361,31 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     if (projid in cartStats) {
 
                     if ((projid in cartStats) && ('unique_' + item in cartStats[projid])) {
-                        stats[item + "_in_filter"] = cartStats[projid]['unique_' + item ]
+                        lclstats[item + "_in_filter"] = cartStats[projid]['unique_' + item ]
                     } else {
-                        stats[item + "_in_filter"] = 0;
+                        lclstats[item + "_in_filter"] = 0;
                     }
                     if ((projid in cartStats) && ('unique_' + item + '_cart' in cartStats[projid])) {
-                        stats[item + "_in_cart"] = cartStats[projid]['unique_' + item + '_cart'];
+                        lclstats[item + "_in_cart"] = cartStats[projid]['unique_' + item + '_cart'];
                     } else {
-                        stats[item + "_in_cart"] = 0
+                        lclstats[item + "_in_cart"] = 0
                     }
                     if ((projid in cartStats) && ('unique_' + item + '_filter_and_cart' in cartStats[projid])) {
-                        stats[item + '_in_filter_and_cart'] = cartStats[projid]['unique_' + item + '_filter_and_cart'];
+                        lclstats[item + '_in_filter_and_cart'] = cartStats[projid]['unique_' + item + '_filter_and_cart'];
                     } else {
-                        stats[item + '_in_filter_and_cart'] = 0;
+                        lclstats[item + '_in_filter_and_cart'] = 0;
                     }
 
                    }
 
                   else{
-                  stats[item + '_in_cart'] = 0;
-                  stats[item + '_in_filter_and_cart'] = 0;
+                  lclstats[item + '_in_cart'] = 0;
+                  lclstats[item + '_in_filter_and_cart'] = 0;
                   //stats[item + '_in_filter'] = 0;
                   }
             }
 
-            var ncur=[cur[0], stats["series_in_cart"], cur[0], cur[1],cur[2],cur[3],stats];
+            var ncur=[cur[0], lclstats["series_in_cart"], cur[0], cur[1],cur[2],cur[3],lclstats];
             newCollectionData.push(ncur);
         }
         //newCollectionData.sort((a,b) => a[0].localeCompare(b[0]))
@@ -1402,23 +1402,25 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     var PatientID=data['PatientID'];
                     var studyid= data['StudyInstanceUID'];
                     var seriesid = data['SeriesInstanceUID'];
+                    var incart = data['unique_series_cart'];
+                    if (incart>0){
+                        $(row).addClass('someInCart');
+                    }
+                    else{
+                        $(row).removeClass('someInCart');
+                    }
+
+
 
 
                      $(row).find('.shopping-cart').parent().on('click', function(event){
                          $(row).find('.shopping-cart-holder').trigger('shopping-cart:update-started');
-                         setTimeout(function(){
                             var elem = event.target;
                             if ($(elem).hasClass('ckbx')){
                                 elem=$(elem).find('.shopping-cart')[0];
                             }
-                            var addingToCart = true;
-                            if ($(elem).parentsUntil('tr').parent().hasClass('someInCart')) {
-                                addingToCart = false;
-                            } else {
-                                addingToCart = true;
-                            }
+                             handleCartClick("series", row, elem, [collection_id,PatientID,studyid, seriesid]);
 
-                         }, 100);
                     });
                  },
                 "columnDefs": [
@@ -1586,6 +1588,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 ndic['sortdir'] = request.order[0].dir;
                             }
                         }
+                         ndic['partitions'] = JSON.stringify(window.partitions);
+                        ndic['filtergrp_list'] = JSON.stringify(window.filtergrp_list);
                         var csrftoken = $.getCookie('csrftoken');
                         $.ajax({
                             url: url,
@@ -1655,7 +1659,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     }
 
      const propagateCartTableStatChangesUpstream = function(numadded, ids){
-        var tableset = ["projects_table","cases_table","studies"];
+
+        var addedupstream=[0,0,0]
+        var tableset = ["projects_table","cases_table","studies_table"];
         for (var i=0;i<ids.length-1;i++){
 
             var tbl= tableset[i];
@@ -1676,6 +1682,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                if (this.hasAttribute("series_in_filter_and_cart")){
                    inboth = parseInt($(this).attr("series_in_filter_and_cart"));
                }
+               if ((incart ==0) && (numadded >0)){
+                   addedupstream[i]=1
+               }
+               else if (incart +numadded ==0){
+                   addedupstream[i]=-1
+               }
+
                $(this).attr("series_in_cart", (incart+numadded).toString());
                $(this).attr("series_in_filter_and_cart", (inboth+numadded).toString());
                $(this).find('.cartnum').text((incart+numadded).toString());
@@ -1705,6 +1718,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             });
 
          }
+        return(addedupstream)
        }
 
 
@@ -1792,7 +1806,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         }
     }
      const propagateTableCacheCartChangesUpstream = function(numadded, ids){
-        var cacheset = ["casesCache","studiesCache"];
+        var cacheset = ["casesCache","studiesCache","seriesCache"];
         var projid=ids[0];
         var caseid=ids[1];
         var studyid;
@@ -1818,7 +1832,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     else{
                          cacheRow['unique_series_cart']=numadded;
                     }
-                    if ('unique_series_filter_and_cart' in cacheRow){
+                    if ('unique_series_filter_cart' in cacheRow){
                         cacheRow['unique_series_filter_cart']=cacheRow['unique_series_filter_cart']+numadded;
                     }
                     else{
@@ -1887,7 +1901,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     const handleCartClick = function(tabletype, row, elem, ids){
 
-
             //$(row).find('.shopping-cart-holder').trigger('shopping-cart:update-started');
              var addingToCart = true;
              if ($(elem).parentsUntil('tr').parent().hasClass('someInCart')) {
@@ -1906,21 +1919,54 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
              window.filtergrp_list = ret[1];
 
              var series_in_cart=0;
-             if (row.hasAttribute("series_in_cart")){
-                 series_in_cart=parseInt($(row).attr("series_in_cart"));
-             }
              var series_in_filter=0;
-             if (row.hasAttribute("series_in_filter")) {
-                 series_in_filter = parseInt($(row).attr("series_in_filter"));
-             }
+             var series_in_filter_not_cart=0;
              var series_in_filter_and_cart=0;
-             if (row.hasAttribute("series_in_filter_and_cart")) {
-                 series_in_filter_and_cart = parseInt($(row).attr("series_in_filter_and_cart"));
-             }
-             var series_in_filter_not_cart = series_in_filter - series_in_filter_and_cart;
-
-
              var series_added=0;
+             var mxseries=1;
+
+             if (tabletype=="series"){
+                 if (addingToCart){
+                     mxseries=1;
+                     series_in_cart=0;
+                     series_in_filter_not_cart=1;
+                     series_in_filter_and_cart=0;
+                 }
+                 else{
+                     mxseries=1;
+                     series_in_cart=1;
+                     series_in_filter_not_cart=0;
+                     series_in_filter_and_cart=1;
+                 }
+             }
+
+             else {
+
+                 if (row.hasAttribute("mxseries")) {
+                     mxseries = parseInt($(row).attr("mxseries"));
+                 }
+                 else if (row.hasAttribute("series_in_filter")) {
+                     mxseries = parseInt($(row).attr("series_in_filter"));
+                 }
+                 else {
+                     mxseries=1;
+                 }
+                 if (row.hasAttribute("series_in_cart")) {
+                     series_in_cart = parseInt($(row).attr("series_in_cart"));
+                 }
+
+                 if (row.hasAttribute("series_in_filter")) {
+                     series_in_filter = parseInt($(row).attr("series_in_filter"));
+                 }
+
+                 var series_in_filter_and_cart = 0;
+                 if (row.hasAttribute("series_in_filter_and_cart")) {
+                     series_in_filter_and_cart = parseInt($(row).attr("series_in_filter_and_cart"));
+                 }
+                  series_in_filter_not_cart = series_in_filter - series_in_filter_and_cart;
+
+             }
+
              if (addingToCart){
                   series_in_cart = series_in_filter_not_cart + series_in_cart;
                   series_in_filter_and_cart = series_in_filter_not_cart + series_in_filter_and_cart;
@@ -1933,7 +1979,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                  if (tabletype=="collections"){
                      window.proj_in_cart[ids[0]]=parseInt($(row).attr("series_in_cart"));;
                  }
-                 if (($(row).attr("series_in_cart"))<($(row).attr("series_in_cart"))){
+                 if (($(row).attr("series_in_cart"))<($(row).attr("mxseries"))){
                      $(row).addClass('extraInItem');
                  }
                  else{
@@ -1970,6 +2016,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
              cartutils.updateCartCounts();
 
     };
+
     const handleRowClick =  function(tabletype, row, event, ids){
         let elem = event.target;
         if ($(elem).hasClass('collection_info')) {
