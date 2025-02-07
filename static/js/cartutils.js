@@ -306,7 +306,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         return deferred.promise();
     };
 
-
     const updateCartCounts =function(){
         if (Object.keys(window.proj_in_cart).length>0){
             var nmprojs = 0;
@@ -315,26 +314,21 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 nmprojs++;
                 nmseries=nmseries+window.proj_in_cart[projid];
             }
-
+            localStorage.setItem('manifestSeriesCount',nmseries);
             var content = "Cart contents: " + nmseries.toString()+" series from "+nmprojs.toString()+" collections ";
 
-
-        $('#cart_stats').html(content) ;
+            $('#cart_stats').html(content) ;
             $('#cart_stats').removeClass('empty-cart');
             $('#export-manifest-cart').removeAttr('disabled');
             $('.cart-view').removeAttr('disabled');
             $('.clear-cart').removeAttr('disabled');
-
-        }
-        else {
-
+        } else {
             $('#cart_stats').addClass('empty-cart');
             $('#cart_stats').html("Your cart is currently empty.");
             $('#export-manifest-cart').attr('disabled', 'disabled');
             $('.cart-view').attr('disabled', 'disabled');
             $('.clear-cart').attr('disabled', 'disabled');
         }
-
     }
     const updateTableCountsAndGlobalCartCounts = function(){
         window.updateTableCounts();
@@ -383,7 +377,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
          $('#export-manifest-cart').attr('disabled','disabled');
          $('.cart-view').attr('disabled','disabled');
          $('.clear-cart').attr('disabled','disabled');
-
     }
 
     $('.clear-cart').on('click', function(){
