@@ -2449,7 +2449,7 @@ section .min-max {
     content: "";
     background: linear-gradient(to top, white 15%, rgba(255, 255, 255, 0) 80%); }
 
-#cohort-details .details-panel, #cohort-filelist .details-panel {
+#cohort-filelist .details-panel {
   overflow: hidden;
   height: 110px; }
 

@@ -994,27 +994,6 @@ require([
 
             set_prog_filter_height(100);
         });
-
-        $('.more-details button').on('click', function () {
-            $('.more-details').hide();
-            $('.less-details').show();
-
-            $('.details-panel').animate({
-                height: ($('.cohort-info').outerHeight() +
-                    (Program_Filter_Max_Height + $('ul.rev-history').outerHeight()) * Program_Filter_Rows + 15) + 'px'
-            }, 800);
-
-            $('.creation-prog-filter-set').each(function () {
-                $(this).css('height', Program_Filter_Max_Height);
-            });
-        });
-        $('.less-details button').on('click', function () {
-            $('.less-details').hide();
-            $('.more-details').show();
-            $('.details-panel').animate({
-                height: '110px'
-            }, 800);
-        });
     }
 
     // Delegated event: Check All and Uncheck All buttons

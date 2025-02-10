@@ -123,7 +123,7 @@
                     </div>
                     <div>
                         <label>Reference Genome</label>
-                        <select class="form-control bq-select" data-column-name="referenceGenome">
+                        <select class="form-select bq-select" data-column-name="referenceGenome">
                             {% for option in reference_genome.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
