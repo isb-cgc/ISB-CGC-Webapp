@@ -248,7 +248,7 @@ body {
 }
 
 .isb-panel [class*="col-"] {
-    float: left;
+    float: left !important;
 }
 
 .isb-sign-in [class*="col-"] {
