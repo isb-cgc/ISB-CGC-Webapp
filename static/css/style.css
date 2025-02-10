@@ -2417,6 +2417,12 @@ section .min-max {
   #cohort-details .revision-filter-panel .revision-prog-filter-set, #cohort-filelist .revision-filter-panel .revision-prog-filter-set {
     height: 100%;
     padding: 0px 8px !important; }
+  #cohort-details .prog-filter-set {
+    position: relative;
+    min-height: 1px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
   #cohort-details .revision-filter-panel .prog-filter-set, #cohort-filelist .revision-filter-panel .prog-filter-set {
     border-left: 2px solid #2A537A; }
     #cohort-details .revision-filter-panel .prog-filter-set h5, #cohort-filelist .revision-filter-panel .prog-filter-set h5 {

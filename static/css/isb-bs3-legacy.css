@@ -69,7 +69,6 @@ button.close {
 }
 
 .btn.btn-info{
-
     color: #fff;
     background-color: #2B7388;
     border-color: #2B7388;
@@ -77,7 +76,6 @@ button.close {
 }
 
 .nav > li > a {
-
     #padding-bottom: 10px;
     padding-top: 10px;
     padding-left: 15px;
@@ -102,7 +100,6 @@ button.close {
     border-bottom-width: 0px!important;
     border-bottom-style: none!important;
     display: block!important;
-
 }
 
 .nav-tabs > li > a:after {
@@ -121,24 +118,24 @@ button.close {
     transform-origin: left;
     transition: transform 0.25s ease-in-out;
 }
+
  #cohort-filelist .nav-tabs > li > a.active {
      color: #a66206 !important;
  }
 
 .isb-panel, .site-header{
     background-color:white!important;
-
 }
 
 .isb-panel-default .isb-panel-heading{
         color: #2A537A;
-
 }
 
 .container{
     padding-left:0px!important;
     padding-right:0px!important;
 }
+
 body {
     background-color:#F8F8F8!important;
 }
@@ -153,7 +150,6 @@ body {
  }
 
  #landing .isb-panel-footer{
-
     padding: 5px 10px;
     font-size: 14px;
     border-radius: 10px;
@@ -161,7 +157,7 @@ body {
     align-items: stretch;
     display: flex;
     flex-direction: column;
-   }
+ }
 
  #landing .isb-panel {
      margin-left: auto;
@@ -180,18 +176,16 @@ body {
      display: flex
  }
 
-
  #landing .isb-panel-body {
     padding: 5px 10px;
     margin-bottom: 70px;
     min-height: 180px;
 }
+
  #landing .isb-panel-footer {
      position: absolute;
      bottom: 15px;
-
  }
-
 
  #cohort-details #placeholder .isb-panel-body, #cohort-filelist #placeholder .isb-panel-body {
     height: 210px;
@@ -200,13 +194,12 @@ body {
 }
 
 .isb-panel-default .isb-panel-body{
-    passing-top:5px;
+    padding-top:5px;
 }
 
 .isb-panel-body {
     padding:15px;
 }
-
 
 .widen-landing-page{
     --bs-gutter-x: 1.5rem;
@@ -214,12 +207,10 @@ body {
      margin-left: calc(  (var(--bs-gutter-x) * -0.5))!important;
 }
 
-
 .row-in-row{
      margin-left:0px!important;
      margin-right:0px!important;
  }
-
 
 .row:not(.row-in-row){
     margin-left:-15px!important;
@@ -250,11 +241,30 @@ body {
     padding-right:15px!important;
 }
 
-
-
 .width-spec{
     --bs-gutter-x: 1.0rem;
     padding-left: calc(  (var(--bs-gutter-x) * 0.6))!important;
     padding-right: calc(  (var(--bs-gutter-x) * 0.6))!important;
+}
+
+.isb-panel [class*="col-"] {
+    float: left;
+}
+
+.isb-sign-in [class*="col-"] {
+    float: left !important;
+}
+
+.btn-primary {
+    background-color: #2A537A !important;
+}
+
+.btn-primary:hover {
+    background-color: #1d3954 !important;
+    border-color: #1a344c !important;
+}
+
+.form-select:hover {
+    cursor: pointer;
 }
 
