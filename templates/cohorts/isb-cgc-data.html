@@ -155,7 +155,7 @@
                                         Combine Mutation Filters with...
                                 </div>
                                 <div class="list-group-item__body">
-                                    <select id="p-{{ program.id }}-mut-filter-combine" class="form-control mut-filter-combine" aria-labelledby="p-{{ program.id }}-heading-and-or-filters">
+                                    <select id="p-{{ program.id }}-mut-filter-combine" class="form-select mut-filter-combine" aria-labelledby="p-{{ program.id }}-heading-and-or-filters">
                                         <option value="and" title="Filters will be combined using AND" selected>AND (Require all filters)</option>
                                         <option value="or" title="Filters will be combined using OR">OR (Require one or more filters)</option>
                                     </select>
@@ -187,7 +187,7 @@
                                                 </div>
                                                 <div id="p-{{ program.id }}-sel-build" class="list-group-item__body sel-build" role="tabpanel" aria-labelledby="p-{{ program.id }}-heading-sel-build">
                                                     {% if molecular_attr_builds|length > 1 %}
-                                                        <select id="p-{{ program.id }}-mutation-build" class="form-control mutation-build" aria-labelledby="p-{{ program.id }}-heading-sel-build">
+                                                        <select id="p-{{ program.id }}-mutation-build" class="form-select mutation-build" aria-labelledby="p-{{ program.id }}-heading-sel-build">
                                                             {% for build in molecular_attr_builds %}
                                                                 <option value="{{ build.value }}" data-bq-table="{{ build.displ_text }}" title="BQ table: {{ build.displ_text }}" {% if build.value == 'HG19' %}selected{% endif %}>{{ build.value }}</option>
                                                             {% endfor %}
@@ -226,7 +226,7 @@
                                             <div id="p-{{ program.id }}-sel-molecular-attr-cat" class="list-group-item__body cohort-feature-select-block" role="tabpanel"
                                                  aria-labelledby="p-{{ program.id }}-heading-sel-molecular-attr-cat" data-feature-displ-name="Mutation Category" data-feature-id="category"
                                                  data-feature-name="mutation-category" data-feature-type="molecular">
-                                                <select id="p-{{ program.id }}-mutation-category" class="mutation-category-selector form-control" aria-labelledby="p-{{ program.id }}-heading-sel-molecular-attr-cat">
+                                                <select id="p-{{ program.id }}-mutation-category" class="mutation-category-selector form-select" aria-labelledby="p-{{ program.id }}-heading-sel-molecular-attr-cat">
                                                     <option value="label" disabled selected>-- Select a Category --</option>
                                                     <option value="any" data-value-displ-name="Any" data-value-name="Any" data-value-id="any">Any</option>
                                                     {% for cat in molecular_attr.categories %}
