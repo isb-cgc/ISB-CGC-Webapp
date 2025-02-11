@@ -247,11 +247,11 @@ body {
     padding-right: calc(  (var(--bs-gutter-x) * 0.6))!important;
 }
 
-.isb-panel [class*="col-"] {
+.isb-panel [class*="col-lg-"], .isb-panel [class*="col-sm-"], .isb-panel [class*="col-md-"] {
     float: left !important;
 }
 
-.isb-sign-in [class*="col-"] {
+.isb-sign-in [class*="col-lg-"], .isb-panel [class*="col-md-"], .isb-panel [class*="col-sm-"] {
     float: left !important;
 }
 
