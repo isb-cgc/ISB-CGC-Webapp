@@ -161,10 +161,19 @@ require([
         } else {
             let filter_token = $this.closest('span.filter-token');
             feature_id = filter_token.attr('data-feature-id'), value_id = filter_token.attr('data-value-id');
-            let checkbox = $('.data-tab.active .filter-panel input[type="checkbox"][data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]');
-            filter_token.remove();
-            checkbox.prop('checked', false);
-            update_filters(checkbox);
+            if(feature_id == 'case_barcode') {
+                filter_token.remove();
+                let this_tab = $('.data-tab.active');
+                let dataTabType = this_tab.attr('data-file-type');
+                let search_input = this_tab.find('.case-barcode-search-text');
+                search_input.val("");
+                search_case_barcode(dataTabType, search_input.val());
+            } else {
+                let checkbox = $('.data-tab.active .filter-panel input[type="checkbox"][data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]');
+                filter_token.remove();
+                checkbox.prop('checked', false);
+                update_filters(checkbox);
+            }
         }
         !withoutDisplayUpdates && update_displays();
     };
@@ -661,17 +670,46 @@ require([
     });
 
     $('.data-tab-content').on('click', '.case-barcode-search-btn', function () {
-        var this_tab = $(this).parents('.data-tab').data('file-type');
-        var search_input = $(this).siblings('.case-barcode-search-text');
+        let this_tab = $(this).parents('.data-tab');
+        let dataTabType = this_tab.attr('data-file-type');
+        let selFilterPanel = '.selected-filters-' + dataTabType;
+        let this_tab_id = this_tab.attr('id');
+        let search_input = $(this).siblings('.case-barcode-search-text');
         search_input.val(search_input.val().trim());
-        search_case_barcode(this_tab, search_input.val());
+        let case_vals = this_tab.find('.case-barcode-search-text').val().split("\s+").join("; ");
+        let token = this_tab.find(selFilterPanel+' .isb-panel-body span[data-feature-id="case_barcode"]');
+        if(token.length > 0) {
+            token.remove();
+        }
+
+        token = $('<span>').data({
+            'feature-id': 'case_barcode',
+            'feature-name': 'Case Barcode',
+            'value-id': case_vals,
+            'value-name': case_vals
+        }).attr('data-feature-id','case_barcode').attr('data-value-id',case_vals).addClass(this_tab_id+'-token filter-token');
+
+        token.append(
+            $('<a>').addClass('delete-x filter-label label label-default')
+                .text('Case Barcode' + ': ' + case_vals)
+                .append('<i class="fa fa-times">')
+                .attr("title", 'Case Barcode' + ': ' + case_vals)
+        );
+        $(selFilterPanel + ' .isb-panel-body').append(token);
+        search_case_barcode(dataTabType, search_input.val());
     });
 
     $('.data-tab-content').on('click', '.case-barcode-search-clear-btn', function () {
-        var this_tab = $(this).parents('.data-tab').data('file-type');
-        var search_input = $(this).siblings('.case-barcode-search-text');
+        let this_tab = $(this).parents('.data-tab');
+        let search_input = $(this).siblings('.case-barcode-search-text');
+        let dataTabType = this_tab.attr('data-file-type');
+        let selFilterPanel = '.selected-filters-' + dataTabType;
+        let token = this_tab.find(selFilterPanel+' .isb-panel-body span[data-feature-id="case_barcode"]');
+        if(token.length > 0) {
+            token.remove();
+        }
         search_input.val("");
-        search_case_barcode(this_tab, search_input.val());
+        search_case_barcode(dataTabType, search_input.val());
     });
 
     function search_case_barcode(tab, search_input_val){
