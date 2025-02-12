@@ -35,19 +35,22 @@ commands:
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC}
               BUCKET="${DEPLOYMENT_BUCKET_ISB_CGC}/${TIER,,}"
               KEY=${DEPLOYMENT_KEY_ISB_CGC}
+              echo "Using production project with related deployment SA and bucket."
             elif [[ ${TIER} == "UAT" ]]; then
               KEY=${DEPLOYMENT_KEY_ISB_CGC_UAT}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_UAT}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_UAT}
               BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_UAT}
+              echo "Using UAT project with related deployment SA and bucket."
             elif [[ ${TIER} == "TEST" ]]; then
               KEY=${DEPLOYMENT_KEY_ISB_CGC_TEST}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_TEST}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_TEST}
               BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_TEST}
+              echo "Using test project with related deployment SA and bucket."
             elif [[ ${TIER} == "EXPR" ]]; then
               DEPLOYMENT_CONFIG=expr.deployment_config.txt
-              echo "Using experimental project and related deployment SA and bucket."
+              echo "Using development/default project with related deployment SA and bucket for experimental deployment config."
             elif [[ ${TIER} == "DEV" ]]; then
               echo "Using default deployment configuration for tier ${TIER}"
             else
