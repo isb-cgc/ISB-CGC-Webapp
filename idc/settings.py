@@ -75,6 +75,8 @@ print("Allowed hosts are: {}".format(ALLOWED_HOSTS))
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
+APPEND_SLASH = bool(os.environ.get('APPEND_SLASH', 'True') == 'True')
+
 ADMINS                  = ()
 MANAGERS                = ADMINS
 
@@ -264,7 +266,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 
 )
-
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
@@ -659,11 +660,11 @@ SOLR_CERT           = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCA
 DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
 
-# Explicitly check for known problems in descrpitions and names provided by users
+# Explicitly check for known problems in descriptions and names provided by users
 DENYLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 ATTRIBUTE_DISALLOW_RE = r'([^a-zA-Z0-9_])'
 
-if DEBUG and DEBUG_TOOLBAR:
+if DEBUG and DEBUG_TOOLBAR and not IS_APP_ENGINE:
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware',)
     DEBUG_TOOLBAR_PANELS = [
