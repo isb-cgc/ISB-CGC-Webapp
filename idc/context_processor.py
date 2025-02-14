@@ -6,7 +6,6 @@ def additional_context(request):
     return {
             'SITE_GOOGLE_ANALYTICS_TRACKING_ID': settings.SITE_GOOGLE_ANALYTICS_TRACKING_ID,
             'SITE_GOOGLE_ANALYTICS': settings.SITE_GOOGLE_ANALYTICS,
-            'USER_DATA_ON': settings.USER_DATA_ON,
             'BASE_URL': settings.BASE_URL,
             'BASE_API_URL': settings.BASE_API_URL,
             'STATIC_FILES_URL': settings.STATIC_URL,
