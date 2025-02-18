@@ -157,7 +157,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
     // remove all items from the cart. clear the glblcart, carHist, cartDetails
     window.resetCart = function(){
-
         window.cartHist = new Array();
         let cartSel = new Object();
         var parsedFiltObj = filterutils.parseFilterObj();
@@ -175,17 +174,11 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         for (var i =0; i< projs_to_clear.length;i++){
             propagateCartTableStatChanges([projs_to_clear[i]], {}, false,true);
         }
-
-<<<<<<< HEAD
-
-=======
-         window.updateTableCounts();
          $('#cart_stats').addClass('empty-cart');
          $('#cart_stats').html("Your cart is currently empty.");
          $('#export-manifest-cart').attr('disabled','disabled');
          $('.cart-view').attr('disabled','disabled');
          $('.clear-cart').attr('disabled','disabled');
->>>>>>> 601ea880e6629200128403009446949b17ecec9d
     }
 
     $('.clear-cart').on('click', function(){
