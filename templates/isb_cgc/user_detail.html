@@ -34,8 +34,8 @@
 {% block content %}
     <div class="row">
         <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="panel panel-default user-panel">
-                <div class="panel-heading">
+            <div class="isb-panel panel-default user-panel">
+                <div class="isb-panel-heading">
                     {% if not unconnected_local_account %}
                         <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
                     {% endif %}
@@ -44,7 +44,7 @@
                         Personal Details
                     </h5>
                 </div>
-                <div class="panel-body">
+                <div class="isb-panel-body">
                     <table class="user-info" role="presentation">
                         <tr>
                             {% if not unconnected_local_account %}
@@ -75,8 +75,8 @@
             </div>
         </div>
         <div class="col-lg-4 col-md-3 col-sm-12">
-            <div class="panel panel-default gcp-panel">
-                <div class="panel-heading">
+            <div class="isb-panel panel-default gcp-panel">
+                <div class="isb-panel-heading">
                     <h5>
                         <i class="fa fa-cloud" aria-hidden="true"></i> Google Cloud Platform
                         <a class="float-right" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html#google-cloud-project-setup-and-data-access"
@@ -85,7 +85,7 @@
                     </h5>
 
                 </div>
-                <div class="panel-body">
+                <div class="isb-panel-body">
                     {% if True %}
                         <label>Google Cloud Credits</label>
                         <div>
@@ -124,13 +124,13 @@
             </div>
         </div>
         <div class="col-lg-4 col-md-3 col-sm-12">
-            <div class="panel panel-default account-management-panel">
-                <div class="panel-heading">
+            <div class="isb-panel panel-default account-management-panel">
+                <div class="isb-panel-heading">
                         <h5>
                             Account Management
                         </h5>
                 </div>
-                <div class="panel-body">
+                <div class="isb-panel-body">
                         {% if unconnected_local_account %}
                         <p>
                             <a href="{% url 'account_change_password' %}" target="_blank" rel="noopener noreferrer">Change Your Password</a>
