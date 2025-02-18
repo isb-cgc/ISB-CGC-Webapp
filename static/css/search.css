@@ -660,11 +660,11 @@ tr:not(.someInCart).ckbx:has(.fa-cart-shopping) {
     background-color:yellow;
 }
 
-#studies_table tr.someInCart:not(.extraInFilt) .ckbx .fa-cart-shopping {
+#studies_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping {
     background-color:green;
 }
 
-#studies_table tr.someInCart.extraInFilt .ckbx .fa-cart-shopping {
+#studies_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping {
     background-color:yellow;
 }
 

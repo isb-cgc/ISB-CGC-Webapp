@@ -145,7 +145,7 @@ require([
              navelem.attr('href', 'javascript:window.history.back()')
          }
          window.mxseries = parseInt(JSON.parse(document.getElementById('mxseries').textContent));
-         window.totseries = parseInt(JSON.parse(document.getElementById('totseries').textContent));
+         //window.totseries = parseInt(JSON.parse(document.getElementById('totseries').textContent));
          window.mxstudies = parseInt(JSON.parse(document.getElementById('mxstudies').textContent));
          window.cartHist = JSON.parse(document.getElementById('carthist').textContent);
 

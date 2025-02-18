@@ -683,9 +683,6 @@ require([
         createPlots('search_derived_set');
         createPlots('tcga_clinical');
 
-        /* for (project in window.selProjects) {
-            tables.initProjectData(project);
-        } */
         updateProjectTable(window.collectionData,stats,{});
 
         $('.clear-filters').on('click', function () {
@@ -832,7 +829,7 @@ require([
             updatecartedits();
         }
     }
-
+   /*
     $(document).ajaxStart(function(){
         $('.spinner').show();
     });
@@ -840,6 +837,8 @@ require([
     $(document).ajaxStop(function(){
         $('.spinner').hide();
     });
+
+    */
 
 });
 

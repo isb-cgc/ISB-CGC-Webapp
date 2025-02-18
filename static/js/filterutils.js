@@ -136,7 +136,6 @@ define(['jquery', 'base'], function($, base) {
         }
     };
 
-
     window.clear_filters = function(){
       $('#program_set').find('.search-checkbox-list').find('input:checkbox').prop('checked', false);
       $('#program_set').find('.search-checkbox-list').find('input:checkbox').prop('indeterminate', false);
@@ -144,6 +143,7 @@ define(['jquery', 'base'], function($, base) {
         $('#search_orig_set').find('.search-checkbox-list').find('input:checkbox').prop('checked', false);
 
     }
+
     window.load_filters = function(filters) {
          var sliders = [];
         _.each(filters, function(group){
@@ -280,7 +280,7 @@ define(['jquery', 'base'], function($, base) {
          return loadPending;
      }
 
-      const load_anonymous_selection_data = function() {
+     const load_anonymous_selection_data = function() {
         // Load anonymous filters from session storage and clear it, so it is not always there
         let filter_str = sessionStorage.getItem('anonymous_filters');
         ANONYMOUS_FILTERS = JSON.parse(filter_str);
@@ -299,7 +299,6 @@ define(['jquery', 'base'], function($, base) {
             $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
         });
     };
-
 
     window.addNone = function(elem, parStr, updateNow) {
             var id = parStr+$(elem).closest('.list-group-item__body')[0].id+"_rng";
@@ -330,7 +329,7 @@ define(['jquery', 'base'], function($, base) {
                 updateFacetsData(true);
             }
         }
-        
+
         const updateCollectionTotals = function(listId, progDic){
         var reformDic = new Object();
         reformDic[listId] = new Object();
@@ -713,11 +712,11 @@ define(['jquery', 'base'], function($, base) {
                 serverdata.push(getProjectCartStats(projArr));
             }
 
-
+            $('.spinner').show();
             //$.when.apply(undefined, serverdata).then(function(ret)
             promise = Promise.all(serverdata).then(function(ret)
             {
-                $('.spinner').show();
+
                 var collFilt = ret[0][0];
                 var collectionData = ret[0][1];
                 var collectionStats = ret[0][2];
@@ -759,6 +758,7 @@ define(['jquery', 'base'], function($, base) {
         return promise
     };
 
+    // sets the filter text
     const mkFiltText = function () {
 
         var isfiltered = true;
@@ -1232,8 +1232,6 @@ define(['jquery', 'base'], function($, base) {
         }
 
     }
-
-
 
 
     return {
