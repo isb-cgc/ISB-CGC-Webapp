@@ -124,7 +124,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         return deferred.promise();
     };
 
-
     const updateCartCounts =function(){
         if (Object.keys(window.proj_in_cart).length>0){
             var nmprojs = 0;
@@ -138,25 +137,22 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 nmseries=nmseries+window.proj_in_cart[projid]['series'];
             }
 
+
             var content = "Cart contents: " + nmseries.toString()+" series from "+nmprojs.toString()+" collections/"+nmcases.toString()+"cases/"+nmstudies.toString()+"studies";
+            localStorage.setItem('manifestSeriesCount',nmseries);
 
-
-        $('#cart_stats').html(content) ;
+            $('#cart_stats').html(content) ;
             $('#cart_stats').removeClass('empty-cart');
             $('#export-manifest-cart').removeAttr('disabled');
             $('.cart-view').removeAttr('disabled');
             $('.clear-cart').removeAttr('disabled');
-
-        }
-        else {
-
+        } else {
             $('#cart_stats').addClass('empty-cart');
             $('#cart_stats').html("Your cart is currently empty.");
             $('#export-manifest-cart').attr('disabled', 'disabled');
             $('.cart-view').attr('disabled', 'disabled');
             $('.clear-cart').attr('disabled', 'disabled');
         }
-
     }
 
     // remove all items from the cart. clear the glblcart, carHist, cartDetails
@@ -180,7 +176,16 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             propagateCartTableStatChanges([projs_to_clear[i]], {}, false,true);
         }
 
+<<<<<<< HEAD
 
+=======
+         window.updateTableCounts();
+         $('#cart_stats').addClass('empty-cart');
+         $('#cart_stats').html("Your cart is currently empty.");
+         $('#export-manifest-cart').attr('disabled','disabled');
+         $('.cart-view').attr('disabled','disabled');
+         $('.clear-cart').attr('disabled','disabled');
+>>>>>>> 601ea880e6629200128403009446949b17ecec9d
     }
 
     $('.clear-cart').on('click', function(){

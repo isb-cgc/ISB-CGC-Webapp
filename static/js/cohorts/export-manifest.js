@@ -125,9 +125,8 @@ require([
         $('#export-manifest-form').append('<input type="hidden" name="filter_async">')
         $('#export-manifest-form').find('input[name="filter_async"]').val( $('input[name="async_download"]').val() );
 
-
         $('input[name="async_download"]').val(
-            ((!(typeof(window.totseries) == "undefined")) && parseInt(window.totseries) > 65000) ? "True" : "False"
+            (parseInt(localStorage.getItem('manifestSeriesCount')) > 65000) ? "True" : "False"
         );
 
         let file_name = $('input[name="file_name"]');
@@ -137,10 +136,7 @@ require([
         $('#download-idc-index').addClass('iscart');
 
         $('.filter-tab.manifest-file').hide();
-         $('.filter-tab.manifest-bq').hide();
-
-
-
+        $('.filter-tab.manifest-bq').hide();
 
         update_file_names();
     }
@@ -148,19 +144,17 @@ require([
      var reset_after_cart = function(){
         $('#export-manifest-modal').find('input[name="from_cart"]').remove();
         $('#export-manifest-modal').find('input[name="partitions"]').remove();
-      $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
-      $('#export-manifest-modal').find('input[name="mxseries"]').remove();
-      $('#export-manifest-modal').find('input[name="mxstudies"]').remove();
-      $('input[name="async_download"]').val( $('#export-manifest-form').find('input[name="filter_async"]'))
-         $('#export-manifest-form').find('input[name="filter_async"]').remove();
-      $('#download-s5cmd').removeClass('iscart');
+        $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
+        $('#export-manifest-modal').find('input[name="mxseries"]').remove();
+        $('#export-manifest-modal').find('input[name="mxstudies"]').remove();
+        $('input[name="async_download"]').val( $('#export-manifest-form').find('input[name="filter_async"]'))
+             $('#export-manifest-form').find('input[name="filter_async"]').remove();
+        $('#download-s5cmd').removeClass('iscart');
         $('#download-idc-index').removeClass('iscart');
 
         $('.filter-tab.manifest-file').show();
-         $('.filter-tab.manifest-bq').show();
-
-
-      $('.modal-title').text('Export Manifest');
+        $('.filter-tab.manifest-bq').show();
+        $('.modal-title').text('Export Manifest');
     }
 
     const update_export_modal_for_mini= function(button){
@@ -222,7 +216,12 @@ require([
         update_file_names();
     };
 
-
+    var reset_after_cart = function(){
+        $('#export-manifest-modal').find('input[name="from_cart"]').remove();
+        $('#export-manifest-modal').find('input[name="partitions"]').remove();
+        $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
+        $('.modal-title').text('Export Manifest');
+    };
 
     $('#export-manifest-modal').on('hide.bs.modal', function() {
         $('input').removeAttr('name-base');
@@ -233,14 +232,6 @@ require([
             reset_after_cart()
         }
     });
-
-    var reset_after_cart = function(){
-        $('#export-manifest-modal').find('input[name="from_cart"]').remove();
-        $('#export-manifest-modal').find('input[name="partitions"]').remove();
-        $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
-        $('.modal-title').text('Export Manifest');
-    }
-
 
     $('#export-manifest-modal').on('hidden.bs.modal', function() {
       $('.manifest-file').show();
@@ -274,10 +265,8 @@ require([
     $('.get-manifest').on('click', function(e) {
          if(($(this).attr('data-export-type') === 's5cmd' || $(this).attr('data-export-type') === 'idc_index')
             &&  $(this).hasClass('iscart')) {
-
             update_export_modal_for_cart(window.partitions, window.filtergrp_lst, window.mxstudies, window.mxseries);
         }
-
         download_manifest($(this).attr("data-export-type"), $(this), e)
     });
 
