@@ -398,11 +398,6 @@ ul.errorlist {
   height: 32px;
   font-size: 29px; }
 
-.user-detail .basic-avatar {
-  width: 54px;
-  height: 54px;
-  font-size: 50px; }
-
 /********************************************
  * Handy Classes
  *******************************************/
@@ -3437,6 +3432,11 @@ span.code {
   margin: auto 5px;
   vertical-align: middle;
   height: 30px; }
+
+.user-details .basic-avatar {
+  width: 54px;
+  height: 54px;
+  font-size: 50px; }
 
 #user-details h4 {
   text-align: center; }

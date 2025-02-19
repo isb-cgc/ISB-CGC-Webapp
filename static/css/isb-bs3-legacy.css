@@ -268,3 +268,31 @@ body {
     cursor: pointer;
 }
 
+#user-details .isb-panel {
+  width: 100%;
+}
+#user-details .isb-panel-heading {
+  color: white;
+  background-color: #2b537b;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px; }
+
+#user-details .isb-panel i {
+  margin-right: 5px;
+}
+#user-details .isb-panel-body {
+  padding: 20px; }
+#user-details .row {
+  width: 100%;
+  text-align: center;
+  margin: 20px 0; }
+  #user-details .row .isb-panel {
+    display: inline-block;
+    margin: 10px 0;
+    text-align: left;
+    vertical-align: top;
+    max-width: 570px; }
+    #user-details .row .isb-panel:nth-child(2) {
+      margin: 0 15px; }
+  #user-details .row .isb-panel-heading a {
+    color: white; }
