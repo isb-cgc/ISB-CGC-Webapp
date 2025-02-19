@@ -296,3 +296,14 @@ body {
       margin: 0 15px; }
   #user-details .row .isb-panel-heading a {
     color: white; }
+
+.text-right {
+    text-align: right;
+}
+
+#user-details label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
