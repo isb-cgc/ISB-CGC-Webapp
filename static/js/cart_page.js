@@ -70,15 +70,11 @@ require([
      var ajaxtriggered = false;
 
     window.resetCartPageView = function(){
-        window.cartHist = new Array();
-        window.updatePartitionsFromScratch();
-        let ret = cartutils.formcartdata();
-        window.partitions = ret[0];
-        window.filtergrp_list = ret[1];
-        window.glblcart = new Object();
 
-        localStorage.removeItem("cartHist")
-        window.location = window.location.protocol+'//'+window.location.host+'/explore/';
+
+        localStorage.setItem("cartcleared","yes");
+        window.history.back();
+
     }
 
     tippy.delegate('#cart-table', {
@@ -135,7 +131,7 @@ require([
             }
         }
         content = "<ol>"+contentArray.join('\n')+"</ol>";
-        $('#cart-description-modal').find('.modal-body').html(content);
+        $('#cart-fdescription-modal').find('.modal-body').html(content);
     }
 
      $(document).ready(function () {

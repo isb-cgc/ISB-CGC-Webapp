@@ -1088,7 +1088,7 @@ def cart_data(request):
 
         partitions = json.loads(req.get('partitions', '{}'))
 
-        limit = int(req.get('limit', 1000))
+        limit = min(int(req.get('limit', 500)),500)
         offset = int(req.get('offset', 0))
         length = int(req.get('length', 100))
         mxseries = int(req.get('mxseries',1000))

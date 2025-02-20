@@ -216,12 +216,6 @@ require([
         update_file_names();
     };
 
-    var reset_after_cart = function(){
-        $('#export-manifest-modal').find('input[name="from_cart"]').remove();
-        $('#export-manifest-modal').find('input[name="partitions"]').remove();
-        $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
-        $('.modal-title').text('Export Manifest');
-    };
 
     $('#export-manifest-modal').on('hide.bs.modal', function() {
         $('input').removeAttr('name-base');

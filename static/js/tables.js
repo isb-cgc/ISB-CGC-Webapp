@@ -77,7 +77,7 @@ require([
 
 define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils, filterutils, tippy, $, base) {
 
-    /*
+
 
     $('#proj_table, #cases_tab, #studies_tab, #series_tab, #cart-table').on('preInit.dt', function(){
         window.show_spinner();
@@ -86,6 +86,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     $('#proj_table, #cases_tab, #studies_tab, #series_tab, #cart-table').on('draw.dt', function(){
         window.hide_spinner();
     });
+
+     /*
 
     // TODO: Adjust these to indicate cart update
     $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('shopping-cart:update-started', '.shopping-cart-holder', function(){
@@ -103,7 +105,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         window.hide_spinner();
     });
 
-     */
+   */
 
     // Update the rows in the Projects Table, clear the other tables.
     window.updateTablesAfterFilter = function (collFilt, collectionsData, collectionStats,cartStats){
@@ -131,6 +133,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $('#cases_tab').DataTable().destroy();
         $('#studies_tab').DataTable().destroy();
         $('#series_tab').DataTable().destroy();
+        updateCaseTable(false,"");
+        updateStudyTable(false,"");
+        updateSeriesTable(false,"");
 
 
     }
@@ -1471,6 +1476,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Series Instance UID:</strong><input class="seriesID_inp" type="text-box" value="'+seriesID+'"><button onclick="filterTable(\'series_tab_wrapper\',\'seriesID\')">Go</button></div>');
     }
 
+    window.resetCartInTables = function(projArr){
+         for (var i =0; i< projArr.length;i++){
+            propagateCartTableStatChanges([projArr[i]], {}, false,true);
+
+        }
+         clearCartSelectionsInCaches();
+
+    }
 
      const propagateCartTableStatChanges = function(ids, itemChng, addingToCart,purge){
 
@@ -1520,7 +1533,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 }
 
 
-                 updateTableRowCartStatsUpstream(row, itemChng, curids, lvl, addingToCart);
+                 updateTableRowCartStatsUpstream(row, itemChng, curids, lvl, addingToCart,purge);
                 });
 
             }
@@ -1528,7 +1541,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     }
 
-     const updateTableRowCartStatsUpstream = function(row,itemChng,ids, lvl,addingToCart){
+     const updateTableRowCartStatsUpstream = function(row,itemChng,ids, lvl,addingToCart,purge){
          var upstream =["collection","case","study"];
          // update row attributes
 
@@ -1555,7 +1568,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
          // if selection was made at a higher level than level being looked at. Only some series added/deleted belong to the item
          var newseries=0;
-         if (ids.length<(lvl+1)){
+         if (ids.length<(lvl+1) && !purge){
             if (addingToCart){
                 newseries=curfilt-curfiltcart;
             }
@@ -1564,12 +1577,18 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             }
          }
          // else they all belong here
-         else{
+         else if (!purge){
              newseries=itemChng['series']['added'];
          }
 
-         $(row).attr(upstreamLblCrt, curcart+newseries);
-         $(row).attr(upstreamLblFiltCrt, curfiltcart+newseries);
+         if (!purge) {
+             $(row).attr(upstreamLblCrt, curcart + newseries);
+             $(row).attr(upstreamLblFiltCrt, curfiltcart + newseries);
+         }
+         else{
+             $(row).attr(upstreamLblCrt, 0);
+             $(row).attr(upstreamLblFiltCrt, 0);
+         }
 
      }
 
@@ -1670,32 +1689,40 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     const clearCartSelectionsInCaches = function(){
         var caches = ["", "casesCache", "studiesCache", "seriesCache"];
-        var rowsToClearUpstream = ["cart_series_in_collection", "cart_studies_in_case", "cart_studies_in_study"];
-        var rowsToClearDownStream = [["unique_cases_cart", "unique_cases_filter_cart"], ["unique_studies_cart", "unique_studies_filter_cart"], ["unique_series_cart", "unique_series_filter_cart"]];
+        var rowsToClearUpstream = [["cart_series_in_collection","filter_cart_series_in_collection"], ["cart_series_in_case","filter_cart_series_in_case"], ["cart_series_in_study","filter_cart_series_in_study"]];
+        var rowsToClearDownstream = [["unique_cases_cart", "unique_cases_filter_cart"], ["unique_studies_cart", "unique_studies_filter_cart"], ["unique_series_cart", "unique_series_filter_cart"]];
         for (var cacheNum = 1; cacheNum < 4; cacheNum++) {
-            var curCache = window[caches[cacheNum]]['data'];
-            // iterate thru each row in the curCaceh
-            for (var rowid = 0; rowid < curCache.length; rowid++) {
-                var curRow = curCache[rowid];
-                for (var upid=0;upid<rowsToClearUpstream.length;upid++){
-                    var lbl = rowsToClearUpstream[upid];
-                    if (lbl in curRow){
-                        curRow[lbl]=0
+            if ((caches[cacheNum] in window) && ('data' in window[caches[cacheNum]]) ) {
+
+                var curCache = window[caches[cacheNum]]['data'];
+                // iterate thru each row in the curCaceh
+                for (var rowid = 0; rowid < curCache.length; rowid++) {
+                    var curRow = curCache[rowid];
+                    for (var upid = 0; upid < rowsToClearUpstream.length; upid++) {
+                        var lbl1 = rowsToClearUpstream[upid][0];
+                        if (lbl1 in curRow) {
+                            curRow[lbl1] = 0
+                        }
+                        var lbl2 = rowsToClearUpstream[upid][1];
+                        if (lbl2 in curRow) {
+                            curRow[lbl2] = 0
+                        }
+
                     }
+
+                    for (var dwnid = 0; dwnid < rowsToClearDownstream.length; dwnid++) {
+                        var lbl1 = rowsToClearDownstream[dwnid][0];
+                        if (lbl1 in curRow) {
+                            curRow[lbl1] = 0
+                        }
+                        var lbl2 = rowsToClearDownstream[dwnid][0];
+                        if (lbl2 in curRow) {
+                            curRow[lbl2] = 0;
+                        }
+
+                    }
+
                 }
-
-                for (var dwnid=0;dwnid<rowsToClearUpstream.length;dwnid++){
-                    var lbl1 = rowsToClearDownstream[dwnid][0];
-                    if (lbl1 in curRow){
-                        curRow[lbl1]=0
-                    }
-                    var lbl2 = rowsToClearDownstream[dwnid][0];
-                    if (lbl2 in curRow){
-                        curRow[lbl2]=0;
-                    }
-
-                }
-
             }
         }
 

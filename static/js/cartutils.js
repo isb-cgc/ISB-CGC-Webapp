@@ -171,9 +171,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         var projs_to_clear = Object.keys(window.proj_in_cart);
         window.proj_in_cart= new Object();
         updateCartCounts();
-        for (var i =0; i< projs_to_clear.length;i++){
-            propagateCartTableStatChanges([projs_to_clear[i]], {}, false,true);
-        }
+        resetCartInTables(projs_to_clear);
+
          $('#cart_stats').addClass('empty-cart');
          $('#cart_stats').html("Your cart is currently empty.");
          $('#export-manifest-cart').attr('disabled','disabled');
@@ -752,6 +751,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                     ndic['aggregate_level'] = 'StudyInstanceUID'
                     ndic['results_level'] = 'StudyInstanceUID'
                     var csrftoken = $.getCookie('csrftoken');
+                    window.show_spinner();
                     $.ajax({
                         url: url,
                         dataType: 'json',
@@ -772,16 +772,19 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                              });
                              var txt =$('#cart-table_info').text().replace('entries','studies');
                              $('#cart-table_info').text(txt);
+                             window.hide_spinner();
                         },
                         error: function () {
                             console.log("problem getting data");
                             alert("There was an error fetching server data. Please alert the systems administrator");
+                            window.hide_spinner();
                         }
                     });
                 }
             });
         } catch(Exception){
             alert("The following error was reported when processing server data: "+ Exception +". Please alert the systems administrator");
+            window.hide_spinner();
         }
     }
 

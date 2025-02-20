@@ -825,9 +825,7 @@ require([
             localStorage.removeItem("cartcleared");
             window.resetCart();
         }
-        else {
-            updatecartedits();
-        }
+
     }
 
 
