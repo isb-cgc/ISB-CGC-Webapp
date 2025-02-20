@@ -138,7 +138,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             }
 
 
-            var content = "Cart contents: " + nmseries.toString()+" series from "+nmprojs.toString()+" collections/"+nmcases.toString()+"cases/"+nmstudies.toString()+"studies";
+            var content = "Cart contents: " + nmseries.toString()+" series from "+nmprojs.toString()+" collections / "+nmcases.toString()+" cases / "+nmstudies.toString()+" studies";
             localStorage.setItem('manifestSeriesCount',nmseries);
 
             $('#cart_stats').html(content) ;
