@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <form id="export-manifest-form" method="GET" data-uri-base="{{ export_uri }}" action="{{ export_uri }}">
+            <form id="export-manifest-form" method="POST" data-uri-base="{{ export_uri }}" action="{{ export_uri }}">
                 <div class="modal-body">
                     <div class="form-group list-group">
                         {% csrf_token %}
