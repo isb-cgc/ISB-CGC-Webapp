@@ -37,6 +37,7 @@ urlpatterns = [
 
     url(r'^cohort_detail/(?P<cohort_id>\d+)/$', demo_views.cohort_detail, name='cohort_detail'),
     url(r'robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name='robots'),
+    url(r'sitemap.xml', TemplateView.as_view(template_name="sitemap.xml", content_type="text/xml"), name='sitemap'),
 
     url(r'^cohorts/', include('cohorts.urls')),
     path('admin/', admin.site.urls),
