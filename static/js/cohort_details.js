@@ -650,12 +650,19 @@ require([
         let save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
         let save_changes_btn = $('button[data-bs-target="#apply-filters-modal"]');
         let save_new_cohort_btn = $('button[data-bs-target="#create-cohort-modal"]');
+        let download_ids_nologin_btn = $('.download-ids-nologin-btn');
         let log_in_to_save_btn = $('#log-in-to-save-btn');
         let totalCases = 0;
 
         $('.total-cases').each(function(){
             if($('.all-selected-filters span[data-prog-id="'+$(this).data('prog-id')+'"]').length > 0) {
                 totalCases += parseInt($(this).text());
+            }
+            if (totalCases>0){
+                download_ids_nologin_btn.removeAttr('disabled');
+            }
+            else{
+                download_ids_nologin_btn.attr('disabled','disabled');
             }
         });
 
@@ -1358,7 +1365,7 @@ require([
         location.href = '/accounts/login/';
     });
 
-    $('.export-btn, .download-ids-btn').on('click', function() {
+    $('.export-btn, .download-ids-nologin-btn').on('click', function() {
         let self=$(this);
         if(self.hasClass('export-btn') && !user_is_social) {
             e.preventDefault();
@@ -1398,6 +1405,34 @@ require([
                 },
             });
         }
+
+        else if (self.hasClass('download-ids-nologin-btn')){
+            var progArr = [];
+            var filters = new Object;
+            $('.sort-by-program').children().each(function(){
+                if (this.hasAttribute('program-id')){
+                    var prog_id= parseInt($(this).attr('program-id'));
+                    var curFilts = search_helper_obj.format_filters(prog_id, add_key=false);
+                    if (Object.keys(curFilts).length>0){
+                        progArr.push(prog_id);
+                    }
+                    for (nkey in curFilts) {
+                        nxtkey=prog_id+":"+nkey
+                        filters[nxtkey]= new Object;
+                        filters[nxtkey]['values']=curFilts[nkey]
+                    }
+                }
+            });
+            //$("#nologin-download").find("input[name='proj_id']").val(proj_id);
+            //var filters = search_helper_obj.format_filters(proj_id);
+
+            var filterStr  = JSON.stringify(filters);
+            var progStr = JSON.stringify(progArr)
+            $("#nologin-download").find("input[name='filters']").val(filterStr);
+            $("#nologin-download").find("input[name='program_ids']").val(progStr);
+            $("#nologin-download").submit();
+            //self.removeAttr('disabled');
+        }
     });
 
     set_mode();
@@ -1405,6 +1440,7 @@ require([
 
     let token = new Date().getTime();
     $('.export-token, .download-token').val(token);
+    $('#nologin-download').find("input[name='downloadToken']").val(token);
     $('.download-ids-btn').attr('href',$('.download-ids-btn').attr('href')+'?downloadToken='+token);
 
 });
