@@ -84,7 +84,7 @@
                 <form id="bq-meta-form">
                     <div>
                         <label>Status</label>
-                        <select id="status" class="form-control bq-select" data-column-name="status">
+                        <select id="status" class="form-select bq-select" data-column-name="status">
                             {% for option in status.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -97,7 +97,7 @@
                     <div>
                         <label>Program</label>
                         <select multiple data-placeholder="Choose Programs..."
-                                class="autocomplete_select_box form-control bq-select" data-column-name="program">
+                                class="autocomplete_select_box form-select bq-select" data-column-name="program">
                             {% for option in program.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -123,7 +123,7 @@
                     </div>
                     <div>
                         <label>Reference Genome</label>
-                        <select class="form-control bq-select" data-column-name="referenceGenome">
+                        <select class="form-select bq-select" data-column-name="referenceGenome">
                             {% for option in reference_genome.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -132,7 +132,7 @@
                     <div>
                         <label>Source</label>
                         <select multiple data-placeholder="Choose Sources..."
-                                class="autocomplete_select_box form-control bq-select" data-column-name="source">
+                                class="autocomplete_select_box form-seelect bq-select" data-column-name="source">
                             {% for option in source.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -141,7 +141,7 @@
                     <div>
                         <label>Data Type</label>
                         <select multiple data-placeholder="Choose Data Types..."
-                                class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
+                                class="autocomplete_select_box form-select bq-select" data-column-name="dataType">
                             {% for option in data_type.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -150,7 +150,7 @@
                     <div>
                         <label>Experimental Strategy</label>
                         <select multiple data-placeholder="Choose Experimental Strategy..."
-                                class="autocomplete_select_box form-control bq-select" data-column-name="expStrat">
+                                class="autocomplete_select_box form-select bq-select" data-column-name="expStrat">
                             {% for option in experimental_strategy.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -158,7 +158,7 @@
                     </div>
 {#                    <div>#}
 {#                        <label>Access</label>#}
-{#                        <select id="dataAccess" class="form-control bq-select" data-column-name="dataAccess">#}
+{#                        <select id="dataAccess" class="form-select bq-select" data-column-name="dataAccess">#}
 {#                            <option value="" selected>ALL</option>#}
 {#                            <option value="open">Open Access</option>#}
 {#                            <option value="controlled">Controlled Access</option>#}
@@ -167,7 +167,7 @@
                     <div id="advSearch0" class="adv-div collapse">
                         <div>
                             <label>BQ Project</label>
-                            <select id="search-by-project-id" class="form-control bq-select" data-column-name="projectId">
+                            <select id="search-by-project-id" class="form-select bq-select" data-column-name="projectId">
                                 {% for option in project_id.options %}
                                     {% if option.value == '' %}
                                         <option value="{{ option.value }}" selected>{{ option.label }}</option>

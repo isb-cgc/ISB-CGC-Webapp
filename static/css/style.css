@@ -398,11 +398,6 @@ ul.errorlist {
   height: 32px;
   font-size: 29px; }
 
-.user-detail .basic-avatar {
-  width: 54px;
-  height: 54px;
-  font-size: 50px; }
-
 /********************************************
  * Handy Classes
  *******************************************/
@@ -2417,6 +2412,12 @@ section .min-max {
   #cohort-details .revision-filter-panel .revision-prog-filter-set, #cohort-filelist .revision-filter-panel .revision-prog-filter-set {
     height: 100%;
     padding: 0px 8px !important; }
+  #cohort-details .prog-filter-set {
+    position: relative;
+    min-height: 1px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
   #cohort-details .revision-filter-panel .prog-filter-set, #cohort-filelist .revision-filter-panel .prog-filter-set {
     border-left: 2px solid #2A537A; }
     #cohort-details .revision-filter-panel .prog-filter-set h5, #cohort-filelist .revision-filter-panel .prog-filter-set h5 {
@@ -2443,7 +2444,7 @@ section .min-max {
     content: "";
     background: linear-gradient(to top, white 15%, rgba(255, 255, 255, 0) 80%); }
 
-#cohort-details .details-panel, #cohort-filelist .details-panel {
+#cohort-filelist .details-panel {
   overflow: hidden;
   height: 110px; }
 
@@ -3432,6 +3433,11 @@ span.code {
   vertical-align: middle;
   height: 30px; }
 
+.user-details .basic-avatar {
+  width: 54px;
+  height: 54px;
+  font-size: 50px; }
+
 #user-details h4 {
   text-align: center; }
 
@@ -4185,16 +4191,9 @@ span.code {
   font-size: 25px;
   text-align: center; }
 
-/********************************************
- * IGV Styles
- *******************************************/
-#igv .header-igv-logo {
-  height: 55px; }
-
-#igv table.info-table {
-  margin-bottom: 15px; }
-  #igv table.info-table td:last-child {
-    padding: 0px 10px; }
+.version-info:hover {
+  cursor: pointer;
+}
 
 #video-tutorials .vid-desc-text {
   color: dimgrey; }

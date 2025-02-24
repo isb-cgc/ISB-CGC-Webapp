@@ -27,5 +27,7 @@ def additional_context(request):
             'STATIC_FILES_URL': settings.STATIC_URL,
             'STORAGE_URI': settings.GCS_STORAGE_URI,
             'FILE_SIZE_UPLOAD_MAX': settings.FILE_SIZE_UPLOAD_MAX,
-            'CONTACT_EMAIL': settings.SERVER_EMAIL
+            'CONTACT_EMAIL': settings.SERVER_EMAIL,
+            'MITELMAN_URL': settings.MITELMAN_URL,
+            'BQ_SEARCH_URL': settings.BQ_SEARCH_URL
     }

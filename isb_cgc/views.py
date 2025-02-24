@@ -120,9 +120,7 @@ def _decode_dict(data):
 def landing_page(request):
     logger.info("[STATUS] Received landing page view request at {}".format(
         datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    return render(request, 'isb_cgc/landing.html',
-                  {'bq_search_url': settings.BQ_SEARCH_URL, 'mitelman_url': settings.MITELMAN_URL,
-                   'tp53_url': settings.TP53_URL})
+    return render(request, 'isb_cgc/landing.html',{})
 
 
 # Redirect all requests for the old landing page location to isb-cgc.org

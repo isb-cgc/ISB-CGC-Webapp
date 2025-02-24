@@ -99,7 +99,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <div class="panel panel-default">
+                <div class="isb-panel isb-panel-default">
                     <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
                         <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span
                                 class="visually-hidden">Close</span></button>
@@ -117,14 +117,14 @@
             <div class="row">
             <!-- Select Program Panel -->
             <div class="col-lg-3 col-md-3 col-sm-12">
-            <div class="panel panel-default" role="tabpanel">
-                <div class="panel-heading clearfix">
+            <div class="isb-panel isb-panel-default" role="tabpanel">
+                <div class="isb-panel-heading clearfix">
                     <h4 class="panel-title pull-left">Select Program</h4>
                 </div>
-                <div class="panel-body">
+                <div class="isb-panel-body">
                     <div>
                         <!-- Grouped by program -->
-                        <select class="sort-by-program dataset-select-box form-control">
+                        <select class="sort-by-program dataset-select-box form-select">
                             {% for program in all_programs %}
                                 {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
                                 {% else %}
@@ -142,11 +142,11 @@
         <div class="row cgc-user-data-type-tabs">
             {% if cohort.id %}
                 <div class="col-sm-12 col-md-12 col-lg-12">
-                    <div class="cohort-selected-filters panel panel-default">
-                        <div class="panel-heading">
+                    <div class="cohort-selected-filters isb-panel isb-panel-default">
+                        <div class="isb-panel-heading">
                             <h4 class="panel-title">Filters</h4>
                         </div>
-                        <div class="panel-body curr-filter-panel gradient-overlay">
+                        <div class="isb-panel-body curr-filter-panel gradient-overlay">
                             {% for prog, filters in current_filters.items %}
                                 <div class="col-sm-{{ current_filters.keys|get_prog_col_size }} prog-filter-set">
                                     <h5>{{ prog }}</h5>
@@ -169,41 +169,35 @@
                             <button class="btn btn-link" role="button">Show Less</button>
                         </div>
                     </div>
-                    <div class="cohort-info panel panel-default">
-                        <div class="panel-heading">
+                    <div class="cohort-info isb-panel isb-panel-default">
+                        <div class="isb-panel-heading">
                             <h4 class="panel-title">Cohort Details</h4>
                         </div>
-                        <div class="panel-body details-panel">
-                            <div class="row col-md-12 space-bottom-10">
+                        <div class="isb-panel-body details-panel">
+                            <div class="space-bottom-10">
                                 <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
                             </div>
-                            <div class="row col-md-12 space-bottom-10">
+                            <div class="space-bottom-10">
                                 <span class="detail-label">Total Number of Cases:</span>
                                 <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                                 <span class="total-values"
                                       id="c-{{ cohort.id }}-data-total-participants">{{ total_cases }}</span>
                             </div>
-                            <div class="row col-md-12 space-bottom-10">
+                            <div class="space-bottom-10">
                                 <span class="detail-label">Total Number of Samples:</span>
                                 <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                                 <span class="total-values"
                                       id="c-{{ cohort.id }}-data-total-samples">{{ total_samples }}</span>
                             </div>
-                            <div class="row col-md-12 space-bottom-10">
+                            <div class="space-bottom-10">
                                 <span>Your Permissions: {{ cohort.perm.perm }}</span>
                             </div>
-                        </div>
-                        <div class="more-details">
-                            <button class="btn btn-link" role="button">Show More</button>
-                        </div>
-                        <div class="less-details" style="display: none;">
-                            <button class="btn btn-link" role="button">Show Less</button>
                         </div>
                     </div>
                 </div>
             {% endif %}
             <div class="col-sm-12 col-md-12 col-lg-12" style="display: none">
-                <div class="panel panel-default">
+                <div class="isb-panel isb-panel-default">
                     <ul class="nav nav-tabs nav-tabs-data" role="tablist">
                         {% for program in programs %}
                             <li role="presentation"
@@ -220,8 +214,8 @@
             <div class="tab-content data-tab-content">
                 <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
                     <div class="col-md-12 data-tab-content-panel spinner-panel">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
+                        <div class="isb-panel isb-panel-default">
+                            <div class="isb-panel-body">
                                 <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
                             </div>
                         </div>

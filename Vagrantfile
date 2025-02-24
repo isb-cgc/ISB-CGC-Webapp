@@ -39,9 +39,10 @@ Vagrant.configure(2) do |config|
   # shell directory before the rest of the provisioning scripts run
   config.vm.provision :shell, inline: "sudo apt-get update", :run => 'always'
   config.vm.provision :shell, inline: "sudo apt-get install dos2unix", :run => 'always'
-  config.vm.provision :shell, inline: "dos2unix /home/vagrant/API/shell/*.sh", :run => 'always'
+  config.vm.provision :shell, inline: "dos2unix /home/vagrant/www/shell/*.sh", :run => 'always'
   config.vm.provision :shell, inline: "echo 'source /home/vagrant/www/shell/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
   config.vm.provision "shell", path: 'shell/install-deps.sh', :run => 'always'
+  # TODO: Adjust create and setup to check for database and run if it's not found so they can be set to always
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'
   config.vm.provision "shell", path: 'shell/vagrant-start-server.sh', :run => 'always'

@@ -110,12 +110,20 @@
             <div class="col-lg-3 col-md-3 col-sm-12 me-auto">
             <div class="isb-panel isb-panel-default" role="tabpanel">
                 <div class="isb-panel-heading clearfix">
+                    <h4 class="isb-panel-title pull-left">CGC Data Version</h4>
+                </div>
+                <div class="isb-panel-body data-version">
+                    {{ data_version.get_display }} <i class="version-info fa fa-solid fa-info-circle"></i>
+                </div>
+            </div>
+            <div class="isb-panel isb-panel-default" role="tabpanel">
+                <div class="isb-panel-heading clearfix">
                     <h4 class="isb-panel-title pull-left">Select Program</h4>
                 </div>
                 <div class="isb-panel-body">
                     <div>
                         <!-- Grouped by program -->
-                        <select class="sort-by-program dataset-select-box form-control">
+                        <select class="sort-by-program dataset-select-box form-select">
                             {% for program in all_programs %}
                                 {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
                                 {% else %}
@@ -250,6 +258,10 @@
 {% endblock %}
 
 {% block js_file %}
+    {{ data_version_info|json_script:"data_version_info" }}
     {{ block.super }}
     <script src="{% static 'js/cohort_details.js' %}"></script>
+    <script>
+        const data_version_info = JSON.parse(document.getElementById('data_version_info').textContent);
+    </script>
 {% endblock %}

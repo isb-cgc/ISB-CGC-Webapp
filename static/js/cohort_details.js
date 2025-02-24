@@ -27,9 +27,18 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
-        bootstrap: 'libs/bootstrap.bundle.min'
+        bootstrap: 'libs/bootstrap.bundle.min',
+        tippy: 'libs/tippy-bundle.umd',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'typeahead':{
             deps: ['jquery'],
             init: function ($) {
@@ -55,11 +64,12 @@ require([
     'bloodhound',
     'underscore',
     'base',
+    'tippy',
     'typeahead',
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
+], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base, tippy) {
 
     var SELECTED_FILTERS = {};
 
@@ -991,27 +1001,6 @@ require([
 
             set_prog_filter_height(100);
         });
-
-        $('.more-details button').on('click', function () {
-            $('.more-details').hide();
-            $('.less-details').show();
-
-            $('.details-panel').animate({
-                height: ($('.cohort-info').outerHeight() +
-                    (Program_Filter_Max_Height + $('ul.rev-history').outerHeight()) * Program_Filter_Rows + 15) + 'px'
-            }, 800);
-
-            $('.creation-prog-filter-set').each(function () {
-                $(this).css('height', Program_Filter_Max_Height);
-            });
-        });
-        $('.less-details button').on('click', function () {
-            $('.less-details').hide();
-            $('.more-details').show();
-            $('.details-panel').animate({
-                height: '110px'
-            }, 800);
-        });
     }
 
     // Delegated event: Check All and Uncheck All buttons
@@ -1442,6 +1431,18 @@ require([
     $('.export-token, .download-token').val(token);
     $('#nologin-download').find("input[name='downloadToken']").val(token);
     $('.download-ids-btn').attr('href',$('.download-ids-btn').attr('href')+'?downloadToken='+token);
+
+    tippy('.version-info',{
+        content: function(ref) {
+            return data_version_info.join("<br />\n");
+        },
+        theme: 'light',
+        placement: 'right',
+        interactive:true,
+        arrow: false,
+        trigger: "click",
+        allowHTML:true,
+    });
 
 });
 
