@@ -32,8 +32,8 @@ body.landing {
 .grid-container {
   display: grid;
   min-width: 420px;
-  grid-template-columns: 120px 145px 155px;
-  grid-template-rows: 100px 100px;
+  grid-template-columns: 145px 145px 145px;
+  grid-template-rows: 100px 100px 100px;
 }
 
 .grid-container button {
@@ -67,7 +67,7 @@ body.landing {
 }
 
 #grid-menu .grid-icon {
-  width: 95px;
+  width: 105px;
 }
 
 #grid-menu .grid-icon-md {
