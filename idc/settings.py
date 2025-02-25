@@ -75,6 +75,8 @@ print("Allowed hosts are: {}".format(ALLOWED_HOSTS))
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
+APPEND_SLASH = bool(os.environ.get('APPEND_SLASH', 'True') == 'True')
+
 ADMINS                  = ()
 MANAGERS                = ADMINS
 
@@ -88,20 +90,17 @@ BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLO
 BIGQUERY_USER_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_USER_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_USER_MANIFEST_DATASET = os.environ.get('BIGQUERY_USER_MANIFEST_DATASET', 'dev_user_dataset')
 BIGQUERY_USER_MANIFEST_TIMEOUT = int(os.environ.get('BIGQUERY_USER_MANIFEST_TIMEOUT', '7'))
-
-# Deployment module
-CRON_MODULE             = os.environ.get('CRON_MODULE')
+PUBSUB_USER_MANIFEST_TOPIC     = "projects/{}/topics/{}".format(GCLOUD_PROJECT_ID, os.environ.get('PUBSUB_USER_MANIFEST_TOPIC', 'user-manifest'))
+USER_MANIFESTS_FOLDER          = os.environ.get('USER_MANIFESTS_FOLDER', 'user-manifests')
+RESULT_BUCKET                  = os.environ.get('RESULT_BUCKET', 'idc-dev-files')
 
 # Log Names
 WEBAPP_LOGIN_LOG_NAME         = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
 COHORT_CREATION_LOG_NAME      = os.environ.get('COHORT_CREATION_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://idc-dev.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://dev-portal.canceridc.dev')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-idc-dev.appspot.com')
 API_HOST                = os.environ.get('API_HOST', 'api-dot-idc-dev.appspot.com')
-
-# Compute services - Should not be necessary in webapp
-PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
 # GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET', 'FAKE_BUCKET')
@@ -110,11 +109,7 @@ PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 DCF_GUID_SUFFIX           = os.environ.get('DCF_GUID_SUFFIX', '')
 
 # BigQuery cohort storage settings
-BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
-BIGQUERY_COHORT_TABLE_ID             = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
-BIGQUERY_IDC_TABLE_ID                = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
 MAX_BQ_INSERT                        = int(os.environ.get('MAX_BQ_INSERT', '500'))
-USER_DATA_ON                         = bool(os.environ.get('USER_DATA_ON', 'False') == 'True')
 
 database_config = {
     'default': {
@@ -143,8 +138,10 @@ DATABASES = database_config
 DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
-IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
-IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
+# AppEngine var is set in the app.yaml so this should be false for CI and local dev apps
+IS_APP_ENGINE = bool(os.getenv('IS_APP_ENGINE', 'False') == 'True')
+# $CI is set only on CircleCI run VMs so this should not have a value outside of a deployment build
+IS_CI = bool(os.getenv('CI', None) is not None)
 
 VERSION = "{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'))
 
@@ -170,7 +167,7 @@ print("[STATUS] DEV_TIER setting is {}".format(DEV_TIER))
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
+if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -182,35 +179,16 @@ if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 2
 
-if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
+if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
-    SITE_ID = 3
+    SITE_ID = int(os.environ.get('SITE_ID', '3'))
 
-def get_project_identifier():
-    return BIGQUERY_PROJECT_ID
-
-# Set cohort table here
-if BIGQUERY_COHORT_TABLE_ID is None:
-    raise Exception("Developer-specific cohort table ID is not set.")
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 
 API_USER = os.environ.get('API_USER', 'api_user')
 API_AUTH_KEY = os.environ.get('API_AUTH_KEY', 'Token')
 API_AUTH_HEADER = os.environ.get('API_AUTH_HEADER', 'HTTP_AUTHORIZATION')
-
-# TODO Remove duplicate class.
-#
-# This class is retained here, as it is required by bq_data_access/v1.
-# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
-class BigQueryCohortStorageSettings(object):
-    def __init__(self, dataset_id, table_id):
-        self.dataset_id = dataset_id
-        self.table_id = table_id
-
-
-def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
 USE_CLOUD_STORAGE              = bool(os.environ.get('USE_CLOUD_STORAGE', 'False') == 'True')
 
@@ -285,7 +263,8 @@ STATICFILES_DIRS = (
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+
 )
 
 # Make this unique, and don't share it with anybody.
@@ -681,11 +660,11 @@ SOLR_CERT           = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCA
 DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
 
-# Explicitly check for known problems in descrpitions and names provided by users
+# Explicitly check for known problems in descriptions and names provided by users
 DENYLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 ATTRIBUTE_DISALLOW_RE = r'([^a-zA-Z0-9_])'
 
-if DEBUG and DEBUG_TOOLBAR:
+if DEBUG and DEBUG_TOOLBAR and not IS_APP_ENGINE:
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware',)
     DEBUG_TOOLBAR_PANELS = [
@@ -711,13 +690,6 @@ if DEBUG and DEBUG_TOOLBAR:
 # If you do not want Axes to override the authentication response
 # you can skip installing the middleware and use your own views.
 MIDDLEWARE.append('axes.middleware.AxesMiddleware',)
-
-##################
-# OHIF_SETTINGS
-##################
-#
-# default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !
-APPEND_SLASH = False
 
 OHIF_V2_PATH=os.environ.get('OHIF_V2_PATH','')
 OHIF_V3_PATH=os.environ.get('OHIF_V3_PATH','')

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block title %}Cart | IDC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}
+
+    <link type="text/css" rel="stylesheet" href="{% static 'css/spinner.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'css/cart.css' %}">
+
+    <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
+
+{% endblock %}
+
+{% block link_page_name %}cart{% endblock %}
+{% block page_name %}cart{% endblock %}
+
+{% block page_header %}
+<div class="container-fluid">
+<div class="spinner" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
+    <h3 class="pull-left">Cart - Study Level Summary</h3>
+ <button id="export-manifest-cart" class="btn btn-special pull-right cart-export-from-cp"  data-toggle="modal" data-target="#export-manifest-modal"
+
+                title="Make a cart selection to enable this feature."> Download Cart Images
+            </button>
+<button class="btn btn-special pull-right cart-modal-button" data-toggle="modal" data-target="#cart-description-modal" title="Get cart details.">Display Cart Construction Details</button>
+<button class="btn btn-default  pull-right cart-reset" title="Reset Cart." onclick="window.resetCartPageView()"> Clear Cart
+                             </button>
+</div>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class ="row">
+
+        <div class="col-lg-12 col-md-12 collex-panel">
+            <div class="cart-wrapper panel panel-default short-inner-content" role="panel panel-default" id="cart-list">
+
+                <div class="panel-body">
+                    <div id="stats"> {{ stats }}</div>
+                <table id="cart-table" class="table collex-table sortable_table table-striped table-hover">
+                    <thead id ="cart-head">
+
+                        <!-- <th class="del">Remove</th> -->
+                        <th class="projid">Project ID</th>
+                        <th class="caseid">Case ID</th>
+                        <th class="studyid">StudyInstanceUID</th>
+                        <th>Number of Series in Cart</th>
+                        <th class="viewer">View</th>
+
+                    </thead>
+                    <colgroup>
+                       <!-- <col style="width: 10%"> -->
+                        <col style="width: 20%">
+                        <col style="width: 20%">
+                        <col style="width: 20%">
+                        <col style="width: 15%">
+                        <col style="width: 15%">
+
+                    </colgroup>
+                    <tbody id="cart-body">
+
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Include footer here instead of base.html so it can be hidden by default -->
+{% include 'share/site_footer.html' with hide="False" %}
+{% include "idc/cart-details-modal.html" %}
+
+{% url 'get_explore_manifest' as export_uri %}
+
+
+{% endblock %}
+
+
+{% block js_file %}
+
+    {{ carthist|json_script:"carthist" }}
+    {{ mxstudies|json_script:"mxstudies" }}
+    {{ mxseries|json_script:"mxseries" }}
+	{{ block.super }}
+    <script type="text/javascript" src="{% static 'js/cart_page.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
+
+{% endblock %}
+
+{% block modal_includes %}
+
+    {% include "cohorts/cart-description-modal.html" %}
+    {% include "cohorts/export-manifest-modal.html" %}
+{% endblock %}

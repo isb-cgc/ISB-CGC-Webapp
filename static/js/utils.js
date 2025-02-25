@@ -99,37 +99,102 @@ define(['jquery'], function($) {
         callback();
     };
 
-    return {
-        // Simple method for displaying an alert-<type> message at a given selector or DOM element location.
-        //
-        // type: One of the accepted alert types (danger, error, info, warning)
-        // text: Content of the message
-        // withEmpty: Truthy boolean for indicating if the element represented by rootSelector should first be emptied
-        // rootSelector: text selector or DOM element which will be the parent of the alert; defaults to #js-messages
-        //  (the DIV present on all pages which shows document-level JS messages)
-        showJsMessage: function(type,text,withEmpty,rootSelector) {
-            rootSelector = rootSelector || '#js-messages';
-            withEmpty && $(rootSelector).empty();
-            var msg = "";
-            if(text instanceof Array){
-                for(var i=0; i<text.length; i++) {
-                    msg += text[i] + '<br />';
-                }
-            } else {
-                msg = text;
+    // Simple method for displaying an alert-<type> message at a given selector or DOM element location.
+    //
+    // type: One of the accepted alert types (danger, error, info, warning)
+    // text: Content of the message
+    // withEmpty: Truthy boolean for indicating if the element represented by rootSelector should first be emptied
+    // rootSelector: text selector or DOM element which will be the parent of the alert; defaults to #js-messages
+    //  (the DIV present on all pages which shows document-level JS messages)
+    function _showJsMessage(type,text,withEmpty,rootSelector, add_classes) {
+        rootSelector = rootSelector || '#js-messages';
+        withEmpty && $(rootSelector).empty();
+        var msg = "";
+        if (text instanceof Array) {
+            for (var i = 0; i < text.length; i++) {
+                msg += text[i] + '<br />';
             }
-            let uuid = crypto.randomUUID();
-            $(rootSelector).append(
-                $('<div>')
-                    .addClass('alert alert-'+type +' alert-dismissible '+uuid)
-                    .html(msg)
-                    .prepend(
-                        '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
-                        +'&times;</span><span class="sr-only">Close</span></button>'
-                    )
-            );
-            return uuid;
-        },
+        } else {
+            msg = text;
+        }
+        let uuid = crypto.randomUUID();
+        if(add_classes) {
+            uuid = `${uuid} ${add_classes}`;
+        }
+        $(rootSelector).append(
+            $('<div>')
+                .addClass(`alert alert-${type} alert-dismissible ${uuid}`)
+                .html(msg)
+                .prepend(
+                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
+                    + '&times;</span><span class="sr-only">Close</span></button>'
+                )
+        );
+        return uuid;
+    };
+
+    const MAX_ELAPSED = 120000;
+    function _checkManifestReady(file_name, check_start) {
+        if(!check_start) {
+            check_start = Date.now();
+        }
+        let check_now = Date.now();
+        if((check_now-check_start) > MAX_ELAPSED) {
+            _showJsMessage("error",
+                "There was an error generating your manifest. Please contact the administrator."
+                , true);
+            sessionStorage.removeItem("user-manifest");
+            return;
+        }
+        $.ajax({
+            url: CHECK_MANIFEST_URL + file_name,
+            method: 'GET',
+            success: function (data) {
+                if(data.manifest_ready) {
+                    let fetch_manifest_url = FETCH_MANIFEST_URL + file_name;
+                    _showJsMessage("warning",
+                        "Your manifest is ready for download! " +
+                        '<a class="btn btn-special manifest-download-link" href="'+fetch_manifest_url+'" role="button">Download Manifest</a>'
+                        , true, null,'manifest-download-box');
+                    $('#export-manifest').removeAttr('data-pending-manifest');
+                    if(!$('#export-manifest').attr('data-no-filters')) {
+                        $('#export-manifest').removeAttr('disabled');
+                        $('#export-manifest').attr('title','Export these search results as a manifest for downloading.');
+                    } else {
+                        $('#export-manifest').attr("title","Select a filter to enable this feature.");
+                    }
+                } else {
+                    setTimeout(_checkManifestReady, 15000, file_name, check_start);
+                }
+            },
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                // If we received a redirect, honor that
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
+                } else {
+                    _showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                }
+            }
+        });
+    };
+
+    function _checkForManifest() {
+        let pending_manifest_request = sessionStorage.getItem("user-manifest");
+        if(pending_manifest_request) {
+            $('#export-manifest').attr('disabled','disabled');
+            $('#export-manifest').attr('data-pending-manifest', 'true');
+            $('#export-manifest').attr('title','A manifest is currently being built.');
+            _showJsMessage("info",
+                "Your manifest is being prepared. Once it is ready, this space will make it available for download. <i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
+                ,true);
+            _checkManifestReady(pending_manifest_request);
+        }
+    };
+
+    return {
+        showJsMessage: _showJsMessage,
         // Block re-requests of requests which can't be handled via AJAX (eg. file downloads)
         // Uses cookie polling
         // Request provides a parameter with a key of expectedCookie and a value of downloadToken
@@ -146,6 +211,8 @@ define(['jquery'], function($) {
         },
         setCookie: _setCookie,
         getCookie: _getCookie,
-        removeCookie: _removeCookie
+        removeCookie: _removeCookie,
+        checkManifestReady: _checkManifestReady,
+        checkForManifest: _checkForManifest
     };
 });

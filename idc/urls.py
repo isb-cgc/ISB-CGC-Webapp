@@ -20,6 +20,7 @@ from django.conf.urls import include, url
 from django.urls import path
 from django.contrib import admin
 from django.conf import settings
+from django.views.generic.base import TemplateView
 
 from . import views, views_api, demo_views
 from cohorts.views import get_query_str_response
@@ -35,6 +36,8 @@ urlpatterns = [
     url(r'^users/api/', views_api.user_detail, name='user_detail_api'),
 
     url(r'^cohort_detail/(?P<cohort_id>\d+)/$', demo_views.cohort_detail, name='cohort_detail'),
+    url(r'robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name='robots'),
+    url(r'sitemap.xml', TemplateView.as_view(template_name="sitemap.xml", content_type="text/xml"), name='sitemap'),
 
     url(r'^cohorts/', include('cohorts.urls')),
     path('admin/', admin.site.urls),
@@ -49,13 +52,17 @@ urlpatterns = [
     url(r'^explore/bq_string/$', get_query_str_response, name='explore_bq_string'),
     url(r'^explore/manifest/$', views.explorer_manifest, name='get_explore_manifest'),
     url(r'^tables/', views.populate_tables, name='populate_tables'),
-
+    url(r'^studymp/', views.studymp, name='studymp'),
     url(r'^warning/', views.warn_page, name='warn'),
     url(r'^about/', views.about_page, name='about_page'),
+    url(r'^test(.*)/', views.test_page, name='test_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^privacy/', views.privacy_policy, name='privacy'),
     url(r'^news/', views.news_page, name='news'),
+    url(r'^cart/$', views.cart_page, name='cart'),
+    url(r'^explore/cart/$', views.cart_page, name='get_explore_cart'),
+    url(r'^cart_data/$', views.cart_data, name='get_cart_data'),
     url(r'^collaborators/', views.collaborators, name='collaborators'),
     url(r'^collections/', include('idc_collections.urls')),
     # url(r'^share/', include('sharing.urls')),

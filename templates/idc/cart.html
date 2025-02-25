@@ -1,31 +1,179 @@
-{% extends 'base.html' %}
-{% load static %}
+<!--
 
-{% block title %}
+ Copyright 2022, Institute for Systems Biology
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+
+-->
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>
     IDC | About
-{% endblock %}
-
-{% block description %}
+</title>
+    <meta name="description" content="
     About IDC
-{% endblock %}
+">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% block page_name %}about{% endblock %}
+    
+    <link type="text/css" rel="stylesheet" href="/static/css/select2.min.css" />
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/css/style.css" />
+    <script type="text/javascript" src="/static/js/libs/modernizr.js"></script>
 
-{% block page_header %}
+    
+
+    
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=">
+        </script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', '');
+        </script>
+    
+    <script>
+        var STATIC_FILES_URL = '/static/';
+        var BASE_URL = 'http://localhost:8086' || "";
+        var STORAGE_URI = 'https://storage.googleapis.com/';
+        var OHIF_V2_PATH = 'https://dev-viewer.canceridc.dev/viewer/';
+        var OHIF_V3_PATH = 'https://dev-viewer.canceridc.dev/v3/viewer/?StudyInstanceUIDs';
+        var VOLVIEW_PATH = 'https://volview.kitware.app/?urls';
+        var SLIM_VIEWER_PATH = 'https://dev-viewer.canceridc.dev/slim/studies/';
+        var tmp = 'tmp';
+    </script>
+    <!-- Adobe User Research study -->
+
+    {% block js_file %}
+
+        {{ projcnts|json_script:"projcnts" }}
+        window.projcnts = JSON.parse(document.getElementById('projcnts').textContent);
+    {% endblock %}
+
+
+
+
+</head>
+<body class="content" id="body">
+<!--Include site main header-->
+
+
+
+
+
+
+<header class="site-header">
+
+    
+    <nav class="navbar navbar-default navbar-fixed-top idc-nav navbar-container">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#main-navbar-collapse" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="/" title="Home Page" >
+                    <img class="navbar-brand" src="/static/img/NIH_IDC_title.svg" alt="NIH IDC Logo"/>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse" id="main-navbar-collapse">
+                <ul class="nav navbar-nav navbar-left">
+                    <li class="navbar-link navbar-item ">
+                        <a class="main-links" href="/explore/" title="Explore image data">Explore Images</a>
+                    </li>
+                    <li class="navbar-link navbar-item ">
+                        <a class="main-links" href="/collections/" title="View IDC collections">Collections</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="external-link" href=""
+                            url="https://learn.canceridc.dev/getting-started-with-idc"
+                            title="Getting Started with IDC"
+                            data-toggle="modal" data-target="#external-web-warning">
+                            Getting Started <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                            </a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="external-link" href="" url="https://discourse.canceridc.dev"
+                           data-toggle="modal" data-target="#external-web-warning">
+                           User Forum <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="main-links" href="/news/" title="View news items">News</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="main-links" href="/about/" title="Information about IDC">About</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="external-link" href="" url="https://learn.canceridc.dev"
+                           data-toggle="modal" data-target="#external-web-warning" title="Documentation">
+                            Help <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    
+                    <li class="navbar-item inline-block navbar-signin">
+                        <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text"
+                               href="/accounts/login/" title="Sign In"><i class="fa fa-solid fa-sign-in"></i>Sign In</a>
+                    </li>
+                
+                    </ul>
+                </div>
+        </div>
+    </nav>
+</header>
+
+<main id="about" class="main-content">
+    <div class="page-heading">
+        
     <div class="container-fluid">
         <h3 class="pull-left">About</h3>
     </div>
-{% endblock %}
 
-{% block content %}
+    </div>
     <div class="container-fluid">
-
+        <!-- Site Messages -->
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="z-index: 100;">
+                
+                <div id="js-messages"></div>
+            </div>
+        </div>
+        <!-- Page Content -->
+        <div class="row">
+            
+    <div class="container-fluid">
         <div class ="row">
             <div class="col-lg-12 col-md-12">
                 <div class="panel panel-default" role="panel panel-default">
                     <div class="panel-body short-inner-content">
-
-
                         <h5>About IDC</h5>
                         <p>
                             NCI Imaging Data Commons (IDC) is a cloud-based repository of publicly available cancer
@@ -125,12 +273,57 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
-{% block js_file %}
-	{{ block.super }}
-	<script type="text/javascript" src="{% static 'js/news.js' %}?v={{ APP_VERSION }}"></script>
-    <script>
-    var showWarning = true;
-    </script>
-{% endblock %}
+        </div>
+    </div>
+    <!-- The landing page and collections page have a special layout, so they have their own footer include -->
+    
+        
+
+
+
+
+    <footer class="row container-fluid site-footer">
+        <div class="row">
+            <a href="/">Site Home</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="mailto:support@canceridc.dev">Contact Us</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="/privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+            &nbsp; &nbsp; | &nbsp;&nbsp;
+            <a href="https://www.cancer.gov/policies/accessibility" target="_blank" rel="noopener noreferrer">Accessibility</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="https://www.cancer.gov/policies/foia" target="_blank" rel="noopener noreferrer">FOIA</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html" target="_blank" rel="noopener noreferrer">HHS Vulnerability Disclosure</a>
+        </div>
+        <div class="row">
+            <a href="https://www.hhs.gov/" target="_blank" rel="noopener noreferrer">U.S. Department of Health and Human Services</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="https://www.nih.gov/" target="_blank" rel="noopener noreferrer">National Institutes of Health</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="https://www.cancer.gov/" target="_blank" rel="noopener noreferrer">National Cancer Institute</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="https://www.usa.gov/" target="_blank" rel="noopener noreferrer">USA.gov</a>
+        </div>
+        <div class="row mat-toolbar-row">
+            NIH... Turning Discovery Into Health ®
+        </div>
+        <div class="row">
+            <i><b>Application Version:</b> local-dev.202311281501.98a8d5</i>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            IDC Data Release Version 17.0 - November 17, 2023
+        </div>
+    </footer>
+
+
+    
+</main>
+
+
+
+
+
+</body>
+
+</html>

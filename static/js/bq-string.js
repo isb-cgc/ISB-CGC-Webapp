@@ -68,7 +68,7 @@ require([
         }
     });
 
-    $('.explore-container').on('click', '.bq-string-display', function() {
+    $('.filter-display-panel').on('click', '.bq-string-display', function() {
         if($('#bq-string-display .bq-string').attr('filter-params') !== $(this).attr('filter-params')) {
             $('#bq-string-display .bq-string').html("Loading...");
             $('#bq-string-display .bq-string').attr('filter-params',$(this).attr('filter-params'));

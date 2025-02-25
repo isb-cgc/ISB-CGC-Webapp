@@ -1,4 +1,5 @@
 version: 2.1
+# Force
 commands:
   deployment_setup:
     steps:
@@ -51,7 +52,7 @@ commands:
               echo "Using test project and related deployment SA and bucket."
             elif [[ ${TIER} == "EXPR" ]]; then
               DEPLOYMENT_CONFIG=expr.deployment_config.txt
-              echo "Using experimental project and related deployment SA and bucket."
+              echo "Using development/default project with related deployment SA and bucket for experimental deployment config."
             elif [[ ${TIER} == "DEV" ]]; then
               echo "Using development/default project and related deployment SA and bucket."
             else
@@ -207,6 +208,7 @@ jobs:
           command: |
             sudo -E rm -rf ./lib
             sudo -E /bin/bash ./shell/unpack_for_deployment.sh
+            sudo -E gcloud config set app/cloud_build_timeout 1600
             sudo -E gcloud app deploy --verbosity=debug ./app.yaml --quiet
 workflows:
   version: 2

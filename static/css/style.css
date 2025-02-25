@@ -3091,7 +3091,7 @@ html {
 }
 
 #landing .modality h3 {
-  max-width: 250px;
+  max-width: 350px;
   display: inline-block;
 }
 
@@ -4117,7 +4117,7 @@ html {
 }
 
 #export-manifest-modal .nav-tabs li.filter-tab {
-  width: 33.33%;
+  width: 25%;
   text-align: center;
 }
 
@@ -4129,8 +4129,12 @@ html {
   padding: 5px 0px 10px 0px;
 }
 
-.version-disabled, .bq-disabled {
+.version-disabled, .bq-disabled, .manifest-disabled {
   cursor: not-allowed;
+}
+
+.manifest-button-wrapper {
+  display: inline-block;
 }
 
 .bq-table-name p {
@@ -4296,10 +4300,6 @@ ul.errorlist {
   text-decoration: none;
 }
 
-.table-panel tr:hover {
-  cursor: pointer;
-}
-
 #download-in-progress {
   font-size: 20px;
 }
@@ -4428,4 +4428,8 @@ d-topics-list iframe {
 
 .tippy-box[data-theme~=blue]>.tippy-svg-arrow {
     fill: #b0d4f3;
+}
+
+.usa-site-alert {
+  margin-top: 56px !important;
 }

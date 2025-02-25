@@ -1,0 +1,29 @@
+    <!-- Shwo Filter Modal -->
+    <div class="modal fade in filtermodis-hidden" id="filter-option-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+
+                    <h4 class="modal-title" id="filterOptionModal">Filter Change Notice</h4>
+
+
+                </div>
+                <div class="modal-body">
+                    You have changed the filter definition for this filter set after having added items to this filter set.
+                    Would you do like to:<br>
+                   <!-- <form action="javascript:;" onsubmit="alert('here')"> -->
+                       <input type="radio" name="filtchoice" value="new" checked> Create a new filter set<br>
+                        <input type="radio" name="filtchoice" value="update"> Update the current filter set with the new filter definition and clear the items currently added to the filter set<br>
+                        <input type="radio" name="filtchoice" value="cancel"> Cancel this change to the filter definition<br>
+                        <br>
+                        <button onclick="processUserChoice()" >Ok</button>
+                        <br>
+                        <input type="checkbox">Remember my choice and do not prompt me again this session
+
+                    <!--</form> -->
+
+                </div>
+
+            </div>
+        </div>
+    </div>

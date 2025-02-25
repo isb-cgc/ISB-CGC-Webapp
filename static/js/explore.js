@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021, Institute for Systems Biology
+ * Copyright 2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ require.config({
         assetsresponsive: 'libs/assets.responsive',
         jquerydt: 'libs/jquery.dataTables.min',
         base: 'base',
-        imagesearch: 'image_search',
+        image_search: 'image_search',
         tippy: 'libs/tippy-bundle.umd.min',
         '@popperjs/core': 'libs/popper.min',
         session_security: 'session_security/script'
@@ -48,21 +48,56 @@ require.config({
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
         'session_security': ['jquery'],
-        'imagesearch': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
+        'image_search': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
     }
 });
 
 require([
+    'image_search',
+    'tables',
     'jquery',
     'tippy',
     'base', // This must always be loaded
-    'imagesearch',
     'jqueryui',
     'jquerydt',
     'bootstrap',
-    'tablesorter'
-], function ($, tippy, base) {
+    'tablesorter',
+
+], function (image_search, tables,$, tippy, base) {
+
+    window.selProjects= new Object();
+    window.glblcart = new Object();
+    window.partitions= new Array();
+
+    //sesssionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
+    window.partitions = new Array();
+
+    window.studymp=new Object();
+    window.projstudymp = new Object();
+    window.casestudymp = new Object();
+    window.collection = JSON.parse(document.getElementById('collections').textContent);
+    var lst = Object.keys(window.collection).sort();
+    window.collectionData = new Array();
+    window.programs = JSON.parse(document.getElementById('programs').textContent);
+    var ind = 0;
+
+    for (program in window.programs) {
+        for (project in window.programs[program]['projects']) {
+            var col = project;
+            var disp = window.programs[program]['projects'][project]['display'];
+            var val = window.programs[program]['projects'][project]['val'];
+            window.collectionData.push([col, disp, val, val]);
+            window.selProjects[project]=new Object();
+        }
+    }
+
+    window.casesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+    window.studyTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+    window.seriesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+
+
     var saving_cohort = false;
+
 
     $('#external-web-warning').on('show.bs.modal', function(){
         $('#collection-modal').hide();
@@ -230,27 +265,56 @@ require([
         $('#collection-modal').removeClass('in');
         $('#collection-modal').css("display","none");
     });
-/*
-    tippy.delegate('table#proj_table', {
-        content: function(reference) {
-            let collection_id=$(reference).parent('tr').data('projectid');
-            let tooltip = collection_tooltips[collection_id];
-            if(tooltip) {
-                return '<div class="collection-tooltip">' + tooltip + '</div>';
-            }
-            return '<span></span>';
-        },
-        theme: 'light',
-        placement: 'right-end',
-        arrow: false,
-        allowHTML: true,
+
+    var cart_info = function(type) {
+        return '<p><span class="cart-info-tip case1">' +
+            `<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>All series from this ${type} are in the cart</span></p>`+
+            '<p><span class="cart-info-tip case2">' +
+            `<i class="fa-solid fa-cart-shopping shopping-cart case2"></i></span> <span>Some series from this ${type} are in the cart</span></p>` +
+             '<p><span class="cart-info-tip case3">' +
+            `<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>No series from this ${type} are in the cart</span></p>`+
+            '<p>Note: clicking the cart icons only add or remove series belonging to ' +
+            '<b>studies</b> that match the current filter</p>';
+    };
+
+    tippy.delegate('#projects_table_head', {
         interactive: true,
-        target: 'td.collex_name',
-        interactiveBorder: 10,
-        maxWidth: 600,
+        target:'.cart-info',
+        allowHTML:true,
+        theme:'light',
+        placement:'right',
+        content: cart_info("collection")
     });
-*/
-    const temp='<html><strong>now</strong></html>';
+
+    tippy.delegate('#cases_table_head', {
+        interactive: true,
+        target:'.cart-info',
+        allowHTML:true,
+        theme:'light',
+        placement:'right',
+        content: cart_info("case")
+    });
+
+    tippy.delegate('#studies_table_head', {
+        interactive: true,
+        target:'.cart-info',
+        allowHTML:true,
+        theme:'light',
+        placement:'right',
+        content: cart_info("study")
+    });
+
+    tippy.delegate('#series_table_head', {
+        interactive: true,
+        target:'.cart-info',
+        allowHTML:true,
+        theme:'light',
+        placement:'right',
+        content: '<p><span class="cart-info-tip case1">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart "></i></span> <span>This series is in the cart</span></p>'+
+             '<p><span class="cart-info-tip case3">' +
+            '<i class="fa-solid fa-cart-shopping shopping-cart case3"></i></span> <span>This series is not the cart</span></p>'
+    });
 
     tippy('.case-info', {
         interactive: true,
@@ -260,19 +324,33 @@ require([
     tippy('.explainer', {
         interactive: true,
         allowHTML:true,
-        content: 'As some attributes have non mutually exclusive values the charts may contain non zero counts for these values even when they are not selected in the left hand panel. See <a href="https://learn.canceridc.dev/portal/data-exploration-and-cohorts/exploring-imaging-data#understanding-counts-in-the-search-results" target="_blank" rel="noopener noreferrer">here</a> for a detailed explanation.'
+        content: 'As some attributes have non mutually exclusive values the charts may contain non zero counts for these ' +
+            'values even when they are not selected in the left hand panel. ' +
+            'See <a href="https://learn.canceridc.dev/portal/data-exploration-and-cohorts/exploring-imaging-data#understanding-counts-in-the-search-results" target="_blank" rel="noopener noreferrer">here</a> for a detailed explanation.'
     });
 
     tippy('.tooltip_filter_info',{
-        content: 'Each chart below reports the number of cases (or patients) for all values within a given attribute, given the currently defined filter set. Once a case is selected, all series for that case, including those that do not meet the search criteria, are included. For example, cases selected based on the presence of CT modality may also contain PET modality, and thus counts for both values will appear in the chart, and the manifest.',
+        content: 'Each chart below reports the number of cases (or patients) for all values within a given attribute, ' +
+            'given the currently defined filter set. Once a case is selected, all series for that case, including those ' +
+            'that do not meet the search criteria, are included. For example, cases selected based on the presence of CT ' +
+            'modality may also contain PET modality, and thus counts for both values will appear in the chart, and the ' +
+            'manifest.',
         theme: 'light',
         placement: 'right-end',
         arrow: false
     });
 
     tippy('.tooltip_chart_info',{
-        content: 'Counts shown below are the number of cases (or patients) for each attribute value. Counts for each attribute (e.g. Modality) '+
-            'are unchanged by the values (e.g. PET) selected (checked) for that attribute. They only change based on the values selected for all other attributes.',
+        content: 'Counts shown below are the number of cases (or patients) for each attribute value. Counts for each ' +
+            'attribute (e.g. Modality) are unchanged by the values (e.g. PET) selected (checked) for that attribute. ' +
+            'They only change based on the values selected for all other attributes.',
+        theme: 'light',
+        placement: 'right-end',
+        arrow: false
+    });
+
+    tippy('.filterset_info',{
+        content: 'Go ask Bill',
         theme: 'light',
         placement: 'right-end',
         arrow: false
@@ -320,13 +398,28 @@ require([
         maxWidth: 130
     });
 
+    tippy('.bq-string-copy',{
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        trigger: 'disabled',
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        maxWidth: 85
+    });
+
     tippy.delegate('.series-table', {
         content: 'Copied!',
         theme: 'blue',
         placement: 'right',
         arrow: true,
         interactive: true, // This is required for any table tooltip to show at the appropriate spot!
-        target: '.copy-this-table',
+        target: '.copy-this',
         onShow(instance) {
             setTimeout(function() {
                 instance.hide();
@@ -342,7 +435,7 @@ require([
         placement: 'right',
         arrow: true,
         interactive: true, // This is required for any table tooltip to show at the appropriate spot!
-        target: '.copy-this-table',
+        target: '.copy-this',
         onShow(instance) {
             setTimeout(function() {
                 instance.hide();
@@ -358,7 +451,7 @@ require([
         placement: 'right',
         arrow: true,
         interactive: true, // This is required for any table tooltip to show at the appropriate spot!
-        target: '.copy-this-table',
+        target: '.copy-this',
         onShow(instance) {
             setTimeout(function() {
                 instance.hide();
@@ -368,13 +461,81 @@ require([
         maxWidth: 85
     });
 
+    const dynamicCartTip = {
+        fn: (instance) => ({
+            onShow() {
+                instance.setContent(instance.props.dynamicTip(instance.reference));
+            }
+        })
+    };
+
+    tippy.delegate('.projects-table', {
+        dynamicTip: function(ref){
+            if($(ref).parent().hasClass('willAdd')) {
+                return "add series to cart"
+            }
+            return "remove series from cart"
+        },
+        interactive: true,
+        allowHTML: true,
+        placement: 'right',
+        content: 'add series to cart', // placeholder text
+        target: '.shopping-cart-holder',
+        plugins: [dynamicCartTip]
+    });
+
+    tippy.delegate('.cases-table', {
+        dynamicTip: function(ref){
+            if($(ref).parent().hasClass('willAdd')) {
+                return "add series to cart"
+            }
+            return "remove series from cart"
+        },
+        interactive: true,
+        allowHTML: true,
+        placement: 'right',
+        content: 'add series to cart', // placeholder text
+        target: '.shopping-cart-holder',
+        plugins: [dynamicCartTip]
+    });
+
+    tippy.delegate('.series-table', {
+        dynamicTip: function(ref){
+            if($(ref).parent().hasClass('willAdd')) {
+                return "add series to cart"
+            }
+            return "remove series from cart"
+        },
+        interactive: true,
+        allowHTML: true,
+        placement: 'right',
+        content: 'add series to cart', // placeholder text
+        target: '.shopping-cart-holder',
+        plugins: [dynamicCartTip]
+    });
+
+    tippy.delegate('.studies-table', {
+        dynamicTip: function(ref){
+            if($(ref).parent().hasClass('willAdd')) {
+                return "add series to cart"
+            }
+            return "remove series from cart"
+        },
+        interactive: true,
+        allowHTML: true,
+        placement: 'right',
+        content: 'add series to cart', // placeholder text
+        target: '.shopping-cart-holder',
+        plugins: [dynamicCartTip]
+    });
+
     tippy.delegate('.cases-table', {
         content: 'Copied!',
         theme: 'blue',
         placement: 'right',
         arrow: true,
         interactive: true, // This is required for any table tooltip to show at the appropriate spot!
-        target: '.copy-this-table',
+        target: '.copy-this',
         onShow(instance) {
             setTimeout(function() {
                 instance.hide();

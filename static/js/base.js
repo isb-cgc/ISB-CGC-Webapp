@@ -64,6 +64,26 @@ require([
         $('#body').addClass('menu-open');
     });
 
+    $('.sign-in-dropdown, .login-first').on('click', function(){
+        if ('sessionid' in localStorage) {
+            localStorage.setItem('presessionid', localStorage.getItem('sessionid'));
+        }
+        localStorage.removeItem('sessionid');
+    })
+
+    $('.sign-out-dropdown, .login-first').on('click', function(){
+        if ('sessionid' in localStorage) {
+            localStorage.removeItem('sessionid');
+        }
+        if ('presessionid' in localStorage) {
+            localStorage.removeItem('presessionid');
+        }
+        if ('cartHist' in localStorage) {
+            localStorage.removeItem('cartHist');
+        }
+
+    })
+
     $('.btn').click(function(event){
        var $ripple = $('<span class="btn__ripple"></span>');
         $ripple.appendTo(this).css({
@@ -74,9 +94,6 @@ require([
         });
         //return false;
     });
-
-    // Radio button controls bootstrap collapse
-    toggleRadio('upload');
 
     function toggleRadio(groupname){
         var radioButton =  $('.radio input[name=' + groupname + ']');
@@ -91,6 +108,9 @@ require([
             }
         })
     };
+
+    // Radio button controls bootstrap collapse
+    toggleRadio('upload');
 
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
@@ -125,14 +145,6 @@ require([
             return new Date(date).getTime();
         },
         type: 'numeric'
-    });
-
-    $(document).ready(function(){
-        if(sessionStorage.getItem("reloadMsg")) {
-            var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));
-            utils.showJsMessage(msg.type,msg.text,true);
-        }
-        sessionStorage.removeItem("reloadMsg");
     });
 
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
@@ -186,7 +198,7 @@ require([
         $('#external-web-warning').modal('hide');
     });
 
-    $('#body').on('click', '.copy-this, .copy-this-table', function(){
+    $('#body').on('click', '.copy-this, .copy-this-table', function(e){
         let content = $(this).attr('content');
         navigator.clipboard.writeText(content).then(
             () => {
@@ -198,10 +210,43 @@ require([
         );
     });
 
+    $('body').on('click', '.manifest-download-link, .manifest-download-box button.close', function(){
+        sessionStorage.removeItem("user-manifest");
+    });
+
+    $(document).ready(function(){
+        if(sessionStorage.getItem("reloadMsg")) {
+            var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));
+            utils.showJsMessage(msg.type,msg.text,true);
+        }
+        sessionStorage.removeItem("reloadMsg");
+
+        utils.checkForManifest();
+
+        if($('#liveText').siblings()[1].shadowRoot !== null) {
+            $('.main-content').css("margin-top", "0px");
+            $($('#liveText').siblings()[1]).css("margin-top", "56px");
+        }
+    });
 });
 
 // Return an object for consts/methods used by most views
 define(['jquery', 'utils'], function($, utils) {
+    window.pending_count = 0;
+
+    window.show_spinner = function() {
+        window.pending_count += 1;
+        $('.spinner').show();
+    };
+
+    window.hide_spinner = function() {
+        window.pending_count -= 1;
+        if(window.pending_count <= 0) {
+            $('.spinner').hide();
+            window.pending_count = 0;
+        }
+    };
+
 
     // Resets forms in modals on hide. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
@@ -232,6 +277,7 @@ define(['jquery', 'utils'], function($, utils) {
         removeCookie: function(name, path) {
             utils.removeCookie(name, path);
         },
-        blockResubmit: utils.blockResubmit
+        blockResubmit: utils.blockResubmit,
+        checkManifestReady: utils.checkManifestReady
     };
 });

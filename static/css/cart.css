@@ -1,0 +1,21 @@
+.viewer-toggle {
+    display: inline;
+}
+
+.viewer-toggle .viewer-menu {
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    min-width: 100px;
+}
+
+.viewer-toggle a.dropdown-toggle {
+    padding: 10px;
+}
+
+.viewer-toggle .viewer-menu a:hover {
+    background-color: #d5d5d5;
+}
+
+.export-button:hover, .btnGroupDropViewers:hover {
+    cursor: pointer;
+}
