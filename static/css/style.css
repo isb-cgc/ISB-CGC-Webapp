@@ -29,6 +29,70 @@ body.landing {
   width: 100%;
 }
 
+.grid-container {
+  display: grid;
+  min-width: 420px;
+  grid-template-columns: 145px 145px 145px;
+  grid-template-rows: 100px 100px 100px;
+}
+
+.grid-container button {
+  border: none;
+  background-color: inherit;
+  display: block;
+  text-align: center;
+}
+
+.grid-container a:hover {
+  text-decoration: none;
+}
+
+.grid-container button:hover {
+  background-color: #bbdce7;
+}
+
+.grid-container i.link-icon {
+  display: block;
+  margin-left: 35%;
+  padding-bottom: 10px;
+  font-size: xx-large !important;
+}
+
+#grid-menu i.dropdown-icon {
+  font-size: x-large;
+}
+
+#grid-menu {
+  padding: 15px;
+}
+
+#grid-menu .grid-icon {
+  width: 105px;
+}
+
+#grid-menu .grid-icon-md {
+  width: 75px;
+}
+
+#grid-menu .grid-icon-sm {
+  height: 42px;
+  margin-left: 30%;
+  display: block;
+}
+
+#grid-menu .grid-icon-sm {
+  width: 45px;
+}
+
+#grid-menu .dropdown-icon-sm {
+  height: 25px;
+}
+
+#grid-menu .dropdown-menu {
+  margin: 10px 0 0 0;
+  box-shadow: 0px 2px 4px rgb(0 0 0 / 97%);
+}
+
 .bq-menu-img {
   width: 28px;
   filter: brightness(80%) !important;
