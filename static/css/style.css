@@ -70,6 +70,10 @@ body.landing {
   width: 95px;
 }
 
+#grid-menu .grid-icon-md {
+  width: 75px;
+}
+
 #grid-menu .dropdown-menu {
   margin: 10px 0 0 0;
   box-shadow: 0px 2px 4px rgb(0 0 0 / 97%);
