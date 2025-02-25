@@ -170,7 +170,7 @@ require([
         $('.download-manifest-text').hide();
 
         $('.manifest-idc-index a').trigger('click');
-
+        $('#export-manifest-modal').find('input[name="async_download"]').val('false');
         if (button.hasClass('series-export')) {
             title = 'Series Export';
             filterNm = 'Series InstanceUID';
