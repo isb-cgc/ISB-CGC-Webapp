@@ -16,14 +16,49 @@
  *
  */
 
+/*
+require.config({
+    baseUrl: STATIC_FILES_URL+'js/',
+    paths: {
+        'datatables.net': ['libs/jquery.dataTables.min'],
+        'datatables.bootstrap': ['libs/jquery.dataTables.bootstrap.min'],
+        'datatables.net-buttons': ['libs/dataTables.buttons.min'],
+
+    },
+    shim: {
+        'datatables.net': ['jquery'],
+    }
+}); */
+
+
 require([
     'jquery',
-    'base',
     'jqueryui',
     'bootstrap',
     'session_security',
-    'tablesorter'
-], function($,base) {
+    'datatables.net',
+    'datatables.bootstrap',
+    'datatables.net-buttons',
+], function($) {
+
+    /* var cohort_list_table = $('#cohort-table').DataTable({
+        "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
+        "order": [[ 1, "desc" ]],
+        "columns": [
+            { "orderable": false },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+
+        ]
+    }); */
+
+
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {

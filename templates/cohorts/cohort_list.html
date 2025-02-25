@@ -26,6 +26,8 @@
 <div class="container">
     <div class="isb-panel isb-panel-default">
         <ul class="nav nav-tabs" role="tablist">
+
+
             <li role="presentation" {% if not is_public %} class="active" {% endif %} >
                 <a href="#saved-cohorts-list" aria-controls="saved-cohorts-list" role="tab" data-bs-toggle="tab">Saved Cohorts</a>
             </li>
@@ -50,7 +52,8 @@
                         </div>
                     {% endif %}
 
-                    {% include "isb_cgc/pagination.html" %}
+
+                     {% include "isb_cgc/pagination.html" %}
 
                     <table id="cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>

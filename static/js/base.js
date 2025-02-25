@@ -168,18 +168,6 @@ require([
         sortList: [[5,1]]
     });
 
-    $('#cohort-table')
-        .on('sortEnd', function()
-        {
-            update_table_display();
-        })
-        .tablesorter({
-        headers: {
-            0: {sorter:false},
-            8: {sorter: 'fullDate'}
-        },
-        sortList: [[8,1]]
-    });
 
     $("#share-share_users").on("keypress", function(e) {
         // Suppress enter key to change line in share text boxes
@@ -190,6 +178,7 @@ require([
 
     // ------ pagination -------
 
+    /*
     if (document.readyState == 'complete') {
         update_table_display();
     } else {
@@ -199,6 +188,9 @@ require([
             }
         }
     }
+
+     */
+
 
     // change no of entries per page
     $('.isb-panel-body').on('change', '.items-per-page', function () {
