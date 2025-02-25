@@ -887,6 +887,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "col1 study-description", "targets": [6]},
                     {className: "col1 numrows", "targets": [7]},
                     {className: "ohif open-viewer", "targets": [8]},
+                    {className: "download-col", "targets": [9]},
                 ],
                 "columns": [
                     {
@@ -1255,7 +1256,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "col1 body-part-examined", "targets": [5]},
                     {className: "series-description", "targets": [6]},
                     {className: "ohif open-viewer", "targets": [7]},
-                    {className: "download", "targets": [8]},
+                    {className: "download-col", "targets": [8]},
 
                  ],
                   "columns": [
@@ -1999,6 +2000,16 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
          else if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
                         }
+
+         else if ($(elem).hasClass('ohif') || $(elem).parentsUntil('tr').hasClass('ohif')) {
+            //do nothing here. opening the viewer
+        }
+
+         else if ($(elem).hasClass('download-col') || $(elem).parentsUntil('tr').hasClass('download-col')) {
+            //do nothing here. downloading a series or study manifest
+        }
+
+
          else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
              handleCartClick(tabletype, row, elem, ids);
          }
