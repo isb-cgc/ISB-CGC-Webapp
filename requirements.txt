@@ -1,5 +1,5 @@
 cryptography==43.0.1
-django==3.2.25
+django==4.2.19
 django-allauth==0.63.1
 django-allauth[socialaccount]
 django-anymail[mailgun]
@@ -8,7 +8,7 @@ django-dotenv==1.4.2
 django-finalware==1.0.0
 djangorestframework==3.14.0
 django-otp
-django-session-security==2.6.5
+django-session-security==2.6.7
 future==0.18.3
 google-api-python-client==2.133.0
 google-cloud-bigquery
