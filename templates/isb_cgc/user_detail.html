@@ -37,10 +37,11 @@
             <div class="isb-panel panel-default user-panel">
                 <div class="isb-panel-heading">
                     {% if not unconnected_local_account %}
-                        <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
+                        <img src="{{ user_details.avatar_url }}" class="avatar" alt="User Avatar"/>
+                    {% else %}
+                        <i class="fa fa-user basic-avatar"> </i>
                     {% endif %}
                     <h5>
-                        <i class="fa fa-user" aria-hidden="true"></i>
                         Personal Details
                     </h5>
                 </div>
