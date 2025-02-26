@@ -472,7 +472,7 @@ require([
 
     tippy.delegate('.projects-table', {
         dynamicTip: function(ref){
-            if($(ref).parent().hasClass('willAdd')) {
+            if($(ref).parentsUntil('tbody').filter('tr').hasClass('extraInFilter') || !($(ref).parentsUntil('tbody').filter('tr').hasClass('someInCart'))) {
                 return "add series to cart"
             }
             return "remove series from cart"
@@ -487,7 +487,7 @@ require([
 
     tippy.delegate('.cases-table', {
         dynamicTip: function(ref){
-            if($(ref).parent().hasClass('willAdd')) {
+            if($(ref).parentsUntil('tbody').filter('tr').hasClass('extraInFilter') || !($(ref).parentsUntil('tbody').filter('tr').hasClass('someInCart'))) {
                 return "add series to cart"
             }
             return "remove series from cart"
@@ -502,10 +502,10 @@ require([
 
     tippy.delegate('.series-table', {
         dynamicTip: function(ref){
-            if($(ref).parent().hasClass('willAdd')) {
-                return "add series to cart"
+            if ($(ref).parentsUntil('tbody').filter('tr').hasClass('someInCart')) {
+                return "remove from cart"
             }
-            return "remove series from cart"
+            return "add to cart"
         },
         interactive: true,
         allowHTML: true,
@@ -517,7 +517,7 @@ require([
 
     tippy.delegate('.studies-table', {
         dynamicTip: function(ref){
-            if($(ref).parent().hasClass('willAdd')) {
+            if($(ref).parentsUntil('tbody').filter('tr').hasClass('extraInFilter') || !($(ref).parentsUntil('tbody').filter('tr').hasClass('someInCart'))) {
                 return "add series to cart"
             }
             return "remove series from cart"

@@ -589,7 +589,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     }
 
     const updateCartTable = function() {
-        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
+
         var slimViewAbleModality=new Set(["SM"])
         if ($('.cart-wrapper').find('.dataTables_controls').length>0){
             var pageRows = parseInt($('.cart-wrapper').find('.dataTables_length select').val());
@@ -685,12 +685,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                             }
                             let modality = row['Modality'];
                             let is_xc = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC")));
-                            if ((Array.isArray(modality) && modality.some(function (el) {
-                                return nonViewAbleModality.has(el)
-                            })) || nonViewAbleModality.has(modality)) {
-                                let tooltip = "no-viewer-tooltip";
-                                return `<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash ${tooltip}"></i>`;
-                            } else if ((Array.isArray(modality) && modality.some(function (el) {
+
+                             if ((Array.isArray(modality) && modality.some(function (el) {
                                     return slimViewAbleModality.has(el)
                                 }
                             )) || (slimViewAbleModality.has(row['Modality']))) {
