@@ -2,11 +2,9 @@ require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         bloodhound: 'libs/bloodhound',
-        typeahead : 'libs/typeahead',
-        tokenfield: 'libs/bootstrap-tokenfield.min'
+        typeahead : 'libs/typeahead'
     },
     shim: {
-        'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],
             init: function ($) {
@@ -29,8 +27,7 @@ require([
     'bloodhound',
     'typeahead',
     'underscore',
-    'base',
-    'tokenfield'
+    'base'
 ], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
     'use strict';
 

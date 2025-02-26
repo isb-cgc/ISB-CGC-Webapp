@@ -37,9 +37,6 @@ if not exists(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH))):
 
 dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
-APP_ENGINE_FLEX = 'aef-'
-APP_ENGINE = 'Google App Engine/'
-
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
@@ -676,5 +673,4 @@ if DEBUG and DEBUG_TOOLBAR:
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
 
 MITELMAN_URL = os.environ.get('MITELMAN_URL', 'https://mitelmandatabase.isb-cgc.org/')
-TP53_URL = os.environ.get('TP53_URL', 'https://tp53.isb-cgc.org/')
 BQ_SEARCH_URL = os.environ.get('BQ_SEARCH_URL', 'https://bq-search.isb-cgc.org/')
