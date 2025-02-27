@@ -673,9 +673,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     var cols = ['', '','','collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID'];
                     var ssCallNeeded = true;
                     if (viewedProjects.length === 0) {
-                        $('#cases_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
-
-                        //updateStudyTable(rowsAdded, '');
                         callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"})
                     } else {
                         var ret = checkClientCache(request, 'cases');
@@ -2175,98 +2172,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                      $(row).find('.fa-caret-right').removeClass('is-hidden');
                      $(row).find('.fa-caret-down').addClass('is-hidden');
                  }
-
                  changeViewStates(tabletype, [ids], rowsAdded);
-
-                 /*
-                 var caseTableUpdate = false;
-
-                 var studyTableUpdate = false;
-                 var seriesTableUpdate = false;
-
-
-                 if (tabletype == "collections") {
-                     caseTableUpdate = true;
-                     var projid = ids[0]
-                     if (rowsAdded) {
-                         window.openProjects[projid] =1;
-                     }
-                     else {
-                         if (projid in window.openProjects){
-                             delete(window.openProjects[projid]);
-                         }
-                         if (projid in window.openCases){
-                             studyTableUpdate = true;
-                             for (caseid in window.openCases[projid] ){
-                                 if (caseid in window.openStudies){
-                                     seriesTableUpdate = true;
-                                     delete(window.openStudies[caseid])
-                                 }
-                            }
-                            delete(openCases[projid]);
-                        }
-                      }
-                 }
-                 else if (tabletype === 'cases') {
-                     studyTableUpdate = true;
-                     var projid=ids[0];
-                     var caseid=ids[1];
-                     if (rowsAdded){
-                         if (!(projid in window.openCases)){
-                             window.openCases[projid]={}
-                         }
-                         window.openCases[projid][caseid]=1
-                     }
-                     else{
-                         if ((projid in window.openCases) && (caseid in window.openCases[projid])){
-                             delete(window.openCases[projid][caseid])
-                         }
-                         if (caseid in window.openStudies){
-                             seriesTableUpdate = true;
-                             delete(window.openStudies[caseid])
-                         }
-                     }
-                 } else if (tabletype === 'studies') {
-                     seriesTableUpdate  = true;
-                     var projid=ids[0];
-                     var caseid=ids[1];
-                     var studyid =ids[2];
-                     if (rowsAdded){
-                         if( !(caseid in window.openStudies)){
-                             window.openStudies[caseid]={}
-                         }
-                         window.openStudies[caseid][studyid]=1
-                     }
-                     else{
-                         if ((caseid in window.openStudies) && (studyid in window.openStudies[caseid])){
-                             delete (window.openStudies[caseid][studyid]);
-                         }
-                     }
-               }
-               if (caseTableUpdate) {
-                   var caseID = "";
-                   if ($('#cases_tab').find('.caseID-inp').length > 0) {
-                       caseID = $('#studies_tab').find('.caseID-inp').val();
-                   }
-                   updateCaseTable(rowsAdded, caseID);
-               }
-               if (studyTableUpdate) {
-                   var studyID = "";
-                   if ($('#studies_tab').find('.studyID-inp').length > 0) {
-                       studyID = $('#studies_tab').find('.studyID-inp').val();
-                   }
-                   updateStudyTable(rowsAdded, studyID);
-               }
-               if (seriesTableUpdate){
-                   var seriesID = "";
-                     if ($('#series_tab').find('.seriesID-inp').length > 0) {
-                     seriesID = $('#series_tab').find('.seriesID-inp').val();
-                 }
-                updateSeriesTable(rowsAdded, seriesID);
-
-               }
-
-                  */
          }
 
     }
