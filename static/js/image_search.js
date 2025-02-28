@@ -97,7 +97,7 @@ require([
     window.hidePanel=function(){
         $('#lh_panel').hide();
         $('#show_lh').show();
-        $('#show_lh').removeClass('hidden');
+        $('#show_lh').removeClass('is-hidden');
         $('#rh_panel').removeClass('col-lg-9');
         $('#rh_panel').removeClass('col-md-9');
         $('#rh_panel').addClass('col-lg-12');
