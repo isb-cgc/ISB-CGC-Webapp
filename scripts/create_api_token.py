@@ -46,11 +46,17 @@ except ObjectDoesNotExist:
     print("Cron user {} not found - creating.".format(settings.CRON_USER))
     cron_user = User.objects.create(username=settings.CRON_USER)
 
-token = Token.objects.create(user=cron_user)
+try:
+    token = Token.objects.get(user=cron_user)
+except ObjectDoesNotExist:
+    print("Cron user {} token not found - creating.".format(settings.CRON_USER))
+    token = Token.objects.create(user=cron_user)
 
 if settings.IS_DEV and settings.CONNECTION_IS_LOCAL:
-    f = open(join(dirname(__file__), '../{}{}'.format(settings.SECURE_LOCAL_PATH, "dev.cron_token.json")), "w")
+    token_file_name = join(dirname(__file__), '../{}{}'.format(settings.SECURE_LOCAL_PATH, "dev.cron_token.json"))
+    print("{} user token written to {}".format(settings.CRON_USER, token_file_name))
+    f = open(token_file_name, "w")
     f.write(str(token))
     f.close()
 else:
-    print("{} user token: {}".format(settings.CRON_USER,str(token)))
+    print("{} user token seen in database".format(settings.CRON_USER))

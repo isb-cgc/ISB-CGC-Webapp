@@ -183,7 +183,7 @@ A11yjPanel = function() {
                         .wrapInner('<span>')
                         .attr('href', 'javascript:void(0)')
                         .append(function() {
-                            return '<em class="glyphicon glyphicon-chevron-down"><span class="sr-only">Click to expand ' + $(this).text() + ' menu</span></em>';
+                            return '<em class="glyphicon glyphicon-chevron-down"><span class="visually-hidden">Click to expand ' + $(this).text() + ' menu</span></em>';
                         });
 
                     // Add collapsed class for toggling bg of the anchor tag

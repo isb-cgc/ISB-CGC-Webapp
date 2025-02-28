@@ -27,10 +27,18 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
-        tokenfield: 'libs/bootstrap-tokenfield.min'
+        bootstrap: 'libs/bootstrap.bundle.min',
+        tippy: 'libs/tippy-bundle.umd',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
-        'tokenfield': ['jquery', 'jqueryui'],
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'typeahead':{
             deps: ['jquery'],
             init: function ($) {
@@ -40,7 +48,8 @@ require.config({
         'bloodhound': {
            deps: ['jquery'],
            exports: 'Bloodhound'
-        }
+        },
+        'bootstrap': ['jquery']
     }
 });
 
@@ -55,12 +64,12 @@ require([
     'bloodhound',
     'underscore',
     'base',
+    'tippy',
     'typeahead',
-    'tokenfield',
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
+], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base, tippy) {
 
     var SELECTED_FILTERS = {};
 
@@ -304,7 +313,7 @@ require([
         }
 
         if($(selFilterPanel + ' .mol-filter-container').length <= 0) {
-            $(selFilterPanel + ' .panel-body').append($('<span class="mol-filter-container">'));
+            $(selFilterPanel + ' .isb-panel-body').append($('<span class="mol-filter-container">'));
         }
 
         var tokenProgDisplName = prog.data('prog-displ-name'),
@@ -365,15 +374,15 @@ require([
                         .attr("title", valTokenDisplay)
                 );
 
-                $(selFilterPanel+' .panel-body .mol-filter-container').append(token.clone(true));
+                $(selFilterPanel+' .isb-panel-body .mol-filter-container').append(token.clone(true));
                 createFormFilterSet.append(token.clone(true));
             }
         });
         clear_mol_filters($(this));
-        if($(selFilterPanel+' .panel-body .mol-filter').length > 0) {
-            $(selFilterPanel+' .panel-body .mol-filter-container').show();
+        if($(selFilterPanel+' .isb-panel-body .mol-filter').length > 0) {
+            $(selFilterPanel+' .isb-panel-body .mol-filter-container').show();
         } else {
-            $(selFilterPanel+' .panel-body .mol-filter-container').hide();
+            $(selFilterPanel+' .isb-panel-body .mol-filter-container').hide();
         }
         update_all_selected_filters_ui('#' + activeDataTab);
         update_displays();
@@ -426,7 +435,7 @@ require([
                 .addClass(progDataTab+'-token filter-token');
 
             // Don't re-add the token and filter if it already exists
-            if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"]'
+            if($(selFilterPanel+' .isb-panel-body span[data-feature-id="'+feature_id+'"]'
                 + '[data-value-id="'+value_id+'"][data-prog-id="'+progId+'"][data-node-id="'+nodeName+'"]').length <= 0) {
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default')
@@ -444,7 +453,7 @@ require([
                     'create-cohort-form-item': token.clone(true)
                 });
 
-                $(selFilterPanel +' .panel-body').append($this.data('select-filters-item'));
+                $(selFilterPanel +' .isb-panel-body').append($this.data('select-filters-item'));
                 createFormFilterSet.append($this.data('create-cohort-form-item'));
             }
         } else { // Checkbox unchecked
@@ -465,27 +474,27 @@ require([
 
         !withoutDisplayUpdates && update_displays();
 
-        if(!cohort_id && $('.all-selected-filters .panel-body span').length > 0) {
+        if(!cohort_id && $('.all-selected-filters .isb-panel-body span').length > 0) {
             $('#at-least-one-filter-alert-modal').hide();
             $('#at-least-one-filter-alert').hide();
             $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
         }
     };
 
-    $('button[data-target="#apply-edits-modal"]').on('click',function(e){
+    $('button[data-bs-target="#apply-edits-modal"]').on('click',function(e){
         // Clear previous 'bad name' alerts
         $('#unallowed-chars-alert').hide();
     });
 
     // Event: Save Cohort button click
-    $('button[data-target="#create-cohort-modal"]').on('click',function(e){
+    $('button[data-bs-target="#create-cohort-modal"]').on('click',function(e){
         // Clear previous alerts
         $('#unallowed-chars-alert').hide();
         $('#at-least-one-filter-alert').hide();
 
         // There must be at least one filter for one program if this is a
         // new cohort
-        if(!cohort_id && $('.all-selected-filters .panel-body span').length <= 0) {
+        if(!cohort_id && $('.all-selected-filters .isb-panel-body span').length <= 0) {
             $('#at-least-one-filter-alert').show();
             e.preventDefault();
             return false;
@@ -493,7 +502,7 @@ require([
 
         var activeDataTab = $('.data-tab.active').attr('id');
         var progCount = 0;
-        $('.all-selected-filters .panel-body').each(function(){
+        $('.all-selected-filters .isb-panel-body').each(function(){
             if($(this).find('span').length > 0) {
                 progCount++;
             }
@@ -559,7 +568,7 @@ require([
         $(this).find('input[type="submit"]').attr("disabled","disabled");
         savingChanges = true;
 
-        if($('.selected-filters .panel-body span.filter-token').length > 0) {
+        if($('.selected-filters .isb-panel-body span.filter-token').length > 0) {
             form.append('<input type="hidden" name="apply-filters" value="true" />');
         }
 
@@ -567,7 +576,7 @@ require([
             form.append('<input type="hidden" name="apply-name" value="true" />');
         }
 
-        var token_list_selector = cohort_id ? '.selected-filters .panel-body' : '#selected-filters';
+        var token_list_selector = cohort_id ? '.selected-filters .isb-panel-body' : '#selected-filters';
         $(token_list_selector + ' span.filter-token').each(function() {
             var $this = $(this);
             var value = {
@@ -645,12 +654,12 @@ require([
     });
 
     var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
-    var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
+    var save_changes_btn = $('button[data-bs-target="#apply-filters-modal"]');
 
     var check_for_changes = function() {
         let save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
-        let save_changes_btn = $('button[data-target="#apply-filters-modal"]');
-        let save_new_cohort_btn = $('button[data-target="#create-cohort-modal"]');
+        let save_changes_btn = $('button[data-bs-target="#apply-filters-modal"]');
+        let save_new_cohort_btn = $('button[data-bs-target="#create-cohort-modal"]');
         let log_in_to_save_btn = $('#log-in-to-save-btn');
         let totalCases = 0;
 
@@ -702,12 +711,12 @@ require([
         save_changes_btn_modal.prop('disabled', 'disabled');
     });
 
-    $('a[data-target="#share-cohort-modal"]').on('click',function(){
-        $('#share-cohort-modal a[data-target="#shared-pane"]').tab('show');
+    $('a[data-bs-target="#share-cohort-modal"]').on('click',function(){
+        $('#share-cohort-modal a[data-bs-target="#shared-pane"]').tab('show');
     });
 
-    $('button[data-target="#share-cohort-modal"]').on('click',function(){
-        $('#share-cohort-modal a[data-target="#share-cohort-pane"]').tab('show');
+    $('button[data-bs-target="#share-cohort-modal"]').on('click',function(){
+        $('#share-cohort-modal a[data-bs-target="#share-cohort-pane"]').tab('show');
     });
 
     // Share with user click
@@ -868,7 +877,7 @@ require([
             }
         });
 
-        $('.all-selected-filters').find('.panel-body').empty();
+        $('.all-selected-filters').find('.isb-panel-body').empty();
         // bug fix #2722
         creationForm.find('#selected-filters p').hide();
         creationForm.find('#selected-filters span').remove();
@@ -892,7 +901,7 @@ require([
             firstSelect = false;
         });
 
-        createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
+        //createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
     };
 
     var set_prog_filter_height = function(height_percentage) {
@@ -935,9 +944,9 @@ require([
 
             // Remove the filter tokens from their respective containers
             createFormFilterSet.find('span[data-feature-id="'+featureId+'"][data-value-id="'+valId+'"]').remove();
-            $(selFilterPanel+' .panel-body span[data-feature-id="'+featureId+'"][data-value-id="'+valId+'"]').remove();
+            $(selFilterPanel+' .isb-panel-body span[data-feature-id="'+featureId+'"][data-value-id="'+valId+'"]').remove();
 
-            if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+            if(!cohort_id && $('.selected-filters .isb-panel-body span').length <= 0) {
                 $('#at-least-one-filter-alert-modal').show();
                 $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
             }
@@ -949,7 +958,7 @@ require([
 
             // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
             var progCount = 0;
-            $('.selected-filters .panel-body').each(function(){
+            $('.selected-filters .isb-panel-body').each(function(){
                 if($(this).find('span').length > 0) {
                     progCount++;
                 }
@@ -984,27 +993,6 @@ require([
             }, 800).toggleClass('gradient-overlay', true);
 
             set_prog_filter_height(100);
-        });
-
-        $('.more-details button').on('click', function () {
-            $('.more-details').hide();
-            $('.less-details').show();
-
-            $('.details-panel').animate({
-                height: ($('.cohort-info').outerHeight() +
-                    (Program_Filter_Max_Height + $('ul.rev-history').outerHeight()) * Program_Filter_Rows + 15) + 'px'
-            }, 800);
-
-            $('.creation-prog-filter-set').each(function () {
-                $(this).css('height', Program_Filter_Max_Height);
-            });
-        });
-        $('.less-details button').on('click', function () {
-            $('.less-details').hide();
-            $('.more-details').show();
-            $('.details-panel').animate({
-                height: '110px'
-            }, 800);
         });
     }
 
@@ -1170,7 +1158,7 @@ require([
     var reject_load = false;
 
     var update_all_selected_filters_ui = function(dataset_selector) {
-        let all_selected_panel = $('.all-selected-filters' + ' .panel-body');
+        let all_selected_panel = $('.all-selected-filters' + ' .isb-panel-body');
         all_selected_panel.empty();
 
         let create_form_filters = $('#selected-filters');
@@ -1338,7 +1326,7 @@ require([
     // we need to stop the tab from responding to clicks for Issue
     // #1950 fix, so we introduce the next function...
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         ACTIVE_PROGRAM_ID = $('ul.nav-tabs-data li.active a').data('program-id');
         filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID);
     });
@@ -1346,7 +1334,7 @@ require([
     // Clicking on the tab will have no effect if another tab
     // is loading....
 
-    $('a[data-toggle="tab"]').on('click', function (e) {
+    $('a[data-bs-toggle="tab"]').on('click', function (e) {
         if (reject_load) {
             e.preventDefault();
             e.stopPropagation();
@@ -1407,6 +1395,18 @@ require([
     let token = new Date().getTime();
     $('.export-token, .download-token').val(token);
     $('.download-ids-btn').attr('href',$('.download-ids-btn').attr('href')+'?downloadToken='+token);
+
+    tippy('.version-info',{
+        content: function(ref) {
+            return data_version_info.join("<br />\n");
+        },
+        theme: 'light',
+        placement: 'right',
+        interactive:true,
+        arrow: false,
+        trigger: "click",
+        allowHTML:true,
+    });
 
 });
 

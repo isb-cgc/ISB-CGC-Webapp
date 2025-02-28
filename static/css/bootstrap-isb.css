@@ -686,3 +686,8 @@ a.list-group-item:focus {
 	z-index: 100;
 	font-weight: bold
 }
+
+.row{
+	margin-left:-15px!important;
+	margin-right:-15px!important;
+}

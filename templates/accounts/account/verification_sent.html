@@ -9,12 +9,12 @@
         <div class="col-lg-12 col-md-12 col-sm-12 accounts-col email-verify">
             <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8">
-                <div class="panel panel-default"></div>
-                <div class="panel panel-default">
+                <div class="isb-panel isb-panel-default"></div>
+                <div class="isb-panel isb-panel-default">
                     <form action="{% url 'account_email' %}" class="email_list" method="post">
                     {% csrf_token %}
-                        <div class="panel-heading"><h3>{% trans "Verify Your E-mail Address" %}</h3></div>
-                        <div class="panel-body">
+                        <div class="isb-panel-heading"><h3>{% trans "Verify Your E-mail Address" %}</h3></div>
+                        <div class="isb-panel-body">
                             <p>{% blocktrans %}We have sent an e-mail to you for verification. Follow the link provided to finalize the signup process.{% endblocktrans %}</p>
                             <p>If you do not receive the e-mail within a few minutes, check your spam folder. Registration confirmation e-mails are often flagged as potential spam.</p>
                             <hr/>

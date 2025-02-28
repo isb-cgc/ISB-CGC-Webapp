@@ -49,7 +49,7 @@
         </div>
         <h4 class="space-top-10">Drop Down</h4>
         <div class="dropdown space-bottom-10">
-            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdowntest" data-toggle="dropdown" aria-expanded="true">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdowntest" data-bs-toggle="dropdown" aria-expanded="true">
                 Dropdown Menu <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdowntest">
@@ -86,7 +86,7 @@
             <div class="panel-heading clearfix">
                 <h5 class="panel-title pull-left">Primary panel with heading and footer</h5>
                 <div class="dropdown pull-right">
-                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <a data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
                     <ul class="dropdown-menu">
                         <li role="menuitem"><a href="">New Workbook</a></li>
                         <li role="menuitem"><a href="">Edit Details</a></li>
@@ -106,7 +106,7 @@
             <div class="panel-heading clearfix">
                 <h5 class="panel-title pull-left">Primary panel with status messages</h5>
                 <div class="dropdown pull-right">
-                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <a data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
                     <ul class="dropdown-menu">
                         <li role="menuitem"><a href="">New Workbook</a></li>
                         <li role="menuitem"><a href="">Edit Details</a></li>
@@ -117,15 +117,15 @@
             <div class="panel-body">
                 <div class="message message-error alert fade in">
                     <p>This is an error message</p>
-                    <a class="close" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                    <a class="close" data-bs-dismiss="alert"><i class="fa fa-times"></i></a>
                 </div>
                 <div class="message message-info alert fade in">
                     <p>This is an information message</p>
-                    <a class="close" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                    <a class="close" data-bs-dismiss="alert"><i class="fa fa-times"></i></a>
                 </div>
                 <div class="message message-success alert fade in">
                     <p>This is a success message</p>
-                    <a class="close" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                    <a class="close" data-bs-dismiss="alert"><i class="fa fa-times"></i></a>
                 </div>
                 <p>Lorem ipsum dolor sit amet, __consectetur__ adipiscing elit. Cras imperdiet nec erat ac condimentum.</p>
             </div>
@@ -183,10 +183,10 @@
         <h4 class="space-top-10">Tabs</h4>
         <div class="panel">
             <ul class="nav nav-tabs">
-                <li class="active"><a href="#home" data-toggle="tab">Home</a></li>
-                <li><a href="#profile" data-toggle="tab">Profile</a></li>
-                <li><a href="#messages" data-toggle="tab">Messages</a></li>
-                <li><a href="#settings" data-toggle="tab">Settings</a></li>
+                <li class="active"><a href="#home" data-bs-toggle="tab">Home</a></li>
+                <li><a href="#profile" data-bs-toggle="tab">Profile</a></li>
+                <li><a href="#messages" data-bs-toggle="tab">Messages</a></li>
+                <li><a href="#settings" data-bs-toggle="tab">Settings</a></li>
             </ul>
 
             <div class="tab-content space-top-10">
@@ -203,22 +203,22 @@
     <div class="space-top-10 container">
         <h2 class="page-header">Alerts</h2>
         <div class="alert alert-success alert-dismissable">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
         Success!</div>
         <div class="alert alert-info alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
             Information!</div>
         <div class="alert alert-warning alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
             Warning!</div>
         <div class="alert alert-danger alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
             Danger!</div>
     </div>
     <div class="space-top-10 container">
         <h2 class="page-header">Modal</h2>
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data--bs-target="#myModal">
           Modal Launch
         </button>
     </div>
@@ -242,14 +242,14 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">Modal title</h4>
           </div>
           <div class="modal-body">
             ...
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary">Save changes</button>
           </div>
         </div>
