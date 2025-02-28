@@ -44,13 +44,13 @@
             <li class="separator"></li>
         {% endif %}
         {% if program.owner.id == user.id %}
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-program-details-modal">Edit Details</button></li>
-        <li role="menuitem"><button class="btn btn-info program-delete" data-toggle="modal" data-target="#delete-program-modal">Delete</button></li>
+        <li role="menuitem"><button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#edit-program-details-modal">Edit Details</button></li>
+        <li role="menuitem"><button class="btn btn-info program-delete" data-bs-toggle="modal" data-bs-target="#delete-program-modal">Delete</button></li>
         <li class="separator"></li>
-        <li role="menuitem"><button class="btn btn-info share" data-toggle="modal" data-target="#share-program-modal">Share</button></li>
-        <li role="menuitem"><button class="btn btn-link shared-with" data-toggle="modal" data-target="#share-program-modal">Shared with (<span class="share-count">{{ program.shared.count }}</span>)</button></li>
+        <li role="menuitem"><button class="btn btn-info share" data-bs-toggle="modal" data-bs-target="#share-program-modal">Share</button></li>
+        <li role="menuitem"><button class="btn btn-link shared-with" data-bs-toggle="modal" data-bs-target="#share-program-modal">Shared with (<span class="share-count">{{ program.shared.count }}</span>)</button></li>
         {% elif shared %}
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-program-modal">Remove</button></li>
+        <li role="menuitem"><button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#remove-program-modal">Remove</button></li>
         {% endif %}
     </ul>
 </div>

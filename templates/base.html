@@ -30,6 +30,7 @@
     {% block extra_css_libs %}{% endblock %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/select2.min.css' %}" />
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}" />
+
     <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}" />
     <script type="text/javascript" src="{% static 'js/libs/modernizr.js' %}"></script>
     {% block header %}{% endblock %}
@@ -50,17 +51,20 @@
         var BASE_URL = "{{ BASE_URL }}" || "";
         var STORAGE_URI = "{{ STORAGE_URI }}";
         var GENCODE_URI = "{{ STORAGE_URI }}gencode/";
+        var MITELMAN_URL = "{{ MITELMAN_URL }}";
+        var BQ_SEARCH_URL = "{{ BQ_SEARCH_URL }}";
     </script>
 </head>
 <body id="body">
 <!--Include site main header-->
-{% include 'share/site_header.html'  %}
+ {% include 'share/site_header.html'  %}
 
-{#<div id="secondary-nav" class="navbar-fixed-top">#}
-{#    {% block secondary_nav %}{% endblock %}#}
-{#</div>#}
+{#   <div id="secondary-nav" class="navbar-fixed-top"> #}
+{#      {% block secondary_nav %}{% endblock %} #}
+{#  </div> #}
 
 <main id="{% block page_name %}content{% endblock %}" class="main-content">
+
     <div class="page-heading">
         {% block page_header %}{% endblock %}
     </div>
@@ -71,7 +75,7 @@
                     {% autoescape off %}
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible">
-                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
                                 {{ message }}
                             </div>
                         {% endfor %}
@@ -80,7 +84,7 @@
                 <div id="js-messages"></div>
             </div>
         </div>
-        <div class="row">{% block content %}{% endblock %}</div>
+        <div>{% block content %}{% endblock %}</div>
     </div>
 
     <!-- Logout Modal -->
@@ -89,15 +93,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+
                 <h4 class="modal-title" id="logoutModalLabel">Logout</h4>
+                <button type="button" class="close float-end" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <form method="post" action="{% url 'account_logout' %}">
                 <div class="modal-body">
                     <p>Are you sure you want to sign out?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancel</button>
                     {% csrf_token %}
                     {% if redirect_field_value %}
                         <input type="hidden" name="{{redirect_field_name}}" value="{{redirect_field_value}}"/>
@@ -125,9 +131,9 @@
                         Would you like to subscribe to our mailing list? </p>
                 </div>
                 <div class="modal-footer">
-                    <input type="submit" value="Yes" data-dismiss="modal" class="btn btn-primary" id="opt-in-yes-btn"/>
-                    <input type="submit" value="No" data-dismiss="modal" class="btn btn-secondary" id="opt-in-no-btn"/>
-                    <button type="button" class="btn btn-link pull-right" data-dismiss="modal" id="opt-in-ask-later-btn">Ask me later</button>
+                    <input type="submit" value="Yes" data-bs-dismiss="modal" class="btn btn-primary" id="opt-in-yes-btn"/>
+                    <input type="submit" value="No" data-bs-dismiss="modal" class="btn btn-secondary" id="opt-in-no-btn"/>
+                    <button type="button" class="btn btn-link float-end" data-bs-dismiss="modal" id="opt-in-ask-later-btn">Ask me later</button>
                 </div>
             </div>
         </div>

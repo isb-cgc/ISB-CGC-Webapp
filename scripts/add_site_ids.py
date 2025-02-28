@@ -35,6 +35,8 @@ try:
         ssl = db_settings['OPTIONS']['ssl']
     db = MySQLdb.connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'], ssl=ssl)
 
+    # TODO: check for django_site table, if not found, exit with error
+
     delete_str = 'DELETE FROM django_site WHERE id in (2, 3, 4, 5);'
     insert_str = 'INSERT INTO django_site (id, domain, name) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s);'
 
