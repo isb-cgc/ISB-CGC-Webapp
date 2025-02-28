@@ -17,19 +17,8 @@ Vagrant.configure(2) do |config|
      vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
    end
 
-  config.vagrant.plugins = ["vagrant-vbguest"]
-
   config.vm.box_url = "https://app.vagrantup.com/debian/boxes/bullseye64"
   config.vm.box = "debian/bullseye64"
-
-  config.vbguest.installer_options = { allow_kernel_upgrade: true }
-  config.vbguest.installer_hooks[:before_install] = [
-    "apt-get update",
-    "apt-get -y install libxt6 libxmu6"
-  ]
-  config.vbguest.installer_hooks[:after_install] = [
-    "VBoxClient --version"
-  ]
 
   # WebApp ports
   config.vm.network "forwarded_port", guest: 8080, host: 8080
@@ -42,10 +31,16 @@ Vagrant.configure(2) do |config|
   # Map Common for the WebApp
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/www/ISB-CGC-Common"
 
+  # To avoid issues with scripts getting Windows line terminators, always install dos2unix and convert the
+  # shell directory before the rest of the provisioning scripts run
+  config.vm.provision :shell, inline: "sudo apt-get update", :run => 'always'
+  config.vm.provision :shell, inline: "sudo apt-get install dos2unix", :run => 'always'
+  config.vm.provision :shell, inline: "dos2unix /home/vagrant/www/shell/*.sh", :run => 'always'
   config.vm.provision :shell, inline: "echo 'source /home/vagrant/www/shell/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
-  config.vm.provision "shell", path: 'shell/install-deps.sh'
+  config.vm.provision "shell", path: 'shell/install-deps.sh', :run => 'always'
+  # TODO: Adjust create and setup to check for database and run if it's not found so they can be set to always
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'
-  config.vm.provision "shell", path: 'shell/vagrant-start-server.sh'
-  config.vm.provision "shell", path: 'shell/vagrant-set-env.sh'
+  config.vm.provision "shell", path: 'shell/vagrant-start-server.sh', :run => 'always'
+  config.vm.provision "shell", path: 'shell/vagrant-set-env.sh', :run => 'always'
 end

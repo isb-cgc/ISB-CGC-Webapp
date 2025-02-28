@@ -120,9 +120,7 @@ def _decode_dict(data):
 def landing_page(request):
     logger.info("[STATUS] Received landing page view request at {}".format(
         datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    return render(request, 'isb_cgc/landing.html',
-                  {'bq_search_url': settings.BQ_SEARCH_URL, 'mitelman_url': settings.MITELMAN_URL,
-                   'tp53_url': settings.TP53_URL})
+    return render(request, 'isb_cgc/landing.html',{})
 
 
 # Redirect all requests for the old landing page location to isb-cgc.org
@@ -174,6 +172,7 @@ def user_detail(request, user_id):
             user = User.objects.get(id=user_id)
             try:
                 social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
+                avatar_url = social_account.get_avatar_url()
             except Exception as e:
                 # This is a local account
                 social_account = None
@@ -191,7 +190,8 @@ def user_detail(request, user_id):
                 'email': user.email,
                 'id': user.id,
                 'last_login': user.last_login,
-                'user_opt_in_status': user_opt_in_status
+                'user_opt_in_status': user_opt_in_status,
+                'avatar_url': avatar_url
             }
 
             return render(request, 'isb_cgc/user_detail.html', {

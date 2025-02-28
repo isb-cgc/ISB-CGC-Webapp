@@ -3,7 +3,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 id="edit-program-header" class="modal-title">Program Details</h4>
             </div>
             <div class="modal-js-messages" id="edit-program-js-messages">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Update" class="btn btn-primary" />
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -31,7 +31,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 id="delete-program-header" class="modal-title">Delete this Program?</h4>
             </div>
             <div class="modal-body">
@@ -45,7 +45,7 @@
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -58,14 +58,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Remove Yourself from this Program?</h4>
             </div>
             <form id="remove-program" method="POST" action="{% url 'program_unshare' program.id %}" data-redirect="{% url 'programs' %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Remove" class="btn btn-primary" />
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -79,12 +79,12 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="share-program-header">Program Sharing</h4>
                 <div class="modal-js-messages" id="share-program-js-messages"></div>
                 <ul class="nav nav-tabs" data-tabs="tablist">
-                    <li class="active"><a class="share" href="#share" data-toggle="tab">Share</a></li>
-                    <li><a class="shared-with" href="#shared-with" data-toggle="tab">Shared With</a></li>
+                    <li class="active"><a class="share" href="#share" data-bs-toggle="tab">Share</a></li>
+                    <li><a class="shared-with" href="#shared-with" data-bs-toggle="tab">Shared With</a></li>
                 </ul>
             </div>
             <div class="tab-content">
@@ -100,7 +100,7 @@
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Send" class="btn btn-primary" />
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
                 <div class="tab-pane fade" id="shared-with">
@@ -138,7 +138,7 @@
                         {% endif %}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
                     </div>
                 </div>
             </div>
