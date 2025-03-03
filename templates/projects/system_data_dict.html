@@ -21,7 +21,7 @@
     <div class="tabpanel" role="tabpanel">
         <ul class="nav nav-tabs" role="tablist">
             {% for key in attr_list_all %}
-                <li role="presentation" class="{% if forloop.counter == 1 %}active{% endif %}"><a href="#dict-{{ key }}" role="tab" data-toggle="tab" title="{{ key }} Dictionary">{{ key }}</a></li>
+                <li role="presentation" class="{% if forloop.counter == 1 %}active{% endif %}"><a href="#dict-{{ key }}" role="tab" data-bs-toggle="tab" title="{{ key }} Dictionary">{{ key }}</a></li>
             {% endfor %}
         </ul>
         <div class="tab-content">

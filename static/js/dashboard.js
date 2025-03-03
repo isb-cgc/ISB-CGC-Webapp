@@ -32,9 +32,9 @@ require([
     });
 
     $('#more-analysis').on('show.bs.collapse', function () {
-        $('a[data-target="#more-analysis"]').text('Show Less');
+        $('a[data-bs-target="#more-analysis"]').text('Show Less');
     }).on('hide.bs.collapse', function () {
-        $('a[data-target="#more-analysis"]').text('Show More');
+        $('a[data-bs-target="#more-analysis"]').text('Show More');
     });
 
     $('#create-workbook').on('submit', function () {

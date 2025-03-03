@@ -1,5 +1,5 @@
-cryptography==42.0.4
-django==3.2.25
+cryptography==43.0.1
+django==4.2.19
 django-allauth==0.63.1
 django-allauth[socialaccount]
 django-anymail[mailgun]
@@ -8,7 +8,7 @@ django-dotenv==1.4.2
 django-finalware==1.0.0
 djangorestframework==3.14.0
 django-otp
-django-session-security==2.6.5
+django-session-security==2.6.7
 future==0.18.3
 google-api-python-client==2.133.0
 google-cloud-bigquery
@@ -31,7 +31,7 @@ rsa==4.7
 simplejson==3.8.1
 six==1.13.0
 uritemplate==4.1.1
-WebOb==1.5.0
+WebOb==1.8.8
 
 # If you are seeing an error about django-debug-toolbar not being installed,
 # the problem is almost certainly that your developer .env wasn't found
