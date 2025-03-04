@@ -500,6 +500,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     alert("There was an error processing the server data. Please alert the systems administrator")
                 } finally {
                     deferred.resolve(ret);
+
                 }
             }, error: function () {
                 console.log("problem getting data");

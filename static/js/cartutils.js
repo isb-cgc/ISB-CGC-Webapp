@@ -122,7 +122,9 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         return deferred.promise();
     };
 
-    const updateCartCounts =function(){//var buttonContents = '<button class="btn btn-small btn-special clear-cart" role="button"  title="Empty your cart."><i className="fa-solid fa-rotate-left"></i> </button>';
+
+    const updateCartCounts =function(){
+
         var buttonContents = '<button class="btn filter-type clear-cart" role="button" title="Clear the current filter set."><i class="fa fa-rotate-left"></i></button>';
 
         if (Object.keys(window.proj_in_cart).length>0){
