@@ -7,6 +7,7 @@
         <div class="tab-content data-tab-content">
             <input id="number_ajax" type="hidden" value="0">
             <div class="spinner" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
+           <div class="spinner2" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
             <div id="lh_panel" class="tab-pane data-tab active flex_div" role="tabpanel">
                 <div class="col-lg-3 col-md-3 main_cols">
                     <div class="filter-panel panel data-tab-content-panel lh">
@@ -698,6 +699,7 @@
                             </button>
                             <pre class="filter-url code"></pre>
                         </div>
+
                     </div>
                 </div>
                 <div>
@@ -899,9 +901,12 @@
                                     <table id="proj_table" class="table table-striped projects-table">
                                         <thead id="projects_table_head">
                                         <tr>
-                                            <th class="ckbx text_data viewbx"></th>
+                                            <th class="ckbx text_data viewbx" style="width:30px">
+                                                <i class="fa-solid fa-plus-circle fa-lg addMult" style="font-family :'Font Awesome 6 Free' !important"></i>
+                                                <i class="fa-solid fa-circle-minus fa-lg addMult" style="font-family :'Font Awesome 6 Free' !important"></i>
+                                            </th>
                                             <th class="ckbx cart-info"><i class="fa-solid fa-info-circle cart-info-icon"></i></th>
-                                            <th class="ckbx cartnum"># of Series in Cart</th>
+                                            <th class="ckbx cartnumholder"># of Series in Cart</th>
                                             <th class="collex_name sorting_1">Collection Name</th>
                                             <th class="numeric_data table-count">Total # of Cases</th>
                                             <th class="numeric_data table-count"># of Cases (filtered)</th>
@@ -920,11 +925,13 @@
                                     <table id="cases_tab" class="table table-striped cases-table">
                                         <thead id="cases_table_head">
                                         <tr>
-                                            <th class="ckbx text_data">
+                                            <th class="ckbx text_data viewbx">
+                                                <i class="fa-solid fa-plus-circle fa-lg addMult" style="font-family :'Font Awesome 6 Free' !important"></i>
+                                                <i class="fa-solid fa-circle-minus fa-lg addMult" style="font-family :'Font Awesome 6 Free' !important"></i>
 
                                             </th>
                                             <th class="ckbx cart-info"><i class="fa-solid fa-info-circle cart-info-icon"></i></th>
-                                            <th class="ckbx"># of Series in Cart</th>
+                                            <th class="ckbx cartnumholder"># of Series in Cart</th>
                                             <th class='text_data'>Collection Name</th>
                                             <th class='text_data'>Case ID <i class="fas fa-info-circle case-info"></i></th>
                                             <th class='numeric_data'>Total # of Studies</th>
@@ -942,18 +949,19 @@
                                     <table id="studies_tab" class="table table-striped studies-table">
                                         <thead id="studies_table_head">
                                         <tr>
-                                            <th class="ckbx text_data">
-
+                                            <th class="ckbx text_data viewbx">
+                                                 <i class="fa-solid fa-plus-circle fa-lg addMult" style="font-family :'Font Awesome 6 Free' !important"></i>
+                                                <i class="fa-solid fa-circle-minus fa-lg addMult" style="font-family :'Font Awesome 6 Free' !important"></i>
                                             </th>
                                             <th class="ckbx cart-info"><i class="fa-solid fa-info-circle cart-info-icon"></i></th>
-                                            <th class="ckbx"># of Series in Cart</th>
+                                            <th class="ckbx cartnumholder"># of Series in Cart</th>
                                             <th class="col1 text_data case-id has_aux" data-auxid="3">Case ID <i class="fas fa-info-circle case-info"></i></th>
                                             <th class="col2 text_data study-id study-id-col">Study Instance UID</th>
                                             <th class="col1 text_data study-date">Study Date</th>
                                             <th class="col1 text_data study-description">Study Description</th>
                                             <th class="col1 numrows numeric_data table-count"># of Series</th>
                                             <th class="ohif text_data open-viewer">View</th>
-                                            <th class="download"></th>
+                                            <th class="download-col"></th>
 
 
                                         </tr>

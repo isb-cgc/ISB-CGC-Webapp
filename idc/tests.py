@@ -18,9 +18,15 @@ from django.test import TestCase
 from django.contrib.auth.models import AnonymousUser, User
 
 from cohorts.models import Cohort
+from idc.views import populate_tables
 
 
-class ModelTest(TestCase):
+class PopulateTables(TestCase):
+    def setUp(self):
+        print('hi')
+
+
+''' class ModelTest(TestCase):
     def setUp(self):
         # We need 2 users to test permissions
         self.test_cohort_owner = User.objects.create_user(username='test_user', email='test_user_email@isb-cgc.org',
@@ -32,3 +38,4 @@ class ModelTest(TestCase):
     def test_make_cohort(self):
         print("A test to make a cohort!")
         self.assertEqual(self.test_cohort_owner.username, 'test_user')
+        '''

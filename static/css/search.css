@@ -399,23 +399,26 @@ tr {
     cursor: pointer;
 }
 
-#projects_table td.cartnum, #projects_table_head th.cartnum{
-    width: 5%;
-    word-wrap: break-word;
+#projects_table td.cartnumholder, #projects_table_head th.cartnumholder,
+#cases_table td.cartnumholder, #cases_table_head th.cartnumholder,
+#studies_table td.cartnumholder, #studies_table_head th.cartnumholder
+{
+    width: 10%;
+
 }
 
-#projects_table td.ckbx:not(.cartnum), #projects_table_head th.ckbx:not(.cartnum),
-#cases_table_head th.ckbx, #cases_table_head th.shop, #cases_table td.ckbx, #cases_table td.shop,
-#series_table_head th.ckbx, #series_table td.ckbx,
-#studies_table_head th.ckbx, #studies_table td.ckbx {
+#projects_table td.ckbx:not(.cartnumholder), #projects_table_head th.ckbx:not(.cartnumholder),
+#cases_table_head th.ckbx:not(.cartnumholder), #cases_table td.ckbx:not(.cartnumholder),
+#studies_table_head th.ckbx:not(.cartnumholder), #studies_table td.ckbx:not(.cartnumholder),
+#series_table_head th.ckbx, #series_table td.ckbx {
     width: 5%;
-    word-wrap: break-word; }
+     }
 
 #search_def_stats {
     padding-top: 8px; }
 
 #projects_table td, #projects_table_head th {
-    width: 33.33%;
+    width: 30%;
     word-wrap: break-word; }
 
 #cases_table td, #cases_table_head th {
@@ -437,7 +440,7 @@ tr {
 
 #studies_table_head th.study-date,
 #studies_table td.study-date {
-    width: 7%;
+    width: 10%;
 }
 
 #studies_table_head th.study-description,
@@ -456,8 +459,8 @@ tr {
     min-width: 70px;
 }
 
-#studies_table_head th.download,
-#studies_table td.download {
+#studies_table_head th.download-col,
+#studies_table td.download-col {
     width:6%;
 }
 
@@ -660,11 +663,11 @@ tr:not(.someInCart).ckbx:has(.fa-cart-shopping) {
     background-color:yellow;
 }
 
-#studies_table tr.someInCart:not(.extraInFilt) .ckbx .fa-cart-shopping {
+#studies_table tr.someInCart:not(.extraInItem) .ckbx .fa-cart-shopping {
     background-color:green;
 }
 
-#studies_table tr.someInCart.extraInFilt .ckbx .fa-cart-shopping {
+#studies_table tr.someInCart.extraInItem .ckbx .fa-cart-shopping {
     background-color:yellow;
 }
 
@@ -763,6 +766,7 @@ li.cartlist {
         margin: 30px auto;
     }
 }
+
 
 #projects_table:hover, #cases_table:hover, #studies_table:hover{
     cursor:pointer;

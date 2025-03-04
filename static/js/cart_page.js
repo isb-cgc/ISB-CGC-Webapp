@@ -70,15 +70,11 @@ require([
      var ajaxtriggered = false;
 
     window.resetCartPageView = function(){
-        window.cartHist = new Array();
-        window.updatePartitionsFromScratch();
-        let ret = cartutils.formcartdata();
-        window.partitions = ret[0];
-        window.filtergrp_lst = ret[1];
-        window.glblcart = new Object();
 
-        localStorage.removeItem("cartHist")
-        window.location = window.location.protocol+'//'+window.location.host+'/explore/';
+
+        localStorage.setItem("cartcleared","yes");
+        window.history.back();
+
     }
 
     tippy.delegate('#cart-table', {
@@ -135,7 +131,7 @@ require([
             }
         }
         content = "<ol>"+contentArray.join('\n')+"</ol>";
-        $('#cart-description-modal').find('.modal-body').html(content);
+        $('#cart-fdescription-modal').find('.modal-body').html(content);
     }
 
      $(document).ready(function () {
@@ -145,6 +141,7 @@ require([
              navelem.attr('href', 'javascript:window.history.back()')
          }
          window.mxseries = parseInt(JSON.parse(document.getElementById('mxseries').textContent));
+         //window.totseries = parseInt(JSON.parse(document.getElementById('totseries').textContent));
          window.mxstudies = parseInt(JSON.parse(document.getElementById('mxstudies').textContent));
          window.cartHist = JSON.parse(document.getElementById('carthist').textContent);
 
@@ -155,7 +152,7 @@ require([
          window.partitions = ret[0];
          window.filtergrp_lst = ret[1];
 
-         window.pageid = Math.random().toString(36).substr(2, 8);
+
          ajaxtriggered = true;
 
         cartutils.updateCartTable();

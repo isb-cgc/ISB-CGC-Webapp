@@ -37,7 +37,7 @@ from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips, DataSetType
-from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data, get_cart_data_studylvl
+from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data, get_cart_data_studylvl, get_table_data_with_cart_data
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
@@ -375,7 +375,54 @@ def studymp(request):
     return JsonResponse(response, status=status)
 
 
+
+
 def populate_tables(request):
+    response = {}
+    status = 200
+
+    try:
+        req = request.GET if request.GET else request.POST
+        path_arr = [nstr for nstr in request.path.split('/') if nstr]
+        table_type = path_arr[len(path_arr)-1]
+        fields = None
+        collapse_on = None
+        filters = json.loads(req.get('filters', '{}'))
+
+        filtergrp_list = json.loads(req.get('filtergrp_list', '{}'))
+        partitions = json.loads(req.get('partitions', '{}'))
+
+        offset = int(req.get('offset', '0'))
+        limit = int(req.get('limit', '500'))
+        serieslimit = int(req.get('serieslimit', '500'))
+        studylimit = int(req.get('studylimit', '500'))
+        if limit > settings.MAX_SOLR_RECORD_REQUEST:
+            logger.warning("[WARNING] Attempt to request more than MAX_SOLR_RECORD_REQUEST! ({})".format(limit))
+            limit = settings.MAX_SOLR_RECORD_REQUEST
+        sort = req.get('sort', 'PatientID')
+        sortdir = req.get('sortdir', 'asc')
+
+        [cnt, tableRes]=get_table_data_with_cart_data(table_type, sort, sortdir, filters, filtergrp_list, partitions, limit, offset)
+        response["res"] = tableRes
+        response["cnt"] = cnt
+        response["diff"] = []
+    except Exception as e:
+        logger.error("[ERROR] While attempting to populate the table:")
+        logger.exception(e)
+        messages.error(
+           request,
+           "Encountered an error when attempting to populate the page - please contact the administrator."
+        )
+        status = 400
+
+    return JsonResponse(response, status=status)
+
+
+
+
+
+
+def populate_tables_old(request):
     response = {}
     status = 200
     tableRes = []
@@ -399,7 +446,7 @@ def populate_tables(request):
         sort = req.get('sort', 'PatientID')
         sortdir = req.get('sortdir', 'asc')
         checkIds = json.loads(req.get('checkids', '[]'))
-        #table_data = get_table_data(filters, table_type)
+
         diffA = []
         versions=[]
         versions = ImagingDataCommonsVersion.objects.filter(
@@ -424,7 +471,6 @@ def populate_tables(request):
         )
 
         sortByField = True
-        #idsReq=[]
         custom_facets = None
         custom_facets_order = None
 
@@ -443,7 +489,7 @@ def populate_tables(request):
             facetfields = ['unique_patient','unique_study', 'unique_series']
             sort_arg = 'collection_id asc'
             sortByField= True
-            sort="collection_id"
+            sort = "collection_id"
 
         if table_type == 'cases':
             custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": limit,
@@ -473,7 +519,6 @@ def populate_tables(request):
                 "tot_series": {"type": "terms", "field": "PatientID", "limit": limit,
                                "facet": {"unique_series": "unique(SeriesInstanceUID)"}, "domain": {"query": "*.*"}}
             }
-
             tableIndex = 'PatientID'
             fields = ['collection_id', 'PatientID','access']
             facetfields=['unique_study', 'unique_series']
@@ -538,8 +583,7 @@ def populate_tables(request):
                 sort_arg = "{} {}".format(sort, sortdir)
                 if sort == 'PatientID':
                     sort_arg = sort_arg+', StudyDate asc'
-                #elif sort == 'StudyInstanceUID':
-                #    sort_arg = sort_arg + 'StudyDate asc'
+
             elif sort == 'SeriesInstanceUID':
                 sortByField = False
                 sort_arg = 'unique_series '+sortdir
@@ -557,15 +601,11 @@ def populate_tables(request):
 
             fields = ['collection_id', 'PatientID', 'SeriesInstanceUID', 'StudyInstanceUID', 'SeriesDescription', 'SeriesNumber',
                       'BodyPartExamined', 'Modality', 'access', 'crdc_series_uuid','gcs_bucket','aws_bucket', 'SOPClassUID']
-
-
             facetfields = []
             sortByField = True
-
             sort_arg = 'StudyInstanceUID asc, SeriesNumber asc' if not sort else "{} {}, SeriesNumber asc".format(
                 sort, sortdir
             )
-
             if sort == 'SeriesDescription':
                 custom_facets_order = {}
 
@@ -573,7 +613,7 @@ def populate_tables(request):
         curInd = 0
         idsFilt = []
 
-        # check that any selected ids are still valid after the filter is updated. ids that are not longer valid are
+        # check that any selected ids are still valid after the filter is updated. ids that are no longer valid are
         # then deselected on the front end
         if len(checkIds)>0:
             selFilters=copy.deepcopy(filters)
@@ -581,7 +621,6 @@ def populate_tables(request):
             newCheckIds = get_collex_metadata(
                 selFilters, [tableIndex], record_limit=len(checkIds)+1,sources=sources, records_only=True,
                 collapse_on=tableIndex, counts_only=False, filtered_needed=False, aux_sources=aux_sources, sort=tableIndex+' asc', default_facets=False
-
             )
 
             nset = set([x[tableIndex] for x in newCheckIds['docs']])
@@ -610,12 +649,13 @@ def populate_tables(request):
             filters[tableIndex]=idsFilt
 
             if not table_type == 'series':
-                custom_facets["tot_series"]["domain"]["query"] = tableIndex + ": (" + " ".join(idsFilt) + ")"
+                #custom_facets["tot_series"]["domain"]["query"] = tableIndex + ": (" + " ".join(idsFilt) + ")"
+
                 cntRecs = get_collex_metadata(
                     filters, fields, record_limit=limit, sources=sources, collapse_on=tableIndex, counts_only=True,
                     records_only=False, filtered_needed=False, custom_facets=custom_facets, raw_format=True, aux_sources=aux_sources, default_facets = False
-
                 )
+
 
                 if table_type =='cases':
                     for rec in cntRecs['facets']['tot_series']['buckets']:
@@ -1008,6 +1048,41 @@ def cart_page(request):
     return render(request, 'collections/cart_list.html', context)
 
 
+def cart_data_stats(request):
+    status = 200
+    response = {}
+    field_list = ['collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID', 'aws_bucket']
+    try:
+
+        req = request.GET if request.GET else request.POST
+        current_filters = json.loads(req.get('filters', '{}'))
+        filtergrp_list = json.loads(req.get('filtergrp_list', '{}'))
+        aggregate_level = req.get('aggregate_level', 'StudyInstanceUID')
+        results_level = req.get('results_level', 'StudyInstanceUID')
+
+        partitions = json.loads(req.get('partitions', '{}'))
+
+        limit = int(req.get('limit', 1000))
+        offset = int(req.get('offset', 0))
+        length = int(req.get('length', 100))
+        mxseries = int(req.get('mxseries',1000))
+
+        response = get_cart_and_filterset_stats(current_filters,filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
+        '''if ((len(partitions)>0) and (aggregate_level == 'StudyInstanceUID')):
+            response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
+        elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
+            response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
+        else:
+            response['numFound'] = 0
+            response['docs'] = []'''
+    except Exception as e:
+        logger.error("[ERROR] While loading cart:")
+        logger.exception(e)
+        status = 400
+
+    return JsonResponse(response, status=status)
+
+
 def cart_data(request):
     status = 200
     response = {}
@@ -1020,7 +1095,7 @@ def cart_data(request):
 
         partitions = json.loads(req.get('partitions', '{}'))
 
-        limit = int(req.get('limit', 1000))
+        limit = min(int(req.get('limit', 500)),500)
         offset = int(req.get('offset', 0))
         length = int(req.get('length', 100))
         mxseries = int(req.get('mxseries',1000))

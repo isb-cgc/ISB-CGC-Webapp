@@ -63,6 +63,7 @@ urlpatterns = [
     url(r'^cart/$', views.cart_page, name='cart'),
     url(r'^explore/cart/$', views.cart_page, name='get_explore_cart'),
     url(r'^cart_data/$', views.cart_data, name='get_cart_data'),
+    url(r'^cart_data_stats/$', views.cart_data_stats, name='get_cart_data_stats'),
     url(r'^collaborators/', views.collaborators, name='collaborators'),
     url(r'^collections/', include('idc_collections.urls')),
     # url(r'^share/', include('sharing.urls')),
