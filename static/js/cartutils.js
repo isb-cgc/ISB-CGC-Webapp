@@ -76,8 +76,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     var seriesTblStrt = 0;
 
 
-
-
     const getCartData = function(offset, limit, aggregate_level, results_level){
         let url = '/cart_data/';
         url = encodeURI(url);
@@ -124,7 +122,11 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         return deferred.promise();
     };
 
+
     const updateCartCounts =function(){
+
+        var buttonContents = '<button class="btn filter-type clear-cart" role="button" title="Clear the current filter set."><i class="fa fa-rotate-left"></i></button>';
+
         if (Object.keys(window.proj_in_cart).length>0){
             var nmprojs = 0;
             var nmcases=0;
@@ -138,23 +140,28 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             }
 
 
-            var content = "Cart contents: " + nmseries.toString()+" series from "+nmprojs.toString()+" collections / "+nmcases.toString()+" cases / "+nmstudies.toString()+" studies";
+            var content = buttonContents+'<span id ="#cart_stats">Cart contents: ' + nmseries.toString()+' series from '+nmprojs.toString()+
+                ' collections / '+nmcases.toString()+' cases / '+nmstudies.toString()+' studies</span>';
             localStorage.setItem('manifestSeriesCount',nmseries);
 
-            $('#cart_stats').html(content) ;
+            $('#cart_stats_holder').html(content) ;
             $('#cart_stats').removeClass('empty-cart');
             $('#export-manifest-cart').removeAttr('disabled');
             $('.cart-view').removeAttr('disabled');
             $('.clear-cart').removeAttr('disabled');
+            $('.clear-cart').on('click', function(){
+                 window.resetCart();
+            });
+
         } else {
+            $('#cart_stats_holder').html('<span id="#cart_stats">Your cart is currently empty</span>');
             $('#cart_stats').addClass('empty-cart');
-            $('#cart_stats').html("Your cart is currently empty.");
+
             $('#export-manifest-cart').attr('disabled', 'disabled');
             $('.cart-view').attr('disabled', 'disabled');
             $('.clear-cart').attr('disabled', 'disabled');
         }
-        let elapsed = (Date.now()-started)/1000;
-        console.debug(`Elapsed time for updateTableCountsAndGlobalCartCounts: ${elapsed}s`);
+
     }
 
     // remove all items from the cart. clear the glblcart, carHist, cartDetails
@@ -182,9 +189,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
          $('.clear-cart').attr('disabled','disabled');
     }
 
-    $('.clear-cart').on('click', function(){
-        window.resetCart();
-    });
+
 
     //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel){
@@ -215,14 +220,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.cartHist[curInd]['selections'] =  newHistSel;
         window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
 
-        /* var projid = newSel['sel'][0];
-        updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource).then(function(){
-            let elapsed = (Date.now()-started)/1000;
-            console.debug(`Elapsed time for updateCartSelections: ${elapsed}s`);
-            completeObj && completeObj.trigger('shopping-cart:update-complete');
-        }); */
-    }
 
+    }
 
 
     // make partitions from table selections
