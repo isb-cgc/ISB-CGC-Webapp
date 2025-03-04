@@ -289,6 +289,11 @@ def cart(request):
     return JsonResponse(response, status=status)
 
 
+# Calculate the size and counts of a cart based on its current partitions
+def calculate_cart(request):
+    pass
+
+
 # returns various metadata mappings for selected projects used in calculating cart selection
 # counts 'on the fly' client side
 def studymp(request):
@@ -328,11 +333,13 @@ def studymp(request):
        projstudymp = dict()
 
        idsEx = get_collex_metadata(
-                    filters, ['collection_id', 'PatientID','StudyInstanceUID', 'SeriesInstanceUID'], record_limit=limit, sources=sources, offset=offset,
-                    records_only=True, custom_facets={}, aux_sources=aux_sources,
-                    collapse_on='StudyInstanceUID', counts_only=False, filtered_needed=False,
-                    raw_format=True, default_facets=False, sort=None
-                )
+            filters, ['collection_id', 'PatientID','StudyInstanceUID', 'SeriesInstanceUID'], record_limit=limit,
+            sources=sources, offset=offset, records_only=True, custom_facets={}, aux_sources=aux_sources,
+            collapse_on='StudyInstanceUID', counts_only=False, filtered_needed=False,
+            raw_format=True, default_facets=False, sort=None
+        )
+
+       logger.debug("[STATUS] records pulled: {}".format(len(idsEx['docs'])))
 
        for doc in idsEx['docs']:
           proj=doc['collection_id'][0]

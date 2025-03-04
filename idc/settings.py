@@ -75,6 +75,8 @@ print("Allowed hosts are: {}".format(ALLOWED_HOSTS))
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
+APPEND_SLASH = bool(os.environ.get('APPEND_SLASH', 'True') == 'True')
+
 ADMINS                  = ()
 MANAGERS                = ADMINS
 
@@ -92,19 +94,13 @@ PUBSUB_USER_MANIFEST_TOPIC     = "projects/{}/topics/{}".format(GCLOUD_PROJECT_I
 USER_MANIFESTS_FOLDER          = os.environ.get('USER_MANIFESTS_FOLDER', 'user-manifests')
 RESULT_BUCKET                  = os.environ.get('RESULT_BUCKET', 'idc-dev-files')
 
-# Deployment module
-CRON_MODULE             = os.environ.get('CRON_MODULE')
-
 # Log Names
 WEBAPP_LOGIN_LOG_NAME         = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
 COHORT_CREATION_LOG_NAME      = os.environ.get('COHORT_CREATION_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://idc-dev.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://dev-portal.canceridc.dev')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-idc-dev.appspot.com')
 API_HOST                = os.environ.get('API_HOST', 'api-dot-idc-dev.appspot.com')
-
-# Compute services - Should not be necessary in webapp
-PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
 # GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET', 'FAKE_BUCKET')
@@ -113,11 +109,7 @@ PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 DCF_GUID_SUFFIX           = os.environ.get('DCF_GUID_SUFFIX', '')
 
 # BigQuery cohort storage settings
-BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
-BIGQUERY_COHORT_TABLE_ID             = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
-BIGQUERY_IDC_TABLE_ID                = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
 MAX_BQ_INSERT                        = int(os.environ.get('MAX_BQ_INSERT', '500'))
-USER_DATA_ON                         = bool(os.environ.get('USER_DATA_ON', 'False') == 'True')
 
 database_config = {
     'default': {
@@ -191,31 +183,12 @@ if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = int(os.environ.get('SITE_ID', '3'))
 
-def get_project_identifier():
-    return BIGQUERY_PROJECT_ID
-
-# Set cohort table here
-if BIGQUERY_COHORT_TABLE_ID is None:
-    raise Exception("Developer-specific cohort table ID is not set.")
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 
 API_USER = os.environ.get('API_USER', 'api_user')
 API_AUTH_KEY = os.environ.get('API_AUTH_KEY', 'Token')
 API_AUTH_HEADER = os.environ.get('API_AUTH_HEADER', 'HTTP_AUTHORIZATION')
-
-# TODO Remove duplicate class.
-#
-# This class is retained here, as it is required by bq_data_access/v1.
-# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
-class BigQueryCohortStorageSettings(object):
-    def __init__(self, dataset_id, table_id):
-        self.dataset_id = dataset_id
-        self.table_id = table_id
-
-
-def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
 USE_CLOUD_STORAGE              = bool(os.environ.get('USE_CLOUD_STORAGE', 'False') == 'True')
 
@@ -293,7 +266,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 
 )
-
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
@@ -688,11 +660,11 @@ SOLR_CERT           = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCA
 DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
 
-# Explicitly check for known problems in descrpitions and names provided by users
+# Explicitly check for known problems in descriptions and names provided by users
 DENYLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 ATTRIBUTE_DISALLOW_RE = r'([^a-zA-Z0-9_])'
 
-if DEBUG and DEBUG_TOOLBAR:
+if DEBUG and DEBUG_TOOLBAR and not IS_APP_ENGINE:
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware',)
     DEBUG_TOOLBAR_PANELS = [

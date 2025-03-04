@@ -77,6 +77,114 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
 
 
+<<<<<<< HEAD
+=======
+        if (('cartHist' in localStorage) && ('sessionid' in localStorage)) {
+            var cartHistLcl = JSON.parse(localStorage.getItem("cartHist"));
+
+            if (('presessionid' in localStorage) || ('sessionid' in localStorage)) {
+                if ('presessionid' in localStorage) {
+                    presessionid = localStorage.getItem('presessionid');
+                    if (presessionid in cartHistLcl) {
+                        cartHist = cartHistLcl[presessionid];
+                    }
+                }
+                if ('sessionid' in localStorage) {
+                    var sessionid = localStorage.getItem('sessionid');
+                    if (sessionid in cartHistLcl) {
+                        cartHist = [...cartHist, ...cartHistLcl[sessionid]];
+                    }
+                }
+                if (cartHist.length > 0) {
+                  cartObj[sessionid] = cartHist;
+                  localStorage.setItem("cartHist", JSON.stringify(cartObj));
+                } else{
+                    localStorage.removeItem("cartHist");
+                }
+                localStorage.removeItem("presessionid")
+            } else {
+                localStorage.removeItem("cartHist")
+            }
+        }
+    };
+
+    // given a dic with studyid as keys, add or subtract series from the cart
+    const updateGlobalCart = function(cartAdded, studymp, lvl){
+        for (studyid in studymp){
+           if (lvl=="series") {
+               var seriesArr = studymp[studyid];
+               for (var i=0; i<seriesArr.length;i++) {
+                   var seriesid = seriesArr[i];
+                   if (cartAdded) {
+                       if (!(studyid in window.glblcart)) {
+                           window.glblcart[studyid] = new Object();
+                           window.glblcart[studyid]['all'] = false;
+                           window.glblcart[studyid]['sel'] = new Set();
+                       }
+                       window.glblcart[studyid]['sel'].add(seriesid);
+                       if (window.studymp[studyid]['val'].length == window.glblcart[studyid]['sel'].size) {
+                           window.glblcart[studyid]['all'] = true;
+                           window.glblcart[studyid]['sel'] = new Set();
+                       }
+                   } else {
+                       if (studyid in window.glblcart) {
+                           if (window.glblcart[studyid]['all']) {
+                               window.glblcart[studyid]['all'] = false;
+                               window.glblcart[studyid]['sel'] = new Set([...window.studymp[studyid]['val']]);
+                           }
+                            window.glblcart[studyid]['sel'].delete(seriesid);
+                         if (window.glblcart[studyid]['sel'].size == 0) {
+                             delete window.glblcart[studyid];
+                         }
+                    }
+                  }
+               }
+           } else{
+             if (cartAdded){
+                 window.glblcart[studyid]=new Object();
+                 window.glblcart[studyid]['all'] = true;
+                 window.glblcart[studyid]['sel'] = new Set();
+             } else {
+                 if (studyid in window.glblcart){
+                     delete(window.glblcart[studyid]);
+                 }
+             }
+           }
+        }
+    };
+
+    // calculate the tot # of projects, cases, studies, and series in the cart
+    const getGlobalCounts = function(){
+        // TODO: call Solr to get counts from facet based on partition
+        tots=[0,0,0,0]
+        for (projid in window.projstudymp){
+            for (studyid in window.projstudymp[projid]){
+                if (studyid in window.glblcart){
+                    tots[0]++;
+                    break;
+
+                }
+            }
+        }
+        for (caseid in window.casestudymp){
+            for (studyid in window.casestudymp[caseid]) {
+                if (studyid in window.glblcart) {
+                    tots[1]++;
+                    break;
+                }
+            }
+        }
+        tots[2] = Object.keys(window.glblcart).length;
+        for (studyid in window.glblcart){
+            if (window.glblcart[studyid]['all']){
+                tots[3]=tots[3]+window.studymp[studyid]['cnt'];
+            } else{
+                tots[3]=tots[3]+window.glblcart[studyid]['sel'].size;
+            }
+        }
+        return tots;
+    };
+>>>>>>> af361a37e28d5ccd81c33bcea84cc02c15b7c2a0
 
     const getCartData = function(offset, limit, aggregate_level, results_level){
         let url = '/cart_data/';
@@ -124,8 +232,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         return deferred.promise();
     };
 
-    const updateCartCounts =function(){
-        //var buttonContents = '<button class="btn btn-small btn-special clear-cart" role="button"  title="Empty your cart."><i className="fa-solid fa-rotate-left"></i> </button>';
+    const updateCartCounts =function(){//var buttonContents = '<button class="btn btn-small btn-special clear-cart" role="button"  title="Empty your cart."><i className="fa-solid fa-rotate-left"></i> </button>';
         var buttonContents = '<button class="btn filter-type clear-cart" role="button" title="Clear the current filter set."><i class="fa fa-rotate-left"></i></button>';
 
         if (Object.keys(window.proj_in_cart).length>0){
@@ -139,7 +246,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 nmstudies=nmstudies+window.proj_in_cart[projid]['studies'];
                 nmseries=nmseries+window.proj_in_cart[projid]['series'];
             }
-
 
 
             var content = buttonContents+'<span id ="#cart_stats">Cart contents: ' + nmseries.toString()+' series from '+nmprojs.toString()+
@@ -163,6 +269,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             $('.cart-view').attr('disabled', 'disabled');
             $('.clear-cart').attr('disabled', 'disabled');
         }
+        let elapsed = (Date.now()-started)/1000;
+        console.debug(`Elapsed time for updateTableCountsAndGlobalCartCounts: ${elapsed}s`);
     }
 
     // remove all items from the cart. clear the glblcart, carHist, cartDetails
@@ -198,7 +306,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         var curInd = window.cartHist.length - 1;
         var selections = window.cartHist[curInd]['selections'];
         var selection = newSel['sel'];
-
+        let started = Date.now();
         var newHistSel = new Array();
         for (var i=0;i<selections.length;i++) {
             var curselection = selections[i]['sel'];
@@ -221,12 +329,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         window.cartHist[curInd]['selections'] =  newHistSel;
         window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
 
-        /* var projid = newSel['sel'][0];
-        updateCartAndCartMetrics(addingToCart, projid, studymp, updateSource).then(function(){
-            completeObj && completeObj.trigger('shopping-cart:update-complete');
-        }); */
-    }
 
+    }
 
 
     // make partitions from table selections

@@ -34,7 +34,7 @@ COHORT_TABLES = {
 from apiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 
-from idc.settings import get_project_identifier
+from idc.settings import BIGQUERY_PROJECT_ID
 
 def authorize_and_get_bq_service():
     credentials = GoogleCredentials.get_application_default().create_scoped(['https://www.googleapis.com/auth/bigquery'])
@@ -123,7 +123,7 @@ class BigQueryCohortSupport(object):
 
 def create_table(dataset_id, table_id):
     print("Creating table {0}.{1}".format(dataset_id, table_id))
-    project_id = get_project_identifier()
+    project_id = BIGQUERY_PROJECT_ID
 
     schema = BigQueryCohortSupport.get_schema()
 

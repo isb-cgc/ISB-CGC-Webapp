@@ -20,6 +20,7 @@ from django.conf.urls import include, url
 from django.urls import path
 from django.contrib import admin
 from django.conf import settings
+from django.views.generic.base import TemplateView
 
 from . import views, views_api, demo_views
 from cohorts.views import get_query_str_response
@@ -35,6 +36,8 @@ urlpatterns = [
     url(r'^users/api/', views_api.user_detail, name='user_detail_api'),
 
     url(r'^cohort_detail/(?P<cohort_id>\d+)/$', demo_views.cohort_detail, name='cohort_detail'),
+    url(r'robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name='robots'),
+    url(r'sitemap.xml', TemplateView.as_view(template_name="sitemap.xml", content_type="text/xml"), name='sitemap'),
 
     url(r'^cohorts/', include('cohorts.urls')),
     path('admin/', admin.site.urls),

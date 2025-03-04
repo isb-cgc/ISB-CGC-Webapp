@@ -77,21 +77,13 @@ WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_loggi
 BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-idc.appspot.com')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-idc.appspot.com')
 
-# Compute services - Should not be necessary in webapp
-PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
 OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
 GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
 # BigQuery cohort storage settings
-BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
-BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
-BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
-BIGQUERY_IDC_TABLE_ID    = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
-
-USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
 DATABASES = {
     'default': {
@@ -129,37 +121,9 @@ if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     SITE_ID = 4
 
 
-def get_project_identifier():
-    return BIGQUERY_PROJECT_ID
-
-
-# Set cohort table here
-if BIGQUERY_COHORT_TABLE_ID is None:
-    raise Exception("Developer-specific cohort table ID is not set.")
-
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 
-
-# TODO Remove duplicate class.
-#
-# This class is retained here, as it is required by bq_data_access/v1.
-# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
-class BigQueryCohortStorageSettings(object):
-    def __init__(self, dataset_id, table_id):
-        self.dataset_id = dataset_id
-        self.table_id = table_id
-
-
-def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
-
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
-
-PROCESSING_ENABLED          = os.environ.get('PROCESSING_ENABLED', False)
-PROCESSING_JENKINS_URL      = os.environ.get('PROCESSING_JENKINS_URL', 'http://localhost/jenkins')
-PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing')
-PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
-PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 

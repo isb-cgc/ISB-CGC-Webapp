@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.4.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 316 128" style="enable-background:new 0 0 316 128;" xml:space="preserve">
+<style type="text/css">
+	.st0{filter:url(#filter-1);}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#164D60;}
+	.st2{fill:none;stroke:#164D60;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round;}
+	.st3{fill:none;stroke:#164D60;stroke-width:1.8;}
+	.st4{fill:#164D60;}
+	.st5{font-family:'ArialMT';}
+	.st6{font-size:62.319px;}
+	.st7{letter-spacing:-3;}
+</style>
+<filter  filterUnits="objectBoundingBox" height="184.9%" id="filter-1" width="205.6%" x="-53.4%" y="-42.4%">
+	<feOffset  dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+	<feGaussianBlur  in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="9.5"></feGaussianBlur>
+	
+		<feColorMatrix  in="shadowBlurOuter1" result="shadowMatrixOuter1" type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.018902972 0">
+		</feColorMatrix>
+	<feMerge>
+		<feMergeNode  in="shadowMatrixOuter1"></feMergeNode>
+		<feMergeNode  in="SourceGraphic"></feMergeNode>
+	</feMerge>
+</filter>
+<g id="mhub_logo_green">
+	<g id="Group-Copy" transform="translate(29.000000, 21.000000)" class="st0">
+		<path id="Combined-Shape_00000170981393737727526900000008138281464393370250_" class="st1" d="M62.8,7.7c3.8,0,7,3,7.2,6.8l0,0.4
+			v56.2c0,1.6-0.6,3.2-1.6,4.5c-2.4,3-6.7,3.6-9.8,1.4l-0.3-0.2L35,58l11.8-9.4l0,0l0,0c0.3-0.2,0.6-0.5,0.9-0.8l0.3-0.3
+			c2.4-3,2-7.3-0.8-9.8L47,37.6c-0.1-0.1-0.1-0.1-0.2-0.2l0.1,0.1l-0.1-0.1L35,28L58.3,9.3c1.2-0.9,2.6-1.5,4-1.6L62.8,7.7z"/>
+		<polyline id="Path-8_00000010302367870240859300000000617608190404206747_" class="st2" points="7.2,68.1 7.2,16.1 41.3,43 		"/>
+		<path id="Path-5-Copy-2_00000142158341004121031760000013292154878640586931_" class="st3" d="M0,71V15c0-4,3.2-7.2,7.2-7.2
+			c1.6,0,3.2,0.6,4.5,1.6l35.1,28c3.1,2.5,3.6,7,1.1,10.1c-0.3,0.4-0.7,0.8-1.1,1.1l-35.1,28c-3.1,2.5-7.6,2-10.1-1.1
+			C0.6,74.3,0,72.7,0,71z"/>
+	</g>
+	<g id="MH-Copy-2" transform="translate(122.000000, 39.000000)">
+		<path id="Path" class="st4" d="M37.7,22.3c1.7-4.2,4.7-13.1,5.9-17c-0.2,4.2-1,15.3-1,24.1v17.2c0,1.7,1.2,2.5,2.9,2.5
+			c1.6,0,2.9-0.8,2.9-2.5V3.7c0-2.2-1.6-3.7-3.9-3.7c-2.7,0-4.2,0.9-5.1,3.4L28.1,31.8c-1.4,3.5-3.3,8.9-3.9,11.6
+			c-0.6-2.7-2.6-8.5-3.8-11.5L8.9,3.3C8,1,6.7,0,4,0C1.6,0,0,1.4,0,3.7v42.9C0,48.2,1.2,49,2.9,49c1.7,0,2.9-0.8,2.9-2.5V29.3
+			c0-8.7-0.7-19.9-0.9-24C6,9.2,9,18.2,10.8,22.6l9.4,23.5c0.9,2.2,2,2.9,4,2.9c2,0,3.1-0.7,4-2.8L37.7,22.3z"/>
+		<path id="Path_00000084506067731557250440000011396199974851887759_" class="st4" d="M79,20.6H55.3c-1.5,0-2.7,1.2-2.7,2.7
+			c0,1.5,1.2,2.7,2.7,2.7H79l0,0v20.5c0,1.7,1.3,2.5,3.1,2.5c1.6,0,2.9-0.9,2.9-2.5V2.5C85,0.8,83.8,0,82.1,0C80.4,0,79,0.8,79,2.5
+			V20.6z"/>
+	</g>
+	<text transform="matrix(1 0 0 1 208 88)" class="st4 st5 st6 st7">ub</text>
+</g>
+</svg>
