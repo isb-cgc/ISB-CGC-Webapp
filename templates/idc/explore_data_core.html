@@ -708,7 +708,7 @@
                         <h4>Cart</h4>
                     </div>
                     <div class="panel-body">
-                        <p><span id="cart_stats" class="empty-cart">Your cart is currently empty.</span></p>
+                        <p id="cart_stats_holder"><span id="cart_stats" class="empty-cart">Your cart is currently empty.</span></p>
                         <div class="cart-container space-top-10">
                             <button id="export-manifest-cart" class="btn btn-primary cart-export btn-small" disabled data-toggle="modal"
                                 data-target="#export-manifest-modal"
@@ -719,10 +719,11 @@
                                 onclick="viewcart()"
                             > View <i class="fa-solid fa-cart-shopping"></i>
                             </button>
-                            <button class="btn btn-small btn-special clear-cart" role="button" disabled
-                                    title="Empty your cart."
-                            > Empty <i class="fa-solid fa-rotate-left"></i>
-                            </button>
+
+                            <!-- <button class="btn btn-small btn-special clear-cart" role="button" disabled
+                                    title="Empty your cart."> <i class="fa-solid fa-rotate-left"></i>
+                            </button> -->
+
                         </div>
                     </div>
                 </div>
