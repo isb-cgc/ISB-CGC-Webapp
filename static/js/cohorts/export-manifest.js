@@ -391,8 +391,8 @@ require([
         let idc_index_manifest_filename = "<filename>";
         let s5cmd_endpoint_url = $('input[name="loc_type_s5cmd"]:checked').attr('data-endpoint-url');
 
-        let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${s5cmd_endpoint_url} run ${s5cmd_manifest_filename}.s5cmd`;
-        let idc_index_text = `idc download ${idc_index_manifest_filename}.s5cmd`;
+        let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${s5cmd_endpoint_url} run ${s5cmd_manifest_filename}`;
+        let idc_index_text = `idc download ${idc_index_manifest_filename}`;
 
         if ($('#export-manifest-modal').find('input[name="mini"]').length > 0) {
             let uid=$('#export-manifest-modal').find('input[name="uid"]').val();
