@@ -76,116 +76,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     var seriesTblStrt = 0;
 
 
-
-<<<<<<< HEAD
-=======
-        if (('cartHist' in localStorage) && ('sessionid' in localStorage)) {
-            var cartHistLcl = JSON.parse(localStorage.getItem("cartHist"));
-
-            if (('presessionid' in localStorage) || ('sessionid' in localStorage)) {
-                if ('presessionid' in localStorage) {
-                    presessionid = localStorage.getItem('presessionid');
-                    if (presessionid in cartHistLcl) {
-                        cartHist = cartHistLcl[presessionid];
-                    }
-                }
-                if ('sessionid' in localStorage) {
-                    var sessionid = localStorage.getItem('sessionid');
-                    if (sessionid in cartHistLcl) {
-                        cartHist = [...cartHist, ...cartHistLcl[sessionid]];
-                    }
-                }
-                if (cartHist.length > 0) {
-                  cartObj[sessionid] = cartHist;
-                  localStorage.setItem("cartHist", JSON.stringify(cartObj));
-                } else{
-                    localStorage.removeItem("cartHist");
-                }
-                localStorage.removeItem("presessionid")
-            } else {
-                localStorage.removeItem("cartHist")
-            }
-        }
-    };
-
-    // given a dic with studyid as keys, add or subtract series from the cart
-    const updateGlobalCart = function(cartAdded, studymp, lvl){
-        for (studyid in studymp){
-           if (lvl=="series") {
-               var seriesArr = studymp[studyid];
-               for (var i=0; i<seriesArr.length;i++) {
-                   var seriesid = seriesArr[i];
-                   if (cartAdded) {
-                       if (!(studyid in window.glblcart)) {
-                           window.glblcart[studyid] = new Object();
-                           window.glblcart[studyid]['all'] = false;
-                           window.glblcart[studyid]['sel'] = new Set();
-                       }
-                       window.glblcart[studyid]['sel'].add(seriesid);
-                       if (window.studymp[studyid]['val'].length == window.glblcart[studyid]['sel'].size) {
-                           window.glblcart[studyid]['all'] = true;
-                           window.glblcart[studyid]['sel'] = new Set();
-                       }
-                   } else {
-                       if (studyid in window.glblcart) {
-                           if (window.glblcart[studyid]['all']) {
-                               window.glblcart[studyid]['all'] = false;
-                               window.glblcart[studyid]['sel'] = new Set([...window.studymp[studyid]['val']]);
-                           }
-                            window.glblcart[studyid]['sel'].delete(seriesid);
-                         if (window.glblcart[studyid]['sel'].size == 0) {
-                             delete window.glblcart[studyid];
-                         }
-                    }
-                  }
-               }
-           } else{
-             if (cartAdded){
-                 window.glblcart[studyid]=new Object();
-                 window.glblcart[studyid]['all'] = true;
-                 window.glblcart[studyid]['sel'] = new Set();
-             } else {
-                 if (studyid in window.glblcart){
-                     delete(window.glblcart[studyid]);
-                 }
-             }
-           }
-        }
-    };
-
-    // calculate the tot # of projects, cases, studies, and series in the cart
-    const getGlobalCounts = function(){
-        // TODO: call Solr to get counts from facet based on partition
-        tots=[0,0,0,0]
-        for (projid in window.projstudymp){
-            for (studyid in window.projstudymp[projid]){
-                if (studyid in window.glblcart){
-                    tots[0]++;
-                    break;
-
-                }
-            }
-        }
-        for (caseid in window.casestudymp){
-            for (studyid in window.casestudymp[caseid]) {
-                if (studyid in window.glblcart) {
-                    tots[1]++;
-                    break;
-                }
-            }
-        }
-        tots[2] = Object.keys(window.glblcart).length;
-        for (studyid in window.glblcart){
-            if (window.glblcart[studyid]['all']){
-                tots[3]=tots[3]+window.studymp[studyid]['cnt'];
-            } else{
-                tots[3]=tots[3]+window.glblcart[studyid]['sel'].size;
-            }
-        }
-        return tots;
-    };
->>>>>>> af361a37e28d5ccd81c33bcea84cc02c15b7c2a0
-
     const getCartData = function(offset, limit, aggregate_level, results_level){
         let url = '/cart_data/';
         url = encodeURI(url);
@@ -269,8 +159,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             $('.cart-view').attr('disabled', 'disabled');
             $('.clear-cart').attr('disabled', 'disabled');
         }
-        let elapsed = (Date.now()-started)/1000;
-        console.debug(`Elapsed time for updateTableCountsAndGlobalCartCounts: ${elapsed}s`);
+
     }
 
     // remove all items from the cart. clear the glblcart, carHist, cartDetails
