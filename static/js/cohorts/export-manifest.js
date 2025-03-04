@@ -387,8 +387,8 @@ require([
                 file_name.attr("name-base", "cohort_" + cohort_ids.join("_") + $('#export-manifest-modal').data('file-timestamp'));
             }
         }
-        let s5cmd_manifest_filename = file_name.attr("name-base")+"_"+$('input[name="loc_type_s5cmd"]:checked').val();
-        let idc_index_manifest_filename = file_name.attr("name-base")+"_"+$('input[name="loc_type_idc_index"]:checked').val();
+        let s5cmd_manifest_filename = "<filename>";
+        let idc_index_manifest_filename = "<filename>";
         let s5cmd_endpoint_url = $('input[name="loc_type_s5cmd"]:checked').attr('data-endpoint-url');
 
         let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${s5cmd_endpoint_url} run ${s5cmd_manifest_filename}.s5cmd`;
