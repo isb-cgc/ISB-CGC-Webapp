@@ -11,7 +11,7 @@ Vagrant.configure(2) do |config|
      vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
      vb.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
 
-     vb.customize ["modifyvm", :id, "--nestedpaging", "off"]
+     vb.customize ["modifyvm", :id, "--nestedpaging", "on"]
      vb.customize ["modifyvm", :id, "--cpus", 2]
      vb.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
   end
@@ -31,11 +31,16 @@ Vagrant.configure(2) do |config|
   # Map Common for the WebApp
   config.vm.synced_folder "../IDC-Common", "/home/vagrant/www/IDC-Common"
 
+  # To avoid issues with scripts getting Windows line terminators, always install dos2unix and convert the
+  # shell directory before the rest of the provisioning scripts run
+  config.vm.provision :shell, inline: "sudo apt-get update", :run => 'always'
+  config.vm.provision :shell, inline: "sudo apt-get install dos2unix", :run => 'always'
+  config.vm.provision :shell, inline: "dos2unix /home/vagrant/www/shell/*.sh", :run => 'always'
   config.vm.provision :shell, inline: "echo 'source /home/vagrant/www/shell/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
-  config.vm.provision :shell, inline: "if [[ -d /vagrant ]]; then echo \"/vagrant is linked to /home/vagrant/www\"; else ln -s /home/vagrant/www /vagrant; fi;", :run => 'always'
-  config.vm.provision "shell", path: 'shell/install-deps.sh'
+  config.vm.provision "shell", path: 'shell/install-deps.sh', :run => 'always'
+  # TODO: Adjust create and setup to check for database and run if it's not found so they can be set to always
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'
-  config.vm.provision "shell", path: 'shell/vagrant-start-server.sh'
-  config.vm.provision "shell", path: 'shell/vagrant-set-env.sh'
+  config.vm.provision "shell", path: 'shell/vagrant-start-server.sh', :run => 'always'
+  config.vm.provision "shell", path: 'shell/vagrant-set-env.sh', :run => 'always'
 end
