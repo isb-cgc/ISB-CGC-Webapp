@@ -122,12 +122,12 @@ require([
         $('#export-manifest-form').append('<input type="hidden" name="mxseries">')
         $('#export-manifest-form').find('input[name="mxseries"]').val(mxseries);
 
-        $('#export-manifest-form').append('<input type="hidden" name="filter_async">')
-        $('#export-manifest-form').find('input[name="filter_async"]').val( $('input[name="async_download"]').val() );
-
         $('input[name="async_download"]').val(
             (parseInt(localStorage.getItem('manifestSeriesCount')) > 65000) ? "True" : "False"
         );
+
+        $('#export-manifest-form').append('<input type="hidden" name="filter_async">')
+        $('#export-manifest-form').find('input[name="filter_async"]').val( $('input[name="async_download"]').val() );
 
         let file_name = $('input[name="file_name"]');
         file_name.attr("name-base",name_base);
