@@ -13,7 +13,7 @@ Vagrant.configure(2) do |config|
 
      vb.customize ["modifyvm", :id, "--nestedpaging", "off"]
      vb.customize ["modifyvm", :id, "--cpus", 2]
-     vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
+     vb.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
   end
 
   config.vm.box_url = "https://app.vagrantup.com/debian/boxes/bullseye64"

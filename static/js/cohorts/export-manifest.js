@@ -147,8 +147,8 @@ require([
         $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
         $('#export-manifest-modal').find('input[name="mxseries"]').remove();
         $('#export-manifest-modal').find('input[name="mxstudies"]').remove();
-        $('input[name="async_download"]').val( $('#export-manifest-form').find('input[name="filter_async"]'))
-             $('#export-manifest-form').find('input[name="filter_async"]').remove();
+        $('input[name="async_download"]').val( $('#export-manifest-form').find('input[name="filter_async"]').val());
+        $('#export-manifest-form').find('input[name="filter_async"]').remove();
         $('#download-s5cmd').removeClass('iscart');
         $('#download-idc-index').removeClass('iscart');
 
