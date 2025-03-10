@@ -131,7 +131,7 @@ require([
             }
         }
         content = "<ol>"+contentArray.join('\n')+"</ol>";
-        $('#cart-fdescription-modal').find('.modal-body').html(content);
+        $('#cart-description-modal').find('.modal-body').html(content);
     }
 
      $(document).ready(function () {
