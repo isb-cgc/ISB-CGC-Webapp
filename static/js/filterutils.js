@@ -335,18 +335,13 @@ define(['jquery', 'base'], function($, base) {
         reformDic[listId] = new Object();
         for (item in progDic){
             if ((item !=='All') && (item !=='None') && (item in window.programs) && (Object.keys(progDic[item]['projects']).length>0)){
-                if ( Object.keys(window.programs[item]['projects']).length===1) {
-                    nitem=Object.keys(progDic[item]['projects'])[0];
-                    reformDic[listId][nitem]=new Object();
-                    reformDic[listId][nitem]['count'] = progDic[item]['val'];
-                } else {
-                    reformDic[listId][item]=new Object();
-                    reformDic[listId][item]['count'] = progDic[item]['val'];
-                    reformDic[item] =  new Object();
-                    for (project in progDic[item]['projects']){
-                        reformDic[item][project]=new Object();
-                        reformDic[item][project]['count']=progDic[item]['projects'][project]['val'];
-                    }
+
+                reformDic[listId][item]=new Object();
+                reformDic[listId][item]['count'] = progDic[item]['val'];
+                reformDic[item] =  new Object();
+                for (project in progDic[item]['projects']){
+                    reformDic[item][project]=new Object();
+                    reformDic[item][project]['count']=progDic[item]['projects'][project]['val'];
                 }
             }
         }

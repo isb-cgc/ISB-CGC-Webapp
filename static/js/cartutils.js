@@ -196,28 +196,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
         var curInd = window.cartHist.length - 1;
         var selections = window.cartHist[curInd]['selections'];
-        var selection = newSel['sel'];
-        let started = Date.now();
-        var newHistSel = new Array();
-        for (var i=0;i<selections.length;i++) {
-            var curselection = selections[i]['sel'];
-            if (curselection.length >= selection.length) {
-                var differenceFound = false;
-                for (var j = 0; j < selection.length; j++) {
-                    if (!(curselection[j] == selection[j])) {
-                        differenceFound = true;
-                        break;
-                    }
-                }
-                if (differenceFound){
-                    newHistSel.push(selections[i]);
-                }
-            } else{
-                newHistSel.push(selections[i]);
-            }
-        }
-        newHistSel.push(newSel);
-        window.cartHist[curInd]['selections'] =  newHistSel;
+        selections.push(newSel);
         window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
 
 

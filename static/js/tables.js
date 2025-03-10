@@ -1507,7 +1507,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             rowsel.each(function() {
                 var row = this;
                 var curids= ids.slice(0,i+1)
-               updateTableRowCartStatsDownstream(row, itemChng, curids, addingToCart, addOrRemoveAll, tbl);
+               updateTableRowCartStatsDownstream(row, itemChng, curids, addingToCart, addOrRemoveAll, tbl,purge);
             });
         }
         for (var lvl=0;lvl<3;lvl++){
@@ -1587,7 +1587,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
      }
 
-     const updateTableRowCartStatsDownstream = function(row, itemChng, ids, addingToCart, addOrRemoveAll, tbl) {
+     const updateTableRowCartStatsDownstream = function(row, itemChng, ids, addingToCart, addOrRemoveAll, tbl, purge) {
          var items =["collections","cases","studies","series"];
          var mini = ids.length
          var mxi=4
@@ -1628,8 +1628,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                   in_filter_cart = 0;
              }
              var in_filter_not_cart= in_filter - in_filter_cart;
-             if ((tbl =="series_table") && (lbl=="series")){
-                 if (addingToCart){
+             if (purge){
+                 in_cart=0;
+                 in_filter_cart =0;
+             }
+             else if ((tbl =="series_table") && (lbl=="series")){
+                 if ((addingToCart)){
                      in_cart=1;
                      in_filter_cart =1;
                  }
@@ -1685,7 +1689,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     const clearCartSelectionsInCaches = function(){
         var caches = ["", "casesCache", "studiesCache", "seriesCache"];
         var rowsToClearUpstream = [["cart_series_in_collection","filter_cart_series_in_collection"], ["cart_series_in_case","filter_cart_series_in_case"], ["cart_series_in_study","filter_cart_series_in_study"]];
-        var rowsToClearDownstream = [["unique_cases_cart", "unique_cases_filter_cart"], ["unique_studies_cart", "unique_studies_filter_cart"], ["unique_series_cart", "unique_series_filter_cart"]];
+        var rowsToClearDownstream = [["unique_cases_cart", "unique_cases_filter_and_cart"], ["unique_studies_cart", "unique_studies_filter_and_cart"], ["unique_series_cart", "unique_series_filter_and_cart"]];
         for (var cacheNum = 1; cacheNum < 4; cacheNum++) {
             if ((caches[cacheNum] in window) && ('data' in window[caches[cacheNum]]) ) {
 
