@@ -979,7 +979,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                     let v3_link = OHIF_V3_PATH + "=" + data;
                                     let v2_element = '<li title="Not available for this modality."><a class="disabled" href="'
                                         + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
-                                    let default_viewer = is_xc ? v3_link : v2_link;
+                                    let default_viewer = v3_link;
                                     let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                         '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                         '</a></li>';
@@ -1000,8 +1000,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                         '<div class="dropdown viewer-toggle">' +
                                         '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                         '<ul class="dropdown-menu viewer-menu">' +
-                                        v2_element +
                                         '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
+                                        v2_element +
                                         volView_element +
                                         '</ul>' +
                                         '</div>';
@@ -1329,7 +1329,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         } else {
                             let v2_link = is_xc ? "" : OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data;
                             let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '&SeriesInstanceUIDs=' + data;
-                            let default_viewer = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC"))) ? v3_link : v2_link;
+                            let default_viewer = v3_link;
                             let volView_link = is_xc ? "" : VOLVIEW_PATH + "=[s3://" + row['aws_bucket'] + '/' + row['crdc_series_uuid']+']"';
                             let v2_element = '<li title="Not available for this modality."><a class="disabled" href="'
                                 + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
@@ -1348,8 +1348,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 '<div class="dropdown viewer-toggle">' +
                                 '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                 '<ul class="dropdown-menu viewer-menu">' +
-                                v2_element +
                                 '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
+                                v2_element +
                                 volView_element +
                                 '</ul></div>';
                         }

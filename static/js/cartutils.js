@@ -668,10 +668,10 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                             let modality = row['Modality'];
                             let is_xc = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC")));
 
-                             if ((Array.isArray(modality) && modality.some(function (el) {
+                            if ((Array.isArray(modality) && modality.some(function (el) {
                                     return slimViewAbleModality.has(el)
-                                }
-                            )) || (slimViewAbleModality.has(row['Modality']))) {
+                                })) || (slimViewAbleModality.has(row['Modality']))) {
+
                                 return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
                                     '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                             } else {
@@ -679,7 +679,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                 let v3_link = OHIF_V3_PATH + "=" + data;
                                 let v2_element = '<li title="Not available for this modality."><a class="disabled" href="'
                                     + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
-                                let default_viewer = is_xc ? v3_link : v2_link;
+                                let default_viewer = v3_link;
                                 let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                     '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                     '</a></li>';
@@ -700,8 +700,8 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                     '<div class="dropdown viewer-toggle">' +
                                     '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                     '<ul class="dropdown-menu viewer-menu">' +
-                                    v2_element +
                                     '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
+                                    v2_element +
                                     volView_element +
                                     '</ul>' +
                                     '</div>';
