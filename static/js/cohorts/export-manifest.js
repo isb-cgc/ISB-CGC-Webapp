@@ -322,6 +322,17 @@ require([
                 + '-checkbox').is(':checked')) ? 'true' : 'false');
         }
 
+        // capture cart state and manifest creation call if in debug mode
+        if (($('#export-manifest-form').find('input[name="from_cart"]').val()=="True") && typeof(window.debug_cart=="boolean") && (window.debug_cart)){
+              if (typeof(window.debugArr) == "undefined"){
+                  window.debugArr= new Array();
+              }
+              var tmp = new Object();
+              tmp['hist'] = JSON.parse(JSON.stringify(window.cartHist));
+              tmp['data'] =$('#export-manifest-form').serialize();
+              window.debugArr.push(tmp);
+        }
+
         if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val() !== "True") {
             console.debug($('#export-manifest-form').find('input[name="partitions"]').val());
             $('#export-manifest-form').trigger('submit');
