@@ -75,7 +75,7 @@ require([
 
     var variantNames = {
         'Colorectal': ['Colon','Rectum'],
-        "Blood": ["Marrow, Blood"],
+        "Blood": ["Marrow, Blood", "Marrow and Blood", "Blood"],
         "Bile-Duct": ["Bile Duct"],
         "Adrenal-Gland": ["Adrenal Glands", "Adrenal"],
         "Testis": ["Testicles"],
