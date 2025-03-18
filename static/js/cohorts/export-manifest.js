@@ -173,7 +173,7 @@ require([
         $('#export-manifest-modal').find('input[name="async_download"]').val('false');
         if (button.hasClass('series-export')) {
             title = 'Series Export';
-            filterNm = 'Series InstanceUID';
+            filterNm = 'SeriesInstanceUID';
             mini_type = 'series';
             name_base='series_manifest';
             $('#export-manifest-form').append('<input type="hidden" name="aws">')
