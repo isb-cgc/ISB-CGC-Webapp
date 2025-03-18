@@ -177,11 +177,13 @@ require([
             mini_type = 'series';
             name_base='series_manifest';
             $('#export-manifest-form').append('<input type="hidden" name="aws">')
-            $('#export-manifest-modal').find('input[name="aws"]').val(button.parent().parent().data('aws'));
-            $('#export-manifest-form').append('<input type="hidden" name="gcs">')
-            $('#export-manifest-modal').find('input[name="gcs"]').val(button.parent().parent().data('gcs'));
             $('#export-manifest-form').append('<input type="hidden" name="crdc">')
+            $('#export-manifest-form').append('<input type="hidden" name="single_series">')
+            $('#export-manifest-form').append('<input type="hidden" name="gcs">')
+            $('#export-manifest-modal').find('input[name="aws"]').val(button.parent().parent().data('aws'));
+            $('#export-manifest-modal').find('input[name="gcs"]').val(button.parent().parent().data('gcs'));
             $('#export-manifest-modal').find('input[name="crdc"]').val(button.parent().parent().data('crdc'));
+            $('#export-manifest-modal').find('input[name="single_series"]').val("True");
         } else if (button.hasClass('study-export')) {
             title = 'Study Export';
             filterNm = 'StudyInstanceUID';
@@ -245,6 +247,7 @@ require([
         $('#export-manifest-modal').find('input[name="uid"]').remove();
         $('#export-manifest-modal').find('input[name="crdc_uid"]').remove();
         $('#export-manifest-modal').find('input[name="aws"]').remove();
+        $('#export-manifest-modal').find('input[name="single_series"]').remove();
         $('#export-manifest-modal').find('input[name="gcs"]').remove();
         var filt_str = $('#export-manifest-form').find('input[name="filters"]').val()
         var filters=JSON.parse(filt_str);
