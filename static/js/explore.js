@@ -577,6 +577,7 @@ require([
         arrow: true,
         target: '.copy-this',
         trigger: 'click',
+        interactive: true,
         onShow(instance) {
             setTimeout(function() {
                 instance.hide();
