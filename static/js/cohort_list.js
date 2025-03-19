@@ -16,19 +16,18 @@
  *
  */
 
-/*
+
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        'datatables.net': ['libs/jquery.dataTables.min'],
-        'datatables.bootstrap': ['libs/jquery.dataTables.bootstrap.min'],
-        'datatables.net-buttons': ['libs/dataTables.buttons.min'],
+
+        'datatables.bootstrap': ['libs/dataTables.bootstrap5']
 
     },
     shim: {
-        'datatables.net': ['jquery'],
+        'datatables.bootstrap': ['jquery'],
     }
-}); */
+});
 
 
 require([
@@ -37,8 +36,7 @@ require([
     'bootstrap',
     'session_security',
     'datatables.net',
-    'datatables.bootstrap',
-    'datatables.net-buttons',
+    'datatables.bootstrap'
 ], function($) {
 
     /* var cohort_list_table = $('#cohort-table').DataTable({
@@ -58,6 +56,53 @@ require([
         ]
     }); */
 
+    /*
+    $(document).ready(function () {
+
+        var gotodiv = '<div class="dt-page"> <label for="goto-page">Page</label>'+
+            '<input id="goto-page" type="number" class="goto-page-number" min="1" max="1">'+
+                '<button class="goto-page-button dataTables_button">Go</button></div>'
+
+        var table = $('#cohort-table').DataTable({
+
+            language:
+                        {
+                            paginate: {
+                                "previous":"Previous",
+                                "next":"Next"
+                            },
+                            paging: {
+
+                            }
+                        },
+            layout: {
+                top2Start:'info',
+                top2End:null,
+                topStart:{
+                    pageLength:true,
+                    paging:
+                     {
+                       boundaryNumbers:false,
+                       firstLast:false,
+                       previousNext:true,
+                     }
+                },
+                topEnd:null,
+                bottom2Start:null,
+                bottom2End:null,
+
+                bottomStart:null,
+                bottomEnd:null
+
+            },
+
+
+        });
+
+        $('#cohort-table_wrapper').find('.dt-length').prepend('<label>Show </label>');
+        $('#cohort-table_wrapper').find('.dt-length').after(gotodiv);
+    });
+   */
 
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms

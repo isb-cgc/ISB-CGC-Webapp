@@ -599,5 +599,13 @@
             </div>
         </div>
     </div>
+
+{% endblock %}
+
+
+{% block js_file %}
+	{{ block.super }}
+
+	<script src="{% static 'js/about.js' %}"></script>
 {% endblock %}
 

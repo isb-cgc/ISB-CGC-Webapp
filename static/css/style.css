@@ -9,6 +9,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
 @import url("./chosen.min.css");
 @import url("./datatables.min.css");
+@import url("./datatables.bootstrap5.css");
 
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
@@ -229,7 +230,11 @@ h1, h2, h3, h4, h5, h6 {
 .dataTables_wrapper .dataTables_paginate {
   padding-top: 0.25em; }
 
-.dataTables_button {
+.dt-paging-button {
+  #padding: 0.2em 0.5em;
+  margin-left: 2px;
+}
+.dt-paging-button .page-link, .dataTables_button {
   box-sizing: border-box;
   display: inline-block;
   min-width: 1em;
@@ -244,18 +249,29 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid #888 !important;
   border-radius: 2px;
   font-weight: 400; }
-  .dataTables_button:hover, .dataTables_button:active, .dataTables_button:focus {
+
+  .dt-paging-button:hover, .dataTables_button:hover, .dt-paging-button:active, .dataTables_button:active, .dt-paging-button:focus, .dataTables_button:focus {
     background-color: #FFA000 !important;
     color: #fff !important;
     border: 1px solid #996000 !important; }
-  .dataTables_button.current, .dataTables_button.current:hover {
+
+  .dt-paging-button.active .page-link, .dt-paging-button .page-link:hover, .dataTables_button.current, .dataTables_button.current:hover {
     color: #fff;
     border: 1px solid gray;
     background-color: #ffb333; }
-  .dataTables_button.disabled {
+
+  .dt-paging-button.disabled, .dataTables_button.disabled {
     color: #fff !important;
     border: 0px !important;
     background-color: #e0e0e0 !important; }
+
+  .dt-paging-button .page-link.next{
+    padding-left:5px;
+  }
+
+  .dt-paging-button .page-link.previous{
+    padding-right:5px;
+  }
 
 .dataTables_length, .dataTables_paginate, .dataTables_goto_page {
   display: inline-block; }

@@ -26,7 +26,8 @@ require.config({
         'underscore': ['libs/underscore-min'],
         'assetscore': ['libs/assets.core'],
         'assetsresponsive': ['libs/assets.responsive'],
-        'tablesorter': ['libs/jquery.tablesorter.min']
+        'tablesorter': ['libs/jquery.tablesorter.min'],
+        'datatables.net':['libs/datatables.min']
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -35,6 +36,7 @@ require.config({
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
+        'datatables.net':['jquery'],
         'underscore': {exports: '_'}
     }
 });
@@ -49,7 +51,8 @@ require([
     'utils',
     'assetscore',
     'assetsresponsive',
-    'tablesorter'
+    'tablesorter',
+    'datatables.net'
 ], function($, jqueryui, bootstrap, session_security, _, utils) {
     'use strict';
 
@@ -167,6 +170,20 @@ require([
         },
         sortList: [[5,1]]
     });
+
+     $('#cohort-table')
+        .on('sortEnd', function()
+        {
+            update_table_display();
+        })
+        .tablesorter({
+        headers: {
+            0: {sorter:false},
+            8: {sorter: 'fullDate'}
+        },
+        sortList: [[8,1]]
+    });
+
 
 
     $("#share-share_users").on("keypress", function(e) {

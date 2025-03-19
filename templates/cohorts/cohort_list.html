@@ -25,13 +25,16 @@
 {% block content %}
 <div class="container">
     <div class="isb-panel isb-panel-default">
-        <ul class="nav nav-tabs" role="tablist">
+    <div class ="isb-panel-heading">
+      <h4>Saved Cohorts</h4>
+    </div>
+        <!-- <ul class="nav nav-tabs" role="tablist">
 
 
-            <li role="presentation" {% if not is_public %} class="active" {% endif %} >
+            <li role="presentation">
                 <a href="#saved-cohorts-list" aria-controls="saved-cohorts-list" role="tab" data-bs-toggle="tab">Saved Cohorts</a>
             </li>
-        </ul>
+        </ul> -->
         <div class="tab-content isb-panel-body ">
             <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="saved-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
@@ -53,6 +56,7 @@
                     {% endif %}
 
 
+
                      {% include "isb_cgc/pagination.html" %}
 
                     <table id="cohort-table" class="table table-striped tablesorter cohort-table">
@@ -60,6 +64,7 @@
                             <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
                             <th class="id-col">Cohort ID</th>
                             <th class="name-col">Cohort Name</th>
+                            <th class="version-col">Cohort Version</th>
                             <th class="case-col"># Cases</th>
                             <th class="sample-col"># Samples</th>
                             <th class="owner-col">Ownership</th>
@@ -78,6 +83,10 @@
                                     {{ cohort.id }}
                                 </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
+
+                                <td class="version-col">{{ cohort.current_version }}</td>
+
+
                                 <td class="case-col">{{ cohort.case_count }}</td>
                                 <td class="sample-col"> {% if cohort.sample_count <= 0 %} N/A {% else %}{{ cohort.sample_count }}{% endif %} </td>
                                 <td class="owner-col">
