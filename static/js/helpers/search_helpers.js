@@ -59,7 +59,7 @@ function($, tree_graph, stack_bar_chart) {
         'GDC': {
             project_short_name_gdc: 'Project Short Name',
             disease_type_gdc: 'Disease Type',
-            gender_gdc: 'Gender',
+            gender_gdc: 'Sex',
             tissue_or_organ_of_origin_gdc: 'Tissue/Organ of Origin',
             vital_status: 'Vital Status',
             race: 'Race',
@@ -72,7 +72,7 @@ function($, tree_graph, stack_bar_chart) {
         'PDC':{
             project_short_name_pdc: 'Project Short Name',
             disease_type_pdc: 'Disease Type',
-            gender_pdc: 'Gender',
+            gender_pdc: 'Sex',
             tissue_or_organ_of_origin_pdc: 'Tissue/Organ of Origin',
             primary_diagnosis_pdc: 'Primary Diagnosis',
             primary_site_pdc: 'Primary Site'
