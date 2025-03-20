@@ -56,6 +56,7 @@ body.landing {
   margin-left: 35%;
   padding-bottom: 10px;
   font-size: xx-large !important;
+  color: #164D60;
 }
 
 #grid-menu i.dropdown-icon {
@@ -68,6 +69,13 @@ body.landing {
 
 #grid-menu .grid-icon {
   width: 105px;
+  display: block;
+  margin: auto;
+  padding-bottom: 10px;
+}
+
+#grid-menu .grid-icon-narrow {
+  padding-top: 5px;
 }
 
 #grid-menu .grid-icon-md {

@@ -69,54 +69,87 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" role="menu" aria-label="addtl-menu-dropdown">
                             <div class="grid-container">
+                                <button class="item" title="Documentation">
+                                    <i class="fa-solid fa-book-open link-icon"></i>
+                                    <a href="" url="https://learn.canceridc.dev/" title="Documentation"
+                                        class="external-link" class="external-link"
+                                        data-toggle="modal" data-target="#external-web-warning"
+                                    >
+                                        Documentation <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>
+                                </button>
+                                <button class="item" title="Tutorials">
+                                    <i class="fa-solid fa-person-chalkboard link-icon"></i>
+                                    <a href="" url="https://github.com/ImagingDataCommons/IDC-Tutorials" title="Tutorials"
+                                        class="external-link" class="external-link"
+                                        data-toggle="modal" data-target="#external-web-warning"
+                                    >
+                                        Tutorials <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>
+                                </button>
+                                <button class="item" title="Publications">
+                                    <i class="fa-solid fa-book link-icon"></i>
+                                    <a href="" url="https://learn.canceridc.dev/publications" title="Publications"
+                                        class="external-link" data-toggle="modal"
+                                        data-target="#external-web-warning"
+                                    >
+                                        Publications <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>
+                                </button>
+
+                                <button class="item" title="Collection Data Dashboards">
+                                    <i class="fa-solid fa-chart-bar link-icon"></i>
+                                    <a href="" url="https://learn.canceridc.dev/cookbook/data-studio/more-dashboard-examples" title="Collection Dashboards"
+                                        class="external-link" class="external-link"
+                                        data-toggle="modal" data-target="#external-web-warning"
+                                    >
+                                        Dashboards <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>
+                                </button>
+
+                                <button class="item" title="Discourse">
+                                    <i class="fa-brands fa-discourse link-icon"></i>
+                                    <a href="" url="https://github.com/ImagingDataCommons/idc-index"
+                                        class="external-link" data-toggle="modal"
+                                        data-target="#external-web-warning" title="Discourse"
+                                    >
+                                        Forum <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>
+                                </button>
+
+                                <button class="item" title="Python API">
+                                    <i class="fa-brands fa-python link-icon"></i>
+                                    <a href="" url="https://github.com/ImagingDataCommons/idc-index"
+                                        class="external-link" data-toggle="modal"
+                                        data-target="#external-web-warning" title="Python API"
+                                    >
+                                        Python API <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>
+                                </button>
+                                <button class="item" title="Zenodo">
+                                    <a href="" url="https://zenodo.org/communities/nci-idc/" title="Zenodo"
+                                        class="external-link" data-toggle="modal"
+                                        data-target="#external-web-warning"
+                                    >
+                                        <img class="grid-icon grid-icon-md grid-icon-narrow" src="{% static 'img/zenodo-name-blue.svg' %}" alt="Zenodo" />
+                                        IDC<br/> Community <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>
+                                </button>
                                 <button class="item" title="MHub">
                                     <a href="" url="https://mhub.ai/" class="external-link" title="MHub">
-                                        <img class="grid-icon" src="{% static 'img/mhub_2.svg' %}" alt="MHub Logo" /> <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                        <img class="grid-icon" src="{% static 'img/mhub_2.svg' %}" alt="MHub Logo" />
+                                        AI<br/> Models<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
                                     </a>
                                 </button>
                                 <button class="item" title="Slicer IDC Browser">
-                                    <a
-                                        href="" url="https://github.com/ImagingDataCommons/SlicerIDCBrowser" title="Slicer IDC Browser"
+                                    <a href="" url="https://github.com/ImagingDataCommons/SlicerIDCBrowser" title="Slicer IDC Browser"
                                         class="external-link" data-toggle="modal" data-target="#external-web-warning"
                                     >
-                                        <img class="grid-icon-md" src="{% static 'img/slicer_idc_logo_outlines.svg' %}" alt="IDC Browser" /> <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
-                                    </a></button>
-                                <button class="item" title="Zenodo">
-                                    <a href="" url="https://zenodo.org/communities/nci-idc/" title="Zenodo"
-                                                        class="external-link" data-toggle="modal"
-                                                        data-target="#external-web-warning"
-                                ><img class="grid-icon-sm" src="{% static 'img/zenodo-icon-blue.svg' %}" alt="Zenodo" />
-                                        Zenodo <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>
+                                        <img class="grid-icon grid-icon-sm" src="{% static 'img/3D-Slicer-Mark.svg' %}" alt="IDC Browser" />
+                                        3D Slicer<br/> Extension <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>
                                 </button>
-                                <button class="item" title="IDC Index">
-                                    <a href="" url="https://github.com/ImagingDataCommons/idc-index"
-                                        class="external-link" data-toggle="modal"
-                                        data-target="#external-web-warning" title="IDC Index"
-                                    >
-                                        <img class="grid-icon-sm" src="{% static 'img/Office-Drawer--Streamline-Ultimate.svg' %}" alt="IDC Index" />
-                                        idc-index <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>
-                                </button>
-                                <button class="item" title="Publications">
-                                    <a href="" url="https://learn.canceridc.dev/publications" title="Publications"
-                                                        class="external-link" data-toggle="modal"
-                                                        data-target="#external-web-warning"
-                                >
-                                    <img class="grid-icon-sm" src="{% static 'img/Library--Streamline-Ionic-Filled.svg' %}" alt="Publications Icon" />
-                                    Publications <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a></button>
-                                <button class="item" title="Documentation">
-                                    <a href="" url="https://learn.canceridc.dev/" title="Documentation"
-                                                        class="external-link" class="external-link"
-                                                        data-toggle="modal" data-target="#external-web-warning"
-                                >
-                                    <img class="grid-icon-sm" src="{% static 'img/Dictionary-Language-Book--Streamline-Core.svg' %}" alt="Documentation Icon" />
-                                    Documentation <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a></button>
-                                <button class="item" title="Collection Data Dashboards">
-                                    <a href="" url="https://learn.canceridc.dev/cookbook/data-studio/more-dashboard-examples" title="Collection Dashboards"
-                                                        class="external-link" class="external-link"
-                                                        data-toggle="modal" data-target="#external-web-warning"
-                                >
-                                    <img class="grid-icon-sm" src="{% static 'img/Dashboard--Streamline-Carbon.svg' %}" alt="Dashboard Icon" />
-                                        Dashboards <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a></button>
+
                             </div>
                         </div>
                     </div>
