@@ -1115,7 +1115,7 @@ nav, .site-header {
   vertical-align: middle;
   padding: 18px 15px 19px 15px;
   }
-@media(max-width: 1264px) {
+@media(max-width: 1344px) {
   .navbar-item {
     padding: 8px 15px 8px 15px;
   }
