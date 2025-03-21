@@ -336,7 +336,7 @@ require([
               window.debugArr.push(tmp);
         }
 
-        if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val().lower() !== "true") {
+        if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val().toLowerCase() !== "true") {
             console.debug($('#export-manifest-form').find('input[name="partitions"]').val());
             $('#export-manifest-form').trigger('submit');
         } else {
