@@ -93,7 +93,6 @@ require([
                mxseries+= window.selProjects[proj].mxseries;
                mxstudies+= window.selProjects[proj].mxstudies;
             }
-
             var filterSets = new Array();
             for (var i=0; i< window.cartHist.length;i++) {
                filterSets.push(window.cartHist[i]['filter'])
@@ -101,7 +100,8 @@ require([
             update_export_modal_for_cart(partitions, filterSets);
         } else if (button.hasClass('cart-export-from-cp')){
             update_export_modal_for_cart(window.partitions, window.filtergrp_list);
-
+        } else if(button.hasClass('cohort-manifest-export')) {
+            $('input[name="async_download"]').val(parseInt(button.attr('data-series-count').val()) > 65000 ? "True" : "False");
         }
     });
 
@@ -157,7 +157,7 @@ require([
         $('.modal-title').text('Export Manifest');
     }
 
-    const update_export_modal_for_mini= function(button){
+    const update_export_modal_for_mini = function(button){
         var title='';
         var filterNm='';
         var mini_type='';
@@ -336,7 +336,7 @@ require([
               window.debugArr.push(tmp);
         }
 
-        if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val() !== "True") {
+        if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val().lower() !== "true") {
             console.debug($('#export-manifest-form').find('input[name="partitions"]').val());
             $('#export-manifest-form').trigger('submit');
         } else {
@@ -376,7 +376,6 @@ require([
                 }
             });
         }
-
     };
 
     $('input.loc_type').on('change', function(){
@@ -413,7 +412,6 @@ require([
     }
 
     var update_download_manifest_buttons = function(clicked){
-
         if(clicked) {
             let cohort_row = clicked.parents('tr'),
                 inactives = (cohort_row.data('inactive-versions') === "True");
@@ -451,7 +449,6 @@ require([
         update_file_names();
         update_download_manifest_buttons();
     });
-
 
     let bq_disabled_message = 'Exporting to BigQuery requires you to be logged in with a linked Google Social Account, and to save your filters as a cohort.';
     if((!user_is_social) && (typeof(user_id)!=="undefined")){
