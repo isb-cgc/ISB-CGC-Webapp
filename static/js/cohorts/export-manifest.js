@@ -100,7 +100,7 @@ require([
             update_export_modal_for_cart(partitions, filterSets);
         } else if (button.hasClass('cart-export-from-cp')){
             update_export_modal_for_cart(window.partitions, window.filtergrp_list);
-        } else if(button.hasClass('cohort-manifest-export')) {
+        } else if(button.hasClass('export-cohort-manifest')) {
             $('input[name="async_download"]').val(parseInt(button.attr('data-series-count').val()) > 65000 ? "True" : "False");
         }
     });
