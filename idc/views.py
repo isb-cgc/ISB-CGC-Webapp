@@ -37,7 +37,7 @@ from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips, DataSetType
-from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data, get_cart_data_studylvl, get_table_data_with_cart_data
+from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data_serieslvl, get_cart_data_studylvl, get_table_data_with_cart_data
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
@@ -1068,13 +1068,7 @@ def cart_data_stats(request):
         mxseries = int(req.get('mxseries',1000))
 
         response = get_cart_and_filterset_stats(current_filters,filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
-        '''if ((len(partitions)>0) and (aggregate_level == 'StudyInstanceUID')):
-            response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
-        elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
-            response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
-        else:
-            response['numFound'] = 0
-            response['docs'] = []'''
+
     except Exception as e:
         logger.error("[ERROR] While loading cart:")
         logger.exception(e)
@@ -1103,7 +1097,7 @@ def cart_data(request):
         if ((len(partitions)>0) and (aggregate_level == 'StudyInstanceUID')):
             response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
         elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
-            response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
+            response = get_cart_data_serieslvl(filtergrp_list, partitions, field_list, limit, offset)
         else:
             response['numFound'] = 0
             response['docs'] = []

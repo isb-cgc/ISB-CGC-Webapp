@@ -115,6 +115,12 @@ require([
             $('#export-manifest-form').append('<input type="hidden" name="filtergrp_list">')
             $('#export-manifest-form').find('input[name="filtergrp_list"]').val(JSON.stringify(filtergrp_list));
         }
+        if ($('#export-manifest-form').find('.debug').length==0){
+           $('#export-manifest-form').append('<input type="hidden" name="debug" class="debug">')
+        }
+        $('#export-manifest-form').find('input[name="debug"]').val(window.lvl);
+
+
         $('#export-manifest-form').append('<input type="hidden" name="partitions">')
         $('#export-manifest-form').find('input[name="partitions"]').val(JSON.stringify(partitions));
         $('#export-manifest-form').append('<input type="hidden" name="mxstudies">')
