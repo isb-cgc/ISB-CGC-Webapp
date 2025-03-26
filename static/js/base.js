@@ -222,11 +222,6 @@ require([
         sessionStorage.removeItem("reloadMsg");
 
         utils.checkForManifest();
-
-        if($('#liveText').siblings()[1].shadowRoot !== null) {
-            $('.main-content').css("margin-top", "0px");
-            $($('#liveText').siblings()[1]).css("margin-top", "56px");
-        }
     });
 });
 

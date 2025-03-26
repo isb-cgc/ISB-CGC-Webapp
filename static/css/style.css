@@ -164,9 +164,6 @@ ul, ol {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale; }
 
-.main-content {
-  margin-top: 56px; }
-
 /*
   Calc the space displayed minus headers and footers to produce a min-height for
   pages that are lacking content to appropriately extend the page
@@ -1970,6 +1967,10 @@ section .min-max {
     margin-left: 10px;}
   .page-heading .page-action-group {
     margin-bottom: 0; }
+
+#landing .page-heading {
+  margin-bottom: 0px;
+}
 
 .page-heading .heading-cohort {
   background-color: #608aa3;
