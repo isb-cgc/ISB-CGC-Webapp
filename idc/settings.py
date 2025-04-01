@@ -182,6 +182,8 @@ SITE_ID = 2
 if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = int(os.environ.get('SITE_ID', '3'))
+else:
+    print("[STATUS] AppEngine not detected, so site ID is set to local or development platform")
 
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
