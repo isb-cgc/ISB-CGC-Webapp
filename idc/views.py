@@ -819,6 +819,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         source = req.get('data_source_type', DataSource.SOLR)
         versions = json.loads(req.get('versions', '[]'))
         filters = json.loads(req.get('filters', '{}'))
+        with_stats = (req.get('with_stats', 'true').lower() == "true")
         disk_size = (req.get('disk_size', 'False').lower() == "true")
 
         fields = json.loads(req.get('fields', '[]'))
@@ -860,7 +861,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
         context = build_explorer_context(
             is_dicofdic, source, versions, filters, fields, order_docs, counts_only, with_related, with_derived,
-            collapse_on, is_json, uniques=uniques, totals=totals, disk_size=disk_size
+            collapse_on, is_json, uniques=uniques, totals=totals, with_stats=with_stats, disk_size=disk_size
         )
 
         if not('totals' in context):
@@ -877,7 +878,6 @@ def explore_data_page(request, filter_path=False, path_filters=None):
           context['totals']['display_file_parts_count'] = 1
         if not ('disk_size' in context['totals']):
           context['totals']['disk_size'] = '0.0 GB'
-
 
         if not is_json:
             # These are filters to be loaded *after* a page render
