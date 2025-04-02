@@ -682,7 +682,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             var curFilterObj = JSON.parse(JSON.stringify(filterutils.parseFilterObj()));
                             curFilterObj.collection_id = viewedProjects;
                             if (caseID.trim().length>0){
-                                curFilterObj.PatientID = caseID;
+                                curFilterObj.PatientID = [caseID];
                             }
                             var filterStr = JSON.stringify(curFilterObj);
 
@@ -1039,7 +1039,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             curFilterObj.collection_id = viewCollections;
                             curFilterObj.PatientID = viewCases;
                             if (studyID.trim().length > 0) {
-                                curFilterObj.StudyInstanceUID = studyID;
+                                curFilterObj.StudyInstanceUID = [studyID];
 
                             }
                             var filterStr = JSON.stringify(curFilterObj);
@@ -1387,7 +1387,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
                         curFilterObj.StudyInstanceUID = viewStudies;
                         if (seriesID.trim().length > 0) {
-                                curFilterObj.SeriesInstanceUID = seriesID;
+                                curFilterObj.SeriesInstanceUID = [seriesID];
                         }
                         var filterStr = JSON.stringify(curFilterObj);
 
