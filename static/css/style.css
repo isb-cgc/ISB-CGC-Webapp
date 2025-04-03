@@ -4471,3 +4471,11 @@ d-topics-list iframe {
     fill: #b0d4f3;
 }
 
+.filter-display-panel .panel-body, .shopping-cart-panel .panel-body {
+  padding-top: 0px
+}
+
+.filter-display-panel .panel-heading, .shopping-cart-panel .panel-heading,
+#projects_panel_container .panel-heading {
+  padding-bottom: 0px
+}
