@@ -121,7 +121,7 @@ require([
         $('#search_def_stats').html(isFiltered ? "Gathering cohort statistics...": "&nbsp;");
         ndic = {
             'totals': JSON.stringify(["PatientID", "StudyInstanceUID", "SeriesInstanceUID"]),
-            'counts_only': 'False',
+            'counts_only': 'True',
             'is_json': 'True',
             'is_dicofdic': 'True',
             'data_source_type': ($("#data_source_type option:selected").val() || 'S'),
