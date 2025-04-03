@@ -814,7 +814,6 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         if ref:
             request.session.create()
 
-
         is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
         source = req.get('data_source_type', DataSource.SOLR)
         versions = json.loads(req.get('versions', '[]'))
@@ -823,7 +822,8 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
         fields = json.loads(req.get('fields', '[]'))
         order_docs = json.loads(req.get('order_docs', '[]'))
-        counts_only = (req.get('counts_only', "False").lower() == "true")
+        counts_only = (req.get('counts_only', "true").lower() == "true")
+        print("Explore data page call, counts only: {}".format(counts_only))
         with_related = (req.get('with_clinical', "True").lower() == "true")
         with_derived = (req.get('with_derived', "True").lower() == "true")
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
