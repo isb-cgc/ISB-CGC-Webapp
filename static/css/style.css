@@ -4479,3 +4479,7 @@ d-topics-list iframe {
 #projects_panel_container .panel-heading {
   padding-bottom: 0px
 }
+
+.filter-display-panel .panel-heading, .shopping-cart-panel .panel-heading {
+  padding-top: 0px
+}
