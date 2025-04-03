@@ -44,10 +44,6 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
 from idc.models import User_Data
-from concurrent.futures import ThreadPoolExecutor
-from multiprocessing import Manager
-from math import floor
-from functools import partial
 
 
 
@@ -809,11 +805,6 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
     try:
         req = request.GET or request.POST
-        mode=req.get('mode','1')
-        ref = (req.get('ref', 'False').lower() == "true")
-        if ref:
-            request.session.create()
-
 
         is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
         source = req.get('data_source_type', DataSource.SOLR)
@@ -824,7 +815,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
         fields = json.loads(req.get('fields', '[]'))
         order_docs = json.loads(req.get('order_docs', '[]'))
-        counts_only = (req.get('counts_only', "False").lower() == "true")
+        counts_only = (req.get('counts_only', "true").lower() == "true")
         with_related = (req.get('with_clinical', "True").lower() == "true")
         with_derived = (req.get('with_derived', "True").lower() == "true")
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
@@ -881,7 +872,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
         if not is_json:
             # These are filters to be loaded *after* a page render
-            context['mode']=mode
+
             if wcohort:
                 context['filters_for_load'] = cohort_filters_dict
             elif filter_path:
