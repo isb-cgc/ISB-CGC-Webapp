@@ -44,10 +44,6 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
 from idc.models import User_Data
-from concurrent.futures import ThreadPoolExecutor
-from multiprocessing import Manager
-from math import floor
-from functools import partial
 
 
 
@@ -809,15 +805,12 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
     try:
         req = request.GET or request.POST
-        mode=req.get('mode','1')
-        ref = (req.get('ref', 'False').lower() == "true")
-        if ref:
-            request.session.create()
 
         is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
         source = req.get('data_source_type', DataSource.SOLR)
         versions = json.loads(req.get('versions', '[]'))
         filters = json.loads(req.get('filters', '{}'))
+        with_stats = (req.get('with_stats', 'true').lower() == "true")
         disk_size = (req.get('disk_size', 'False').lower() == "true")
 
         fields = json.loads(req.get('fields', '[]'))
@@ -860,7 +853,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
         context = build_explorer_context(
             is_dicofdic, source, versions, filters, fields, order_docs, counts_only, with_related, with_derived,
-            collapse_on, is_json, uniques=uniques, totals=totals, disk_size=disk_size
+            collapse_on, is_json, uniques=uniques, totals=totals, with_stats=with_stats, disk_size=disk_size
         )
 
         if not('totals' in context):
@@ -878,10 +871,9 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         if not ('disk_size' in context['totals']):
           context['totals']['disk_size'] = '0.0 GB'
 
-
         if not is_json:
             # These are filters to be loaded *after* a page render
-            context['mode']=mode
+
             if wcohort:
                 context['filters_for_load'] = cohort_filters_dict
             elif filter_path:
