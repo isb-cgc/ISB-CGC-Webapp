@@ -576,6 +576,7 @@ require([
             form.append('<input type="hidden" name="apply-name" value="true" />');
         }
 
+        var values=[];
         var token_list_selector = cohort_id ? '.selected-filters .isb-panel-body' : '#selected-filters';
         $(token_list_selector + ' span.filter-token').each(function() {
             var $this = $(this);
@@ -587,8 +588,12 @@ require([
             if($this.data('user-program-id')) {
                 value['user_program'] = $this.data('user-program-id');
             }
-            form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
+
+             //form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
+
+             values.push(value);
         });
+        form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(values)}));
 
         if(cohort_id) {
             $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
@@ -1443,6 +1448,11 @@ require([
         trigger: "click",
         allowHTML:true,
     });
+
+    $('.compare-version').on('click', function(){
+        var cohort_id= $(this).attr('data-cohort-id');
+    })
+
 
 });
 

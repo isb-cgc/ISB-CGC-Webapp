@@ -523,4 +523,83 @@ require([
         $('#cohort-apply-to-workbook').append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
     });
 
+    $('.compare-version').on('click', function(){
+
+         var cohort_id=$(this).attr('data-cohort-id');
+         var cohort_filters_str=$(this).attr('data-filters').replaceAll('\'','"');
+         var cohort_filters=JSON.parse(cohort_filters_str);
+
+         var filter_disp=""
+         for (var prog in cohort_filters){
+             var filter_disp_curr='<p><h5>'+prog+'</h5>';
+              var filtA =cohort_filters[prog];
+              for (var filt_ind=0;filt_ind<filtA.length;filt_ind++){
+                  var curfilt=filtA[filt_ind];
+                  var attr_nm= curfilt['attr_name']
+                  var attr_nm_arr = attr_nm.split('_');
+                  var src=attr_nm_arr[attr_nm_arr.length-1];
+                  var src_nm= '['+src.toUpperCase()+']';
+                  var disp_nm= curfilt['display_name'];
+                  var disp_val = curfilt['values'][0]['display_val']
+                  var attr_str = '<span><a class="label filter-lable label-default">'+src_nm+' '+disp_nm+': '+disp_val+'</a></span>'
+                  filter_disp_curr+=attr_str
+
+              }
+              filter_disp_curr+='</p>';
+              filter_disp+=filter_disp_curr;
+
+         }
+         $("#version-compare-modal").find('#selected-filters').html(filter_disp);
+
+         var cohort_name = $(this).attr('data-cohort-name');
+         var cases_orig = $(this).attr('data-case-count');
+         var samples_orig = $(this).attr('data-sample-count');
+
+         $("#version-compare-modal").find('form')[0].action='/cohorts/copy_cohort/'+cohort_id+'/';
+
+         $("#version-compare-modal").find('#create-cohort-name').val(cohort_name);
+         $("#version-compare-modal").find('#cases_orig').html(cases_orig);
+         $("#version-compare-modal").find('#samples_orig').html(samples_orig);
+
+
+
+         $("#version-compare-modal").modal('show');
+         $("#version-compare-modal").find('#placeholder').show();
+         $("#version-compare-modal").find('.modal-footer').hide();
+         $("#version-compare-modal").find('#version-compare-content').hide();
+         var url = BASE_URL + '/cohorts/cohort_filter_stats/'+cohort_id+'/';
+         var csrftoken = $.getCookie('csrftoken');
+        $.ajax({
+            type: 'POST',
+            url: url,
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                if ('case_barcode' in data) {
+                    $("#version-compare-modal").find('#cases_new').html(data['case_barcode']);
+                }
+                else {
+                    $("#version-compare-modal").find('#cases_new').html('0');
+                }
+                if ('sample_barcode' in data) {
+                    $("#version-compare-modal").find('#samples_new').html(data['sample_barcode']);
+                }
+                else{
+                    $("#version-compare-modal").find('#samples_new').html('0');
+                }
+                $("#version-compare-modal").find('.modal-footer').show();
+                $("#version-compare-modal").find('#version-compare-content').show();
+                $("#version-compare-modal").find('#placeholder').hide();
+            },
+            error: function (e) {
+                console.error("Failed to fetch stats for this cohort's filter: " + JSON.parse(e.responseText).msg);
+                $("#version-compare-modal").find('#placeholder').hide();
+            }
+
+        })
+
+    });
+
 });

@@ -224,7 +224,8 @@
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     </div>
-                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+
+                     <form id="create-cohort-form" method="POST" action={% url 'save_cohort' %}>
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="create-cohort-name">Name:</label>
