@@ -17,7 +17,7 @@ Vagrant.configure(2) do |config|
      vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
    end
 
-  config.vm.box_url = "https://app.vagrantup.com/debian/boxes/bullseye64"
+  config.vm.box_url = "https://portal.cloud.hashicorp.com/vagrant/discover/debian/bullseye64"
   config.vm.box = "debian/bullseye64"
 
   # WebApp ports
