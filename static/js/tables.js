@@ -77,35 +77,12 @@ require([
 
 define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils, filterutils, tippy, $, base) {
 
-
-
     $('#proj_table, #cases_tab, #studies_tab, #series_tab, #cart-table').on('preInit.dt', function(){
         window.show_spinner();
     });
-
     $('#proj_table, #cases_tab, #studies_tab, #series_tab, #cart-table').on('draw.dt', function(){
         window.hide_spinner();
     });
-
-     /*
-
-    // TODO: Adjust these to indicate cart update
-    $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('shopping-cart:update-started', '.shopping-cart-holder', function(){
-        window.show_spinner();
-    });
-
-    $('#proj_table, #cases_tab, #studies_tab, #series_tab').on('shopping-cart:update-complete', '.shopping-cart-holder', function(){
-        window.hide_spinner();
-    });
-
-    $(document).on('study-map:update-started', function(){
-        window.show_spinner();
-    });
-    $(document).on('study-map:update-complete', function(){
-        window.hide_spinner();
-    });
-
-   */
 
     // Update the rows in the Projects Table, clear the other tables.
     window.updateTablesAfterFilter = function (collFilt, collectionsData, collectionStats,cartStats){

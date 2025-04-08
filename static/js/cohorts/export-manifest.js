@@ -201,7 +201,7 @@ require([
 
         let filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
         let filters= new Object();
-        if (filt_str.length>0){
+        if (filt_str.length>0 && button.hasClass('study-export')){
             filters = JSON.parse(filt_str)
         }
 
