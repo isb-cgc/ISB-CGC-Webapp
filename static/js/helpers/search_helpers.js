@@ -247,8 +247,8 @@ function($, tree_graph, stack_bar_chart) {
             }
         },
 
-        format_filters: function(program_id) {
-            var list = {};
+        format_filters: function(program_id, add_key=true) {
+            var filt_hsh = {};
             var program_selector = '';
             if (program_id != '0') {
                 program_selector = '#' + program_id + '-data ';
@@ -260,15 +260,18 @@ function($, tree_graph, stack_bar_chart) {
                 let key_id = -1;
                 if ($this.data('feature-id'))
                     key_id = $this.data('feature-id');
-                key = (key_id > 0 ? key_id+":" : "") + key
+                if (add_key) {
+                    key = (key_id > 0 ? key_id + ":" : "") + key
+                }
                 if ($this.data('value-id'))
                     val = $this.data('value-id');
 
-                if(!list[key])
-                    list[key] = [];
-                list[key].push(val);
+                if(!filt_hsh[key]) {
+                    filt_hsh[key] = [];
+                }
+                filt_hsh[key].push(val);
             });
-            return list;
+            return filt_hsh;
         },
 
         generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version, program_id) {
