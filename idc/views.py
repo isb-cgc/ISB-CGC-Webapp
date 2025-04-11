@@ -91,7 +91,8 @@ def landing_page(request):
         "Mesothelium",
         "Chest-Abdomen-Pelvis, Leg, TSpine",
         "Abdomen, Arm, Bladder, Chest, Head-Neck, Kidney, Leg, Retroperitoneum, Stomach, Uterus",
-        "Blood, Bone"
+        "Blood, Bone",
+        "Esophagus, Lung, Pancreas, Thymus"
     ]
 
     for collection in collex:

@@ -715,7 +715,7 @@ def load_display_vals(filename):
         attr_vals_file = open(filename, "r")
 
         for line in csv_reader(attr_vals_file):
-            if 'display_value' in line:
+            if 'Raw' in line:
                 continue
             if line[0] not in display_vals:
                 display_vals[line[0]] = {
@@ -800,7 +800,11 @@ def main():
         if len(args.display_vals):
             dvals = load_display_vals(args.display_vals)
             for attr in dvals:
-                update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
+                try:
+                    attr_obj = Attribute.objects.get(name=attr)
+                    update_display_values(attr_obj, dvals[attr]['vals'])
+                except ObjectDoesNotExist as e:
+                    print("[WARNING] Attr {} not found - display values will not be updated! Rerun ETL if this is not expected.".format(attr))
 
         # Solr commands are automatically output for full ETL; the step below is for outside-of-ETL executions
         if len(ETL_CONFIG):
