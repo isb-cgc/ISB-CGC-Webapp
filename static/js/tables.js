@@ -560,7 +560,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     // recreates the cases table when a chevron is clicked in the projects table. Defines the chevron and cart selection actions.
     // Updates data structures such as casesCache, which caches case rows to limit calls to the server, and selProjects, which stores information
     // across tables about which items are added to the cart, and which chevrons are selected
-    window.updateCaseTable = function(rowsAdded,caseID) {
+    window.updateCaseTable = function(rowsAdded,caseID, table_search) {
         viewedProjects =Object.keys(window.openProjects);
         if ($('#cases_tab_wrapper').find('.dataTables_controls').length>0){
             pageRows = parseInt($('#cases_tab_wrapper').find('.dataTables_length select').val());
@@ -683,7 +683,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 }
 
                             }
-
+                        ndic['table_search'] = table_search;
 
                         var csrftoken = $.getCookie('csrftoken');
                         $.ajax({
@@ -748,7 +748,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     }
 
 
-    window.updateStudyTable = function(rowsAdded, studyID) {
+    window.updateStudyTable = function(rowsAdded, studyID, table_search) {
         let nonViewAbleModality= new Set([""]);
         var viewCases = [];
         for (projid in window.openCases) {
@@ -992,7 +992,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                               return '<i class="fa fa-download study-export export-button" data-series-count="'+row['unique_series']
                                   +'" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
                           }
-
                       }
                 ],
                 "processing": true,
@@ -1035,9 +1034,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             }
                             ndic['partitions'] = JSON.stringify(window.partitions);
                             ndic['filtergrp_list'] = JSON.stringify(window.filtergrp_list);
+                            ndic['table_search'] = table_search;
+                            let csrftoken = $.getCookie('csrftoken');
 
-
-                            var csrftoken = $.getCookie('csrftoken');
                             $.ajax({
                                 url: url,
                                 dataType: 'json',
@@ -1099,7 +1098,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input class="studyID_inp" type="text-box" value="'+studyID+'"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
     }
 
-    window.updateSeriesTable = function(rowsAdded, seriesID) {
+    window.updateSeriesTable = function(rowsAdded, seriesID, table_search) {
         var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
         var slimViewAbleModality=new Set(["SM"])
         viewStudies = []
@@ -1130,51 +1129,41 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
                     $(row).attr('data-aws',  data['aws_bucket'])
 
-
-
                      if ('cart_series_in_collection' in data){
                        $(row).attr('cart_series_in_collection',  data['cart_series_in_collection']);
-                    }
-                    else{
+                    } else{
                         $(row).attr('cart_series_in_collection','0')
                     }
                     if ('filter_series_in_collection' in data){
                        $(row).attr('filter_series_in_collection',  data['filter_series_in_collection']);
-                    }
-                    else{
+                    } else {
                         $(row).attr('filter_series_in_collection','0')
                     }
                     if ('filter_cart_series_in_collection' in data){
                        $(row).attr('filter_cart_series_in_collection',  data['filter_cart_series_in_collection']);
-                    }
-                    else{
+                    } else {
                         $(row).attr('filter_cart_series_in_collection','0')
                     }
 
-
                     if ('cart_series_in_case' in data){
                        $(row).attr('cart_series_in_case',  data['cart_series_in_case']);
-                    }
-                    else{
+                    } else {
                         $(row).attr('cart_series_in_case','0')
                     }
                     if ('filter_series_in_case' in data){
                        $(row).attr('filter_series_in_case',  data['filter_series_in_case']);
-                    }
-                    else{
+                    } else {
                         $(row).attr('filter_series_in_case','0')
                     }
                     if ('filter_cart_series_in_case' in data){
                        $(row).attr('filter_cart_series_in_case',  data['filter_cart_series_in_case']);
-                    }
-                    else{
+                    } else {
                         $(row).attr('filter_cart_series_in_case','0')
                     }
 
                     if ('cart_series_in_study' in data){
                        $(row).attr('cart_series_in_study',  data['cart_series_in_study']);
-                    }
-                    else{
+                    } else {
                         $(row).attr('cart_series_in_study','0')
                     }
                     if ('filter_series_in_study' in data){
@@ -1385,6 +1374,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         }
                          ndic['partitions'] = JSON.stringify(window.partitions);
                         ndic['filtergrp_list'] = JSON.stringify(window.filtergrp_list);
+                        ndic['table_search'] = table_search;
                         var csrftoken = $.getCookie('csrftoken');
                         $.ajax({
                             url: url,
@@ -2090,21 +2080,21 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             if ($('#cases_tab').find('.caseID-inp').length > 0) {
                 caseID = $('#studies_tab').find('.caseID-inp').val();
             }
-            updateCaseTable(rowsAdded, caseID);
+            updateCaseTable(rowsAdded, caseID, false);
         }
         if (studyTableUpdate) {
             var studyID = "";
             if ($('#studies_tab').find('.studyID-inp').length > 0) {
                 studyID = $('#studies_tab').find('.studyID-inp').val();
             }
-            updateStudyTable(rowsAdded, studyID);
+            updateStudyTable(rowsAdded, studyID, false);
         }
         if (seriesTableUpdate) {
             var seriesID = "";
             if ($('#series_tab').find('.seriesID-inp').length > 0) {
                 seriesID = $('#series_tab').find('.seriesID-inp').val();
             }
-            updateSeriesTable(rowsAdded, seriesID);
+            updateSeriesTable(rowsAdded, seriesID, false);
 
         }
 
@@ -2179,14 +2169,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var elem=$('#'+wrapper);
         var varStr=elem.find('.dataTables_controls').find('.'+type+'_inp').val();
         if (type ==="seriesID") {
-            window.updateSeriesTable(false,varStr)
+            window.updateSeriesTable(false,varStr, true)
         }
 
         else if (type ==="studyID") {
-            window.updateStudyTable(false,  varStr)
+            window.updateStudyTable(false,  varStr, true)
         }
         else if (type==="caseID"){
-            window.updateCaseTable(false,varStr)
+            window.updateCaseTable(false,varStr, true)
         }
     }
 

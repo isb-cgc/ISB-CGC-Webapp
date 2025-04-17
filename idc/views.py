@@ -372,16 +372,15 @@ def studymp(request):
     return JsonResponse(response, status=status)
 
 
-
-
 def populate_tables(request):
     response = {}
     status = 200
 
     try:
-        req = request.GET if request.GET else request.POST
+        req = request.GET if request.method == 'GET' else request.POST
         path_arr = [nstr for nstr in request.path.split('/') if nstr]
         table_type = path_arr[len(path_arr)-1]
+        table_search = req.get("table_search", "false").lower() == 'true'
         fields = None
         collapse_on = None
         filters = json.loads(req.get('filters', '{}'))
@@ -399,7 +398,7 @@ def populate_tables(request):
         sort = req.get('sort', 'PatientID')
         sortdir = req.get('sortdir', 'asc')
 
-        [cnt, tableRes]=get_table_data_with_cart_data(table_type, sort, sortdir, filters, filtergrp_list, partitions, limit, offset)
+        [cnt, tableRes]=get_table_data_with_cart_data(table_type, sort, sortdir, filters, filtergrp_list, partitions, limit, offset, table_search)
         response["res"] = tableRes
         response["cnt"] = cnt
         response["diff"] = []
@@ -413,10 +412,6 @@ def populate_tables(request):
         status = 400
 
     return JsonResponse(response, status=status)
-
-
-
-
 
 
 def populate_tables_old(request):
