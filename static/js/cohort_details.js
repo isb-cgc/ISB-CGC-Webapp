@@ -673,14 +673,15 @@ require([
             if($('.all-selected-filters span[data-prog-id="'+$(this).data('prog-id')+'"]').length > 0) {
                 totalCases += parseInt($(this).text());
             }
-            if (totalCases > 0){
-                download_ids_nologin_btn.removeAttr('disabled');
-                download_ids_nologin_btn.attr("title","Download the cases matching these filters.");
-            } else{
-                download_ids_nologin_btn.attr('disabled','disabled');
-                download_ids_nologin_btn.attr("title","Please select at least one filter.");
-            }
         });
+
+        if (totalCases > 0){
+            download_ids_nologin_btn.removeAttr('disabled');
+            download_ids_nologin_btn.attr("title","Download the cases matching these filters.");
+        } else {
+            download_ids_nologin_btn.attr('disabled','disabled');
+            download_ids_nologin_btn.attr("title","Please select at least one filter.");
+        }
 
         if ($('#edit-cohort-name').val() !== original_title || $('.all-selected-filters span').length > 0) {
             save_changes_btn.prop('disabled', false)
@@ -688,17 +689,16 @@ require([
             if(save_new_cohort_btn.length > 0) {
                 if (totalCases > 0) {
                     save_new_cohort_btn.removeAttr('disabled');
-                    save_new_cohort_btn.removeAttr('title');
+                    save_new_cohort_btn.removeAttr('Save these filters as a cohort.');
                 } else {
                     save_new_cohort_btn.attr("title", "Please adjust your filters to include at least one case in the cohort.");
                     save_new_cohort_btn.attr('disabled','disabled');
                 }
             }
-            if(log_in_to_save_btn.length > 0)
-            {
+            if(log_in_to_save_btn.length > 0) {
                 if (totalCases > 0) {
                     log_in_to_save_btn.removeAttr('disabled');
-                    log_in_to_save_btn.removeAttr('title');
+                    log_in_to_save_btn.attr("title","Log in to save these filters as a cohort.");
                 } else {
                     log_in_to_save_btn.attr("title", "Please adjust your filters to include at least one case in the cohort.");
                     log_in_to_save_btn.attr('disabled','disabled');
