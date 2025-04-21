@@ -19,10 +19,12 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-       bootstrap: 'libs/bootstrap.bundle.min'
+        'datatables.bootstrap': ['libs/dataTables.bootstrap5'],
+
     },
     shim: {
-        'bootstrap': ['jquery']
+        'datatables.bootstrap': ['jquery']
+
     }
 });
 
@@ -32,7 +34,9 @@ require([
     'underscore',
     'jqueryui',
     'bootstrap',
-    'session_security'
+    'session_security',
+    'datatables.net',
+    'datatables.bootstrap'
 ], function ($, base, _) {
 
     // For manaaging filter changes
@@ -1084,5 +1088,6 @@ require([
                 },
             })
     });
+
 
 });
