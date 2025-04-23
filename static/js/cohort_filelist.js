@@ -32,12 +32,15 @@ require([
     'jquery',
     'base',
     'underscore',
+    'utils',
     'jqueryui',
     'bootstrap',
     'session_security',
     'datatables.net',
     'datatables.bootstrap'
-], function ($, base, _) {
+], function ($, base, _, utils) {
+
+    $.getCookie = utils.getCookie;
 
     // For manaaging filter changes
     var UPDATE_PENDING = false;
@@ -241,19 +244,25 @@ require([
             $('#placeholder').show();
             var data_tab_content_div = $('div.data-tab-content');
             var get_panel_url = "";
+            var ndic={}
             if (cohort !== null) {
                 get_panel_url = BASE_URL + '/cohorts/filelist/'+cohort+'/panel/' + active_tab +'/';
             }
             else {
                 get_panel_url = BASE_URL + '/cohorts/filelist/panel/' + active_tab + '/';
+                ndic['program_ids']=JSON.stringify(program_ids);
+                ndic['case_filters']=JSON.stringify(case_filters);
             }
-
+            //data         :ndic,
+            // beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
-                type        :'GET',
+                type        :'POST',
+                data         :ndic,
                 url         : get_panel_url,
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     data_tab_content_div.append(data);
-
                     update_links(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
 
@@ -864,6 +873,7 @@ require([
             if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length > 0) {
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
             }
+            //cases_filter here
             UPDATE_PENDING = true;
             $('#'+active_tab+'-files').find('.filelist-panel .spinner i').removeClass('d-none');
             $.ajax({

@@ -27,6 +27,7 @@
 
 {% block page_header %}
     <div class="container">
+
         <div class="banner-section">
         </div>
 
@@ -36,11 +37,69 @@
                 <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
             </ol>
         {% endif %}
-        <h3 class="page-header">Cancer Data File Browser
+        <h3 class="page-header">Cancer Data File Browser {{ program_ids }}
             {% if cohort %}
                  <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
             {% endif %}
         </h3>
+
+        {% if cohort.id %}
+                <div class="col-sm-12 col-md-12 col-lg-12">
+                    <div class="cohort-selected-filters isb-panel isb-panel-default">
+                        <div class="isb-panel-heading">
+                            <h4 class="panel-title">Filters</h4>
+                        </div>
+                        <div class="isb-panel-body curr-filter-panel gradient-overlay">
+                            {% for prog, filters in current_filters.items %}
+                                <div class="col-sm-{{ current_filters.keys|get_prog_col_size }} prog-filter-set">
+                                    <h5>{{ prog }}</h5>
+                                    {% for filter in filters %}
+                                        {% for val in filter.values %}
+                                            <span class="filter-label label label-default space-right-5">{{ filter.display_name }}: {{ val.display_val }}</span>
+                                            {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% empty %}
+                                <div class="col-sm-12 prog-filter-set">
+                                    <p>No filters have been applied to this cohort.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="more-filters">
+                            <button class="btn btn-link" role="button">Show More</button>
+                        </div>
+                        <div class="less-filters" style="display: none;">
+                            <button class="btn btn-link" role="button">Show Less</button>
+                        </div>
+                    </div>
+                    <div class="cohort-info isb-panel isb-panel-default">
+                        <div class="isb-panel-heading">
+                            <h4 class="panel-title">Cohort Details</h4>
+                        </div>
+                        <div class="isb-panel-body details-panel">
+                            <div class="space-bottom-10">
+                                <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
+                            </div>
+                            <div class="space-bottom-10">
+                                <span class="detail-label">Total Number of Cases:</span>
+                                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                                <span class="total-values"
+                                      id="c-{{ cohort.id }}-data-total-participants">{{ total_cases }}</span>
+                            </div>
+                            <div class="space-bottom-10">
+                                <span class="detail-label">Total Number of Samples:</span>
+                                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                                <span class="total-values"
+                                      id="c-{{ cohort.id }}-data-total-samples">{{ total_samples }}</span>
+                            </div>
+                            <div class="space-bottom-10">
+                                <span>Your Permissions: {{ cohort.perm.perm }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
         <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
             <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
             The maximum number of files which can be downloaded in a list is <span class="file-list-limit">#</span>. Your selections currently total
@@ -50,6 +109,16 @@
 {% endblock %}
 
 {% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="isb-panel isb-panel-default">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-12">
@@ -188,6 +257,12 @@
     var FILE_LIST_MAX = '{{  file_list_max }}';
     var request_user_id = {% if user.is_anonymous %} null {% else %} {{ user.id }} {% endif %};
     var programs_this_cohort = {{ programs_this_cohort|tojson|safe }};
+    {% if program_ids|length > 0 %}
+        var program_ids = {{ program_ids }};
+    {% else %}
+        var program_ids=[];
+    {% endif %}
+    var case_filters = {{ case_filters|tojson|safe }};
     </script>
 {% endblock %}
 
