@@ -673,11 +673,12 @@ require([
             if($('.all-selected-filters span[data-prog-id="'+$(this).data('prog-id')+'"]').length > 0) {
                 totalCases += parseInt($(this).text());
             }
-            if (totalCases>0){
+            if (totalCases > 0){
                 download_ids_nologin_btn.removeAttr('disabled');
-            }
-            else{
+                download_ids_nologin_btn.attr("title","Download the cases matching these filters.");
+            } else{
                 download_ids_nologin_btn.attr('disabled','disabled');
+                download_ids_nologin_btn.attr("title","Please select at least one filter.");
             }
         });
 
