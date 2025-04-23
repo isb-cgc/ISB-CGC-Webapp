@@ -53,9 +53,12 @@ To run your server in PyCharm:
 
  1. Make sure your Vagrant machine is running by going to **Tools > Vagrant > Up**
   * If this is the first time you've built the VM, it can be time consuming.
-  * Our VMs are currently running Ubuntu 16 LTS, which is what the app deploys under as well.
- 2. Once the VM has built, set the `shell/python-su.sh` script to executable in the vagrant machine's command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
- 3. You can now click on the Run or Debug icons in the toolbar (upper-right corner of the PyCharm GUI)
+  * Our VMs are currently running Debian Bullseye LTS, which is what the app deploys under as well.
+ 2. Once the VM is built you will need to update the kernel headers and Guest Additions
+  * Kernel header update: `sudo apt-get -y install dkms build-essential linux-headers-$(uname -r)`
+  * Guest Additions ISO mounting and installation: https://docs.bitnami.com/virtual-machine/faq/configuration/install-virtualbox-guest-additions/
+ 3. Next, set the `shell/python-su.sh` script to executable in the vagrant machine's command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
+ 4. You can now click on the Run or Debug icons in the toolbar (upper-right corner of the PyCharm GUI)
   * Your server will start and the PyCharm console should show all the logs and output from the system. 
   * If you are running in debug, you can also use breakpoints to stop the execution and examine variables and code as it runs.
 
