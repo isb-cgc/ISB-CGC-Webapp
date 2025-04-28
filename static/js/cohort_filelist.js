@@ -504,7 +504,7 @@ require([
         if(files.length <= 0) {
             $(tab_selector).find('.filelist-panel table tbody').append(
                 '<tr>' +
-                '<td colspan="9"><i>No file listings found.</i></td><td></td>'
+                '<td colspan="9"><i>No resources or files found.</i></td><td></td>'
             );
         }
         else {
@@ -561,10 +561,17 @@ require([
                     column_name = tab_columns[active_tab][j];
                     switch (column_name){
                         case 'filename':
-                            table_row_data += '<td><div class ="col-filename">' +
-                                    '<div>' + files[i]['filename'] + '</div>' +
-                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
-                                    '</div></td>';
+                            table_row_data += '<td><div class ="col-filename"><div>';
+                            if(files[i]['dataformat'] == 'BigQuery') {
+                                table_row_data += '<a href="'+BQ_SEARCH_URL+'search?tableId='+
+                                    files[i]['filename'].split(".")[2]+'&status=current&include_always_newest=false" '+
+                                    'title="View table in BQ Search" target="_blank" rel="nofollow noreferrer">'+
+                                    files[i]['filename']+'</a>';
+                            } else {
+                                table_row_data += files[i]['filename'] + '</div>' +
+                                        '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id']+']';
+                            }
+                            table_row_data += '</div></div></td>'
                             break;
                         case 'pdf_filename':
                             let file_loc = PATH_PDF_URL+files[i]['file_node_id'];
@@ -749,6 +756,8 @@ require([
         $(this).toggleClass('column_show').toggleClass('column_hide');
         var col_index = $(this).index();
         tab_columns_display[this_tab][col_index][1] ^= 1;
+        console.debug($('#'+this_tab+'-files table.file-list-table')
+            .find('td:nth-child('+(col_index+1)+'), th:nth-child('+(col_index+1)+'), col:nth-child('+(col_index+1)+')'));
         $('#'+this_tab+'-files table.file-list-table')
             .find('td:nth-child('+(col_index+1)+'), th:nth-child('+(col_index+1)+'), col:nth-child('+(col_index+1)+')')
             .toggleClass('hide');

@@ -37,7 +37,8 @@ import django
 django.setup()
 
 from google_helpers.bigquery.bq_support import BigQuerySupport
-from projects.models import CgcDataVersion, Program, Project, Attribute, Attribute_Ranges, DataSourceJoin, Attribute_Display_Values, DataSource, DataVersion, DataNode, DataSetType, Attribute_Set_Type
+from projects.models import CgcDataVersion, Attribute_Tooltips, Program, Project, Attribute, Attribute_Ranges, \
+    DataSourceJoin, Attribute_Display_Values, DataSource, DataVersion, DataNode, DataSetType, Attribute_Set_Type
 from django.contrib.auth.models import User
 
 logger = logging.getLogger(__name__)
@@ -181,6 +182,68 @@ def load_attributes(ds_attr_files, program_attr_file_name, node_attr_file_name, 
             attr_file.close()
 
 
+def update_display_values(attr, updates):
+    if len(updates):
+        new_vals = []
+        to_update = Attribute_Display_Values.objects.filter(raw_value__in=list(updates.keys()), attribute=attr)
+        if len(to_update):
+            for upd in to_update:
+                upd.display_value = updates[upd.raw_value]
+            Attribute_Display_Values.objects.bulk_update(to_update, ['display_value'])
+            logger.info("[STATUS] Updated {} display values for attribute {}.".format(str(len(to_update))), attr.name)
+        to_add = set(updates.keys()).difference(set([x.raw_value for x in to_update]))
+        for rv in to_add:
+            new_vals.append(Attribute_Display_Values(raw_value=rv, display_value=updates[rv]['display_value'], attribute=attr))
+        if len(new_vals):
+            Attribute_Display_Values.objects.bulk_create(new_vals)
+            logger.info("[STATUS] Added {} display values for attribute {}.".format(str(len(new_vals))), attr.name)
+
+
+def load_display_vals():
+    for attr, raw_values in DISPLAY_VALS:
+        try:
+            attr_obj = Attribute.objects.get(name=attr)
+            update_display_values(attr_obj, raw_values)
+        except ObjectDoesNotExist as e:
+            print("[WARNING] Attr {} not found - display values will not be updated! Rerun ETL if this is not expected.".format(attr))
+
+
+def load_tooltips():
+    try:
+        for attr_name, attr_ttips in ATTR_TIPS.items():
+            print(attr_name)
+            attr = Attribute.objects.get(name=attr_name, active=True)
+
+            tips = Attribute_Tooltips.objects.select_related('attribute').filter(attribute=attr)
+            extent_tooltips = [tip.value for tip in tips]
+
+            new_tooltips = []
+            updated_tooltips = []
+
+            for val in attr_ttips:
+                if len(extent_tooltips) and val not in extent_tooltips:
+                    new_tooltips.append(Attribute_Tooltips(value=val, tooltip=attr_ttips[val], attribute=attr))
+                else:
+                    updated_tooltips.append(val)
+
+            if len(new_tooltips):
+                logger.info("[STATUS] Adding {} new tooltips.".format(str(len(new_tooltips))))
+                Attribute_Tooltips.objects.bulk_create(new_tooltips)
+            if len(updated_tooltips):
+                logger.info("[STATUS] Updating {} tooltips.".format(str(len(updated_tooltips))))
+                to_update = Attribute_Tooltips.objects.filter(value__in=updated_tooltips, attribute=attr)
+                for ttip in to_update:
+                    ttip.tooltip = attr_ttips[ttip.value]
+                Attribute_Tooltips.objects.bulk_update(to_update, ['tooltip'])
+
+            if not len(new_tooltips) and not len(updated_tooltips):
+                logger.info("[STATUS] No new or changed tooltips found.")
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load tooltips:")
+        logger.exception(e)
+        logger.error("[ERROR] Last attribute name read: {}".format(attr_name))
+
+
 def add_attributes(attr_set):
     for attr_name, attr in attr_set.items():
         try:
@@ -299,7 +362,7 @@ def inactivate_data_versions(major, subv):
     return
 
 
-def add_data_versions(versions):
+def add_data_versions(versions, deactivate):
     try:
         cgc_dev = None
         cgc_version = versions.get('major_version', {}).get('active', None)
@@ -323,19 +386,35 @@ def add_data_versions(versions):
             ver_to_cgc.append(DataVersion.cgc_versions.through(dataversion_id=obj.id, cgcdataversion_id=major_ver.id))
 
         if versions['subversions'].get('associate', None):
-            dvs = DataVersion.objects.filter(version__in=[x for x in versions['subversions']['associate']])
-            mvs = {x.version_number: x for x in CgcDataVersion.objects.filter(version_number__in=[y for x, y in versions['subversions']['associate'].items()])}
-            dv_to_mv = { x: mvs[x['major']] for x in versions['subversions']['associate']}
+            data_version_ids = list(set(versions['subversions']['associate'].keys()))
+            dvs = DataVersion.objects.filter(version__in=data_version_ids)
+            cgc_version_map = {x.version_number: x for x in CgcDataVersion.objects.filter(version_number__in=[y for x, y in versions['subversions']['associate'].items()])}
+            dv_to_mv = { x: cgc_version_map[versions['subversions']['associate'][x]] for x in data_version_ids}
             for dv in dvs:
                 ver_to_cgc.append(DataVersion.cgc_versions.through(dataversion=dv, cgcdataversion=dv_to_mv[dv.version]))
 
         len(ver_to_prog) and DataVersion.programs.through.objects.bulk_create(ver_to_prog)
         len(ver_to_cgc) and DataVersion.cgc_versions.through.objects.bulk_create(ver_to_cgc)
 
+        deactivate_data_versions(deactivate['minor'], deactivate['major'])
+
         logger.info("[STATUS] Current Active data versions:")
         logger.info("{}".format(DataVersion.objects.filter(active=True)))
     except Exception as e:
         logger.error("[ERROR] Data Versions may not have been added!")
+        logger.exception(e)
+
+
+def deactivate_data_versions(versions, cgc_version):
+    try:
+        for dv in DataVersion.objects.filter(version__in=versions):
+            dv.active=False
+            dv.save()
+        for dv in CgcDataVersion.objects.filter(version_number__in=cgc_version):
+            dv.active=False
+            dv.save()
+    except Exception as e:
+        logger.error("[ERROR] While deactivating versions:")
         logger.exception(e)
 
 
@@ -419,6 +498,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
         attrs_to_srcs = []
         source_joins = {}
         for src in sources:
+            build_attrs = (build_attrs and (src.get("attributes", {}).get("from", None) is None))
             try:
                 obj = DataSource.objects.get(name=src['name'])
                 logger.warning("[WARNING] Source with the name {} already exists - updating ONLY!".format(src['name']))
@@ -460,7 +540,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
             source_attrs = list(obj.get_source_attr(all=True).values_list('name',flat=True))
             schema_src = src['schema_source'].split('.') if src['source_type'] == DataSource.SOLR else src['name'].split('.')
             schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
-            link_attrs = []
+            attrs_to_link = []
             for field in schema:
                 if build_attrs:
                     if field['name'] not in ATTR_SET and field['name'] not in BQ_SCHEMA_SKIP:
@@ -482,15 +562,14 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                             attr['display_vals'] = {}
                         attr['display_vals'].update(DISPLAY_VALS[attr['name']])
 
-
                     if 'range' not in attr:
                         if attr['name'].lower() in ranges_needed:
                             attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
                 elif link_attr and field['name'] not in source_attrs:
-                    link_attrs.append(field['name'])
+                    attrs_to_link.append(field['name'])
 
             if build_attrs:
-                for la in link_attrs:
+                for la in attrs_to_link:
                     try:
                         a = Attribute.objects.get(name=la)
                         attrs_to_srcs.append(Attribute.data_sources.through(attribute_id=a.id,datasource_id=obj.id))
@@ -543,29 +622,31 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
 
 
 def copy_attrs(from_data_sources, to_data_sources, excludes):
-    to_sources = DataSource.objects.filter(name__in=to_data_sources)
-    from_sources = DataSource.objects.filter(name__in=from_data_sources)
-    to_sources_attrs = to_sources.get_source_attrs()
-    bulk_add = []
+    try:
+        to_sources = DataSource.objects.filter(name__in=to_data_sources)
+        from_sources = DataSource.objects.filter(name__in=from_data_sources)
+        if not len(to_sources) or not len(from_sources):
+            raise Exception("Can't copy attributes from {} to {}: some data sources were not found!".format(from_sources, to_sources))
+        to_sources_attrs = to_sources.get_source_attrs()
+        bulk_add = []
 
-    for fds in from_sources:
-        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'] or []).exclude(name__in=excludes)
-        logger.info("Copying {} attributes from {} to: {}.".format(
-            len(from_source_attrs.values_list('name', flat=True)),
-            fds.name, "; ".join(to_data_sources)
-        ))
+        for fds in from_sources:
+            from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'] or []).exclude(name__in=excludes)
+            logger.info("Copying {} attributes from {} to: {}.".format(
+                len(from_source_attrs.values_list('name', flat=True)),
+                fds.name, "; ".join(to_data_sources)
+            ))
 
-        for attr in from_source_attrs:
-            for ds in to_sources:
-                bulk_add.append(Attribute.data_sources.through(attribute_id=attr.id, datasource_id=ds.id))
+            for attr in from_source_attrs:
+                for ds in to_sources:
+                    bulk_add.append(Attribute.data_sources.through(attribute_id=attr.id, datasource_id=ds.id))
 
-    if len(bulk_add):
-        try:
+        if len(bulk_add):
             Attribute.data_sources.through.objects.bulk_create(bulk_add)
-        except Exception as e:
-            logger.error("[ERROR] While trying to copy attributes from {} to {}:".format(fds.name, "; ".join(to_data_sources)))
-            logger.error("Attributes: {}".format(",".join(from_source_attrs.values_list('name',flat=True))))
-            logger.exception(e)
+
+    except Exception as e:
+        logger.error("[ERROR] While trying to copy attributes:")
+        logger.exception(e)
 
 
 def add_programs(progs):
@@ -638,7 +719,7 @@ def main(config, make_attr=False):
                 Project.objects.update_or_create(**proj)
 
         if 'versions' in config:
-            add_data_versions(config['versions'])
+            add_data_versions(config['versions'], config.get('deactivate',None))
 
         # Preload all display value information, as we'll want to load it into the attributes while we build that set
         if 'display_values' in config and exists(join(dirname(__file__), config['display_values'])):
@@ -653,7 +734,7 @@ def main(config, make_attr=False):
             print("[STATUS] Display values file not listed - skipping!")
 
         # Preload all tooltip information, as we'll want to load it into the attributes while we build that set
-        if 'tooltips' in config and exists(join(dirname(__file__), config['attr_tooltips'])):
+        if 'attr_tooltips' in config and exists(join(dirname(__file__), config['attr_tooltips'])):
             attr_tips_file = open(join(dirname(__file__), config['attr_tooltips']), "r")
 
             for line in csv_reader(attr_tips_file):
@@ -662,21 +743,48 @@ def main(config, make_attr=False):
                 ATTR_TIPS[line[2]][line[0]]=line[1]
             attr_tips_file.close()
 
+        # build_attributes is a special setting for use when attributes can be sourced from a BQ table schema and
+        # require no other information (eg. display values, tooltips), and the types can be reliably inferred from their
+        # BQ schema type.
+        # If this is not the case, supply 'attributes' or 'attr_copy', which will automatically disable building of
+        # the attribute set from a BQ table.
+        # Note that the BQ schema will still need to be supplied in the data source entry for Solr data sources, as
+        # this is essential in the production of the Solr core creation and indexing scripts.
         if 'data_sources' in config:
-            add_data_sources(config['data_sources'],build_attrs=('attributes' not in config))
+            add_data_sources(config['data_sources'], build_attrs=(('attributes' not in config) and ('attr_copy' not in config)))
 
+        # 'attributes' is a set of files to parse incoming (new) attributes to be associated with nodes, programs,
+        # and datasources. This should not be used to copy existing attributes to a new data source;
+        # for that use 'attr_copy'
         if 'attributes' in config:
             ds_attr_files = {x['name']: x['attributes'] for x in config['data_sources'] if 'attributes' in x}
-            load_attributes(ds_attr_files, config['attributes'].get('program_file',None), config['attributes'].get('node_file',None), config['attributes'].get('attr_set_types',None))
+            load_attributes(
+                ds_attr_files,
+                config['attributes'].get('program_file', None),
+                config['attributes'].get('node_file', None),
+                config['attributes'].get('attr_set_types', None)
+            )
 
-        # Add any attributes found to be new in the prior step to the database, including linkage to the new data sources
+        # Add any attributes found to be new in the prior steps to the database,
+        # including linkage to the new data sources
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
 
+        # Once attributes are loaded, add tooltips and/or display values, if we have any
+        len(ATTR_TIPS) and load_tooltips()
+
+        len(DISPLAY_VALS) and load_display_vals()
+
+        # Copy any pre-existing attributes from specified source and destination data sources
+        # Note this should generally NOT be used in conjunction with explicitly defined files
+        # or a build_attributes step, as the former assume attributes need to be added to the database
+        # while this step does not.
+        # If only some attributes should be copied over, the attr_exclude key should be provided with a list of
+        # attribute names to leave out of the copy process. Copying is useful when an attribute's presence in a node,
+        # data set type, and/or program is consistent and the only thing which needs to happen is its addition to a
+        # newly added data source
         if 'attr_copy' in config:
             for each in config['attr_copy']:
-                copy_attrs(each['src'],each['dest'], config.get("attr_exclude", []))
-
-        len(ATTR_SET) and make_attr and add_attributes([ATTR_SET[x] for x in ATTR_SET])
+                copy_attrs([each['src']],[each['dest']], config.get("attr_exclude", []))
 
     except Exception as e:
         logger.exception(e)
