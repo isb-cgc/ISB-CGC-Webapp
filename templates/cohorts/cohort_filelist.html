@@ -43,21 +43,23 @@
             {% endif %}
         </h3>
 
-        {% if cohort.id %}
+        {% if not cohort.id %}
                 <div class="col-sm-12 col-md-12 col-lg-12">
                     <div class="cohort-selected-filters isb-panel isb-panel-default">
                         <div class="isb-panel-heading">
-                            <h4 class="panel-title">Filters</h4>
+                            <h4 class="panel-title">Case Filters</h4>
                         </div>
                         <div class="isb-panel-body curr-filter-panel gradient-overlay">
-                            {% for prog, filters in current_filters.items %}
-                                <div class="col-sm-{{ current_filters.keys|get_prog_col_size }} prog-filter-set">
+                            {% for prog, filters in case_filters_disp.items %}
+                                <div class="col-sm-12 prog-filter-set">
                                     <h5>{{ prog }}</h5>
+
                                     {% for filter in filters %}
-                                        {% for val in filter.values %}
-                                            <span class="filter-label label label-default space-right-5">{{ filter.display_name }}: {{ val.display_val }}</span>
-                                            {% endfor %}
+
+                                            <span class="filter-label label label-default space-right-5">{{ filter.attr_nm }}: {{ filter.values|first }}</span>
+
                                     {% endfor %}
+
                                 </div>
                             {% empty %}
                                 <div class="col-sm-12 prog-filter-set">
