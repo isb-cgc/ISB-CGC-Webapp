@@ -1,4 +1,4 @@
-cryptography==44.0.1
+cryptography==44.0.2
 django==4.2.20
 django-allauth==0.63.1
 django-allauth[socialaccount]
@@ -9,7 +9,7 @@ django-finalware==1.0.0
 djangorestframework==3.14.0
 django-otp
 django-session-security==2.6.7
-future==0.18.3
+future==1.0.0
 google-api-python-client==2.133.0
 google-cloud-bigquery
 google-cloud-logging
@@ -19,12 +19,12 @@ jsonschema==2.6.0
 mysqlclient==2.0.1
 oauth2client==3.0.0
 pexpect==4.0.1
-pyasn1==0.4.6
+pyasn1==0.6.1
 pyjwt==2.4.0
 pylint
 python-openid==2.2.5
-pytz==2018.4
-PyYAML==5.4
+pytz==2025.2
+PyYAML==6.0.2
 requests==2.32.3
 requests-oauthlib==0.7.0
 rsa==4.7

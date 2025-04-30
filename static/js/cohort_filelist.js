@@ -1072,30 +1072,67 @@ require([
 
     $('.data-tab-content').on('click', '.pdf-download', function(){
         $.ajax({
-                type        :'GET',
-                url         : $(this).attr('url'),
-                success : function (data) {
-                    let signed_uri = data['signed_uri'];
-                    let a = document.createElement('a');
-                    a.href = signed_uri;
-                    a.download = $(this).attr('data-filename');
-                    a.target="_blank"
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(a.href);
-                },
-                error: function (xhr) {
-                     let responseJSON = $.parseJSON(xhr.responseText);
-                    // If we received a redirect, honor that
-                    if(responseJSON.redirect) {
-                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
-                        window.location = responseJSON.redirect;
-                    } else {
-                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
-                    }
-                },
-            })
+            type        :'GET',
+            url         : $(this).attr('url'),
+            success : function (data) {
+                let signed_uri = data['signed_uri'];
+                let a = document.createElement('a');
+                a.href = signed_uri;
+                a.download = $(this).attr('data-filename');
+                a.target="_blank"
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(a.href);
+            },
+            error: function (xhr) {
+                 let responseJSON = $.parseJSON(xhr.responseText);
+                // If we received a redirect, honor that
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
+                } else {
+                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                }
+            },
+        })
+    });
+
+
+    function updateFilterDisplay(filterSet) {
+        filterSet.find('li.checkbox').each(function(){
+            let isZero = $(this).find('input').attr('data-count').val() === "0";
+            let hideZero = $(this).parents('.filter-panel').find('.hide-zeros input').is(':checked');
+            let isChecked = $(this).find('input').is(':checked');
+            let toHide = (!isChecked && ($(this).hasClass('search-mismatch') || (isZero && hideZero)));
+            if(toHide){
+                $(this).addClass('is-hidden');
+            } else {
+                $(this).removeClass('is-hidden');
+            }
+        });
+        update_zero_case_filters(filterSet.parents('.hide-zeros'));
+    };
+
+    $('.filelist-container').on('keyup', '.filter-search', function(){
+        let searchVal = $(this).val();
+        let searchFilters = Boolean(searchVal !== '');
+        let filterSet = $(this).parents('.list-group-item').children('.list-group-item');
+        let filters = filterSet.find('.list-group-item__body li.checkbox');
+
+        if(!searchFilters) {
+            filters.removeClass('search-mismatch');
+        } else {
+            filters.each(function(){
+                let label = $(this).find('label');
+                if(label.innerHtml.lowerCase().includes(searchVal)) {
+                    $(this).removeClass('search-mismatch');
+                } else {
+                    $(this).addClass('search-mismatch');
+                }
+            });
+        }
+        updateFilterDisplay(filterSet);
     });
 
 
