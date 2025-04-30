@@ -22,6 +22,7 @@ pexpect==4.0.1
 pyasn1==0.6.1
 pyjwt==2.4.0
 pylint
+pyopenssl==25.0.0
 python-openid==2.2.5
 pytz==2025.2
 PyYAML==6.0.2
