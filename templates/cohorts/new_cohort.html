@@ -40,8 +40,6 @@
         </ol>
      </div>
      <div class="col-lg-6 col-md-6">
-
-
         <h1 class="page-header float-start">Create Cohort</h1>
      </div>
      <div class="col-lg-6 col-md-6">
@@ -49,19 +47,12 @@
             <button class="ms-2 btn btn-secondary float-end " data-bs-toggle="modal" data-bs-target="#create-cohort-modal"
                     title="Please select at least one filter." > Save As New Cohort
             </button>
-
-
-
         {% else %}
 
             <button class="ms-2 btn btn-secondary float-end" id="log-in-to-save-btn"
                     title="Please select at least one filter."
-{#                        onclick="location.href='{% url 'account_login' %}'"#}
                     disabled>Log In to Save New Cohort
             </button>
-
-
-
         {% endif %}
          <form id ="nologin-download" action="/cohorts/download_ids_nologin/" method="POST">
              {% csrf_token %}
@@ -71,10 +62,6 @@
                  <button class="ms-2 btn btn-secondary float-end download-ids-nologin-btn nologin"
                     title="Please select at least one filter." > Download Case List
                </button>
-
-
-
-
          </form>
      </div>
 
