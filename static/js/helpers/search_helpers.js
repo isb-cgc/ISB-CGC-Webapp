@@ -93,7 +93,6 @@ function($, tree_graph, stack_bar_chart) {
     };
 
     return  {
-
         filter_data_for_clin_trees: function(attr_counts, these_nodes, program_id) {
             if(program_id == null || program_id == undefined) {
                 program_id = $('ul.nav-tabs-data li.active a').data('program-id');
@@ -191,8 +190,7 @@ function($, tree_graph, stack_bar_chart) {
                 $('.case-trees .spinner').hide();
 
                 context.update_zero_case_filters_all();
-                $('.hide-zeros input').on('change', function()
-                {
+                $('.hide-zeros input').on('change', function() {
                     context.update_zero_case_filters($(this));
                 });
                 return $.Deferred().resolve();
@@ -285,11 +283,9 @@ function($, tree_graph, stack_bar_chart) {
                 url += 'limit=' + limit + '&';
             }
 
-
             if (filters) {
                 url += 'filters=' + encodeURIComponent(JSON.stringify(filters)) + '&';
             }
-
             url += 'mut_filter_combine='+$('.mut-filter-combine :selected').val();
             return url;
         },
@@ -335,12 +331,10 @@ function($, tree_graph, stack_bar_chart) {
                        filter.addClass("visible-filter");
                        if (visible_filter_count >= 6) {
                            filter.addClass("extra-values");
-                           if (!is_expanded)
-                           {
+                           if (!is_expanded) {
                                filter.hide();
                            }
-                       }
-                       else {
+                       } else {
                            filter.show();
                        }
                        visible_filter_count++;

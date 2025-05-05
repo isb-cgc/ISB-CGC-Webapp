@@ -199,13 +199,13 @@ require([
         UPDATE_QUEUE.push(function(){
             update_displays(withoutCheckChanges,for_panel_load, alternate_prog_id);
         });
-    };
+    }
 
     function dequeueUpdate(withoutCheckChanges,for_panel_load, alternate_prog_id){
         if(UPDATE_QUEUE.length > 0) {
             UPDATE_QUEUE.shift()();
         }
-    };
+    }
 
     var update_displays = function(withoutCheckChanges,for_panel_load, alternate_prog_id) {
         // If a user has clicked more filters while an update was going out, queue up a future update and return
@@ -518,8 +518,7 @@ require([
                 if (cohort_id) {
                     $('.selected-filters').show();
                     $('.all-selected-filters').hide();
-                }
-                else {
+                } else {
                     $('.selected-filters').hide();
                     $('.all-selected-filters').show();
                 }
