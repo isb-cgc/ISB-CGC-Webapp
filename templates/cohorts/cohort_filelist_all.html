@@ -52,39 +52,21 @@
                                 <div id="collapse-all-{{ attr.name }}" class="list-group-item__body collapse file-feature-select-block" role="tabpanel"
                                      data-feature-type="donor" aria-labelledby="heading-all-{{ attr.name }}"
                                      data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                    <input class="filter-search" type="text" placeholder="Search...">
                                     <ul class="search-checkbox-list" id="all-{{ attr.name }}">
                                         {% with attr.values|how_many_more:6 as num_more %}
                                             {% for v in attr.values|check_for_order:attr.name %}
-                                                {% if forloop.counter0 < 6 %}
-                                                    <li class="checkbox">
-                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                            <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
-                                                                   id="all-{{ attr.name }}-{{ v.value }}" data-feature-name="{{ attr.name }}"
-                                                                   data-count="{{ v.count }}" data-feature-id="{{ attr.id }}"
-                                                                   data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                        </label>
-                                                    </li>
-                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                    <li class="extra-values checkbox" style="display:none;">
-                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                            <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name}}-{{ v.value }}"
-                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                        </label>
-                                                    </li>
-                                                {% else %}
-                                                    <li class="extra-values checkbox" style="display:none;">
-                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                            <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name }}-{{ v.value }}"
-                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                        </label>
-                                                    </li>
-                                                {% endif %}
+                                                <li class="checkbox{% if forloop.counter0 >= 6 and num_more > 0 %} extra-values{% endif %}">
+                                                    <label{% if v.tooltip %} title="{{ v.tooltip }}"{% endif %}>
+                                                        <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
+                                                               id="all-{{ attr.name }}-{{ v.value }}" data-feature-name="{{ attr.name }}"
+                                                               data-count="{{ v.count }}" data-feature-id="{{ attr.id }}"
+                                                               data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
+                                                               data-value-display="{% if v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}">
+                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                    </label>
+                                                </li>
                                             {% endfor %}
                                             {% if num_more > 0 %}
                                                 <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>

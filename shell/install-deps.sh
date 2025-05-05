@@ -70,8 +70,8 @@ apt-get install mysql-client
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -y unzip libffi-dev libssl-dev git g++ curl dos2unix
-apt-get install -y python3-distutils python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
+apt-get install -y unzip libffi-dev libssl-dev git g++ curl dos2unix pkg-config
+apt-get install -y python3-distutils python3-mysqldb libmysqlclient libmysqlclient-dev libpython3-dev build-essential
 apt-get install -y python3-pip
 
 echo "Dependencies Installed"
