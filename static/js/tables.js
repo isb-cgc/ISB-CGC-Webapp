@@ -750,7 +750,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         });
         $('#cases_tab').find('tbody').attr('id','cases_table');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>');
-        $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Case ID:</strong><input class="caseID_inp" type="text-box" value="'+caseID+'" maxlength="256"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
+        $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Case ID:</strong><input class="caseID_inp" type="search" value="'+caseID+'" maxlength="256"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
         return updatePromise;
     }
 
@@ -1107,7 +1107,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
         $('#studies_tab').children('tbody').attr('id','studies_table');
         $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
-        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input class="studyID_inp" type="text-box" value="'+studyID+'" maxlength="256"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
+        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input class="studyID_inp" type="search" value="'+studyID+'" maxlength="256"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
         return updatePromise;
     }
 
@@ -1455,7 +1455,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         });
         $('#series_tab').children('tbody').attr('id','series_table');
         $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'series_tab_wrapper\')">Go</button></div>');
-        $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Series Instance UID:</strong><input class="seriesID_inp" type="text-box" value="'+seriesID+'" maxlength="256"><button onclick="filterTable(\'series_tab_wrapper\',\'seriesID\')">Go</button></div>');
+        $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Series Instance UID:</strong><input class="seriesID_inp" type="search" value="'+seriesID+'" maxlength="256"><button onclick="filterTable(\'series_tab_wrapper\',\'seriesID\')">Go</button></div>');
         return updatePromise;
     }
 
@@ -1504,6 +1504,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         update_search_thread = setTimeout(function(){
             SEARCH_PENDING = true;
             let varStr = input.val();
+            // Don't search again if no change was made (this squelches any non-changing keypress eg. home, end
             if(Last_searches[type] !== varStr) {
                 Last_searches[type] = varStr;
                 update_methods[type](false,  varStr, true)

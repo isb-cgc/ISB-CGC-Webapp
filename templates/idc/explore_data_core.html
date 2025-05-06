@@ -1,7 +1,5 @@
 {% load custom_tags %}
 {% load static %}
-
-
 <div class="container-fluid">
     <div class="row">
         <div class="tab-content data-tab-content">
@@ -57,13 +55,11 @@
                                                         <input type="radio" class="sort_val" value="alpha"
                                                                           name="Program" onclick="updateColl()">Alpha
                                                     </span>
-
                                                 </div>
                                                 <div style="display:block">
                                                 <input id="hide-zeros-collex" class="hide-zeros "  type="checkbox"
                                                        value="hide-zeros" onchange="updateColl()"> Hide collections with 0 cases
                                                 </div>
-
                                                 {% with programs.items|length|add:"-5" as more %}
                                                     <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }}
                                                         more</a><span class="checks"><a class="check-all">Check All</a> / <a
@@ -126,7 +122,6 @@
                                                                             {% for proj, projD in progV.projects.items|dictsort:0 %}
                                                                                 <li class="checkbox {% if forloop.counter >= 6 %} extra-values is-hidden{% endif %} {% if projD.val == 0 %} zeroed {% endif %}">
                                                                                     <label class="lbl" data-click-for-info="false">
-
                                                                                         <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                                                data-filter-display-attr="Collection"
                                                                                                data-filter-display-val="{{ projD.display }}"
@@ -136,17 +131,11 @@
                                                                                                   <span id="{{ proj }}"class="collection_name value">{{ projD.display }} </span>
                                                                                                   <span><i class="collection_info fa-solid fa-info-circle"></i></span>
                                                                                                    <span class="float-right case_count count plotit">{{ projD.val }}</span>
-
                                                                                     </label>
-
-
-
-
                                                                                 </li>
                                                                             {% endfor %}
                                                                         </ul>
                                                                     </div>
-
                                                             </li>
                                                         {% endif %}
                                                     {% endfor %}
@@ -168,33 +157,26 @@
                                                             {% if attr.units %}({{ attr.units }}){% endif %}</span>
                                                             <span class="is-hidden noCase"> (0 cases)</span>
                                                         </a>
-
                                                     <span class="controls">
                                                    <i class="fa-solid fa-cog" title="Settings"></i>
                                                    <i class="fa-solid fa-search" title="Filter values"></i>
                                                   </span>
-
                                                     </div>
-
                                                     <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
                                                          class="collapse in list-group-item__body">
-
                                                     <input id="analysis_search"
                                                        class="text-filter is-hidden value-search" type="text"
                                                        placeholder="Search..." onkeyup="updateFilters('analysis_results_id',{},false,true)">
-
                                                      <div class="sorter cntr">
                                                          <span>Sort by: <input type="radio" class="sort_val" value="num" name="Access" checked onclick="resort('analysis_results_id')">Count
                                                              <input type="radio" class="sort_val" value="alpha"
                                                                           name="Access"  onclick="resort('analysis_results_id')">Alpha
                                                          </span>
                                                      </div>
-
                                                     <div style="display:block">
                                                     <input id="hide-zeros-analysis" class="hide-zeros" type="checkbox"
                                                        value="hide-zeros" onchange="updateFilters('analysis_results_id',{},false,false)"> Hide analysis results with 0 cases
                                                     </div>
-
                                                 {% with attr.values|length|add:"-5" as more %}
                                                     <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }}
                                                         more</a><span class="checks"><a class="check-all">Check All</a> / <a
@@ -223,7 +205,6 @@
                                                                 {% endwith %}
                                                             {% endfor %}
                                                         </ul>
-
                                                     </div>
                                                 </li>
                                             </ul>
@@ -232,7 +213,6 @@
                             </div>
                         </div>
                     </div>
-
                     {% if DEV_TIER %}
                         <div class="tabpanel data-tab-content-panel" style="display:none">
                             <div class="panel panel-default">
@@ -254,7 +234,6 @@
                                 <br><span><input id="hide-zeros-attr" class="hide-zeros" type="checkbox" value="hide-zeros"
                                                  onchange="hideAtt(this)"> Hide attribute values with 0 cases</span>
                             </div>
-
                             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                                 <li id="search_orig" role="presentation" class="filter-tab active"><a
                                         href="#search_orig_set" role="tab" data-toggle="tab" title="orig"
@@ -267,9 +246,7 @@
                                     <li id="search_derived" role="presentation" class="filter-tab"><a
                                             href="#search_derived_set" role="tab" data-toggle="tab" title="derived"
                                             aria-expanded="false">Derived</a></li>
-
                                 {% endif %}
-
                                 {% if set_attributes.related_set is None %}
                                     <li id="search_related" role="presentation" class="filter-tab disabled"><a
                                             href="#search_related_set" role="tab" data-toggle="tab" title="related"
@@ -278,7 +255,6 @@
                                     <li id="search_related" role="presentation" class="filter-tab"><a
                                             href="#search_related_set" role="tab" data-toggle="tab" title="related"
                                             aria-expanded="false">Related</a></li>
-
                                 {% endif %}
                             </ul>
                             <div class="tab-content">
@@ -303,16 +279,13 @@
                                                      <i class="fa-solid fa-search" title="Filter displayed values"></i>
                                                  </span>
                                                     </div>
-
                                                     <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
                                                          class="list-group-item__body collapse
                                                             {% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation,CancerType" %} in
                                                             {% endif %}
                                                             "
-
                                                          aria-expanded="{% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation,CancerType" %}true
                                                          {% else %}false{% endif %}"
-
                                                         {% if attr.min_max %}
                                                          data-min="{{ attr.min_max.min|floor }}"
                                                          data-max="{{ attr.min_max.max|ceiling }}"
@@ -320,7 +293,6 @@
                                                          data-curmax="{{ attr.min_max.max }}"
                                                          data-curminrng="{{ attr.min_max.min|floor }}"
                                                          data-curmaxrng="{{ attr.min_max.max|ceiling }}"
-
                                                             {% endif %}
                                                         >
                                                         <input class="text-filter value-search is-hidden" type="text"
@@ -338,9 +310,7 @@
                                                                 <label for="{{ attr.name }}_join_and" class="join">ALL</label>
                                                             selected modalities
                                                         {% endif %}
-
                                                         <div class="sorter cntr">
-
                                                             Sort by:
                                                             <input type="radio" class="sort_val" name="{{ attr.name }}"
                                                                    value="num" checked onclick="resort('{{ attr.name }}')">Count
@@ -348,7 +318,6 @@
                                                             <input type="radio" class="sort_val"
                                                                             name="{{ attr.name }}" value="alpha"
                                                                             onclick="resort('{{ attr.name }}')">Alpha
-
                                                         </div>
                                                         {% if attr.values|length > 5 %}
                                                             {% with attr.values|length|add:"-5" as more %}
@@ -363,7 +332,6 @@
                                                                         class="check-all">Check All</a> / <a
                                                                         class="uncheck-all">Uncheck All</a></span></p>
                                                             {% endwith %}
-
                                                         {% else %}
                                                             <p class="check-uncheck"><span class="checks2"><a
                                                                     class="check-all">Check All</a> / <a
@@ -427,14 +395,11 @@
                                                                                     ){% endif %}</span> <span
                                                                                 class="is-hidden noCase"> (0 cases)</span>
                                                                         </a>
-
                                                                         <span class="controls">
                                                                           <i class="fa-solid fa-cog" title="Sort results"></i>
                                                                           <i class="fa-solid fa-search" title="Filter displayed values"></i>
                                                                         </span>
-
                                                                     </div>
-
                                                                     <div id="{{ attr.name }}"
                                                                          data-filter-attr-id="{{ attr.id }}"
                                                                          data-filter-display-attr="{{ attr.display_name }}"
@@ -513,7 +478,6 @@
                                         {% endfor %}
                                     </ul>
                                 </div>
-
                                 <div id="search_related_set" role="tabpanel" class="tab-pane search-set">
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                         <li class="list-group-item">
@@ -699,7 +663,6 @@
                             </button>
                             <pre class="filter-url code"></pre>
                         </div>
-
                     </div>
                 </div>
                 <div>
@@ -719,15 +682,12 @@
                                 onclick="viewcart()"
                             > View <i class="fa-solid fa-cart-shopping"></i>
                             </button>
-
                             <!-- <button class="btn btn-small btn-special clear-cart" role="button" disabled
                                     title="Empty your cart."> <i class="fa-solid fa-rotate-left"></i>
                             </button> -->
-
                         </div>
                     </div>
                 </div>
-
                  <div id="res" class=" filter-panel" role="tabpanel">
                           <div class=" filter-panel" role="tabpanel">
                             <div class="tab-content">
@@ -785,8 +745,6 @@
                                         {% endfor %}
                                       {% endwith %}
                                     </div>
-
-
                                     <div class="more-graphs" >
                                             <button class="btn btn-link" role="button"
                                                     onclick="toggleGraphOverFlow('original-graphs',true)">Show More
@@ -800,11 +758,8 @@
                                     <div class="graph-explain">
                                         <img src="{% static 'img/results_glyp.png' %}" width="20%" height="20%">
                                         <a class="explainer">Why</a> do the pie charts sometimes show attribute values that were not selected?
-
                                     </div>
-
                                 </div>
-
                                 <div id="results_derived_set" role="tabpanel" class="tab-pane panel">
                                     <div class="bar-charts-div-derived derived-graphs">
                                         {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
@@ -826,17 +781,14 @@
                                                                 onclick="hideGraphs(this)">Hide
                                                         </button>
                                                     </div>
-
                                                     <div class="graph-set" style="display:none">
                                                 {% else %}
                                                     <div class="graph-set">
                                                 {% endif %}
-
                                             {% for attr in attr_setV.attributes|order_quant:attr_setK %}
                                                 <div id="{{ attr.name }}_chart" class="bar-chart">
                                                     <svg width="240" height="200"></svg>
                                                 </div>
-
                                             {% endfor %}
                                             </div>
                                             </div>
@@ -850,9 +802,7 @@
                                     </div>
                                     <div id="results_related_set" role="tabpanel" class="tab-pane panel">
                                         <div class="related-graphs graph-set">
-
                                             {% for attr in set_attributes.related_set.All.attributes %}
-
                                                 {% if forloop.counter <= 3 %}
                                                     <div id="{{ attr.name }}_chart" class="bar-chart ">
                                                         <svg width="240" height="200"></svg>
@@ -880,16 +830,9 @@
                             </div>
                             </div>
                                    <div class="tabpanel data-tab-content-panel">
-
                              </div>
                              </div>
-
-
-
                             </div>
-
-
-
                         </div></div>
                 <div class="vert">
                         <div class="tabpanel data-tab-content-panel table-panel">
@@ -917,7 +860,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div  class="tabpanel data-tab-content-panel table-panel">
                             <div id="cases_panel_container" class="panel panel-default">
                                 <div class="panel-heading clearfix"><h4 class="panel-title">Selected Cases</h4></div>
@@ -929,7 +871,6 @@
                                             <th class="ckbx text_data viewbx">
                                                 <i class="fa-solid fa-plus-circle fa-lg addMult" style="font-family :'Font Awesome 6 Free' !important"></i>
                                                 <i class="fa-solid fa-circle-minus fa-lg addMult" style="font-family :'Font Awesome 6 Free' !important"></i>
-
                                             </th>
                                             <th class="ckbx cart-info"><i class="fa-solid fa-info-circle cart-info-icon"></i></th>
                                             <th class="ckbx cartnumholder"># of Series in Cart</th>
@@ -973,7 +914,6 @@
                             <div id="series_panel_container" class="panel panel-default">
                                 <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
                                 <div class="panel-body">
-
                                     <table id="series_tab" class="table table-striped series-table">
                                         <thead id="series_table_head">
                                         <tr>
@@ -986,7 +926,6 @@
                                             <th class="series-description">Series Description</th>
                                             <th class="open-viewer text_data">View</th>
                                             <th class="download"></th>
-
                                         </tr>
                                         </thead>
                                     </table>
