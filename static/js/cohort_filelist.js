@@ -435,6 +435,10 @@ require([
         if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length >0){
             url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
         }
+        if ((typeof(case_filters)=="object") && (Object.keys(case_filters).length>0)){
+            url += '&case_filters=' + encodeURIComponent(case_filters);
+        }
+
 
         $(tab_selector).find('.prev-page').addClass('disabled');
         $(tab_selector).find('.next-page').addClass('disabled');
@@ -883,6 +887,9 @@ require([
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
             }
             //cases_filter here
+            if ((typeof(case_filters)=="object") && (Object.keys(case_filters).length>0)){
+                url += '&case_filters=' + encodeURIComponent(JSON.stringify(case_filters));
+            }
             UPDATE_PENDING = true;
             $('#'+active_tab+'-files').find('.filelist-panel .spinner i').removeClass('d-none');
             $.ajax({

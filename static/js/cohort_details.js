@@ -666,6 +666,7 @@ require([
         let save_changes_btn = $('button[data-bs-target="#apply-filters-modal"]');
         let save_new_cohort_btn = $('button[data-bs-target="#create-cohort-modal"]');
         let download_ids_nologin_btn = $('.download-ids-nologin-btn');
+         let view_files_nologin_btn = $('.view-files-nologin-btn')
         let log_in_to_save_btn = $('#log-in-to-save-btn');
         let totalCases = 0;
 
@@ -676,9 +677,11 @@ require([
         });
 
         if (totalCases > 0){
+            view_files_nologin_btn.removeAttr('disabled');
             download_ids_nologin_btn.removeAttr('disabled');
             download_ids_nologin_btn.attr("title","Download the cases matching these filters.");
         } else {
+            view_files_nologin_btn.attr('disabled','disabled');
             download_ids_nologin_btn.attr('disabled','disabled');
             download_ids_nologin_btn.attr("title","Please select at least one filter.");
         }
@@ -1224,7 +1227,7 @@ require([
             return;
         }
 
-        if(cohort && load_program_id === null) {
+        if(cohort && (load_program_id === null) && !(typeof(cohort_programs)=="undefined")) {
             load_program_id = cohort_programs[0].id;
         }
 
@@ -1451,7 +1454,10 @@ require([
     });
 
     set_mode();
-    filter_panel_load(cohort_id);
+    if (!window.location.pathname.includes("filelist")){
+       filter_panel_load(cohort_id);
+    }
+
 
     let token = new Date().getTime();
     $('.export-token, .download-token').val(token);

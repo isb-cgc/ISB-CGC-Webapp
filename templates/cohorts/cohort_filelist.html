@@ -37,29 +37,27 @@
                 <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
             </ol>
         {% endif %}
-        <h3 class="page-header">Cancer Data File Browser {{ program_ids }}
+        <h3 class="page-header">Cancer Data File Browser
             {% if cohort %}
                  <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
             {% endif %}
         </h3>
 
-        {% if not cohort.id %}
+         {% if current_case_filters_disp.items|length > 0 %}
                 <div class="col-sm-12 col-md-12 col-lg-12">
                     <div class="cohort-selected-filters isb-panel isb-panel-default">
                         <div class="isb-panel-heading">
-                            <h4 class="panel-title">Case Filters</h4>
+                            <h4 class="panel-title">Filters</h4>
                         </div>
                         <div class="isb-panel-body curr-filter-panel gradient-overlay">
-                            {% for prog, filters in case_filters_disp.items %}
-                                <div class="col-sm-12 prog-filter-set">
+                            {% for prog, filters in current_case_filters_disp.items %}
+                                <div class="col-sm-{{ current_case_filters_disp.keys|get_prog_col_size }} prog-filter-set">
                                     <h5>{{ prog }}</h5>
-
                                     {% for filter in filters %}
-
-                                            <span class="filter-label label label-default space-right-5">{{ filter.attr_nm }}: {{ filter.values|first }}</span>
-
+                                        {% for val in filter.values %}
+                                            <span class="filter-label label label-default space-right-5">{{ filter.display_name }}: {{ val.display_val }}</span>
+                                            {% endfor %}
                                     {% endfor %}
-
                                 </div>
                             {% empty %}
                                 <div class="col-sm-12 prog-filter-set">
@@ -101,6 +99,8 @@
                     </div>
                 </div>
             {% endif %}
+
+
 
         <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
             <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
@@ -271,4 +271,5 @@
 {% block js_file %}
 	{{ block.super }}
 	<script src="{% static 'js/cohort_filelist.js' %}"></script>
+    <script src="{% static 'js/cohort_details.js' %}"></script>
 {% endblock %}

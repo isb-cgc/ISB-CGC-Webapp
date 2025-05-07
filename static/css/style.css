@@ -2429,7 +2429,7 @@ section .min-max {
   #cohort-details .revision-filter-panel .revision-prog-filter-set, #cohort-filelist .revision-filter-panel .revision-prog-filter-set {
     height: 100%;
     padding: 0px 8px !important; }
-  #cohort-details .prog-filter-set {
+  #cohort-details .prog-filter-set, #cohort-filelist .prog-filter-set {
     position: relative;
     min-height: 1px;
     padding-left: 15px;
