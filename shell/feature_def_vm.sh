@@ -19,7 +19,7 @@ echo "Installing dependencies for Feature Def and/or CloudSQL table export"
 export HOME="$(pwd)"
 export APPROOT="$(pwd)/ISB-CGC-WebApp"
 
-apt-get -y --force-yes install software-properties-common
+apt-get -y install software-properties-common
 apt-get update -qq
 
 # Install git
@@ -35,7 +35,7 @@ git clone -b master https://github.com/isb-cgc/ISB-CGC-WebApp.git
 find . -type f -name '*.pyc' -delete
 
 echo "Install primary dependencies..."
-apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python-dev ruby g++ gcc
+apt-get install -qq -y unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python-dev g++ gcc
 
 # Install PIP + libraries
 echo "Installing pip..."

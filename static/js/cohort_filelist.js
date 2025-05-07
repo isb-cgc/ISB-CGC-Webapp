@@ -945,16 +945,18 @@ require([
     var update_zero_case_filters = function(hide_zero_case_checkbox) {
         if (!hide_zero_case_checkbox)
             return;
-
-        var should_hide = hide_zero_case_checkbox.prop('checked');
-        var parent_filter_panel = hide_zero_case_checkbox.parent().parent();
+        let hideZeros = hide_zero_case_checkbox.is(':checked');
+        let parent_filter_panel = hide_zero_case_checkbox.parent().parent();
         parent_filter_panel.find('.search-checkbox-list').each(function() {
-            var filter_list = $(this);
-            var num_filter_to_show = 0;
+            let filter_list = $(this);
+            let num_filter_to_show = 0;
             filter_list.find('li').each(function () {
-                var filter = $(this);
-                var is_zero_case = (filter.find('span').text() == "0");
-                if (!is_zero_case || !should_hide) {
+                let filter = $(this);
+                let searchMismatch = filter.hasClass('search-mismatch');
+                let isChecked = filter.find('input').is(':checked');
+                let is_zero_case = (filter.find('input').attr('data-count') === "0");
+                let toHide = (!isChecked && ((is_zero_case && hideZeros) || searchMismatch));
+                if (!toHide) {
                     num_filter_to_show++;
                 }
             });
@@ -971,20 +973,21 @@ require([
                 filter_list.find('.more-checks').show();
             }
 
-            var visible_filter_count = 0;
+            let visible_filter_count = 0;
             filter_list.find('li').each(function () {
-                var filter = $(this);
-                var is_zero_case = (filter.find('span').text() == "0");
+                let filter = $(this);
+                let isChecked = filter.find('.filter-value').is(':checked');
+                let is_zero_case = (filter.find('input').attr('data-count') === "0");
                 filter.removeClass("extra-values");
                 filter.removeClass("visible-filter");
-                if (is_zero_case && should_hide) {
+                let searchMismatch = filter.hasClass('search-mismatch');
+                if (!isChecked && ((is_zero_case && hideZeros) || searchMismatch)) {
                     filter.hide();
                 } else {
                     filter.addClass("visible-filter");
-                    if (visible_filter_count >= 6) {
+                    if (visible_filter_count >= 6 && !isChecked) {
                         filter.addClass("extra-values");
-                        if (!is_expanded)
-                        {
+                        if (!is_expanded) {
                             filter.hide();
                         }
                     } else {
@@ -1089,30 +1092,57 @@ require([
 
     $('.data-tab-content').on('click', '.pdf-download', function(){
         $.ajax({
-                type        :'GET',
-                url         : $(this).attr('url'),
-                success : function (data) {
-                    let signed_uri = data['signed_uri'];
-                    let a = document.createElement('a');
-                    a.href = signed_uri;
-                    a.download = $(this).attr('data-filename');
-                    a.target="_blank"
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(a.href);
-                },
-                error: function (xhr) {
-                     let responseJSON = $.parseJSON(xhr.responseText);
-                    // If we received a redirect, honor that
-                    if(responseJSON.redirect) {
-                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
-                        window.location = responseJSON.redirect;
+            type        :'GET',
+            url         : $(this).attr('url'),
+            success : function (data) {
+                let signed_uri = data['signed_uri'];
+                let a = document.createElement('a');
+                a.href = signed_uri;
+                a.download = $(this).attr('data-filename');
+                a.target="_blank"
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(a.href);
+            },
+            error: function (xhr) {
+                 let responseJSON = $.parseJSON(xhr.responseText);
+                // If we received a redirect, honor that
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
+                } else {
+                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                }
+            },
+        })
+    });
+
+    let last_searches = {};
+
+    $('.filelist-container').on('keyup', '.filter-search', function(){
+        let searchVal = $(this).val().trim();
+        let filterSet = $(this).parents('.list-group-item');
+        let attr = filterSet.find('.search-checkbox-list').attr("id");
+        let searchFilters = Boolean(searchVal !== '');
+        let filters = filterSet.find('.search-checkbox-list li.checkbox');
+
+        if(!searchFilters) {
+            filters.removeClass('search-mismatch');
+        } else {
+            if((last_searches[attr] !== searchVal)) {
+                filters.each(function(){
+                    let filterValue = $(this).find('input.filter-value').attr("data-value-display");
+                    if(filterValue.toLowerCase().includes(searchVal.toLowerCase())) {
+                        $(this).removeClass('search-mismatch');
                     } else {
-                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                        $(this).addClass('search-mismatch');
                     }
-                },
-            })
+                });
+            }
+        }
+        last_searches[attr] = searchVal;
+        update_zero_case_filters(filterSet.parents('.filter-panel').find('.hide-zeros'));
     });
 
 

@@ -54,37 +54,17 @@
                                     <ul class="search-checkbox-list" id="pdf-{{ attr.name }}">
                                         {% with attr.values|how_many_more:6 as num_more %}
                                             {% for v in attr.values|check_for_order:attr.name %}
-                                                {% if forloop.counter0 < 6 %}
-                                                    <li class="checkbox">
-                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                            <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-{{ attr.name }}-{{ v.value }}"
-                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}" data-feature-id="{{ attr.id }}"
-                                                                    data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
-                                                            >
-                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                        </label>
-                                                    </li>
-                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                    <li class="extra-values checkbox" style="display:none;">
-                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                            <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-{{ attr.name}}-{{ v.value }}"
-                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}" data-feature-id="{{ attr.id }}"
-                                                                   data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
-                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                        </label>
-                                                    </li>
-                                                {% else %}
-                                                    <li class="extra-values checkbox" style="display:none;">
-                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                            <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-{{ attr.name }}-{{ v.value }}"
-                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
-                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                        </label>
-                                                    </li>
-                                                {% endif %}
+                                                <li class="checkbox{% if forloop.counter0 >= 6 and num_more > 0 %} extra-values{% endif %}">
+                                                    <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}" data-feature-id="{{ attr.id }}"
+                                                                data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
+                                                               data-value-display="{% if v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}"
+                                                        >
+                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                    </label>
+                                                </li>
                                             {% endfor %}
                                             {% if num_more > 0 %}
                                                 <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>

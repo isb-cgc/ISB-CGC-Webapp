@@ -1,6 +1,6 @@
 {# Public Data Set Filter Template #}
 {% with prog_nodes=node_case_attr|get_nodes_string %}
-<div id="{{ program.id }}-data" node-id="{{ node_id }}" class="tab-pane data-tab " role="tabpanel"
+<div id="{{ program.id }}-data" node-id="{{ node_id }}" class="tab-pane data-tab" role="tabpanel"
     data-prog-nodes="{{ prog_nodes }}" >
 {% endwith %}
     <div class="row row-in-row" >
@@ -23,15 +23,11 @@
                     <li role="presentation" class="filter-tab {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters" href="#p-{{ program.id }}-molecular-filters" role="tab" aria-selected="false" data-bs-toggle="tab" title="Molecular Filters">Molec.</a></li>
                 </ul>
                 <div class="tab-content">
-
                      <!-- case filters tab -->
                     <div role="tabpanel" class="tab-pane active" id="case-filters-{{ program.id }}">
-
                         <ul class="list-group" id="case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                             {% for node, case_attr in node_case_attr|sort_nodes %}
-
                             <li class="list-group-item">
-
                                 <div id="{{ node }}-{{ program.id }}-case-heading" class="list-group-item__heading in node-filter-heading">
                                     <a role="button" class="text-decoration-none" data-bs-toggle="collapse" href="#{{ node }}-{{ program.id }}-case" aria-expanded="false"
                                        aria-controls="{{ node }}-{{ program.id }}-case">
@@ -42,7 +38,6 @@
                                 <div id="{{ node }}-{{ program.id }}-case" class="list-group-item__body collapse" aria-expanded="false">
                                     <ul class="list-group values" id="{{ node }}-case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                                         {% for attr in case_attr|get_sorted_items %}
-
 
                                         {% if not attr.name|attr_is_hidden and attr_counts|list_contains_name:attr.name %}
                                                 <li class="list-group-item">
@@ -58,15 +53,18 @@
                                              aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
                                              data-feature-id="{{ attr.id }}"
                                             data-node-name="{{ node }}" data-prog-id="{{ program.id }}">
+                                            <input class="filter-search" type="text" placeholder="Search...">
                                             <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">
                                                 {% with attr_counts|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
                                                     {% for v in attr_counts|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}
                                                             <li class="checkbox{% if forloop.counter0 >= 6 %} extra-values{% endif %}">
                                                                 <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                                    <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-prog-id="{{ program.id }}"
+                                                                    <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-prog-id="{{ program.id }}"
                                                                            id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}" data-node-name="{{ node  }}"
+                                                                           data-count="{{ v.count }}"
                                                                            data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                            data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
+                                                                           data-value-display="{% if v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}"
                                                                             {% if cohort.id > 0 %} disabled{% endif %}
                                                                     >
                                                                     {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
@@ -112,12 +110,14 @@
                                     <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
                                          aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
                                          data-feature-type="datatype" data-feature-id="{{ attr.id }}">
+                                        <input class="filter-search" type="text" placeholder="Search...">
                                         <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">
                                             {% with attr_counts|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
                                             {% for v in attr_counts|get_named_item:attr.name|get_item:'values' %}
                                                 <li class="checkbox{% if forloop.counter0 >= 6 %} extra-values{% endif %}">
                                                     <label>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                        <input class="filter-value" type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                               data-count="{{ v.count }}"
                                                                data-value-displ-name="{% if v.value == 'None' %}None{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}"
                                                                data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
                                                                 {% if cohort.id > 0 %} disabled{% endif %}

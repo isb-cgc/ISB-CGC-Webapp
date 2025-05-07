@@ -40,28 +40,25 @@
         </ol>
      </div>
      <div class="col-lg-6 col-md-6">
+<<<<<<< HEAD
 
 
         <h1 class="page-header float-start">Case Browser</h1>
+=======
+        <h1 class="page-header float-start">Create Cohort</h1>
+>>>>>>> 5af434fcd420c63ecda7d76bfc3f586750534650
      </div>
      <div class="col-lg-6 col-md-6">
         {% if user.is_authenticated %}
             <button class="ms-2 btn btn-secondary float-end " data-bs-toggle="modal" data-bs-target="#create-cohort-modal"
                     title="Please select at least one filter." > Save As New Cohort
             </button>
-
-
-
         {% else %}
 
             <button class="ms-2 btn btn-secondary float-end" id="log-in-to-save-btn"
                     title="Please select at least one filter."
-{#                        onclick="location.href='{% url 'account_login' %}'"#}
                     disabled>Log In to Save New Cohort
             </button>
-
-
-
         {% endif %}
          <form id ="nologin-download" action="/cohorts/download_ids_nologin/" method="POST">
              {% csrf_token %}
@@ -72,12 +69,15 @@
                  <button class="ms-2 btn btn-secondary float-end download-ids-nologin-btn nologin"
                     title="Please select at least one filter." disabled> Download Case List
                </button>
+<<<<<<< HEAD
 
          <form id ="nologin-view-files" action="/cohorts/filelist/" method="POST">
              {% csrf_token %}
              <input type="hidden" name="program_ids" value="temp">
              <input type="hidden" name="case_filters" value="ntemp">
               <input type="hidden" name="downloadToken">
+=======
+>>>>>>> 5af434fcd420c63ecda7d76bfc3f586750534650
          </form>
                  <button class="ms-2 btn btn-secondary float-end view-files-nologin-btn nologin"
                     title="Please select at least one filter." disabled>View Files (these Cases)

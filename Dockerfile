@@ -18,7 +18,7 @@
 
 # Dockerfile extending the Python Community image from Dockerhub with application files for a
 # single application.
-FROM python:3.9-bullseye
+FROM python:3.11-bookworm
 
 SHELL ["/bin/bash", "-c"]
 
@@ -44,10 +44,10 @@ RUN apt-get install -y mysql-server
 
 RUN apt-get -y install build-essential
 RUN apt-get -y install --reinstall python3-m2crypto python3-cryptography
-RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
+RUN apt-get -y install libxml2-dev libxmlsec1-dev swig  pkg-config
 RUN pip install pexpect
 
-RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git ruby g++ curl
+RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git g++ curl
 
 ADD . /app
 

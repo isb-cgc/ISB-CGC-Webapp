@@ -199,13 +199,13 @@ require([
         UPDATE_QUEUE.push(function(){
             update_displays(withoutCheckChanges,for_panel_load, alternate_prog_id);
         });
-    };
+    }
 
     function dequeueUpdate(withoutCheckChanges,for_panel_load, alternate_prog_id){
         if(UPDATE_QUEUE.length > 0) {
             UPDATE_QUEUE.shift()();
         }
-    };
+    }
 
     var update_displays = function(withoutCheckChanges,for_panel_load, alternate_prog_id) {
         // If a user has clicked more filters while an update was going out, queue up a future update and return
@@ -518,8 +518,7 @@ require([
                 if (cohort_id) {
                     $('.selected-filters').show();
                     $('.all-selected-filters').hide();
-                }
-                else {
+                } else {
                     $('.selected-filters').hide();
                     $('.all-selected-filters').show();
                 }
@@ -1480,6 +1479,31 @@ require([
         var cohort_id= $(this).attr('data-cohort-id');
     })
 
+    let last_searches = {};
+    $('.program-tabs').on('keyup', '.filter-search', function(){
+        let searchVal = $(this).val().trim();
+        let filterSet = $(this).parents('.list-group-item');
+        let attr = filterSet.find('.search-checkbox-list').attr("id");
+        let searchFilters = Boolean(searchVal !== '');
+        let filters = filterSet.find('.search-checkbox-list li.checkbox');
+
+        if(!searchFilters) {
+            filters.removeClass('search-mismatch');
+        } else {
+            if((last_searches[attr] !== searchVal)) {
+                filters.each(function(){
+                    let filterValue = $(this).find('input.filter-value').attr("data-value-display");
+                    if(filterValue.toLowerCase().includes(searchVal.toLowerCase())) {
+                        $(this).removeClass('search-mismatch');
+                    } else {
+                        $(this).addClass('search-mismatch');
+                    }
+                });
+            }
+        }
+        last_searches[attr] = searchVal;
+        search_helpers.update_zero_case_filters(filterSet.parents('.filter-panel').find('.hide-zeros'));
+    });
 
 });
 

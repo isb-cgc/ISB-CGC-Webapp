@@ -123,7 +123,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/ISB-CGC-Webapp
     docker:
-      - image: cimg/python:3.9.2
+      - image: cimg/python:3.11
       - image: cimg/mysql:8.0
         environment:
           MYSQL_ROOT_HOST: "%"
@@ -199,7 +199,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/ISB-CGC-Webapp
     docker:
-      - image: cimg/python:3.9.2
+      - image: cimg/python:3.11
     steps:
       - restore_cache:
           keys:
