@@ -650,7 +650,7 @@ CRON_USER = os.environ.get('CRON_USER', 'cron-user')
 CRON_AUTH_KEY = os.environ.get('CRON_AUTH_KEY', 'Token')
 
 # Explicitly check for known items
-BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+BLACKLIST_RE = r'(<script>|</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|</iframe>)'
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
