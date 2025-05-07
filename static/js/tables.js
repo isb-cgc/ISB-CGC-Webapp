@@ -749,8 +749,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             );
         });
         $('#cases_tab').find('tbody').attr('id','cases_table');
-        $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>');
-        $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Case ID:</strong><input class="caseID_inp" type="search" value="'+caseID+'" maxlength="256"></div>');
+        $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after(
+            '<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" '
+            + 'type="number"></div>'
+        );
+        $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after(
+            '<div class="dataTables_filter"><strong>Find by Case ID:</strong><input class="caseID_inp '
+            + 'table-search-box" data-search-type="case" type="text-box" value="'+caseID+'" maxlength="256"><button '
+            + 'class="clear"><i class="fa fa-solid fa-circle-xmark"></i></button></div>'
+        );
         return updatePromise;
     }
 
@@ -1107,7 +1114,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
         $('#studies_tab').children('tbody').attr('id','studies_table');
         $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
-        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input class="studyID_inp" type="search" value="'+studyID+'" maxlength="256"></div>');
+        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input data-search-type="study" class="studyID_inp table-search-box" type="text-box" value="'+studyID+'" maxlength="256"><button class="clear"><i class="fa fa-solid fa-circle-xmark"></i></button></div>');
         return updatePromise;
     }
 
@@ -1454,8 +1461,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             });
         });
         $('#series_tab').children('tbody').attr('id','series_table');
-        $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'series_tab_wrapper\')">Go</button></div>');
-        $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Series Instance UID:</strong><input class="seriesID_inp" type="search" value="'+seriesID+'" maxlength="256"></div>');
+        $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after(
+            '<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number">'
+            +'<button onclick="changePage(\'series_tab_wrapper\')">Go</button></div>'
+        );
+        $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after(
+            '<div class="dataTables_filter"><strong>Find by Series Instance UID:</strong><input '
+            +'class="seriesID_inp table-search-box" type="text-box" data-search-type="series" value="'
+            +seriesID+'" maxlength="256"><button class="clear"><i class="fa fa-solid fa-circle-xmark"></i></button></div>'
+        );
         return updatePromise;
     }
 
@@ -1504,7 +1518,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         update_search_thread = setTimeout(function(){
             SEARCH_PENDING = true;
             let varStr = input.val();
-            // Don't search again if no change was made (this squelches any non-changing keypress eg. home, end
+            // Don't search again if no change was made (this squelches any non-change)
             if(Last_searches[type] !== varStr) {
                 Last_searches[type] = varStr;
                 update_methods[type](false,  varStr, true)
@@ -1523,18 +1537,16 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         }, SUBSEQUENT_DELAY);
     }
 
-    $('#cases_panel_container').on('change', '.caseID_inp', function(event){
-        filterTable('cases_panel', 'caseID', $(this));
+    $('#rh_panel').on('change keyup', '.table-search-box', function(event){
+        let type = $(this).attr("data-search-type");
+        filterTable(`${type}_panel`, `${type}ID`, $(this));
     });
 
-    $('#series_panel_container').on('change', '.seriesID_inp', function(event){
-        filterTable('series_panel', 'seriesID', $(this));
+    $('#rh_panel').on('click', '.dataTables_filter button.clear', function(){
+        let search_box = $(this).siblings('.table-search-box');
+        search_box.val('');
+        search_box.trigger("change");
     });
-
-    $('#studies_panel_container').on('change', '.studyID_inp', function(event){
-        filterTable('study_panel', 'studyID', $(this));
-    });
-
 
     window.resetCartInTables = function(projArr){
          for (var i =0; i< projArr.length;i++){
@@ -2261,8 +2273,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         }
 
     }
-
-
 
     const pretty_print_id = function (id) {
         var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);

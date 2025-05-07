@@ -424,6 +424,7 @@ nav {
 
 .dataTables_filter input {
   margin-left: 10px;
+  border: 1px solid black;
 }
 
 .dataTables_controls {
@@ -4472,14 +4473,25 @@ d-topics-list iframe {
 }
 
 .filter-display-panel .panel-body, .shopping-cart-panel .panel-body {
-  padding-top: 0px
+  padding-top: 0px;
 }
 
 .filter-display-panel .panel-heading, .shopping-cart-panel .panel-heading,
 #projects_panel_container .panel-heading {
-  padding-bottom: 0px
+  padding-bottom: 0px;
 }
 
 .filter-display-panel .panel-heading, .shopping-cart-panel .panel-heading {
-  padding-top: 0px
+  padding-top: 0px;
+}
+
+.dataTables_filter button.clear {
+  display: inline-block;
+  margin-left: -25px;
+  background-color: transparent;
+  border: 0;
+}
+
+.dataTables_filter button.clear:hover {
+  color: #a4470c;
 }
