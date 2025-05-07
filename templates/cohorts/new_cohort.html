@@ -40,13 +40,7 @@
         </ol>
      </div>
      <div class="col-lg-6 col-md-6">
-<<<<<<< HEAD
-
-
         <h1 class="page-header float-start">Case Browser</h1>
-=======
-        <h1 class="page-header float-start">Create Cohort</h1>
->>>>>>> 5af434fcd420c63ecda7d76bfc3f586750534650
      </div>
      <div class="col-lg-6 col-md-6">
         {% if user.is_authenticated %}
@@ -69,15 +63,12 @@
                  <button class="ms-2 btn btn-secondary float-end download-ids-nologin-btn nologin"
                     title="Please select at least one filter." disabled> Download Case List
                </button>
-<<<<<<< HEAD
 
-         <form id ="nologin-view-files" action="/cohorts/filelist/" method="POST">
+         <form id ="nologin-view-files" action="/cohorts/filelist/" method="POST" target="_blank">
              {% csrf_token %}
-             <input type="hidden" name="program_ids" value="temp">
-             <input type="hidden" name="case_filters" value="ntemp">
+             <input type="hidden" name="program_ids" value="">
+             <input type="hidden" name="case_filters" value="">
               <input type="hidden" name="downloadToken">
-=======
->>>>>>> 5af434fcd420c63ecda7d76bfc3f586750534650
          </form>
                  <button class="ms-2 btn btn-secondary float-end view-files-nologin-btn nologin"
                     title="Please select at least one filter." disabled>View Files (these Cases)
