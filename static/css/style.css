@@ -4495,3 +4495,7 @@ d-topics-list iframe {
 .dataTables_filter button.clear:hover {
   color: #a4470c;
 }
+
+.goto-page-number {
+  margin-left: 5px;
+}
