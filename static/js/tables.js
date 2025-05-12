@@ -751,7 +751,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $('#cases_tab').find('tbody').attr('id','cases_table');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after(
             '<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" '
-            + 'type="number"></div>'
+            + 'type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>'
         );
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after(
             '<div class="dataTables_filter"><strong>Find by Case ID:</strong><input class="caseID_inp '
