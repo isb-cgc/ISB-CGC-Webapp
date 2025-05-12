@@ -1113,8 +1113,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         })
 
         $('#studies_tab').children('tbody').attr('id','studies_table');
-        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
-        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input data-search-type="study" class="studyID_inp table-search-box" type="text-box" value="'+studyID+'" maxlength="256"><button class="clear"><i class="fa fa-solid fa-circle-xmark"></i></button></div>');
+        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after(
+            '<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number">'
+            +'<button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>'
+        );
+        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after(
+            '<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input data-search-type="study"'
+            + ' class="studyID_inp table-search-box" type="text-box" value="'+studyID+'" maxlength="256"><button '
+            + 'class="clear"><i class="fa fa-solid fa-circle-xmark"></i></button></div>'
+        );
         return updatePromise;
     }
 
