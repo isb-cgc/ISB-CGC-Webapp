@@ -763,7 +763,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     window.updateStudyTable = function(rowsAdded, studyID, table_search) {
         let updatePromise = $.Deferred();
-        let nonViewAbleModality= new Set([""]);
+        let nonViewAbleModality= new Set(["REG"]);
         var viewCases = [];
         for (projid in window.openCases) {
             viewCases = viewCases.concat(Object.keys(window.openCases[projid]));
@@ -1127,7 +1127,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     window.updateSeriesTable = function(rowsAdded, seriesID, table_search) {
         let updatePromise = $.Deferred();
-        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
+        var nonViewAbleModality= new Set(["PR","SEG","REG", "RTSTRUCT","RTPLAN","RWV", "SR", "ANN"])
         var slimViewAbleModality=new Set(["SM"])
         viewStudies = []
         for (caseid in window.openStudies){
