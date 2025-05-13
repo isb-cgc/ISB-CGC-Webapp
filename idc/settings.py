@@ -25,7 +25,7 @@ from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
-
+import google.cloud.logging
 
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 
@@ -337,11 +337,40 @@ MIDDLEWARE.append(
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+handler_set = ['console_dev', 'console_prod']
+handlers = {
+    'mail_admins': {
+        'level': 'ERROR',
+        'filters': ['require_debug_false'],
+        'class': 'django.utils.log.AdminEmailHandler'
+    },
+    'console_dev': {
+        'level': 'DEBUG',
+        'filters': ['require_debug_true'],
+        'class': 'logging.StreamHandler',
+        'formatter': 'verbose',
+    },
+    'console_prod': {
+        'level': 'DEBUG',
+        'filters': ['require_debug_false'],
+        'class': 'logging.StreamHandler',
+        'formatter': 'simple',
+    },
+}
+
+if IS_APP_ENGINE:
+    # We need to hook up Python logging to Google Cloud Logging for AppEngine (or nothing will be logged)
+    client = google.cloud.logging_v2.Client()
+    client.setup_logging()
+    handler_set.append('stackdriver')
+    handlers['stackdriver'] = {
+        'level': 'DEBUG',
+        'filters': ['require_debug_false'],
+        'class': 'google.cloud.logging_v2.handlers.CloudLoggingHandler',
+        'client': client,
+        'formatter': 'verbose'
+    }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -355,57 +384,33 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            'format': '[%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
+            'format': '[%(name)s] [%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
         },
         'simple': {
-            'format': '[%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
+            'format': '[%(name)s] [%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
         },
     },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'console_dev': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'console_prod': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_false'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
+    'handlers': handlers,
+    'root': {
+        'level': 'INFO',
+        'handlers': handler_set
     },
     'loggers': {
+        '': {
+            'level': 'INFO',
+            'handlers': handler_set,
+            'propagate': True
+        },
+        'django': {
+            'level': 'INFO',
+            'handlers': handler_set,
+            'propagate': False
+        },
         'django.request': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'main_logger': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
             'propagate': True,
-        },
-        'axes': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'allauth': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'google_helpers': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+        }
     },
 }
 
