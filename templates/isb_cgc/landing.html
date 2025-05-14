@@ -92,8 +92,9 @@
 
                 <div class="row cards-row">
                     <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="isb-panel">
-                            <div class="isb-panel-heading row">
+                        <div class="card mb-3">
+                            <div class="card-header bg-white border-0 row">
+                                <div class="row">
                                 <div class="col-9">
                                     <a target="_blank" rel="noreferrer" class="text-decoration-none"
                                        href="{{ BQ_SEARCH_URL }}">
@@ -106,13 +107,14 @@
                                         <img src="{% static 'img/bq-icon.png' %}" class="img-fluid"
                                              alt="bq table icon"></a>
                                 </div>
+                               </div>
                             </div>
-                            <div class="isb-panel-body">
+                            <div class="card-body bg-white">
                                 Browse BigQuery tables of metadata and molecular cancer data from the Genomic Data
                                 Commons and other sources. Jump directly to a table to perform discovery and computation
                                 via SQL.
                             </div>
-                            <div class="isb-panel-footer">
+                            <div class="card-footer">
                                 <div class="row">
                                     <div class="col-2"></div>
                                     <div class="col-4 text-center">
@@ -138,8 +140,11 @@
                     </div>
 
                     <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="isb-panel">
-                            <div class="isb-panel-heading row">
+                        <div class="card mb-3 border-2">
+
+                            <div class="card-header bg-white border-0">
+
+                                   <div class="row">
                                 <div class="col-9">
                                     <a target="_blank" rel="noreferrer" class="text-decoration-none"
                                        href="/cohorts/filelist/">
@@ -152,14 +157,20 @@
                                         <img src="{% static 'img/de-icon.png' %}" class="img-fluid"
                                              alt="data explorer icon">
                                     </a>
+                                  </div>
+
                                 </div>
                             </div>
-                            <div class="isb-panel-body">
+                            <div class="card-body">
+                                <div class="row">
+                                     <div class="col-9">
                                 Explore a comprehensive selection of cancer related data files in Google Cloud Storage
                                 Buckets, such as raw sequencing, cancer nucleotide variation, pathology or radiology
                                 images.
+                                     </div>
+                                </div>
                             </div>
-                            <div class="isb-panel-footer">
+                            <div class="card-footer bg-white border-0">
                                 <div class="row">
                                     <div class="col-2"></div>
                                     <div class="col-4 text-center">
