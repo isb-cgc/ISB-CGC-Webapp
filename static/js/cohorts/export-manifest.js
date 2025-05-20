@@ -265,6 +265,11 @@ require([
     });
 
     var download_manifest = function(export_type, clicked_button, e) {
+        if (clicked_button.is('[disabled=disabled]')) {
+            e.preventDefault();
+            return false;
+        }
+
         let manifest_type = (export_type === 'bq' ? 'bq-manifest' : 'file-manifest');
         $('#unallowed-chars-alert').hide();
         $('#name-too-long-alert-modal').hide();
@@ -273,13 +278,8 @@ require([
         if(export_type === 's5cmd' || export_type === 'idc_index') {
             name = name+"_"+$('input[name="loc_type_'+export_type+'"]:checked').val();
         }
-        let unallowed = (name.match(base.blacklist) || []);
-
-        if (clicked_button.is('[disabled=disabled]')) {
-            e.preventDefault();
-            return false;
-        }
-
+        let unallowed = (((name !== undefined && name !== null) && name.match(base.blacklist)) || []);
+        
         if (unallowed.length > 0) {
             $('.unallowed-chars').text(unallowed.join(", "));
             $('#unallowed-chars-alert').show();
