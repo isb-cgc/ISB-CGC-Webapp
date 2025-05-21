@@ -347,8 +347,7 @@ require([
                     if(data.jobId) {
                         let long_running_msg = "";
                         if(is_async && is_full_export) {
-                            long_running_msg = "NOTE: This type of export can take up to 10-15 minutes to complete. "
-                            + "Please leave this tab open until the download button appears.  ";
+                            long_running_msg = "NOTE: This type of export can produce a very large file. ";
                         }
                         sessionStorage.setItem("user-manifest", data.file_name);
                         base.showJsMessage("info",

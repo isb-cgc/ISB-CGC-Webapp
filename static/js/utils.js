@@ -133,7 +133,7 @@ define(['jquery'], function($) {
         return uuid;
     };
 
-    const MAX_ELAPSED = 900000;
+    const MAX_ELAPSED = 240000;
     function _checkManifestReady(file_name, check_start) {
         if(!check_start) {
             check_start = Date.now();
