@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021, Institute for Systems Biology
+ * Copyright 2020-2025, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -275,6 +275,8 @@ require([
             return false;
         }
 
+        let is_async = ($('input[name="async_download"]').val().toLowerCase() === "true");
+        let is_full_export = (export_type === 'csv' || export_type === 'tsv' || export_type === 'json');
         let export_manifest_form = $('#export-manifest-form');
         let export_manifest = $('#export-manifest');
 
@@ -328,7 +330,7 @@ require([
             + (export_type === 's5cmd' ? 's5cmd' : 'file')
                 + '-checkbox').is(':checked')) ? 'true' : 'false');
         }
-        if(manifest_type === 'file-manifest' && $('input[name="async_download"]').val().toLowerCase() !== "true") {
+        if(manifest_type === 'file-manifest' && !is_async) {
             export_manifest_form.trigger('submit');
         } else {
             export_manifest.attr('disabled','disabled');
@@ -343,10 +345,16 @@ require([
                         base.showJsMessage("info",data.message,true);
                     }
                     if(data.jobId) {
+                        let long_running_msg = "";
+                        if(is_async && is_full_export) {
+                            long_running_msg = "NOTE: This type of export can take up to 10-15 minutes to complete. "
+                            + "Please leave this tab open until the download button appears.  ";
+                        }
                         sessionStorage.setItem("user-manifest", data.file_name);
                         base.showJsMessage("info",
                             "Your manifest is being prepared. Once it is ready, this space will make it available for "
-                            + "download. <i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
+                            + `download. ${long_running_msg}`
+                            + "<i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
                             , true);
                         base.checkManifestReady(data.file_name);
                     }
