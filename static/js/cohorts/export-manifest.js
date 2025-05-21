@@ -275,6 +275,9 @@ require([
             return false;
         }
 
+        let export_manifest_form = $('#export-manifest-form');
+        let export_manifest = $('#export-manifest');
+
         let manifest_type = (export_type === 'bq' ? 'bq-manifest' : 'file-manifest');
         $('#unallowed-chars-alert').hide();
         $('#name-too-long-alert-modal').hide();
@@ -293,7 +296,7 @@ require([
         }
 
         $('#manifest-in-progress').modal('show');
-        if(manifest_type == 'file-manifest') {
+        if(manifest_type === 'file-manifest') {
             base.blockResubmit(function () {
                 $('#manifest-in-progress').modal('hide');
             }, downloadToken, 'downloadToken');
@@ -325,16 +328,15 @@ require([
             + (export_type === 's5cmd' ? 's5cmd' : 'file')
                 + '-checkbox').is(':checked')) ? 'true' : 'false');
         }
-        if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val().toLowerCase() !== "true") {
-            console.debug($('#export-manifest-form').find('input[name="partitions"]').val());
-            $('#export-manifest-form').trigger('submit');
+        if(manifest_type === 'file-manifest' && $('input[name="async_download"]').val().toLowerCase() !== "true") {
+            export_manifest_form.trigger('submit');
         } else {
-            $('#export-manifest').attr('disabled','disabled');
-            $('#export-manifest').attr('data-pending-manifest', 'true');
-            $('#export-manifest').attr('title','A manifest is currently being built.');
+            export_manifest.attr('disabled','disabled');
+            export_manifest.attr('data-pending-manifest', 'true');
+            export_manifest.attr('title','A manifest is currently being built.');
             $.ajax({
-                url: $('#export-manifest-form').attr('action'),
-                data: $('#export-manifest-form').serialize(),
+                url: export_manifest_form.attr('action'),
+                data: export_manifest_form.serialize(),
                 method: 'GET',
                 success: function (data) {
                     if(data.message) {
@@ -343,8 +345,9 @@ require([
                     if(data.jobId) {
                         sessionStorage.setItem("user-manifest", data.file_name);
                         base.showJsMessage("info",
-                            "Your manifest is being prepared. Once it is ready, this space will make it available for download. <i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
-                            ,true);
+                            "Your manifest is being prepared. Once it is ready, this space will make it available for "
+                            + "download. <i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
+                            , true);
                         base.checkManifestReady(data.file_name);
                     }
                 },
@@ -361,7 +364,7 @@ require([
                 complete: function(xhr, status) {
                     $('#manifest-in-progress').modal('hide');
                     $('#export-manifest-modal').modal('hide');
-                    $('#export-manifest-form')[0].reset();
+                    export_manifest_form[0].reset();
                 }
             });
         }
@@ -372,15 +375,16 @@ require([
     });
 
     var update_file_names = function(clicked) {
+        let export_manifest_modal = $('#export-manifest-modal');
         let file_name = $('input[name="file_name"]');
         if(!clicked) {
             if(!file_name.attr("name-base") || file_name.attr("name-base").length <= 0) {
-                file_name.attr("name-base", (is_cohort ? "cohort_" + cohort_id + $('#export-manifest-modal').data('file-timestamp') : "file_manifest"));
+                file_name.attr("name-base", (is_cohort ? "cohort_" + cohort_id + export_manifest_modal.data('file-timestamp') : "file_manifest"));
             }
         } else {
             if(!file_name.attr("name-base") || file_name.attr("name-base").length <= 0) {
                 let cohort_ids = [clicked.data('cohort-id')];
-                file_name.attr("name-base", "cohort_" + cohort_ids.join("_") + $('#export-manifest-modal').data('file-timestamp'));
+                file_name.attr("name-base", "cohort_" + cohort_ids.join("_") + export_manifest_modal.data('file-timestamp'));
             }
         }
         let s5cmd_manifest_filename = "<filename>";
@@ -390,8 +394,8 @@ require([
         let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${s5cmd_endpoint_url} run ${s5cmd_manifest_filename}`;
         let idc_index_text = `idc download ${idc_index_manifest_filename}`;
 
-        if ($('#export-manifest-modal').find('input[name="mini"]').length > 0) {
-            let uid=$('#export-manifest-modal').find('input[name="uid"]').val();
+        if (export_manifest_modal.find('input[name="mini"]').length > 0) {
+            let uid=export_manifest_modal.find('input[name="uid"]').val();
             idc_index_text = `idc download ${uid}`;
         }
         $('.s5cmd-text').text(s5cmd_text);
@@ -450,10 +454,6 @@ require([
         bq_disabled_message += ' Please save these filters as a cohort to enable this feature.'
     }
 
-    let s5cmd_disabled_message = 'Your manifest\'s size exceeds the limit for file manifest download (65k entries). Please use'
-        + ' <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"'
-        + ' data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i> </a> (requires Google login).';
-
     tippy.delegate('#export-manifest-modal', {
         content: bq_disabled_message,
         theme: 'dark',
@@ -462,26 +462,6 @@ require([
         interactive: true,
         allowHTML: true,
         target: '.bq-disabled'
-    });
-
-    tippy.delegate('#export-manifest-modal', {
-        content: s5cmd_disabled_message,
-        theme: 'dark',
-        placement: 'right',
-        arrow: true,
-        interactive: true,
-        onTrigger: (instance, event) => {
-            if($(event.target).hasClass('manifest-disabled')) {
-                instance.enable();
-            } else {
-                instance.disable();
-            }
-        },
-        onUntrigger: (instance, event) => {
-            instance.enable();
-        },
-        allowHTML: true,
-        target: '.manifest-disabled'
     });
 
     tippy.delegate('#export-manifest-modal', {
