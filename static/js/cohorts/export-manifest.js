@@ -107,28 +107,29 @@ require([
 
     var update_export_modal_for_cart = function(partitions, filtergrp_list, mxstudies=0, mxseries=0){
         is_cohort = false;
+        let export_form = $('#export-manifest-form');
         var name_base='';
         $('.modal-title').text("Export Cart Manifest");
-        $('#export-manifest-form').append('<input type="hidden" name="from_cart">')
-        $('#export-manifest-form').find('input[name="from_cart"]').val("True");
+        export_form.append('<input type="hidden" name="from_cart">')
+        export_form.find('input[name="from_cart"]').val("True");
         if(filtergrp_list !== null && filtergrp_list !== undefined && filtergrp_list.length > 0) {
-            $('#export-manifest-form').append('<input type="hidden" name="filtergrp_list">')
-            $('#export-manifest-form').find('input[name="filtergrp_list"]').val(JSON.stringify(filtergrp_list));
+            export_form.append('<input type="hidden" name="filtergrp_list">')
+            export_form.find('input[name="filtergrp_list"]').val(JSON.stringify(filtergrp_list));
         }
 
-        $('#export-manifest-form').append('<input type="hidden" name="partitions">')
-        $('#export-manifest-form').find('input[name="partitions"]').val(JSON.stringify(partitions));
-        $('#export-manifest-form').append('<input type="hidden" name="mxstudies">')
-        $('#export-manifest-form').find('input[name="mxstudies"]').val(mxstudies);
-        $('#export-manifest-form').append('<input type="hidden" name="mxseries">')
-        $('#export-manifest-form').find('input[name="mxseries"]').val(mxseries);
+        export_form.append('<input type="hidden" name="partitions">')
+        export_form.find('input[name="partitions"]').val(JSON.stringify(partitions));
+        export_form.append('<input type="hidden" name="mxstudies">')
+        export_form.find('input[name="mxstudies"]').val(mxstudies);
+        export_form.append('<input type="hidden" name="mxseries">')
+        export_form.find('input[name="mxseries"]').val(mxseries);
 
         $('input[name="async_download"]').val(
             (parseInt(localStorage.getItem('manifestSeriesCount')) > 65000) ? "True" : "False"
         );
 
-        $('#export-manifest-form').append('<input type="hidden" name="filter_async">')
-        $('#export-manifest-form').find('input[name="filter_async"]').val( $('input[name="async_download"]').val() );
+        export_form.append('<input type="hidden" name="filter_async">')
+        export_form.find('input[name="filter_async"]').val( $('input[name="async_download"]').val() );
 
         let file_name = $('input[name="file_name"]');
         file_name.attr("name-base",name_base);
@@ -143,11 +144,12 @@ require([
     }
 
      var reset_after_cart = function(){
-        $('#export-manifest-modal').find('input[name="from_cart"]').remove();
-        $('#export-manifest-modal').find('input[name="partitions"]').remove();
-        $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
-        $('#export-manifest-modal').find('input[name="mxseries"]').remove();
-        $('#export-manifest-modal').find('input[name="mxstudies"]').remove();
+        let export_modal = $('#export-manifest-modal');
+        export_modal.find('input[name="from_cart"]').remove();
+        export_modal.find('input[name="partitions"]').remove();
+        export_modal.find('input[name="filtergrp_list"]').remove();
+        export_modal.find('input[name="mxseries"]').remove();
+        export_modal.find('input[name="mxstudies"]').remove();
         $('input[name="async_download"]').val( $('#export-manifest-form').find('input[name="filter_async"]').val());
         $('#export-manifest-form').find('input[name="filter_async"]').remove();
         $('#download-s5cmd').removeClass('iscart');
@@ -159,6 +161,8 @@ require([
     }
 
     const update_export_modal_for_mini = function(button){
+        let export_modal = $('#export-manifest-modal');
+        let export_form = $('#export-manifest-form');
         var title='';
         var filterNm='';
         var mini_type='';
@@ -171,20 +175,20 @@ require([
         $('.download-manifest-text').hide();
 
         $('.manifest-idc-index a').trigger('click');
-        $('#export-manifest-modal').find('input[name="async_download"]').val('false');
+        export_modal.find('input[name="async_download"]').val('false');
         if (button.hasClass('series-export')) {
             title = 'Series Export';
             filterNm = 'SeriesInstanceUID';
             mini_type = 'series';
             name_base='series_manifest';
-            $('#export-manifest-form').append('<input type="hidden" name="aws">')
-            $('#export-manifest-form').append('<input type="hidden" name="crdc">')
-            $('#export-manifest-form').append('<input type="hidden" name="single_series">')
-            $('#export-manifest-form').append('<input type="hidden" name="gcs">')
-            $('#export-manifest-modal').find('input[name="aws"]').val(button.parent().parent().data('aws'));
-            $('#export-manifest-modal').find('input[name="gcs"]').val(button.parent().parent().data('gcs'));
-            $('#export-manifest-modal').find('input[name="crdc"]').val(button.parent().parent().data('crdc'));
-            $('#export-manifest-modal').find('input[name="single_series"]').val("True");
+            export_form.append('<input type="hidden" name="aws">')
+            export_form.append('<input type="hidden" name="crdc">')
+            export_form.append('<input type="hidden" name="single_series">')
+            export_form.append('<input type="hidden" name="gcs">')
+            export_modal.find('input[name="aws"]').val(button.parent().parent().data('aws'));
+            export_modal.find('input[name="gcs"]').val(button.parent().parent().data('gcs'));
+            export_modal.find('input[name="crdc"]').val(button.parent().parent().data('crdc'));
+            export_modal.find('input[name="single_series"]').val("True");
         } else if (button.hasClass('study-export')) {
             title = 'Study Export';
             filterNm = 'StudyInstanceUID';
@@ -193,13 +197,13 @@ require([
         }
 
         $('.modal-title').text(title);
-        $('#export-manifest-form').append('<input type="hidden" name="mini">')
-        $('#export-manifest-form').find('input[name="mini"]').val(mini_type);
+        export_form.append('<input type="hidden" name="mini">')
+        export_form.find('input[name="mini"]').val(mini_type);
 
-        $('#export-manifest-form').append('<input type="hidden" name="uid">')
-        $('#export-manifest-modal').find('input[name="uid"]').val(button.data('uid'));
+        export_form.append('<input type="hidden" name="uid">')
+        export_modal.find('input[name="uid"]').val(button.data('uid'));
 
-        let filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
+        let filt_str=export_form.find('input[name="filters"]').val()
         let filters= new Object();
         if (filt_str.length>0 && button.hasClass('study-export')){
             filters = JSON.parse(filt_str)
@@ -244,12 +248,13 @@ require([
     });
 
     var reset_after_mini = function(){
-        $('#export-manifest-modal').find('input[name="mini"]').remove();
-        $('#export-manifest-modal').find('input[name="uid"]').remove();
-        $('#export-manifest-modal').find('input[name="crdc_uid"]').remove();
-        $('#export-manifest-modal').find('input[name="aws"]').remove();
-        $('#export-manifest-modal').find('input[name="single_series"]').remove();
-        $('#export-manifest-modal').find('input[name="gcs"]').remove();
+        let export_modal = $('#export-manifest-modal');
+        export_modal.find('input[name="mini"]').remove();
+        export_modal.find('input[name="uid"]').remove();
+        export_modal.find('input[name="crdc_uid"]').remove();
+        export_modal.find('input[name="aws"]').remove();
+        export_modal.find('input[name="single_series"]').remove();
+        export_modal.find('input[name="gcs"]').remove();
         var filt_str = $('#export-manifest-form').find('input[name="filters"]').val()
         var filters=JSON.parse(filt_str);
         if ('StudyInstanceUID' in filters){
