@@ -279,7 +279,7 @@ require([
             name = name+"_"+$('input[name="loc_type_'+export_type+'"]:checked').val();
         }
         let unallowed = (((name !== undefined && name !== null) && name.match(base.blacklist)) || []);
-        
+
         if (unallowed.length > 0) {
             $('.unallowed-chars').text(unallowed.join(", "));
             $('#unallowed-chars-alert').show();
@@ -288,13 +288,11 @@ require([
         }
 
         $('#manifest-in-progress').modal('show');
-
         if(manifest_type == 'file-manifest') {
             base.blockResubmit(function () {
                 $('#manifest-in-progress').modal('hide');
             }, downloadToken, 'downloadToken');
         }
-
         let checked_fields = [];
         clicked_button.parents('.tab-pane.manifest').find('.field-checkbox').each(function() {
             var cb = $(this)[0];
@@ -302,7 +300,6 @@ require([
                 checked_fields.push(cb.value);
             }
         });
-
         let checked_columns = [];
         clicked_button.parents('.tab-pane.manifest').find('.column-checkbox').each(function() {
             var cb = $(this)[0];
@@ -310,14 +307,12 @@ require([
                 checked_columns.push(cb.value);
             }
         });
-
         $('input[name="file_type"]').val(export_type);
         $('input[name="header_fields"]').val(JSON.stringify(checked_fields));
         $('input[name="file_name"]').val(name);
         $('input[name="columns"]').val(JSON.stringify(checked_columns));
         $('input[name="downloadToken"]').val(downloadToken);
         $('input[name="manifest-type"]').val(manifest_type);
-
         $('input[name="include_header"]').val('false');
 
         if(export_type !== 'bq') {
@@ -325,8 +320,6 @@ require([
             + (export_type === 's5cmd' ? 's5cmd' : 'file')
                 + '-checkbox').is(':checked')) ? 'true' : 'false');
         }
-
-
         if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val().toLowerCase() !== "true") {
             console.debug($('#export-manifest-form').find('input[name="partitions"]').val());
             $('#export-manifest-form').trigger('submit');
