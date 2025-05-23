@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2020, Institute for Systems Biology
+ * Copyright 2020-2025, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,13 +133,14 @@ define(['jquery'], function($) {
         return uuid;
     };
 
-    const MAX_ELAPSED = 120000;
+    const MAX_ELAPSED = 900000;
     function _checkManifestReady(file_name, check_start) {
         if(!check_start) {
             check_start = Date.now();
         }
         let check_now = Date.now();
-        if((check_now-check_start) > MAX_ELAPSED) {
+        let elapsed_millis = check_now-check_start;
+        if((elapsed_millis) > MAX_ELAPSED) {
             _showJsMessage("error",
                 "There was an error generating your manifest. Please contact the administrator."
                 , true);

@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021, Institute for Systems Biology
+ * Copyright 2020-2025, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,28 +107,29 @@ require([
 
     var update_export_modal_for_cart = function(partitions, filtergrp_list, mxstudies=0, mxseries=0){
         is_cohort = false;
+        let export_form = $('#export-manifest-form');
         var name_base='';
         $('.modal-title').text("Export Cart Manifest");
-        $('#export-manifest-form').append('<input type="hidden" name="from_cart">')
-        $('#export-manifest-form').find('input[name="from_cart"]').val("True");
+        export_form.append('<input type="hidden" name="from_cart">')
+        export_form.find('input[name="from_cart"]').val("True");
         if(filtergrp_list !== null && filtergrp_list !== undefined && filtergrp_list.length > 0) {
-            $('#export-manifest-form').append('<input type="hidden" name="filtergrp_list">')
-            $('#export-manifest-form').find('input[name="filtergrp_list"]').val(JSON.stringify(filtergrp_list));
+            export_form.append('<input type="hidden" name="filtergrp_list">')
+            export_form.find('input[name="filtergrp_list"]').val(JSON.stringify(filtergrp_list));
         }
 
-        $('#export-manifest-form').append('<input type="hidden" name="partitions">')
-        $('#export-manifest-form').find('input[name="partitions"]').val(JSON.stringify(partitions));
-        $('#export-manifest-form').append('<input type="hidden" name="mxstudies">')
-        $('#export-manifest-form').find('input[name="mxstudies"]').val(mxstudies);
-        $('#export-manifest-form').append('<input type="hidden" name="mxseries">')
-        $('#export-manifest-form').find('input[name="mxseries"]').val(mxseries);
+        export_form.append('<input type="hidden" name="partitions">')
+        export_form.find('input[name="partitions"]').val(JSON.stringify(partitions));
+        export_form.append('<input type="hidden" name="mxstudies">')
+        export_form.find('input[name="mxstudies"]').val(mxstudies);
+        export_form.append('<input type="hidden" name="mxseries">')
+        export_form.find('input[name="mxseries"]').val(mxseries);
 
         $('input[name="async_download"]').val(
             (parseInt(localStorage.getItem('manifestSeriesCount')) > 65000) ? "True" : "False"
         );
 
-        $('#export-manifest-form').append('<input type="hidden" name="filter_async">')
-        $('#export-manifest-form').find('input[name="filter_async"]').val( $('input[name="async_download"]').val() );
+        export_form.append('<input type="hidden" name="filter_async">')
+        export_form.find('input[name="filter_async"]').val( $('input[name="async_download"]').val() );
 
         let file_name = $('input[name="file_name"]');
         file_name.attr("name-base",name_base);
@@ -143,11 +144,12 @@ require([
     }
 
      var reset_after_cart = function(){
-        $('#export-manifest-modal').find('input[name="from_cart"]').remove();
-        $('#export-manifest-modal').find('input[name="partitions"]').remove();
-        $('#export-manifest-modal').find('input[name="filtergrp_list"]').remove();
-        $('#export-manifest-modal').find('input[name="mxseries"]').remove();
-        $('#export-manifest-modal').find('input[name="mxstudies"]').remove();
+        let export_modal = $('#export-manifest-modal');
+        export_modal.find('input[name="from_cart"]').remove();
+        export_modal.find('input[name="partitions"]').remove();
+        export_modal.find('input[name="filtergrp_list"]').remove();
+        export_modal.find('input[name="mxseries"]').remove();
+        export_modal.find('input[name="mxstudies"]').remove();
         $('input[name="async_download"]').val( $('#export-manifest-form').find('input[name="filter_async"]').val());
         $('#export-manifest-form').find('input[name="filter_async"]').remove();
         $('#download-s5cmd').removeClass('iscart');
@@ -159,6 +161,8 @@ require([
     }
 
     const update_export_modal_for_mini = function(button){
+        let export_modal = $('#export-manifest-modal');
+        let export_form = $('#export-manifest-form');
         var title='';
         var filterNm='';
         var mini_type='';
@@ -171,20 +175,20 @@ require([
         $('.download-manifest-text').hide();
 
         $('.manifest-idc-index a').trigger('click');
-        $('#export-manifest-modal').find('input[name="async_download"]').val('false');
+        export_modal.find('input[name="async_download"]').val('false');
         if (button.hasClass('series-export')) {
             title = 'Series Export';
             filterNm = 'SeriesInstanceUID';
             mini_type = 'series';
             name_base='series_manifest';
-            $('#export-manifest-form').append('<input type="hidden" name="aws">')
-            $('#export-manifest-form').append('<input type="hidden" name="crdc">')
-            $('#export-manifest-form').append('<input type="hidden" name="single_series">')
-            $('#export-manifest-form').append('<input type="hidden" name="gcs">')
-            $('#export-manifest-modal').find('input[name="aws"]').val(button.parent().parent().data('aws'));
-            $('#export-manifest-modal').find('input[name="gcs"]').val(button.parent().parent().data('gcs'));
-            $('#export-manifest-modal').find('input[name="crdc"]').val(button.parent().parent().data('crdc'));
-            $('#export-manifest-modal').find('input[name="single_series"]').val("True");
+            export_form.append('<input type="hidden" name="aws">')
+            export_form.append('<input type="hidden" name="crdc">')
+            export_form.append('<input type="hidden" name="single_series">')
+            export_form.append('<input type="hidden" name="gcs">')
+            export_modal.find('input[name="aws"]').val(button.parent().parent().data('aws'));
+            export_modal.find('input[name="gcs"]').val(button.parent().parent().data('gcs'));
+            export_modal.find('input[name="crdc"]').val(button.parent().parent().data('crdc'));
+            export_modal.find('input[name="single_series"]').val("True");
         } else if (button.hasClass('study-export')) {
             title = 'Study Export';
             filterNm = 'StudyInstanceUID';
@@ -193,13 +197,13 @@ require([
         }
 
         $('.modal-title').text(title);
-        $('#export-manifest-form').append('<input type="hidden" name="mini">')
-        $('#export-manifest-form').find('input[name="mini"]').val(mini_type);
+        export_form.append('<input type="hidden" name="mini">')
+        export_form.find('input[name="mini"]').val(mini_type);
 
-        $('#export-manifest-form').append('<input type="hidden" name="uid">')
-        $('#export-manifest-modal').find('input[name="uid"]').val(button.data('uid'));
+        export_form.append('<input type="hidden" name="uid">')
+        export_modal.find('input[name="uid"]').val(button.data('uid'));
 
-        let filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
+        let filt_str=export_form.find('input[name="filters"]').val()
         let filters= new Object();
         if (filt_str.length>0 && button.hasClass('study-export')){
             filters = JSON.parse(filt_str)
@@ -244,12 +248,13 @@ require([
     });
 
     var reset_after_mini = function(){
-        $('#export-manifest-modal').find('input[name="mini"]').remove();
-        $('#export-manifest-modal').find('input[name="uid"]').remove();
-        $('#export-manifest-modal').find('input[name="crdc_uid"]').remove();
-        $('#export-manifest-modal').find('input[name="aws"]').remove();
-        $('#export-manifest-modal').find('input[name="single_series"]').remove();
-        $('#export-manifest-modal').find('input[name="gcs"]').remove();
+        let export_modal = $('#export-manifest-modal');
+        export_modal.find('input[name="mini"]').remove();
+        export_modal.find('input[name="uid"]').remove();
+        export_modal.find('input[name="crdc_uid"]').remove();
+        export_modal.find('input[name="aws"]').remove();
+        export_modal.find('input[name="single_series"]').remove();
+        export_modal.find('input[name="gcs"]').remove();
         var filt_str = $('#export-manifest-form').find('input[name="filters"]').val()
         var filters=JSON.parse(filt_str);
         if ('StudyInstanceUID' in filters){
@@ -270,6 +275,11 @@ require([
             return false;
         }
 
+        let is_async = ($('input[name="async_download"]').val().toLowerCase() === "true");
+        let is_full_export = (export_type === 'csv' || export_type === 'tsv' || export_type === 'json');
+        let export_manifest_form = $('#export-manifest-form');
+        let export_manifest = $('#export-manifest');
+
         let manifest_type = (export_type === 'bq' ? 'bq-manifest' : 'file-manifest');
         $('#unallowed-chars-alert').hide();
         $('#name-too-long-alert-modal').hide();
@@ -279,7 +289,7 @@ require([
             name = name+"_"+$('input[name="loc_type_'+export_type+'"]:checked').val();
         }
         let unallowed = (((name !== undefined && name !== null) && name.match(base.blacklist)) || []);
-        
+
         if (unallowed.length > 0) {
             $('.unallowed-chars').text(unallowed.join(", "));
             $('#unallowed-chars-alert').show();
@@ -288,13 +298,11 @@ require([
         }
 
         $('#manifest-in-progress').modal('show');
-
-        if(manifest_type == 'file-manifest') {
+        if(manifest_type === 'file-manifest') {
             base.blockResubmit(function () {
                 $('#manifest-in-progress').modal('hide');
             }, downloadToken, 'downloadToken');
         }
-
         let checked_fields = [];
         clicked_button.parents('.tab-pane.manifest').find('.field-checkbox').each(function() {
             var cb = $(this)[0];
@@ -302,7 +310,6 @@ require([
                 checked_fields.push(cb.value);
             }
         });
-
         let checked_columns = [];
         clicked_button.parents('.tab-pane.manifest').find('.column-checkbox').each(function() {
             var cb = $(this)[0];
@@ -310,14 +317,12 @@ require([
                 checked_columns.push(cb.value);
             }
         });
-
         $('input[name="file_type"]').val(export_type);
         $('input[name="header_fields"]').val(JSON.stringify(checked_fields));
         $('input[name="file_name"]').val(name);
         $('input[name="columns"]').val(JSON.stringify(checked_columns));
         $('input[name="downloadToken"]').val(downloadToken);
         $('input[name="manifest-type"]').val(manifest_type);
-
         $('input[name="include_header"]').val('false');
 
         if(export_type !== 'bq') {
@@ -325,28 +330,32 @@ require([
             + (export_type === 's5cmd' ? 's5cmd' : 'file')
                 + '-checkbox').is(':checked')) ? 'true' : 'false');
         }
-
-
-        if(manifest_type == 'file-manifest' && $('input[name="async_download"]').val().toLowerCase() !== "true") {
-            console.debug($('#export-manifest-form').find('input[name="partitions"]').val());
-            $('#export-manifest-form').trigger('submit');
+        if(manifest_type === 'file-manifest' && !is_async) {
+            export_manifest_form.trigger('submit');
         } else {
-            $('#export-manifest').attr('disabled','disabled');
-            $('#export-manifest').attr('data-pending-manifest', 'true');
-            $('#export-manifest').attr('title','A manifest is currently being built.');
+            export_manifest.attr('disabled','disabled');
+            export_manifest.attr('data-pending-manifest', 'true');
+            export_manifest.attr('title','A manifest is currently being built.');
             $.ajax({
-                url: $('#export-manifest-form').attr('action'),
-                data: $('#export-manifest-form').serialize(),
+                url: export_manifest_form.attr('action'),
+                data: export_manifest_form.serialize(),
                 method: 'GET',
                 success: function (data) {
                     if(data.message) {
                         base.showJsMessage("info",data.message,true);
                     }
                     if(data.jobId) {
+                        let long_running_msg = "";
+                        if(is_async && is_full_export) {
+                            long_running_msg = "NOTE: This type of export can take up to 10-15 minutes to complete. "
+                            + "Please leave this tab open until the download button appears.  ";
+                        }
                         sessionStorage.setItem("user-manifest", data.file_name);
                         base.showJsMessage("info",
-                            "Your manifest is being prepared. Once it is ready, this space will make it available for download. <i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
-                            ,true);
+                            "Your manifest is being prepared. Once it is ready, this space will make it available for "
+                            + `download. ${long_running_msg}`
+                            + "<i class=\"fa-solid fa-arrows-rotate fa-spin\"></i>"
+                            , true);
                         base.checkManifestReady(data.file_name);
                     }
                 },
@@ -363,7 +372,7 @@ require([
                 complete: function(xhr, status) {
                     $('#manifest-in-progress').modal('hide');
                     $('#export-manifest-modal').modal('hide');
-                    $('#export-manifest-form')[0].reset();
+                    export_manifest_form[0].reset();
                 }
             });
         }
@@ -374,15 +383,16 @@ require([
     });
 
     var update_file_names = function(clicked) {
+        let export_manifest_modal = $('#export-manifest-modal');
         let file_name = $('input[name="file_name"]');
         if(!clicked) {
             if(!file_name.attr("name-base") || file_name.attr("name-base").length <= 0) {
-                file_name.attr("name-base", (is_cohort ? "cohort_" + cohort_id + $('#export-manifest-modal').data('file-timestamp') : "file_manifest"));
+                file_name.attr("name-base", (is_cohort ? "cohort_" + cohort_id + export_manifest_modal.data('file-timestamp') : "file_manifest"));
             }
         } else {
             if(!file_name.attr("name-base") || file_name.attr("name-base").length <= 0) {
                 let cohort_ids = [clicked.data('cohort-id')];
-                file_name.attr("name-base", "cohort_" + cohort_ids.join("_") + $('#export-manifest-modal').data('file-timestamp'));
+                file_name.attr("name-base", "cohort_" + cohort_ids.join("_") + export_manifest_modal.data('file-timestamp'));
             }
         }
         let s5cmd_manifest_filename = "<filename>";
@@ -392,8 +402,8 @@ require([
         let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${s5cmd_endpoint_url} run ${s5cmd_manifest_filename}`;
         let idc_index_text = `idc download ${idc_index_manifest_filename}`;
 
-        if ($('#export-manifest-modal').find('input[name="mini"]').length > 0) {
-            let uid=$('#export-manifest-modal').find('input[name="uid"]').val();
+        if (export_manifest_modal.find('input[name="mini"]').length > 0) {
+            let uid=export_manifest_modal.find('input[name="uid"]').val();
             idc_index_text = `idc download ${uid}`;
         }
         $('.s5cmd-text').text(s5cmd_text);
@@ -452,10 +462,6 @@ require([
         bq_disabled_message += ' Please save these filters as a cohort to enable this feature.'
     }
 
-    let s5cmd_disabled_message = 'Your manifest\'s size exceeds the limit for file manifest download (65k entries). Please use'
-        + ' <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"'
-        + ' data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i> </a> (requires Google login).';
-
     tippy.delegate('#export-manifest-modal', {
         content: bq_disabled_message,
         theme: 'dark',
@@ -464,26 +470,6 @@ require([
         interactive: true,
         allowHTML: true,
         target: '.bq-disabled'
-    });
-
-    tippy.delegate('#export-manifest-modal', {
-        content: s5cmd_disabled_message,
-        theme: 'dark',
-        placement: 'right',
-        arrow: true,
-        interactive: true,
-        onTrigger: (instance, event) => {
-            if($(event.target).hasClass('manifest-disabled')) {
-                instance.enable();
-            } else {
-                instance.disable();
-            }
-        },
-        onUntrigger: (instance, event) => {
-            instance.enable();
-        },
-        allowHTML: true,
-        target: '.manifest-disabled'
     });
 
     tippy.delegate('#export-manifest-modal', {
