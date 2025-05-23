@@ -55,10 +55,7 @@ if [ -n "$CI" ]; then
    echo Setting up ${GOOGLE_APPLICATION_CREDENTIALS} for migration
 fi
 python3 ${HOMEROOT}/manage.py migrate --noinput
-if [ -n "$CI" ]; then
-   unset GOOGLE_APPLICATION_CREDENTIALS
-   echo GAC NOW: ${GOOGLE_APPLICATION_CREDENTIALS} post-migration
-fi
+
 
 echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
@@ -99,3 +96,8 @@ python3 ${HOMEROOT}/scripts/create_api_token.py
 
 # Check system config
 python3 ${HOMEROOT}/manage.py check
+
+if [ -n "$CI" ]; then
+   unset GOOGLE_APPLICATION_CREDENTIALS
+   echo GAC NOW: ${GOOGLE_APPLICATION_CREDENTIALS} database-setup
+fi
