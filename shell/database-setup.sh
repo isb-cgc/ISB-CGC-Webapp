@@ -50,7 +50,15 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 # python3 ${HOMEROOT}/manage.py makemigrations <appname>
 # Now run migrations
 echo "Running Migrations..."
+if [ -n "$CI" ]; then
+   export GOOGLE_APPLICATION_CREDENTIALS=${HOMEROOT}/deployment.key.json
+   echo Setting up ${GOOGLE_APPLICATION_CREDENTIALS} for migration
+fi
 python3 ${HOMEROOT}/manage.py migrate --noinput
+if [ -n "$CI" ]; then
+   unset GOOGLE_APPLICATION_CREDENTIALS
+   echo GAC NOW: ${GOOGLE_APPLICATION_CREDENTIALS} post-migration
+fi
 
 echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
