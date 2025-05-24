@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2022, Institute for Systems Biology
+# Copyright 2015-2025, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
     url(r'session_security/', include('session_security.urls')),
-    url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
 
     url(r'^uihist/$', views.save_ui_hist, name='ui_hist'),

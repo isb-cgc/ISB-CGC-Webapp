@@ -45,17 +45,6 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'dev-user'@'%';"
 mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'dev-user'@'localhost';"
 
-#
-# WJRL 5/23/25
-# Moving to ditching keyfiles, Django is still is making calling into the storage service, which
-# complains it MUST have GOOGLE_APPLICATION_CREDENTIALS pointing at a file. So, we set this here
-# and clear it below when all is done.
-#
-if [ -n "$CI" ]; then
-   export GOOGLE_APPLICATION_CREDENTIALS=${HOMEROOT}/deployment.key.json
-   echo Setting up ${GOOGLE_APPLICATION_CREDENTIALS} for database setup operations
-fi
-
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
 # python3 ${HOMEROOT}/manage.py makemigrations <appname>
 # Now run migrations
@@ -103,7 +92,3 @@ python3 ${HOMEROOT}/scripts/create_api_token.py
 # Check system config
 python3 ${HOMEROOT}/manage.py check
 
-if [ -n "$CI" ]; then
-   unset GOOGLE_APPLICATION_CREDENTIALS
-   echo GAC NOW: ${GOOGLE_APPLICATION_CREDENTIALS} with completion of database setup operations
-fi
