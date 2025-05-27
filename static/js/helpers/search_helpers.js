@@ -251,7 +251,7 @@ function($, tree_graph, stack_bar_chart) {
             if (program_id != '0') {
                 program_selector = '#' + program_id + '-data ';
             }
-            $('.all-selected-filters .isb-panel-body span[data-prog-id="'+program_id+'"].filter-token').each(function() {
+            $('.all-selected-filters .card-body span[data-prog-id="'+program_id+'"].filter-token').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
                     val = $this.data('value-name');

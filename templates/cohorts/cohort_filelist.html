@@ -27,9 +27,8 @@
 
 {% block page_header %}
     <div class="container">
-
-        <div class="banner-section">
-        </div>
+    <div class="row">
+       <div class="col-12">
 
         {% if cohort %}
             <ol class="breadcrumb">
@@ -37,11 +36,11 @@
                 <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
             </ol>
         {% endif %}
-        <h3 class="page-header">Cancer Data File Browser
+        <h4 class="page-header">Cancer Data File Browser
             {% if cohort %}
                  <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
             {% endif %}
-        </h3>
+        </h4>
 
          {% if current_case_filters_disp.items|length > 0 %}
                 <div class="col-sm-12 col-md-12 col-lg-12">
@@ -112,6 +111,8 @@
             <span class="file-list-total">#</span>. Please filter your list using the platform panel at the left (or make a smaller cohort) to limit the size of your file download list.
         </div>
     </div>
+    </div>
+    </div>
 {% endblock %}
 
 {% block content %}
@@ -119,7 +120,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="isb-panel isb-panel-default">
+                <div class="card">
                 </div>
             </div>
         </div>
@@ -127,12 +128,12 @@
 
     <div class="container">
         <div class="row">
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="isb-panel isb-panel-default">
+            <div class="col-sm-12 col-md-12 col-lg-12 ">
+                <div class="card pt-4 pb-5 mb-4">
 
-                    <ul class="nav nav-tabs nav-tabs-files" role="tablist">
-                        <li role="presentation" class="file-browser-tab tabactive"><a href="#all-files" class ="active" aria-selected="true"  role="tab" data-bs-toggle="tab" title="Browse All Resources" data-file-type="all">All Resources</a></li>
-                        <li role="presentation" class="file-browser-tab"><a href="#pdf-files" aria-selected="false" class="selected" role="tab" data-bs-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
+                    <ul class="nav nav-tabs nav-tabs-files text-center text-decoration-none" role="tablist">
+                        <li role="presentation" class="file-browser-tab tabactive"><a href="#all-files" class ="active text-decoration-none" aria-selected="true"  role="tab" data-bs-toggle="tab" title="Browse All Resources" data-file-type="all">All Resources</a></li>
+                        <li role="presentation" class="file-browser-tab"><a href="#pdf-files" aria-selected="false" class="selected text-decoration-none" role="tab" data-bs-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
                         <li role="presentation" class="file-browser-tab"><a href="#dicom-files" aria-selected="false" role="tab" data-bs-toggle="tab" title="Browse Viewable Image Files" data-file-type="dicom">Viewable Images</a></li>
                     </ul>
                 </div>
@@ -143,8 +144,8 @@
             <div class="tab-content data-tab-content">
                 <div id="placeholder" class="tab-pane active file-browser-tab" role="tabpanel">
                     <div class="col-md-12 data-tab-content-panel spinner-panel">
-                        <div class="panel isb-panel-default">
-                            <div class="isb-panel-body">
+                        <div class="card">
+                            <div class="card-body">
                                 <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
                             </div>
                         </div>

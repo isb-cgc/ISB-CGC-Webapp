@@ -210,7 +210,7 @@ require([
 
 
     // change no of entries per page
-    $('.isb-panel-body').on('change', '.items-per-page', function () {
+    $('.card-body').on('change', '.items-per-page', function () {
         items_per_page = parseInt($('.items-per-page :selected').val());
         goto_table_page(1);
     });
@@ -288,7 +288,7 @@ require([
         update_table_display();
     }
 
-    $('.isb-panel-body').on('click', '.goto-page-button', function () {
+    $('.card-body').on('click', '.goto-page-button', function () {
         var page_no_input = $(this).siblings('.goto-page-number').val();
         if (page_no_input == "")
             return;
@@ -304,7 +304,7 @@ require([
         }
     });
 
-    $('.isb-panel-body').on('click', '.paginate_button', function () {
+    $('.card-body').on('click', '.paginate_button', function () {
         var page_no;
         if ($(this).hasClass('next-page')) {
             page_no = parseInt(page) + 1;

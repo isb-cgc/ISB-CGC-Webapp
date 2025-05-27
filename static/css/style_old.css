@@ -2001,18 +2001,6 @@ section .min-max {
 .min-max a:hover, .min-max a:focus {
   text-decoration: none; }
 
-#sample_analyses .analysis {
-  height: 450px; }
-  #sample_analyses .analysis .card-footer {
-    position: absolute;
-    bottom: 50px;
-    right: 20px;
-    margin: 0;
-    padding: 0; }
-
-#sample_analyses img {
-  padding: 10px;
-  height: 200px; }
 
 .row-console {
   background-color: #F8F8F8;
@@ -3260,30 +3248,7 @@ span.code {
     background-color: #9e9e9e; }
   #landing .jumbotron-fluid {
     padding-bottom: 8px; }
-  #landing .card-heading {
-    padding: 5px 10px;
-    min-height: 77px; }
-    #landing .card-heading a {
-      text-decoration: none; }
-    #landing .card-heading img {
-      padding: 0;
-      max-width: 100px; }
-  #landing .card-body {
-    padding: 5px 10px;
-    margin-bottom: 70px;
-    min-height: 120px; }
-  #landing .card-footer {
-    position: absolute;
-    bottom: 15px;
-    padding: 5px 10px;
-    font-size: 14px;
-    border-radius: 10px;
-    width: calc(100% - 20px);
-    align-items: stretch;
-    display: flex;
-    flex-direction: column; }
-    #landing .card-footer a {
-      text-decoration: none; }
+
   #landing .landing-icon {
     background-size: contain;
     background-repeat: no-repeat;
@@ -3299,31 +3264,14 @@ span.code {
     display: flex;
     flex-wrap: wrap;
     justify-content: center; }
-  #landing .card {
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 10px;
-    max-width: 400px;
-    min-width: 250px;
-    box-shadow: none;
-    border-width: 1px;
-    border-style: solid;
-    font-size: 16px;
-    padding: 10px;
-    position: relative;
-    flex-direction: column;
-    align-items: stretch;
-    display: flex; }
-    #landing .card h4 {
-      margin: 0; }
+
   #landing .dbrowser-div {
     background-color: #e2ebf3; }
     #landing .dbrowser-div h3 {
       color: #2b537b; }
     #landing .dbrowser-div h4, #landing .dbrowser-div i {
       color: #226caa; }
-    #landing .dbrowser-div card {
-      border-color: #2b537b; }
+
     #landing .dbrowser-div .card-footer a:hover .learn-icon {
       background-image: url("../img/blue-lightbulb-hover.png"); }
     #landing .dbrowser-div .card-footer a:hover .launch-icon {
@@ -3344,20 +3292,8 @@ span.code {
       color: #925122; }
     #landing .resources-div h4, #landing .resources-div i {
       color: #f18621; }
-    #landing .resources-div card {
-      border-color: #925122; }
-    #landing .resources-div .card-footer a:hover .learn-icon {
-      background-image: url("../img/orange-lightbulb-hover.png"); }
-    #landing .resources-div .card-footer a:hover .launch-icon {
-      background-image: url("../img/orange-rocket-hover.png"); }
-    #landing .resources-div .card-footer a:hover .statistical-icon {
-      background-image: url("../img/orange-statistical-hover.png"); }
-    #landing .resources-div .card-footer a:hover .community-icon {
-      background-image: url("../img/orange-community-hover.png"); }
-    #landing .resources-div .card-footer a:hover .github-icon {
-      background-image: url("../img/orange-github-hover.png"); }
-    #landing .resources-div .card-footer a:hover .icon-caption {
-      color: #925122; }
+
+
     #landing .resources-div .learn-icon {
       background-image: url("../img/orange-lightbulb.png"); }
     #landing .resources-div .launch-icon {

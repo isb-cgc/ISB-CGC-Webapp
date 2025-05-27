@@ -148,7 +148,7 @@ require([
                 }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
                 // Don't re-add the token and filter if it already exists
-                if($(selFilterPanel+' .isb-panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+                if($(selFilterPanel+' .card-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
                     token.append(
                         $('<a>').addClass('delete-x filter-label label label-default')
                             .text(tokenFeatDisplName + ': ' + tokenValDisplName)
@@ -160,7 +160,7 @@ require([
                         'select-filters-item': token.clone(true)
                     });
 
-                    $(selFilterPanel + ' .isb-panel-body').append($this.data('select-filters-item'));
+                    $(selFilterPanel + ' .card-body').append($this.data('select-filters-item'));
                 }
             } else {
                 $(selFilterPanel+' span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').remove();
@@ -188,7 +188,7 @@ require([
     $('.data-tab-content').on('click', '.clear-filters', function() {
         let activeDataTab = $('.data-tab.active').data('file-type');
 
-        $(this).parents('.selected-filters-'+activeDataTab).find('.isb-panel-body').empty();
+        $(this).parents('.selected-filters-'+activeDataTab).find('.card-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
@@ -497,8 +497,8 @@ require([
             $(tab_selector).find('.sortable_table th').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
-            $(tab_selector).find('.filelist-panel .isb-panel-body .total-file-count').html(total_files.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-            $(tab_selector).find('.filelist-panel .isb-panel-body .paginate_button_space').html(html_page_button);
+            $(tab_selector).find('.filelist-panel .card-body .total-file-count').html(total_files.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+            $(tab_selector).find('.filelist-panel .card-body .paginate_button_space').html(html_page_button);
         }
 
         $(tab_selector).find('.filelist-panel table tbody').empty();
@@ -701,7 +701,7 @@ require([
         let search_input = $(this).siblings('.case-barcode-search-text');
         search_input.val(search_input.val().trim());
         let case_vals = this_tab.find('.case-barcode-search-text').val().split("\s+").join("; ");
-        let token = this_tab.find(selFilterPanel+' .isb-panel-body span[data-feature-id="case_barcode"]');
+        let token = this_tab.find(selFilterPanel+' .card-body span[data-feature-id="case_barcode"]');
         if(token.length > 0) {
             token.remove();
         }
@@ -719,7 +719,7 @@ require([
                 .append('<i class="fa fa-times">')
                 .attr("title", 'Case Barcode' + ': ' + case_vals)
         );
-        $(selFilterPanel + ' .isb-panel-body').append(token);
+        $(selFilterPanel + ' .card-body').append(token);
         search_case_barcode(dataTabType, search_input.val());
     });
 
@@ -728,7 +728,7 @@ require([
         let search_input = $(this).siblings('.case-barcode-search-text');
         let dataTabType = this_tab.attr('data-file-type');
         let selFilterPanel = '.selected-filters-' + dataTabType;
-        let token = this_tab.find(selFilterPanel+' .isb-panel-body span[data-feature-id="case_barcode"]');
+        let token = this_tab.find(selFilterPanel+' .card-body span[data-feature-id="case_barcode"]');
         if(token.length > 0) {
             token.remove();
         }

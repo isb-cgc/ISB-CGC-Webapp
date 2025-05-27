@@ -10,26 +10,32 @@
             <div id="{{ program.id }}-data-filter-panel" class="card mb-3 filter-panel"
                  role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}
                  data-prog-id="{{ program.id }}" data-node-id="{{ node_id }}" data-prog-displ-name="{{ program.name }}">
-                <div class="card-header bg-white border-0">
-                    <h6 class="card-title pull-left text-isb-card-header">Select Filters</h6>
+                <div class="card-header bg-white border-0 ">
+                    <h6 class="card-title pull-left">Select Filters</h6>
                 </div>
-               <div class="card-body bg-white">
-                <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
-                <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                   <li role="presentation" class="filter-tab"> <a href="#case-filters-{{ program.id }}" role="tab"  class="active" aria-selected="true" data-bs-toggle="tab" title="Case Filters">Case</a></li>
+               <div class="card-body bg-white ">
+                <div class="hide-zeros text-isb-blue"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
 
-                    <li role="presentation" class="filter-tab {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}"  role="tab" aria-selected="false" data-bs-toggle="tab" title="Data Type Filters">Data</a></li>
+                <ul class="nav nav-tabs nav-tabs-filters pt-2 pb-4" role="tablist">
 
-                    <li role="presentation" class="filter-tab {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters" href="#p-{{ program.id }}-molecular-filters" role="tab" aria-selected="false" data-bs-toggle="tab" title="Molecular Filters">Molec.</a></li>
+                   <li role="presentation" class="filter-tab"> <a href="#case-filters-{{ program.id }}" role="tab"  class="active text-center text-uppercase text-decoration-none" aria-selected="true" data-bs-toggle="tab" title="Case Filters">Case</a></li>
+
+                    <li role="presentation" class="filter-tab  {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}"  class="text-center text-uppercase text-decoration-none" role="tab" aria-selected="false" data-bs-toggle="tab" title="Data Type Filters">Data</a></li>
+
+                    <li role="presentation" class="filter-tab  {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters text-center text-uppercase text-decoration-none" href="#p-{{ program.id }}-molecular-filters" role="tab" aria-selected="false" data-bs-toggle="tab" title="Molecular Filters">Molec.</a></li>
+
                 </ul>
+
+
                 <div class="tab-content">
+
                      <!-- case filters tab -->
                     <div role="tabpanel" class="tab-pane active" id="case-filters-{{ program.id }}">
                         <ul class="list-group" id="case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                             {% for node, case_attr in node_case_attr|sort_nodes %}
                             <li class="list-group-item">
-                                <div id="{{ node }}-{{ program.id }}-case-heading" class="list-group-item__heading in node-filter-heading">
-                                    <a role="button" class="text-decoration-none" data-bs-toggle="collapse" href="#{{ node }}-{{ program.id }}-case" aria-expanded="false"
+                                <div id="{{ node }}-{{ program.id }}-case-heading" class="ps-3 pe-3 list-group-item__heading in node-filter-heading">
+                                    <a role="button" class="text-decoration-none " data-bs-toggle="collapse" href="#{{ node }}-{{ program.id }}-case" aria-expanded="false"
                                        aria-controls="{{ node }}-{{ program.id }}-case">
                                         <i class="fa fa-solid fa-caret-right"></i><i class="fa fa-solid fa-caret-down"></i>{{ node }}
                                     </a>
@@ -267,6 +273,7 @@
                     </div>
                     {% endif %}
                 </div>
+
                </div>
             </div>
         </div>
@@ -275,21 +282,21 @@
     <div class="col-lg-9 data-tab-content-panel">
         <!-- Selected Filters Panel -->
         {% if not cohort.id %}
-        <div class="selected-filters isb-panel isb-panel-default">
-            <div class="isb-panel-heading clearfix">
-                <h4 class="isb-panel-title pull-left">Selected Filters</h4>
+        <div class="selected-filters card mb-3">
+            <div class="card-header border-0 bg-white clearfix">
+                <h4 class="card-title pull-left">Selected Filters</h4>
                 <a class="pull-right clear-filters text-decoration-none" role="button">Clear All</a>
             </div>
-            <div class="isb-panel-body"></div>
+            <div class="card"></div>
         </div>
         {% endif %}
 
         <!-- Program Details Panel -->
-        <div class="cohort-info isb-panel isb-panel-default">
-            <div class="isb-panel-heading">
-                <h4 class="isb-panel-title">{{ program.name }} Details</h4>
+        <div class="cohort-info card mb-3">
+            <div class="card-header border-0 bg-white">
+                <h6 class="card-title">{{ program.name }} Details</h6>
             </div>
-            <div class="isb-panel-body">
+            <div class="card-body">
                 <div class="row">
                 <div class="col-md-6">
                     <span class="detail-label">Total Number of Cases:</span>
@@ -306,11 +313,11 @@
         </div>
 
         <!-- Clinical Features Treemap Panel -->
-        <div class="case-trees isb-panel isb-panel-default">
-            <div class="isb-panel-heading">
-                <h4 class="isb-panel-title">{{ program.name }} Clinical Featuressss</h4>
+        <div class="case-trees card">
+            <div class="card-header border-0 bg-white">
+                <h4 class="card-title">{{ program.name }} Clinical Featuressss</h4>
             </div>
-            <div class="isb-panel-body">
+            <div class="card-body border-0">
                 <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="tree-graph-case-{{ program.id }}" class="tree-graph-case"></div>
             </div>

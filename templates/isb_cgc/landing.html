@@ -59,9 +59,17 @@
         </div>
         <div class="container-fluid width-spec">
             <div class="alert alert-warning alert-dismissible">
-                <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
-                <b>IMPORTANT NOTICE:</b> ISB-CGC no longer supports controlled access data (including the IGV
-                genomic viewer). If you have any questions, please contact us at <a href="mailto:feedback@isb-cgc.org">feedback@isb-cgc.org</a>.
+                <div class="row">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-10">
+
+                   <b>IMPORTANT NOTICE:</b> ISB-CGC no longer supports controlled access data (including the IGV
+                   genomic viewer). If you have any questions, please contact us at <a href="mailto:feedback@isb-cgc.org">feedback@isb-cgc.org</a>.
+                   </div>
+                    <div class="col-sm-1">
+                        <button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
+
+                    </div>
             </div>
         </div>
         <div class="header-div container-fluid">
@@ -92,8 +100,9 @@
 
                 <div class="row cards-row">
                     <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="card mb-3">
-                            <div class="card-header bg-white border-0 row">
+                        <div class="card mb-3 border-2">
+                            <div class="card-header bg-white border-0">
+                                <div class="card-title">
                                 <div class="row">
                                 <div class="col-9">
                                     <a target="_blank" rel="noreferrer" class="text-decoration-none"
@@ -109,12 +118,13 @@
                                 </div>
                                </div>
                             </div>
+                            </div>
                             <div class="card-body bg-white">
                                 Browse BigQuery tables of metadata and molecular cancer data from the Genomic Data
                                 Commons and other sources. Jump directly to a table to perform discovery and computation
                                 via SQL.
                             </div>
-                            <div class="card-footer">
+                            <div class="card-footer bg-white border-0">
                                 <div class="row">
                                     <div class="col-2"></div>
                                     <div class="col-4 text-center">
@@ -162,13 +172,11 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <div class="row">
-                                     <div class="col-9">
+
                                 Explore a comprehensive selection of cancer related data files in Google Cloud Storage
                                 Buckets, such as raw sequencing, cancer nucleotide variation, pathology or radiology
                                 images.
-                                     </div>
-                                </div>
+
                             </div>
                             <div class="card-footer bg-white border-0">
                                 <div class="row">
@@ -195,8 +203,9 @@
                     </div>
 
                     <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="isb-panel">
-                            <div class="isb-panel-heading row">
+                        <div class="card mb-3 border-2">
+                            <div class="card-header bg-white border-0">
+                                <div class="row">
                                 <div class="col-9">
                                     <a target="_blank" rel="noreferrer" class="text-decoration-none"
                                        href="{{ MITELMAN_URL }}">
@@ -211,12 +220,15 @@
                                              alt="Mitelman Database Icon">
                                     </a>
                                 </div>
+                                </div>
                             </div>
-                            <div class="isb-panel-body">
+                            <div class="card-body">
+
                                 Browse the Mitelman Database of Chromosome Aberrations and Gene Fusions in Cancer which
                                 relates cytogenetic changes, in particular gene fusions, to tumor characteristics.
+
                             </div>
-                            <div class="isb-panel-footer">
+                            <div class="card-footer bg-white border-0">
                                 <div class="row">
                                     <div class="col-2"></div>
                                     <div class="col-4 text-center">
@@ -239,6 +251,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
 
@@ -260,8 +273,10 @@
 
                 <div class="row cards-row">
                     <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="isb-panel">
-                            <div class="isb-panel-heading row">
+                        <div class="card border-2 bg-white">
+                            <div class="card-header border-0 bg-white">
+                                <div class="card-title">
+                                <div class="row">
                                 <div class="col-9">
                                     <a target="_blank" rel="noreferrer" class="text-decoration-none"
                                        href="{% url 'cohort' %}">
@@ -275,13 +290,17 @@
                                              alt="bq table icon">
                                     </a>
                                 </div>
+                                </div>
                             </div>
-                            <div class="isb-panel-body">
+                        </div>
+                            <div class="card-body">
+
                                 A web interface to build cohorts based on clinical demographics and molecular filters.
                                 Compare patient cohorts with various exploration tools including image
                                 viewers and the Cancer Data File Browser.
+
                             </div>
-                            <div class="isb-panel-footer">
+                            <div class="card-footer border-0 bg-white">
                                 <div class="row">
                                     <div class="col-2"></div>
                                     <div class="col-4 text-center">
@@ -305,8 +324,9 @@
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="isb-panel">
-                            <div class="isb-panel-heading row">
+                        <div class="card bg-white border-2">
+                            <div class="card-header border-0 bg-white">
+                                <div class="row">
                                 <div class="col-9">
                                     <a target="_blank" rel="noreferrer"
                                        href="{% url 'programmatic_access' %}" class="text-decoration-none">
@@ -322,11 +342,13 @@
                                     </a>
                                 </div>
                             </div>
-                            <div class="isb-panel-body">
+                            </div>
+
+                            <div class="card-body bg-white border-0">
                                 Learn more about how to access and analyze cancer data through programmatic interfaces
                                 including Google Cloud virtual machines and APIs.
                             </div>
-                            <div class="isb-panel-footer">
+                            <div class="card-footer bg-white border-0">
                                 <div class="row">
                                     <div class="col-2"></div>
                                     <div class="col-4 text-center">
@@ -350,8 +372,9 @@
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="isb-panel">
-                            <div class="isb-panel-heading row">
+                        <div class="card bg-white border-2">
+                            <div class="card-header bg-white border-0">
+                                <div class="row">
                                 <div class="col-9">
                                     <a target="_blank" rel="noreferrer" class="text-decoration-none"
                                        href="https://github.com/isb-cgc/Community-Notebooks">
@@ -365,13 +388,14 @@
                                              alt="bq table icon">
                                     </a>
                                 </div>
+                               </div>
                             </div>
-                            <div class="isb-panel-body">
+                            <div class="card-body bg-white border-0">
                                 A collection of notebooks written in R and Python, to serve as both tutorials or
                                 analysis tools for a range of users; includes reproductions of Regulome Explorer
                                 functionality.
                             </div>
-                            <div class="isb-panel-footer">
+                            <div class="card-footer bg-white border-0">
                                 <div class="row">
                                     <div class="col-4 text-center">
                                         <a target="_blank" rel="noreferrer"
