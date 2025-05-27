@@ -10,7 +10,9 @@ if [ -n "$CI" ]; then
     export DATABASE_NAME=${DATABASE_NAME_BUILD}
     export DATABASE_HOST=${DATABASE_HOST_BUILD}
     # Give the 'ubuntu' test user access
-    mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%';"
+    mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS 'ubuntu'@'%' IDENTIFIED BY 'ubuntu';"
+    mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%';"
+    mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'localhost';"
 else
     if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
         export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
