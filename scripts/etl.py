@@ -85,7 +85,8 @@ SOLR_TYPE_EXCEPTION = {
 
 SOLR_SINGLE_VAL = {
     "case_barcode": ["case_barcode"],
-    "sample_barcode": ["case_barcode", "sample_barcode"]
+    "sample_barcode": ["case_barcode", "sample_barcode"],
+    "file_node_id": ["file_node_id", "file_name_key","file_name","index_file_id","index_file_name_key","file_size","index_file_size","file_type","data_type","data_category","experimental_strategy","data_format","platform","access","acl","slide_barcode","SeriesInstanceUID","StudyInstanceUID","build"]
 }
 
 PREFORMATTED_ATTRS = ["disease_type_gdc","disease_type_pdc", "primary_diagnosis_gdc","primary_site_gdc",
@@ -211,7 +212,6 @@ def load_display_vals():
 def load_tooltips():
     try:
         for attr_name, attr_ttips in ATTR_TIPS.items():
-            print(attr_name)
             attr = Attribute.objects.get(name=attr_name, active=True)
 
             tips = Attribute_Tooltips.objects.select_related('attribute').filter(attribute=attr)
@@ -505,8 +505,11 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
             except ObjectDoesNotExist as e:
                 obj, created = DataSource.objects.update_or_create(
                     name=src['name'], version=DataVersion.objects.get(version=src['version']),
-                    source_type=src['source_type'],
+                    source_type=src['source_type']
                 )
+                if src.get('aggregate_level', None):
+                    obj.aggregate_level = src['aggregate_level']
+                    obj.save()
 
                 progs = Program.objects.filter(name__in=src['programs'])
                 src_to_prog = []

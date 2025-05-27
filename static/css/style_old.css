@@ -2816,7 +2816,7 @@ section .min-max {
   padding-left: 5px; }
 
 #cohort-details .file_count:after, #cohort-filelist .file_count:after {
-  content: 'file(s)';
+  content: 'resource(s)';
   font-size: 0.9em;
   padding-left: 5px; }
 

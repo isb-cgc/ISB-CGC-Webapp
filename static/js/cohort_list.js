@@ -524,7 +524,6 @@ require([
     });
 
     $('.compare-version').on('click', function(){
-
          var cohort_id=$(this).attr('data-cohort-id');
          var cohort_filters_str=$(this).attr('data-filters').replaceAll('\'','"');
          var cohort_filters=JSON.parse(cohort_filters_str);
@@ -543,11 +542,9 @@ require([
                   var disp_val = curfilt['values'][0]['display_val']
                   var attr_str = '<span><a class="label filter-lable label-default">'+src_nm+' '+disp_nm+': '+disp_val+'</a></span>'
                   filter_disp_curr+=attr_str
-
               }
               filter_disp_curr+='</p>';
               filter_disp+=filter_disp_curr;
-
          }
          $("#version-compare-modal").find('#selected-filters').html(filter_disp);
 
@@ -560,9 +557,6 @@ require([
          $("#version-compare-modal").find('#create-cohort-name').val(cohort_name);
          $("#version-compare-modal").find('#cases_orig').html(cases_orig);
          $("#version-compare-modal").find('#samples_orig').html(samples_orig);
-
-
-
          $("#version-compare-modal").modal('show');
          $("#version-compare-modal").find('#placeholder').show();
          $("#version-compare-modal").find('.modal-footer').hide();

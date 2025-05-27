@@ -19,7 +19,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        'jquery': ['libs/jquery-3.5.1.min'],
+        'jquery': ['libs/jquery-3.7.1.min'],
         'bootstrap': ['libs/bootstrap.bundle.min'],
         'jqueryui': ['libs/jquery-ui.min'],
         'session_security': ['session_security/script'],

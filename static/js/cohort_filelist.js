@@ -510,8 +510,7 @@ require([
                 '<tr>' +
                 '<td colspan="9"><i>No resources or files found.</i></td><td></td>'
             );
-        }
-        else {
+        } else {
             var first_page_entry = ((page - 1) * files_per_page) + 1;
             var last_page_entry = first_page_entry + files.length - 1;
             $(tab_selector).find('.showing').text(first_page_entry + " to " + last_page_entry);
@@ -604,10 +603,23 @@ require([
                             table_row_data += '<td>' + files[i][column_name] + '</td>';
                             break;
                         case 'filesize':
-                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] != null && files[i]['filesize'] != 'N/A'? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
+                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] !== null && files[i]['filesize'] !== 'N/A'? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
                             break;
                         default:
-                            table_row_data += '<td>' + (files[i][column_name] || 'N/A') + '</td>';
+                            let vals = files[i][column_name];
+                            let val_types = column_name.split("_")+"s"
+                            if(Array.isArray(files[i][column_name])) {
+                                if((column_name === 'program' || column_name === 'case'
+                                        || column_name === 'case_node_id' || column_name === 'sample'
+                                        || column_name === 'sample_node_id' || column_name === 'project_short_name') &&
+                                    files[i][column_name].length > 5) {
+                                    let val_count = files[i][column_name].length-1
+                                    vals = files[i][column_name][0] + ` and ${val_count} more ${val_types}`;
+                                } else {
+                                    vals = files[i][column_name].join(", ");
+                                }
+                            }
+                            table_row_data += '<td>' + (vals || 'N/A') + '</td>';
                     }
                 }
                 row = '<tr>'+table_row_data+'</tr>';
