@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2024, Institute for Systems Biology
+# Copyright 2015-2025, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import copy
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
+from django.views.decorators.cache import never_cache, cache_page
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -57,7 +57,7 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 
 
 # The site's homepage
-@never_cache
+@cache_page(60 * 5)
 def landing_page(request):
     collex = Collection.objects.filter(active=True, subject_count__gt=6,
                                        collection_type=Collection.ORIGINAL_COLLEX, species='Human',
@@ -1007,6 +1007,7 @@ def warn_page(request):
 
 
 # About page
+@cache_page(60 * 15)
 def about_page(request):
     return render(request, 'idc/about.html', {'request': request})
 
