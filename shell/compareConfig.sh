@@ -52,14 +52,18 @@ diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
 # The < and > mess up the tests:
 
 while read -r LINE; do
-    LINE=`echo "${LINE}" | sed -e s/\'//g`
-    if [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "PASSWORD"` ]; then
+    TEST_LINE=`echo "${LINE}" | sed -e s/\'//g | sed -e s/\"//g`
+    IS_PASS=`echo "${TEST_LINE}" | sed -e 's/<//g' | sed -e 's/>//g' | grep -i "PASSWORD"`
+    IS_SECRET=`echo "${TEST_LINE}" | sed -e 's/<//g' | sed -e 's/>//g' | grep -i "SECRET"`
+    IS_KEY=`echo "${TEST_LINE}" | sed -e 's/<//g' | sed -e 's/>//g' | grep -i "KEY"`
+    IS_TOKEN=`echo "${TEST_LINE}" | sed -e 's/<//g' | sed -e 's/>//g' | grep -i "TOKEN"`
+    if [ ! -z "${IS_PASS}" ]; then
         echo "PASSWORD REDACTED"
-    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "SECRET"` ]; then
+    elif [ ! -z "${IS_SECRET}" ]; then
         echo "SECRET REDACTED"
-    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "KEY"` ]; then
+    elif [ ! -z "${IS_KEY}" ]; then
         echo "KEY REDACTED"
-    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "TOKEN"` ]; then
+    elif [ ! -z "${IS_TOKEN}" ]; then
         echo "TOKEN REDACTED"
     else
         echo "${LINE}"
