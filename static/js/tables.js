@@ -974,11 +974,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                     let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                         '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                         '</a></li>';
-                                    let bucket = Array.isArray(row['aws_bucket']) ? row['aws_bucket'][0] : row['aws_bucket'];
+                                    let disable_multi = Array.isArray(row['aws_bucket']) && (row['aws_bucket'].length > 0);
                                     if(!is_xc) {
-                                        if(bucket.indexOf(",") < 0) {
+                                        if(!disable_multi) {
+                                            let bucket = Array.isArray(row['aws_bucket']) ? row['aws_bucket'][0] : row['aws_bucket'];
                                             let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function (i) {
-                                                return "s3://" + row['aws_bucket'] + "/" + i;
+                                                return "s3://" + bucket + "/" + i;
                                             }).join(",") + ']"';
                                             volView_element = '<li><a class="external-link" href="" url="'+volView_link+'" ' +
                                                 'data-toggle="modal" data-target="#external-web-warning">VolView ' +
