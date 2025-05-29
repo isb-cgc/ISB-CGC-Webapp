@@ -16,8 +16,7 @@
 
 from __future__ import absolute_import
 
-from django.conf.urls import include, url
-from django.urls import path
+from django.urls import include, re_path, path
 from django.contrib import admin
 from django.conf import settings
 from django.views.generic.base import TemplateView
@@ -30,42 +29,42 @@ admin.autodiscover()
 
 urlpatterns = [
 
-    url(r'^$', views.landing_page, name='landing_page'),
-    url(r'^quota/', views.quota_page, name='quota_page'),
-    url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
-    url(r'^users/api/', views_api.user_detail, name='user_detail_api'),
+    re_path(r'^$', views.landing_page, name='landing_page'),
+    re_path(r'^quota/', views.quota_page, name='quota_page'),
+    re_path(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
+    re_path(r'^users/api/', views_api.user_detail, name='user_detail_api'),
 
-    url(r'^cohort_detail/(?P<cohort_id>\d+)/$', demo_views.cohort_detail, name='cohort_detail'),
-    url(r'robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name='robots'),
-    url(r'sitemap.xml', TemplateView.as_view(template_name="sitemap.xml", content_type="text/xml"), name='sitemap'),
+    re_path(r'^cohort_detail/(?P<cohort_id>\d+)/$', demo_views.cohort_detail, name='cohort_detail'),
+    re_path(r'robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name='robots'),
+    re_path(r'sitemap.xml', TemplateView.as_view(template_name="sitemap.xml", content_type="text/xml"), name='sitemap'),
 
-    url(r'^cohorts/', include('cohorts.urls')),
+    re_path(r'^cohorts/', include('cohorts.urls')),
     path('admin/', admin.site.urls),
-    url(r'^accounts/', include('accounts.urls')),
-    url(r'session_security/', include('session_security.urls')),
-    url(r'^_ah/(vm_)?health$', views.health_check),
+    re_path(r'^accounts/', include('accounts.urls')),
+    re_path(r'session_security/', include('session_security.urls')),
+    re_path(r'^_ah/(vm_)?health$', views.health_check),
 
-    url(r'^uihist/$', views.save_ui_hist, name='ui_hist'),
-    url(r'^explore/$', views.explore_data_page, name='explore_data'),
-    url(r'^explore/filters/', views.parse_explore_filters, name='parse_explore_filters'),
-    url(r'^explore/bq_string/$', get_query_str_response, name='explore_bq_string'),
-    url(r'^explore/manifest/$', views.explorer_manifest, name='get_explore_manifest'),
-    url(r'^tables/', views.populate_tables, name='populate_tables'),
-    url(r'^studymp/', views.studymp, name='studymp'),
-    url(r'^warning/', views.warn_page, name='warn'),
-    url(r'^about/', views.about_page, name='about_page'),
-    url(r'^test(.*)/', views.test_page, name='test_page'),
-    url(r'^dashboard/', views.dashboard_page, name='dashboard'),
-    url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
-    url(r'^privacy/', views.privacy_policy, name='privacy'),
-    url(r'^news/', views.news_page, name='news'),
-    url(r'^cart/$', views.cart_page, name='cart'),
-    url(r'^explore/cart/$', views.cart_page, name='get_explore_cart'),
-    url(r'^cart_data/$', views.cart_data, name='get_cart_data'),
-    url(r'^cart_data_stats/$', views.cart_data_stats, name='get_cart_data_stats'),
-    url(r'^collaborators/', views.collaborators, name='collaborators'),
-    url(r'^collections/', include('idc_collections.urls')),
-    # url(r'^share/', include('sharing.urls')),
+    re_path(r'^uihist/$', views.save_ui_hist, name='ui_hist'),
+    re_path(r'^explore/$', views.explore_data_page, name='explore_data'),
+    re_path(r'^explore/filters/', views.parse_explore_filters, name='parse_explore_filters'),
+    re_path(r'^explore/bq_string/$', get_query_str_response, name='explore_bq_string'),
+    re_path(r'^explore/manifest/$', views.explorer_manifest, name='get_explore_manifest'),
+    re_path(r'^tables/', views.populate_tables, name='populate_tables'),
+    re_path(r'^studymp/', views.studymp, name='studymp'),
+    re_path(r'^warning/', views.warn_page, name='warn'),
+    re_path(r'^about/', views.about_page, name='about_page'),
+    re_path(r'^test(.*)/', views.test_page, name='test_page'),
+    re_path(r'^dashboard/', views.dashboard_page, name='dashboard'),
+    re_path(r'^extended_login/$', views.extended_login_view, name='extended_login'),
+    re_path(r'^privacy/', views.privacy_policy, name='privacy'),
+    re_path(r'^news/', views.news_page, name='news'),
+    re_path(r'^cart/$', views.cart_page, name='cart'),
+    re_path(r'^explore/cart/$', views.cart_page, name='get_explore_cart'),
+    re_path(r'^cart_data/$', views.cart_data, name='get_cart_data'),
+    re_path(r'^cart_data_stats/$', views.cart_data_stats, name='get_cart_data_stats'),
+    re_path(r'^collaborators/', views.collaborators, name='collaborators'),
+    re_path(r'^collections/', include('idc_collections.urls')),
+    # re_path(r'^share/', include('sharing.urls')),
 ]
 
 if settings.IS_DEV:
@@ -75,7 +74,7 @@ if settings.IS_DEV:
 if settings.DEBUG and settings.DEBUG_TOOLBAR:
     import debug_toolbar
     urlpatterns = [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        re_path(r'^__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
 
 if settings.LOCAL_RESPONSE_PAGES:

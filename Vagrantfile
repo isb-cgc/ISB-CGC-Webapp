@@ -17,8 +17,8 @@ Vagrant.configure(2) do |config|
      vb.customize ["modifyvm", :id, "--paravirtprovider", "default"]
   end
 
-  config.vm.box_version = "11.20241217.1"
-  config.vm.box = "debian/bullseye64"
+  config.vm.box = "debian/bookworm64"
+  config.vm.box_version = "12.20250126.1"
 
   # WebApp ports
   config.vm.network "forwarded_port", guest: 8086, host: 8086
