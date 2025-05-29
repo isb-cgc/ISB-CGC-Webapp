@@ -48,7 +48,7 @@ from idc.models import User_Data
 
 
 debug = settings.DEBUG
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
@@ -399,6 +399,7 @@ def populate_tables(request):
         sortdir = req.get('sortdir', 'asc')
 
         [cnt, tableRes]=get_table_data_with_cart_data(table_type, sort, sortdir, filters, filtergrp_list, partitions, limit, offset, table_search)
+
         response["res"] = tableRes
         response["cnt"] = cnt
         response["diff"] = []
@@ -812,7 +813,6 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         fields = json.loads(req.get('fields', '[]'))
         order_docs = json.loads(req.get('order_docs', '[]'))
         counts_only = (req.get('counts_only', "true").lower() == "true")
-        print("Explore data page call, counts only: {}".format(counts_only))
         with_related = (req.get('with_clinical', "True").lower() == "true")
         with_derived = (req.get('with_derived', "True").lower() == "true")
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')

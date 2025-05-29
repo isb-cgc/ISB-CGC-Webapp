@@ -38,7 +38,7 @@ import logging
 
 register = template.Library()
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 # If an attribute's values should be alphanumerically sorted, list them here
 ALPHANUM_SORT = [

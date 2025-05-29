@@ -26,7 +26,7 @@ from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 
 debug = settings.DEBUG
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 from datetime import datetime
 
 from django.views.decorators.csrf import csrf_exempt

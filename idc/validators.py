@@ -7,7 +7,7 @@ from accounts.models import PasswordHistory
 
 import re
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 class PasswordReuseValidator:

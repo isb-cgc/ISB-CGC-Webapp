@@ -18,7 +18,7 @@ import logging
 from idc_collections.models import Attribute
 from django.conf import settings
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 def retTuple(x, order_docs):

@@ -26,7 +26,7 @@ from cohorts.utils import _get_cohort_stats
 from idc_collections.collex_metadata_utils import get_collex_metadata
 from idc_collections.models import DataSetType
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 def main():

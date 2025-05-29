@@ -39,7 +39,7 @@ from idc_collections.models import Collection, Attribute, Attribute_Tooltips, Da
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 def main():

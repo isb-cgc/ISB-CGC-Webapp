@@ -19,7 +19,7 @@ from django.contrib.auth.models import User
 
 import logging
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 class AppInfo(models.Model):

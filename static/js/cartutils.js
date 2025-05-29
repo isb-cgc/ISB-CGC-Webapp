@@ -571,7 +571,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     }
 
     const updateCartTable = function() {
-
         var slimViewAbleModality=new Set(["SM"])
         if ($('.cart-wrapper').find('.dataTables_controls').length>0){
             var pageRows = parseInt($('.cart-wrapper').find('.dataTables_length select').val());
@@ -588,7 +587,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[1, "asc"]],
-
                 "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
                     $(row).attr('data-studyid', data['StudyInstanceUID']);
@@ -624,7 +622,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                         updateCartTable();
                     });
                 },
-
                 "columnDefs": [],
                 "columns": [
                     {
@@ -632,14 +629,11 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                             return data;
                         }
                     },
-
                     {
                         "type": "html", "orderable": false, "data": "PatientID", render: function (data) {
                             return data;
                         }
                     },
-
-
                     {
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
@@ -647,8 +641,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                 '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         }
                     },
-
-
                     {
                         "type": "text", "orderable": false, data: 'selcnt', render: function (data, type, row) {
                             return data;
@@ -683,17 +675,18 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                 let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                     '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                     '</a></li>';
-                                let bucket = Array.isArray(row['aws_bucket']) ? row['aws_bucket'][0] : row['aws_bucket'];
+                                let per_series_bucket = Array.isArray(row['aws_bucket']);
                                 if(!is_xc) {
-                                    if(bucket.indexOf(",") < 0) {
-                                        let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function (i) {
+                                    let volView_link = "";
+                                    if(!per_series_bucket) {
+                                        volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function (i) {
                                             return "s3://" + row['aws_bucket'] + "/" + i;
                                         }).join(",") + ']"';
-                                        volView_element = '<li><a class="external-link" href="" url="'+volView_link+'" ' +
-                                            'data-toggle="modal" data-target="#external-web-warning">VolView ' +
-                                            '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
-                                            '</a></li>';
                                     }
+                                    volView_element = '<li><a class="external-link" href="" url="'+volView_link+'" ' +
+                                        'data-toggle="modal" data-target="#external-web-warning">VolView ' +
+                                        '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                        '</a></li>';
                                     v2_element = '<li><a href="'+v2_link+'" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
                                 }
                                 return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +

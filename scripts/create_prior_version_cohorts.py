@@ -33,7 +33,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from cohorts.utils import _save_cohort
 from idc_collections.models import ImagingDataCommonsVersion, Attribute
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 COHORT_DEFS_EXAMPLE = [
     # {

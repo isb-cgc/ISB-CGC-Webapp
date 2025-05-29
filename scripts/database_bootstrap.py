@@ -47,7 +47,7 @@ from idc_collections.models import Program, Collection, Attribute, Attribute_Ran
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 ranges_needed = {
     'wbc_at_diagnosis': 'by_200',
