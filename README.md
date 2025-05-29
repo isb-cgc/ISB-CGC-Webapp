@@ -55,11 +55,16 @@ You will need to set the `shell/python-su.sh` file to be executable. You can do 
 To run your server in PyCharm:
 
  1. Make sure your Vagrant machine is running by going to **Tools > Vagrant > Up**
-    - If this is the first time you've built the VM, it can be time consuming.
-    - Our VMs are currently running Ubuntu 16.0.4 LTS, which is what the app deploys under as well.
- 2. Once the VM has built, click on the Run or Debug icons in the toolbar (upper-right corner of the PyCharm GUI)
-    - Your server will start and the PyCharm console should show all the logs and output from the system. 
-    - If you are running in debug, you can also use breakpoints to stop the execution and examine variables and code as it runs.
+  * If this is the first time you've built the VM, it can be time consuming.
+  * Our VMs are currently running Debian 12 (Bookworm) LTS, which is what the app deploys under as well.
+ 2. Once the VM is built, you will need to update the kernel headers and Guest Additions
+  * Kernel header update: `sudo apt-get -y install dkms build-essential linux-headers-$(uname -r)`
+    * NOTE: you may get a 'package not found' error here; if so, you'll need to look up the current header package for this install and use that instead.
+  * Guest Additions ISO mounting and installation: https://docs.bitnami.com/virtual-machine/faq/configuration/install-virtualbox-guest-additions/
+ 3. Next, set the `shell/python-su.sh` script to executable in the vagrant machine's command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
+ 4. You can now click on the Run or Debug icons in the toolbar (upper-right corner of the PyCharm GUI)
+  * Your server will start and the PyCharm console should show all the logs and output from the system. 
+  * If you are running in debug, you can also use breakpoints to stop the execution and examine variables and code as it runs.
 
 ## Adding Python Dependencies
 
@@ -71,11 +76,11 @@ To update your existing python dependencies because of a change, or to pull down
 
  1. Click **Tools > Start SSH session...**
  2. Select the Vagrant VM Connection you set up
- 3. Type `cd www; sudo pip3 install -r requirements.txt --upgrade -t lib/`
+ 3. Type `cd www; sudo pip install -r requirements.txt --upgrade -t lib/`
 
 Or from the command line, you can do this by doing the following:
 
  1. Open a terminal in the project directory
  2. Type `vagrant ssh` to login to the virtual machine
  3. Change directory to the `www` directory (`/home/vagrant/www/` is the full path)
- 4. Run `pip3 install -r requirements.txt --upgrade -t lib/`
+ 4. Run `pip install -r requirements.txt --upgrade -t lib/`
