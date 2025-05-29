@@ -47,7 +47,7 @@ apt-get install mysql-client
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix pkg-config
+apt-get install -y --force-yes unzip libffi-dev libssl-dev git g++ curl dos2unix pkg-config
 apt-get install -y --force-yes python3-distutils python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
 apt-get install -y --force-yes python3-pip
 
