@@ -84,6 +84,7 @@ MANAGERS                = ADMINS
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
+GCLOUD_TOPICS_ID               = os.environ.get('GCLOUD_TOPICS_ID', GCLOUD_PROJECT_ID)
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
 BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
