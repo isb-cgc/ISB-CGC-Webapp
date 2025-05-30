@@ -91,7 +91,7 @@ BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLO
 BIGQUERY_USER_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_USER_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_USER_MANIFEST_DATASET = os.environ.get('BIGQUERY_USER_MANIFEST_DATASET', 'dev_user_dataset')
 BIGQUERY_USER_MANIFEST_TIMEOUT = int(os.environ.get('BIGQUERY_USER_MANIFEST_TIMEOUT', '7'))
-PUBSUB_USER_MANIFEST_TOPIC     = "projects/{}/topics/{}".format(GCLOUD_PROJECT_ID, os.environ.get('PUBSUB_USER_MANIFEST_TOPIC', 'user-manifest'))
+PUBSUB_USER_MANIFEST_TOPIC     = "projects/{}/topics/{}".format(GCLOUD_TOPICS_ID, os.environ.get('PUBSUB_USER_MANIFEST_TOPIC', 'user-manifest'))
 USER_MANIFESTS_FOLDER          = os.environ.get('USER_MANIFESTS_FOLDER', 'user-manifests')
 RESULT_BUCKET                  = os.environ.get('RESULT_BUCKET', 'idc-dev-files')
 

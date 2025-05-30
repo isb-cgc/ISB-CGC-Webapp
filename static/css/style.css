@@ -4499,3 +4499,9 @@ d-topics-list iframe {
 .goto-page-number {
   margin-left: 5px;
 }
+
+.collapse-open-all {
+  margin-top: 5px;
+  font-weight: bold;
+  font-size: smaller;
+}

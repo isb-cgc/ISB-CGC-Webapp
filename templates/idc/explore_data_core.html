@@ -25,8 +25,9 @@
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
                                 <h4 class="panel-title">Search Scope</h4>
-                                <button class="is-hidden" onclick="fetchscript()">press me</button>
-                                <button class="is-hidden" onclick="testfunc()">press me</button>
+                                <p class="collapse-open-all">
+                                    <a class="collapse-all search-scope-toggle">Close All</a> / <a class="open-all search-scope-toggle">Open All</a>
+                                </p>
                             </div>
                             <div class="tab-content">
                                 <div id="program_set" class="tab-pane active" role="tabpanel">
@@ -43,7 +44,7 @@
                                                 <i class="fa-solid fa-search" title="Filter values"></i>
                                                </span>
                                             </div>
-                                            <div id="Program" data-filter-attr-nm="Program"
+                                            <div id="Program" class="search-scope-item in" data-filter-attr-nm="Program"
                                                  class="filter-panel collection-list collapse in" aria-expanded="true">
                                                 <input id="collection_search"
                                                        class="collection-text-filter is-hidden value-search" type="text"
@@ -163,7 +164,7 @@
                                                   </span>
                                                     </div>
                                                     <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
-                                                         class="collapse in list-group-item__body">
+                                                         class="collapse in list-group-item__body search-scope-item">
                                                     <input id="analysis_search"
                                                        class="text-filter is-hidden value-search" type="text"
                                                        placeholder="Search..." onkeyup="updateFilters('analysis_results_id',{},false,true)">
@@ -216,8 +217,10 @@
                     <div id="search-configuration" class="search-configuration filter-panel search-con" role="tabpanel">
                         <div class="tabpanel panel-default" role="tabpanel">
                             <div class="panel-heading clearfix">
-                                <h4 class="panel-title">Search Configuration
-                                </h4>
+                                <h4 class="panel-title">Search Configuration</h4>
+                                <p class="collapse-open-all">
+                                    <a class="collapse-all search-config-toggle">Close All</a> / <a class="open-all search-config-toggle">Open All</a>
+                                </p>
                                 <br><span><input id="hide-zeros-attr" class="hide-zeros" type="checkbox" value="hide-zeros"
                                                  onchange="hideAtt(this)"> Hide attribute values with 0 cases</span>
                             </div>
@@ -267,7 +270,7 @@
                                                  </span>
                                                     </div>
                                                     <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
-                                                         class="list-group-item__body collapse
+                                                         class="list-group-item__body collapse search-config-item
                                                             {% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation,CancerType" %} in
                                                             {% endif %}
                                                             "
@@ -391,7 +394,7 @@
                                                                          data-filter-attr-id="{{ attr.id }}"
                                                                          data-filter-display-attr="{{ attr.display_name }}"
                                                                          data-plotnm="{{ attr.name|plotnm }}"
-                                                                         class="collapse list-group-item__body collapse"
+                                                                         class="collapse list-group-item__body collapse search-config-item"
                                                                             {% if attr.min_max %}
                                                                          data-min="{{ attr.min_max.min|floor }}"
                                                                          data-max="{{ attr.min_max.max|ceiling }}"
@@ -501,7 +504,7 @@
                                                             </div>
                                                             <div id="{{ attr.name }}"
                                                                  data-filter-attr-id="{{ attr.id }}"
-                                                                 class="collapse list-group-item__body collapse"
+                                                                 class="collapse list-group-item__body collapse search-config-item"
                                                                  aria-expanded="false"
                                                                     {% if attr.min_max %}
                                                                  data-min="{{ attr.min_max.min|floor }}"

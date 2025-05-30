@@ -589,4 +589,14 @@ require([
     $('.download-link').on('click', function(){
         $('#download-images').modal("hide");
     });
+
+    $('.container-fluid').on('click', '.collapse-all', function(){
+        let targets = $(this).hasClass('search-scope-toggle') ? '.search-scope-item' : '.search-config-item';
+        $(targets).collapse('hide');
+    });
+
+    $('.container-fluid').on('click', '.open-all', function(){
+        let targets = $(this).hasClass('search-scope-toggle') ? '.search-scope-item' : '.search-config-item';
+        $(targets).collapse('show');
+    });
 });
