@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017-2024, Institute for Systems Biology
+ * Copyright 2017-2025, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,18 @@ require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         'datatables.bootstrap': ['libs/dataTables.bootstrap5'],
-
+        tippy: 'libs/tippy-bundle.umd',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'datatables.bootstrap': ['jquery']
-
     }
 });
 
@@ -33,12 +40,13 @@ require([
     'base',
     'underscore',
     'utils',
+    'tippy',
     'jqueryui',
     'bootstrap',
     'session_security',
     'datatables.net',
     'datatables.bootstrap'
-], function ($, base, _, utils) {
+], function ($, base, _, utils, tippy) {
 
     $.getCookie = utils.getCookie;
 
@@ -562,8 +570,9 @@ require([
                         case 'filename':
                             table_row_data += '<td><div class ="col-filename"><div>';
                             if(files[i]['dataformat'] == 'BigQuery') {
-                                table_row_data += '<a href="'+BQ_SEARCH_URL+'search?tableId='+
-                                    files[i]['filename'].split(".")[2]+'&status=current&include_always_newest=false" '+
+                                let bq_table = files[i]['filename'].split(".");
+                                table_row_data += '<a href="'+BQ_SEARCH_URL+'search?datasetId='+bq_table[1] + '&tableId='+
+                                    bq_table[2]+'&projectId='+bq_table[0]+'" ' +
                                     'title="View table in BQ Search" target="_blank" rel="nofollow noreferrer">'+
                                     files[i]['filename']+'</a>';
                             } else {
@@ -604,18 +613,25 @@ require([
                         default:
                             let vals = files[i][column_name];
                             let val_types = column_name.split("_")+"s"
+                            let vals_tip = "";
+                            let data_vals = "";
                             if(Array.isArray(files[i][column_name])) {
+                                let num_vals = files[i][column_name].length;
                                 if((column_name === 'program' || column_name === 'case'
                                         || column_name === 'case_node_id' || column_name === 'sample'
                                         || column_name === 'sample_node_id' || column_name === 'project_short_name') &&
-                                    files[i][column_name].length > 5) {
-                                    let val_count = files[i][column_name].length-1
+                                    num_vals > 5) {
+                                    let val_count = num_vals-1
                                     vals = files[i][column_name][0] + ` and ${val_count} more ${val_types}`;
+                                    if(column_name === 'program' && num_vals > 1) {
+                                        vals_tip = ` <i class="fa fa-solid fa-info-circle vals-tooltip" data-source="${column_name}">`
+                                        data_vals = ` data-${column_name}-full="`+files[i][column_name].join(", ")+'"';
+                                    }
                                 } else {
                                     vals = files[i][column_name].join(", ");
                                 }
                             }
-                            table_row_data += '<td>' + (vals || 'N/A') + '</td>';
+                            table_row_data += `<td ${data_vals}>` + (vals || 'N/A') + `${vals_tip}` + '</td>';
                     }
                 }
                 row = '<tr>'+table_row_data+'</tr>';
@@ -1153,5 +1169,19 @@ require([
         update_zero_case_filters(filterSet.parents('.filter-panel').find('.hide-zeros'));
     });
 
+    tippy.delegate('.filelist-container', {
+        content: function(reference) {
+            let source = $(reference).attr('data-source');
+            let source_vals = $(reference).parents('td').attr(`data-${source}-full`);
+            return `<p>${source_vals}</p>`;
+        },
+        theme: 'dark',
+        placement: 'right',
+        arrow: false,
+        allowHTML: true,
+        interactive:true,
+        target: ['.vals-tooltip'],
+        maxWidth: 250
+    });
 
 });
