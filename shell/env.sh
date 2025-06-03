@@ -1,3 +1,4 @@
+#!/bin/bash
 # Location of the .env file
 # This is NOT a relative path and should NOT be the same value as SECURE_LOCAL_PATH
 # This should be an absolute path on the VM.
