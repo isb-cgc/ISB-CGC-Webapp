@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017-2024, Institute for Systems Biology
+ * Copyright 2017-2025, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,19 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-       bootstrap: 'libs/bootstrap.bundle.min'
+        'datatables.bootstrap': ['libs/dataTables.bootstrap5'],
+        tippy: 'libs/tippy-bundle.umd',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
-        'bootstrap': ['jquery']
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
+        'datatables.bootstrap': ['jquery']
     }
 });
 
@@ -30,10 +39,16 @@ require([
     'jquery',
     'base',
     'underscore',
+    'utils',
+    'tippy',
     'jqueryui',
     'bootstrap',
-    'session_security'
-], function ($, base, _) {
+    'session_security',
+    'datatables.net',
+    'datatables.bootstrap'
+], function ($, base, _, utils, tippy) {
+
+    $.getCookie = utils.getCookie;
 
     // For manaaging filter changes
     var UPDATE_PENDING = false;
@@ -180,14 +195,11 @@ require([
 
     $('.data-tab-content').on('click', '.clear-filters', function() {
         let activeDataTab = $('.data-tab.active').data('file-type');
-
         $(this).parents('.selected-filters-'+activeDataTab).find('.isb-panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
-
         SELECTED_FILTERS[activeDataTab] = {};
-
         update_displays();
     });
 
@@ -237,19 +249,24 @@ require([
             $('#placeholder').show();
             var data_tab_content_div = $('div.data-tab-content');
             var get_panel_url = "";
+            var ndic={}
             if (cohort !== null) {
                 get_panel_url = BASE_URL + '/cohorts/filelist/'+cohort+'/panel/' + active_tab +'/';
-            }
-            else {
+            } else {
                 get_panel_url = BASE_URL + '/cohorts/filelist/panel/' + active_tab + '/';
+                ndic['program_ids']=JSON.stringify(program_ids);
+                ndic['case_filters']=JSON.stringify(case_filters);
             }
-
+            //data         :ndic,
+            // beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
-                type        :'GET',
+                type        :'POST',
+                data         :ndic,
                 url         : get_panel_url,
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     data_tab_content_div.append(data);
-
                     update_links(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
 
@@ -422,6 +439,10 @@ require([
         if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length >0){
             url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
         }
+        if ((typeof(case_filters)=="object") && (Object.keys(case_filters).length>0)){
+            url += '&case_filters=' + encodeURIComponent(case_filters);
+        }
+
 
         $(tab_selector).find('.prev-page').addClass('disabled');
         $(tab_selector).find('.next-page').addClass('disabled');
@@ -491,10 +512,9 @@ require([
         if(files.length <= 0) {
             $(tab_selector).find('.filelist-panel table tbody').append(
                 '<tr>' +
-                '<td colspan="9"><i>No file listings found.</i></td><td></td>'
+                '<td colspan="9"><i>No resources or files found.</i></td><td></td>'
             );
-        }
-        else {
+        } else {
             var first_page_entry = ((page - 1) * files_per_page) + 1;
             var last_page_entry = first_page_entry + files.length - 1;
             $(tab_selector).find('.showing').text(first_page_entry + " to " + last_page_entry);
@@ -548,10 +568,18 @@ require([
                     column_name = tab_columns[active_tab][j];
                     switch (column_name){
                         case 'filename':
-                            table_row_data += '<td><div class ="col-filename">' +
-                                    '<div>' + files[i]['filename'] + '</div>' +
-                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
-                                    '</div></td>';
+                            table_row_data += '<td><div class ="col-filename"><div>';
+                            if(files[i]['dataformat'] == 'BigQuery') {
+                                let bq_table = files[i]['filename'].split(".");
+                                table_row_data += '<a href="'+BQ_SEARCH_URL+'search?datasetId='+bq_table[1] + '&tableId='+
+                                    bq_table[2]+'&projectId='+bq_table[0]+'" ' +
+                                    'title="View table in BQ Search" target="_blank" rel="nofollow noreferrer">'+
+                                    files[i]['filename']+'</a>';
+                            } else {
+                                table_row_data += files[i]['filename'] + '</div>' +
+                                        '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id']+']';
+                            }
+                            table_row_data += '</div></div></td>'
                             break;
                         case 'pdf_filename':
                             let file_loc = PATH_PDF_URL+files[i]['file_node_id'];
@@ -580,10 +608,30 @@ require([
                             table_row_data += '<td>' + files[i][column_name] + '</td>';
                             break;
                         case 'filesize':
-                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] != null && files[i]['filesize'] != 'N/A'? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
+                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] !== null && files[i]['filesize'] !== 'N/A'? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
                             break;
                         default:
-                            table_row_data += '<td>' + (files[i][column_name] || 'N/A') + '</td>';
+                            let vals = files[i][column_name];
+                            let val_types = column_name.split("_")+"s"
+                            let vals_tip = "";
+                            let data_vals = "";
+                            if(Array.isArray(files[i][column_name])) {
+                                let num_vals = files[i][column_name].length;
+                                if((column_name === 'program' || column_name === 'case'
+                                        || column_name === 'case_node_id' || column_name === 'sample'
+                                        || column_name === 'sample_node_id' || column_name === 'project_short_name') &&
+                                    num_vals > 5) {
+                                    let val_count = num_vals-1
+                                    vals = files[i][column_name][0] + ` and ${val_count} more ${val_types}`;
+                                    if(column_name === 'program' && num_vals > 1) {
+                                        vals_tip = ` <i class="fa fa-solid fa-info-circle vals-tooltip" data-source="${column_name}">`
+                                        data_vals = ` data-${column_name}-full="`+files[i][column_name].join(", ")+'"';
+                                    }
+                                } else {
+                                    vals = files[i][column_name].join(", ");
+                                }
+                            }
+                            table_row_data += `<td ${data_vals}>` + (vals || 'N/A') + `${vals_tip}` + '</td>';
                     }
                 }
                 row = '<tr>'+table_row_data+'</tr>';
@@ -736,6 +784,8 @@ require([
         $(this).toggleClass('column_show').toggleClass('column_hide');
         var col_index = $(this).index();
         tab_columns_display[this_tab][col_index][1] ^= 1;
+        console.debug($('#'+this_tab+'-files table.file-list-table')
+            .find('td:nth-child('+(col_index+1)+'), th:nth-child('+(col_index+1)+'), col:nth-child('+(col_index+1)+')'));
         $('#'+this_tab+'-files table.file-list-table')
             .find('td:nth-child('+(col_index+1)+'), th:nth-child('+(col_index+1)+'), col:nth-child('+(col_index+1)+')')
             .toggleClass('hide');
@@ -860,6 +910,10 @@ require([
             if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length > 0) {
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
             }
+            //cases_filter here
+            if ((typeof(case_filters)=="object") && (Object.keys(case_filters).length>0)){
+                url += '&case_filters=' + encodeURIComponent(JSON.stringify(case_filters));
+            }
             UPDATE_PENDING = true;
             $('#'+active_tab+'-files').find('.filelist-panel .spinner i').removeClass('d-none');
             $.ajax({
@@ -915,16 +969,18 @@ require([
     var update_zero_case_filters = function(hide_zero_case_checkbox) {
         if (!hide_zero_case_checkbox)
             return;
-
-        var should_hide = hide_zero_case_checkbox.prop('checked');
-        var parent_filter_panel = hide_zero_case_checkbox.parent().parent();
+        let hideZeros = hide_zero_case_checkbox.is(':checked');
+        let parent_filter_panel = hide_zero_case_checkbox.parent().parent();
         parent_filter_panel.find('.search-checkbox-list').each(function() {
-            var filter_list = $(this);
-            var num_filter_to_show = 0;
+            let filter_list = $(this);
+            let num_filter_to_show = 0;
             filter_list.find('li').each(function () {
-                var filter = $(this);
-                var is_zero_case = (filter.find('span').text() == "0");
-                if (!is_zero_case || !should_hide) {
+                let filter = $(this);
+                let searchMismatch = filter.hasClass('search-mismatch');
+                let isChecked = filter.find('input').is(':checked');
+                let is_zero_case = (filter.find('input').attr('data-count') === "0");
+                let toHide = (!isChecked && ((is_zero_case && hideZeros) || searchMismatch));
+                if (!toHide) {
                     num_filter_to_show++;
                 }
             });
@@ -941,20 +997,21 @@ require([
                 filter_list.find('.more-checks').show();
             }
 
-            var visible_filter_count = 0;
+            let visible_filter_count = 0;
             filter_list.find('li').each(function () {
-                var filter = $(this);
-                var is_zero_case = (filter.find('span').text() == "0");
+                let filter = $(this);
+                let isChecked = filter.find('.filter-value').is(':checked');
+                let is_zero_case = (filter.find('input').attr('data-count') === "0");
                 filter.removeClass("extra-values");
                 filter.removeClass("visible-filter");
-                if (is_zero_case && should_hide) {
+                let searchMismatch = filter.hasClass('search-mismatch');
+                if (!isChecked && ((is_zero_case && hideZeros) || searchMismatch)) {
                     filter.hide();
                 } else {
                     filter.addClass("visible-filter");
-                    if (visible_filter_count >= 6) {
+                    if (visible_filter_count >= 6 && !isChecked) {
                         filter.addClass("extra-values");
-                        if (!is_expanded)
-                        {
+                        if (!is_expanded) {
                             filter.hide();
                         }
                     } else {
@@ -1059,30 +1116,72 @@ require([
 
     $('.data-tab-content').on('click', '.pdf-download', function(){
         $.ajax({
-                type        :'GET',
-                url         : $(this).attr('url'),
-                success : function (data) {
-                    let signed_uri = data['signed_uri'];
-                    let a = document.createElement('a');
-                    a.href = signed_uri;
-                    a.download = $(this).attr('data-filename');
-                    a.target="_blank"
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(a.href);
-                },
-                error: function (xhr) {
-                     let responseJSON = $.parseJSON(xhr.responseText);
-                    // If we received a redirect, honor that
-                    if(responseJSON.redirect) {
-                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
-                        window.location = responseJSON.redirect;
+            type        :'GET',
+            url         : $(this).attr('url'),
+            success : function (data) {
+                let signed_uri = data['signed_uri'];
+                let a = document.createElement('a');
+                a.href = signed_uri;
+                a.download = $(this).attr('data-filename');
+                a.target="_blank"
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(a.href);
+            },
+            error: function (xhr) {
+                 let responseJSON = $.parseJSON(xhr.responseText);
+                // If we received a redirect, honor that
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
+                } else {
+                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                }
+            },
+        })
+    });
+
+    let last_searches = {};
+
+    $('.filelist-container').on('keyup', '.filter-search', function(){
+        let searchVal = $(this).val().trim();
+        let filterSet = $(this).parents('.list-group-item');
+        let attr = filterSet.find('.search-checkbox-list').attr("id");
+        let searchFilters = Boolean(searchVal !== '');
+        let filters = filterSet.find('.search-checkbox-list li.checkbox');
+
+        if(!searchFilters) {
+            filters.removeClass('search-mismatch');
+        } else {
+            if((last_searches[attr] !== searchVal)) {
+                filters.each(function(){
+                    let filterValue = $(this).find('input.filter-value').attr("data-value-display");
+                    if(filterValue.toLowerCase().includes(searchVal.toLowerCase())) {
+                        $(this).removeClass('search-mismatch');
                     } else {
-                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                        $(this).addClass('search-mismatch');
                     }
-                },
-            })
+                });
+            }
+        }
+        last_searches[attr] = searchVal;
+        update_zero_case_filters(filterSet.parents('.filter-panel').find('.hide-zeros'));
+    });
+
+    tippy.delegate('.filelist-container', {
+        content: function(reference) {
+            let source = $(reference).attr('data-source');
+            let source_vals = $(reference).parents('td').attr(`data-${source}-full`);
+            return `<p>${source_vals}</p>`;
+        },
+        theme: 'dark',
+        placement: 'right',
+        arrow: false,
+        allowHTML: true,
+        interactive:true,
+        target: ['.vals-tooltip'],
+        maxWidth: 250
     });
 
 });

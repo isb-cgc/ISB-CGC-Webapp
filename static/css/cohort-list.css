@@ -1,0 +1,6 @@
+.compare-version{
+    #border: 1px solid
+}
+.inactive-version{
+    background-color: darkgray !important;
+}

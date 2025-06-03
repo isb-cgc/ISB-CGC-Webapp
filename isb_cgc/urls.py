@@ -46,14 +46,14 @@ urlpatterns = [
     # Blink views
     # ------------------------------------------
 
-    re_path(r'^help/', views.help_page, name='help'),
-    re_path(r'^about/', views.about_page, name='about_page'),
-    re_path(r'^citations/', views.citations_page, name='citations_page'),
+    re_path(r'^help/$', views.help_page, name='help'),
+    re_path(r'^about/$', views.about_page, name='about_page'),
+    re_path(r'^citations/$', views.citations_page, name='citations_page'),
     re_path(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     re_path(r'^otp_request/$', views.CgcOtpView.as_view(), name='otp_request'),
-    re_path(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
-    re_path(r'^how_to_discover/', views.how_to_discover_page, name='how_to_discover'),
-    re_path(r'^contact_us/', views.contact_us, name='contact_us'),
+    re_path(r'^videotutorials/$', views.vid_tutorials_page, name='vid_tutorials'),
+    re_path(r'^how_to_discover/$', views.how_to_discover_page, name='how_to_discover'),
+    re_path(r'^contact_us/$', views.contact_us, name='contact_us'),
     re_path(r'^bq_meta_search/$', views.bq_meta_search, name='bq_meta_search'),
     re_path(r'^bq_meta_search/(?P<full_table_id>[A-Za-z0-9._/-]+)/$', views.bq_meta_search, name='bq_meta_search_table'),
     # re_path(r'^bq_meta_search/(?P<table_id>[A-Za-z0-9._/-]+)/$', views.bq_meta_search, name='bq_meta_search_table'),
@@ -72,7 +72,7 @@ urlpatterns = [
     re_path(r'^opt_in/form/$', views.opt_in_form, name='opt_in_form'),
     re_path(r'^opt_in/form_reg_user/$', views.form_reg_user, name='opt_in_form_reg_user'),
     re_path(r'^opt_in/form_submit', views.opt_in_form_submitted, name='opt_in_form_submitted'),
-    re_path(r'^warning/', views.warn_page, name='warn'),
+    re_path(r'^warning/$', views.warn_page, name='warn'),
 ]
 
 if settings.IS_DEV:
