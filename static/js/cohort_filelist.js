@@ -187,14 +187,11 @@ require([
 
     $('.data-tab-content').on('click', '.clear-filters', function() {
         let activeDataTab = $('.data-tab.active').data('file-type');
-
         $(this).parents('.selected-filters-'+activeDataTab).find('.isb-panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
-
         SELECTED_FILTERS[activeDataTab] = {};
-
         update_displays();
     });
 
@@ -247,8 +244,7 @@ require([
             var ndic={}
             if (cohort !== null) {
                 get_panel_url = BASE_URL + '/cohorts/filelist/'+cohort+'/panel/' + active_tab +'/';
-            }
-            else {
+            } else {
                 get_panel_url = BASE_URL + '/cohorts/filelist/panel/' + active_tab + '/';
                 ndic['program_ids']=JSON.stringify(program_ids);
                 ndic['case_filters']=JSON.stringify(case_filters);
