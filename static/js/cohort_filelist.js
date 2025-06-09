@@ -990,9 +990,11 @@ require([
             filter_list.find('.show-more').text(show_more_text);
 
             var is_expanded = filter_list.find('.less-checks').hasClass("more-expanded");
-            if (num_filter_to_show == 0 || num_extra <= 0) {
+            if (num_filter_to_show === 0 || num_extra <= 0) {
                 filter_list.find('.more-checks').hide();
                 filter_list.find('.less-checks').hide();
+                filter_list.find('.less-checks').removeClass("more-expanded");
+                is_expanded = false;
             } else if (!is_expanded) {
                 filter_list.find('.more-checks').show();
             }
