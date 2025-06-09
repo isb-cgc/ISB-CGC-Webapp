@@ -121,11 +121,13 @@
                 <div class="isb-panel-body">
                     <div>
                         <!-- Grouped by program -->
-                        <select class="sort-by-program dataset-select-box form-select">
+                        <select id="program-select" class="sort-by-program dataset-select-box form-select">
                             {% for program in all_programs %}
                                 {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
                                 {% else %}
-                                    <option value="{{ program.name }}" node-id="0" program-id="{{ program.id }}">
+                                    <option value="{{ program.name }}" node-id="0" program-id="{{ program.id }}"
+                                        {% if program.name == "TCGA" %}selected{% endif %}
+                                    >
                                         {{ program.name }} ({{ program.node_list }})
                                     </option>
                                 {% endif %}
