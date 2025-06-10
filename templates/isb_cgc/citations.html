@@ -166,7 +166,7 @@
                     {% for paper in papers %}
                         <li>
                             {{ paper.authors }}
-                            <a target="_blank" rel="noreferrer" href="{{ paper.url }}/">
+                            <a target="_blank" rel="noreferrer" href="{{ paper.url }}">
                                 {{ paper.title |safe }}</a>.
                             {% if paper.source %}<i>{{ paper.source |safe }}. </i>{% endif %}
                             {% if paper.year %}{{ paper.year }}. {% endif %}
