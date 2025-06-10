@@ -40,22 +40,40 @@
         </ol>
      </div>
      <div class="col-lg-6 col-md-6">
-
-
-        <h1 class="page-header float-start">Create Cohort</h1>
+        <h1 class="page-header float-start">Case Browser</h1>
      </div>
      <div class="col-lg-6 col-md-6">
         {% if user.is_authenticated %}
-            <button class="btn btn-secondary float-end" data-bs-toggle="modal" data-bs-target="#create-cohort-modal"
+            <button class="ms-2 btn btn-secondary float-end " data-bs-toggle="modal" data-bs-target="#create-cohort-modal"
                     title="Please select at least one filter." > Save As New Cohort
             </button>
         {% else %}
-            <button class="btn btn-secondary float-end" id="log-in-to-save-btn"
+
+            <button class="ms-2 btn btn-secondary float-end" id="log-in-to-save-btn"
                     title="Please select at least one filter."
-{#                        onclick="location.href='{% url 'account_login' %}'"#}
                     disabled>Log In to Save New Cohort
             </button>
         {% endif %}
+         <form id ="nologin-download" action="/cohorts/download_ids_nologin/" method="POST">
+             {% csrf_token %}
+             <input type="hidden" name="program_ids">
+             <input type="hidden" name="filters">
+             <input type="hidden" name="downloadToken">
+             </form>
+                 <button class="ms-2 btn btn-secondary float-end download-ids-nologin-btn nologin"
+                    title="Please select at least one filter." disabled> Download Case List
+               </button>
+
+         <form id ="nologin-view-files" action="/cohorts/filelist/" method="POST" target="_blank">
+             {% csrf_token %}
+             <input type="hidden" name="program_ids" value="">
+             <input type="hidden" name="case_filters" value="">
+              <input type="hidden" name="downloadToken">
+         </form>
+                 <button class="ms-2 btn btn-secondary float-end view-files-nologin-btn nologin"
+                    title="Please select at least one filter." disabled>View Resources (these Cases)
+               </button>
+
      </div>
 
     </div>
@@ -103,11 +121,13 @@
                 <div class="isb-panel-body">
                     <div>
                         <!-- Grouped by program -->
-                        <select class="sort-by-program dataset-select-box form-select">
+                        <select id="program-select" class="sort-by-program dataset-select-box form-select">
                             {% for program in all_programs %}
                                 {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
                                 {% else %}
-                                    <option value="{{ program.name }}" node-id="0" program-id="{{ program.id }}">
+                                    <option value="{{ program.name }}" node-id="0" program-id="{{ program.id }}"
+                                        {% if program.name == "TCGA" %}selected{% endif %}
+                                    >
                                         {{ program.name }} ({{ program.node_list }})
                                     </option>
                                 {% endif %}
@@ -204,7 +224,8 @@
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     </div>
-                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+
+                     <form id="create-cohort-form" method="POST" action={% url 'save_cohort' %}>
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="create-cohort-name">Name:</label>

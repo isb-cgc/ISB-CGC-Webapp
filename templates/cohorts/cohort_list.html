@@ -13,6 +13,8 @@
 {% block page_name %}cohorts-list{% endblock %}
 
 {% block page_header %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/cohort-list.css' %}">
 <div class="container">
      <div class="row">
      <div class="col-lg-12 col-md-12 col-sm-12">
@@ -25,12 +27,21 @@
 {% block content %}
 <div class="container">
     <div class="isb-panel isb-panel-default">
-        <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" {% if not is_public %} class="active" {% endif %} >
+    <div class ="isb-panel-heading">
+      <h4>Saved Cohorts</h4>
+    </div>
+        <!-- <ul class="nav nav-tabs" role="tablist">
+
+
+            <li role="presentation">
                 <a href="#saved-cohorts-list" aria-controls="saved-cohorts-list" role="tab" data-bs-toggle="tab">Saved Cohorts</a>
             </li>
-        </ul>
+        </ul> -->
+
+
         <div class="tab-content isb-panel-body ">
+
+
             <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="saved-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
                     {% if not from_workbook %}
@@ -50,23 +61,27 @@
                         </div>
                     {% endif %}
 
-                    {% include "isb_cgc/pagination.html" %}
+
+
+                     {% include "isb_cgc/pagination.html" %}
 
                     <table id="cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>
                             <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
                             <th class="id-col">Cohort ID</th>
                             <th class="name-col">Cohort Name</th>
+                            <th class="version-col">Cohort Version</th>
                             <th class="case-col"># Cases</th>
                             <th class="sample-col"># Samples</th>
                             <th class="owner-col">Ownership</th>
                             <th class="share-col">Shared With</th>
                             <th class="export-col">Last Export</th>
                             <th class="date-col">Created On</th>
+
                         </tr></thead>
                         <tbody>
                         {% for cohort in cohorts %}
-                        {% with valid_export=cohort.get_export_is_valid %}
+                        {% with valid_export=cohort.get_export_is_valid isactive=cohort.get_data_versions.0.active %}
                             <tr class="page-item">
                                 <td class="checkbox-col">
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
@@ -74,7 +89,24 @@
                                 <td class="id-col">
                                     {{ cohort.id }}
                                 </td>
-                                <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
+                                <td class="name-col">
+                                    {% if isactive %}
+                                    <a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">
+                                    {% else %}
+
+                                        <a class="compare-version" data-bs-toggle="modal" data-bs-target="#version-compare-modal" data-cohort-id="{{ cohort.id }}" data-filters="{{ cohort.get_filters_for_ui }}" data-case-count="{{ cohort.case_count }}" data-sample-count="{{ cohort.sample_count }}" data-cohort-name="{{ cohort.name }}">
+                                    {% endif %}
+                                    {{ cohort.name }}
+                                    </a>
+
+                                </td>
+
+                                <td class="version-col {% if not isactive %}inactive-version{% endif %}">
+                                    {{ cohort.get_data_versions.0.get_display }}
+                                    {% if not isactive %}(inactive){% endif %}
+                                </td>
+
+
                                 <td class="case-col">{{ cohort.case_count }}</td>
                                 <td class="sample-col"> {% if cohort.sample_count <= 0 %} N/A {% else %}{{ cohort.sample_count }}{% endif %} </td>
                                 <td class="owner-col">
@@ -107,6 +139,9 @@
                                     </p>
                                 </td>
                                 <td class="date-col">{{ cohort.date_created|date:'M d, Y, g:i a' }}</td>
+
+
+
                             </tr>
                         {% endwith %}
                         {% endfor %}
@@ -236,7 +271,9 @@
     var cohort_list = {{ cohorts_listing|safe }};
     var shared_users = {{ shared_users|safe }};
     </script>
+    {% include "cohorts/cohort_compare_modal.html" %}
 {% endblock %}
+
 
 {% block js_file %}
 	{{ block.super }}

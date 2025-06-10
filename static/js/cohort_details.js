@@ -199,13 +199,13 @@ require([
         UPDATE_QUEUE.push(function(){
             update_displays(withoutCheckChanges,for_panel_load, alternate_prog_id);
         });
-    };
+    }
 
     function dequeueUpdate(withoutCheckChanges,for_panel_load, alternate_prog_id){
         if(UPDATE_QUEUE.length > 0) {
             UPDATE_QUEUE.shift()();
         }
-    };
+    }
 
     var update_displays = function(withoutCheckChanges,for_panel_load, alternate_prog_id) {
         // If a user has clicked more filters while an update was going out, queue up a future update and return
@@ -518,8 +518,7 @@ require([
                 if (cohort_id) {
                     $('.selected-filters').show();
                     $('.all-selected-filters').hide();
-                }
-                else {
+                } else {
                     $('.selected-filters').hide();
                     $('.all-selected-filters').show();
                 }
@@ -576,6 +575,7 @@ require([
             form.append('<input type="hidden" name="apply-name" value="true" />');
         }
 
+        var values=[];
         var token_list_selector = cohort_id ? '.selected-filters .isb-panel-body' : '#selected-filters';
         $(token_list_selector + ' span.filter-token').each(function() {
             var $this = $(this);
@@ -587,8 +587,12 @@ require([
             if($this.data('user-program-id')) {
                 value['user_program'] = $this.data('user-program-id');
             }
-            form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
+
+             //form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
+
+             values.push(value);
         });
+        form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(values)}));
 
         if(cohort_id) {
             $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
@@ -660,6 +664,8 @@ require([
         let save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
         let save_changes_btn = $('button[data-bs-target="#apply-filters-modal"]');
         let save_new_cohort_btn = $('button[data-bs-target="#create-cohort-modal"]');
+        let download_ids_nologin_btn = $('.download-ids-nologin-btn');
+         let view_files_nologin_btn = $('.view-files-nologin-btn')
         let log_in_to_save_btn = $('#log-in-to-save-btn');
         let totalCases = 0;
 
@@ -669,23 +675,32 @@ require([
             }
         });
 
+        if (totalCases > 0){
+            view_files_nologin_btn.removeAttr('disabled');
+            download_ids_nologin_btn.removeAttr('disabled');
+            download_ids_nologin_btn.attr("title","Download the cases matching these filters.");
+        } else {
+            view_files_nologin_btn.attr('disabled','disabled');
+            download_ids_nologin_btn.attr('disabled','disabled');
+            download_ids_nologin_btn.attr("title","Please select at least one filter.");
+        }
+
         if ($('#edit-cohort-name').val() !== original_title || $('.all-selected-filters span').length > 0) {
             save_changes_btn.prop('disabled', false)
             save_changes_btn_modal.prop('disabled',false);
             if(save_new_cohort_btn.length > 0) {
                 if (totalCases > 0) {
                     save_new_cohort_btn.removeAttr('disabled');
-                    save_new_cohort_btn.removeAttr('title');
+                    save_new_cohort_btn.removeAttr('Save these filters as a cohort.');
                 } else {
                     save_new_cohort_btn.attr("title", "Please adjust your filters to include at least one case in the cohort.");
                     save_new_cohort_btn.attr('disabled','disabled');
                 }
             }
-            if(log_in_to_save_btn.length > 0)
-            {
+            if(log_in_to_save_btn.length > 0) {
                 if (totalCases > 0) {
                     log_in_to_save_btn.removeAttr('disabled');
-                    log_in_to_save_btn.removeAttr('title');
+                    log_in_to_save_btn.attr("title","Log in to save these filters as a cohort.");
                 } else {
                     log_in_to_save_btn.attr("title", "Please adjust your filters to include at least one case in the cohort.");
                     log_in_to_save_btn.attr('disabled','disabled');
@@ -1211,7 +1226,7 @@ require([
             return;
         }
 
-        if(cohort && load_program_id === null) {
+        if(cohort && (load_program_id === null) && !(typeof(cohort_programs)=="undefined")) {
             load_program_id = cohort_programs[0].id;
         }
 
@@ -1221,7 +1236,8 @@ require([
         ACTIVE_NODE_ID = load_node_id;
 
         if (load_program_id == null) {
-            load_program_id = all_nodes[0].programs[0].id;
+            let default_selected = $('#program-select :selected').attr('program-id');
+            load_program_id = default_selected || all_nodes[0].programs[0].id;
         }
         ACTIVE_PROGRAM_ID = load_program_id;
 
@@ -1347,16 +1363,17 @@ require([
         location.href = '/accounts/login/';
     });
 
-    $('.export-btn, .download-ids-btn').on('click', function() {
-        let self=$(this);
-        if(self.hasClass('export-btn') && !user_is_social) {
+    $('.export-btn').on('click', function(){
+         if(!user_is_social) {
             e.preventDefault();
             return false;
         }
-        let msg = self.hasClass('download-ids-btn') ? $('#download-in-prog') : $('#export-in-prog');
-        let token = self.hasClass('download-ids-btn') ? $('.download-token').val() : $('.export-token').val();
+         let self=$(this);
+         self.attr('disabled','disabled');
 
-        self.attr('disabled','disabled');
+         let msg = $('#export-in-prog');
+         let token = $('.export-token').val();
+
         msg.show();
 
         base.blockResubmit(function() {
@@ -1364,36 +1381,87 @@ require([
             msg.hide();
         },token,"downloadToken");
 
-        if(self.hasClass('export-btn')) {
-            $.ajax({
-                type: 'GET',
-                url: $('.export-btn').attr('url') + '?downloadToken=' + token,
-                success: function (data) {
-                    let msg_box = $('#export-result');
-                    msg_box.hide();
-                    msg_box.empty();
-                    msg_box.html(data['message']);
-                    msg_box.show();
+        $.ajax({
+            type: 'GET',
+            url: $('.export-btn').attr('url') + '?downloadToken=' + token,
+            success: function (data) {
+                let msg_box = $('#export-result');
+                msg_box.hide();
+                msg_box.empty();
+                msg_box.html(data['message']);
+                msg_box.show();
                 },
-                error: function (xhr) {
-                    var responseJSON = $.parseJSON(xhr.responseText);
-                    // If we received a redirect, honor that
-                    if (responseJSON.redirect) {
-                        base.setReloadMsg(responseJSON.level || "error", responseJSON.message);
-                        window.location = responseJSON.redirect;
-                    } else {
-                        base.showJsMessage(responseJSON.level || "error", responseJSON.message, true);
-                    }
-                },
-            });
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                // If we received a redirect, honor that
+                if (responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error", responseJSON.message);
+                    window.location = responseJSON.redirect;
+                } else {
+                    base.showJsMessage(responseJSON.level || "error", responseJSON.message, true);
+                }},
+        });
+
+
+    });
+
+    $('.download-ids-nologin-btn, .view-files-nologin-btn').on('click', function() {
+        let self=$(this);
+        let msg =  $('#download-in-prog');
+        let token =  $('.download-token').val()
+
+        self.attr('disabled','disabled');
+        //msg.show();
+
+        base.blockResubmit(function() {
+            self.removeAttr('disabled');
+            msg.hide();
+        },token,"downloadToken");
+
+        var progArr = [];
+        var filters = new Object;
+        $('.sort-by-program').children().each(function(){
+            if (this.hasAttribute('program-id')){
+                var prog_id= parseInt($(this).attr('program-id'));
+                var curFilts = search_helper_obj.format_filters(prog_id, add_key=false);
+                if (Object.keys(curFilts).length>0){
+                    progArr.push(prog_id);
+                }
+                for (nkey in curFilts) {
+                    nxtkey=prog_id+":"+nkey
+                    filters[nxtkey]= new Object;
+                    filters[nxtkey]['values']=curFilts[nkey]
+                }
+            }
+        });
+
+
+        var filterStr  = JSON.stringify(filters);
+        var progStr = JSON.stringify(progArr)
+        if ($(self).hasClass('download-ids-nologin-btn')){
+            $("#nologin-download").find("input[name='filters']").val(filterStr);
+            $("#nologin-download").find("input[name='program_ids']").val(progStr);
+           $("#nologin-download").submit();
+         }
+        else{
+            $("#nologin-view-files").find("input[name='case_filters']").val(filterStr);
+            $("#nologin-view-files").find("input[name='program_ids']").val(progStr);
+            $("#nologin-view-files").submit();
         }
+
+        //self.removeAttr('disabled');
+
     });
 
     set_mode();
-    filter_panel_load(cohort_id);
+    if (!window.location.pathname.includes("filelist")){
+       filter_panel_load(cohort_id);
+    }
+
 
     let token = new Date().getTime();
     $('.export-token, .download-token').val(token);
+    $('#nologin-download').find("input[name='downloadToken']").val(token);
     $('.download-ids-btn').attr('href',$('.download-ids-btn').attr('href')+'?downloadToken='+token);
 
     tippy('.version-info',{
@@ -1408,5 +1476,34 @@ require([
         allowHTML:true,
     });
 
+    $('.compare-version').on('click', function(){
+        var cohort_id= $(this).attr('data-cohort-id');
+    })
+
+    let last_searches = {};
+    $('.program-tabs').on('keyup', '.filter-search', function(){
+        let searchVal = $(this).val().trim();
+        let filterSet = $(this).parents('.list-group-item');
+        let attr = filterSet.find('.search-checkbox-list').attr("id");
+        let searchFilters = Boolean(searchVal !== '');
+        let filters = filterSet.find('.search-checkbox-list li.checkbox');
+
+        if(!searchFilters) {
+            filters.removeClass('search-mismatch');
+        } else {
+            if((last_searches[attr] !== searchVal)) {
+                filters.each(function(){
+                    let filterValue = $(this).find('input.filter-value').attr("data-value-display");
+                    if(filterValue.toLowerCase().includes(searchVal.toLowerCase())) {
+                        $(this).removeClass('search-mismatch');
+                    } else {
+                        $(this).addClass('search-mismatch');
+                    }
+                });
+            }
+        }
+        last_searches[attr] = searchVal;
+        search_helpers.update_zero_case_filters(filterSet.parents('.filter-panel').find('.hide-zeros'));
+    });
 });
 
