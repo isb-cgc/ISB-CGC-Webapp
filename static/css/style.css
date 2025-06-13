@@ -4505,3 +4505,7 @@ d-topics-list iframe {
   font-weight: bold;
   font-size: smaller;
 }
+
+.collapse-all, .open-all {
+  cursor: pointer;
+}

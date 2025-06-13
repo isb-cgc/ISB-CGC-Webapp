@@ -38,6 +38,8 @@ Vagrant.configure(2) do |config|
   config.vm.provision :shell, inline: "sudo apt-get install dos2unix", :run => 'always'
   config.vm.provision :shell, inline: "dos2unix /home/vagrant/www/shell/*.sh", :run => 'always'
   config.vm.provision :shell, inline: "echo 'source /home/vagrant/www/shell/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
+  # This script will kill any further building if settings appear to be wrong
+  config.vm.provision "shell", path: 'shell/check-settings.sh', :run => 'always'
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   # TODO: Adjust create and setup to check for database and run if it's not found so they can be set to always
   config.vm.provision "shell", path: 'shell/create-database.sh'
