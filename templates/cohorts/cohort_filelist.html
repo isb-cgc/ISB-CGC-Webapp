@@ -44,11 +44,11 @@
 
          {% if current_case_filters_disp.items|length > 0 %}
                 <div class="col-sm-12 col-md-12 col-lg-12">
-                    <div class="cohort-selected-filters isb-panel isb-panel-default">
-                        <div class="isb-panel-heading">
-                            <h4 class="panel-title">Filters</h4>
+                    <div class="cohort-selected-filters card mb-4">
+                        <div class="card-header bg-white border-0 ">
+                            <h4 class="card-title">Filters</h4>
                         </div>
-                        <div class="isb-panel-body curr-filter-panel gradient-overlay">
+                        <div class="card-body curr-filter-panel gradient-overlay">
                             {% for prog, filters in current_case_filters_disp.items %}
                                 <div class="col-sm-{{ current_case_filters_disp.keys|get_prog_col_size }} prog-filter-set">
                                     <h5>{{ prog }}</h5>
@@ -71,11 +71,11 @@
                             <button class="btn btn-link" role="button">Show Less</button>
                         </div>
                     </div>
-                    <div class="cohort-info isb-panel isb-panel-default">
-                        <div class="isb-panel-heading">
-                            <h4 class="panel-title">Cohort Details</h4>
+                    <div class="cohort-info card">
+                        <div class="card-header bg-white border-0">
+                            <h4 class="card-title">Cohort Details</h4>
                         </div>
-                        <div class="isb-panel-body details-panel">
+                        <div class="card-body">
                             {% if cohort.id %}
                             <div class="space-bottom-10">
                                 <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
@@ -118,18 +118,13 @@
 {% block content %}
 
     <div class="container">
-        <div class="row">
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="card">
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <div class="container">
         <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-12 ">
-                <div class="card pt-4 pb-5 mb-4">
+                <div class="card pt-4 pb-4 mb-4 border-bottom-2 border-top-0 border-start-0 border-end-0">
 
                     <ul class="nav nav-tabs nav-tabs-files text-center text-decoration-none" role="tablist">
                         <li role="presentation" class="file-browser-tab tabactive"><a href="#all-files" class ="active text-decoration-none" aria-selected="true"  role="tab" data-bs-toggle="tab" title="Browse All Resources" data-file-type="all">All Resources</a></li>

@@ -1,21 +1,27 @@
 <div id="pdf-files" class="tab-pane data-tab" data-file-type="pdf" role="tabpanel">
     <div class="col-lg-3 col-md-3 col-sm-pull-0"></div>
-   <div class="row">
+    <div class="row">
       <div class="col-lg-9 col-md-9 col-sm-12 ms-auto">
-        <div class="selected-filters-pdf isb-panel isb-panel-default">
-            <div class="isb-panel-heading clearfix">
-                <h4 class="isb-panel-title float-start">Selected Filters</h4>
-                <a class="float-end clear-filters text-decoration-none" role="button">Clear All</a>
-            </div>
-            <div class="isb-panel-body"></div>
-        </div>
+          <div class="card selected-filters-all mb-4">
+              <div class="clearfix card-header bg-white border-0">
+                    <h4 class="card-title float-start">Selected Filters</h4>
+                    <a  class="clear-filters float-end text-decoration-none" role="button">Clear All</a>
+                 </div>
+              <div class="card-body"></div>
+          </div>
+       </div>
     </div>
-    </div>
+
     <div class="row">
     <div id="pdf-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
-        <div class="isb-panel isb-panel-default filter-panel">
-            <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 cases</div>
-                <div class="isb-panel-body tab-content filter-build-panel" data-filter-build="HG19" id="pdf-filter-panel">
+        <div class="card filter-panel">
+         <div class="card-header bg-white border-0">
+                    <div class="card-title ">
+                     <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 casess</div>
+                    </div>
+            </div>
+
+                <div class="card-body tab-content filter-build-panel" data-filter-build="HG19" id="pdf-filter-panel">
                     <ul class="list-group" id="metadata-data-accordian-pdf" role="tablist" aria-multiselectable="true">
                         <li class="list-group-item">
                             <div id="heading-pdf-case-id" class="list-group-item__heading">
@@ -79,27 +85,44 @@
                 </div>
         </div>
     </div>
+
     <div id="pdf-file-panel" class="file-panel col-sm-9 col-md-9 col-lg-9">
-        <div class="filelist-panel isb-panel">
-            <div class="isb-panel-heading">
-                <div class="file-panel-toggle">
-                    <a class="fa fa-angle-double-left" title="Click to hide the filters"></a>
-                    <a class="fa fa-angle-double-right" title="Click to see the filters"></a>
+        <div class="filelist-panel card">
+            <div class="card-header bg-white border-0">
+                    <div class="file-panel-toggle pull-left">
+                        <a class="fa fa-angle-double-left" title="Click to hide the filters"></a>
+                        <a class="fa fa-angle-double-right" title ="Click to see the filters"></a>
+                    </div>
+                    <h4 class="card-title pull-left ms-4 me-4">Resource Listing</h4>
+                    <div class="page-action-group pull-right">
+                        <ul>
+                            <li class="menu-item"><span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span></li>
+                            <li class="menu-item"><span class="pending-left" id="export-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Exporting...</span></li>
+                            <li class="menu-item">
+                                <div class="filelist-obtain">
+                                    <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>
+                                    <input type="hidden" class="download-token" value="" />
+                                </div>
+                            </li>
+                            <li class="menu-item">
+                                <div class="filelist-obtain">
+                                    <a class="export-link"
+                                       base-url="{% if not user.is_anonymous and is_social %}{{ export_url }}{% endif %}"
+                                       url="{% if not user.is_anonymous and is_social %}{{ export_url }}{% endif %}"
+                                       {% if user.is_anonymous or not is_social %}
+                                            title="Log in with a Google Account to enable this feature." disabled
+                                       {% else %}
+                                            title="Export file manifest to BQ"
+                                       {% endif %}
+                                    >
+                                        <button class="btn btn-info export-btn"{% if user.is_anonymous or not is_social %} disabled{% endif %}>BQ</button></a>
+                                    <input type="hidden" class="export-token" value="" />
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <h4>File Listing</h4>
-                <div class="page-action-group pull-right">
-                    <ul>
-                        <li class="menu-item">
-                            <div class="filelist-obtain">
-                                <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
-                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>
-                                <input type="hidden" class="download-token" value="" />
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="isb-panel-body">
+            <div class="card-body">
                 <div class="dataTables_info">
                     <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
                     <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>

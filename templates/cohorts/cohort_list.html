@@ -15,19 +15,21 @@
 {% block page_header %}
 
 <link type="text/css" rel="stylesheet" href="{% static 'css/cohort-list.css' %}">
-<div class="container">
+<div class="container mt-4">
      <div class="row">
      <div class="col-lg-12 col-md-12 col-sm-12">
-           <h1 class="page-header float-start">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
-           <div class="float-end new-cohort"><a href="{% url 'cohort' %}" class="btn btn-primary"><i class="fa fa-plus"></i> New Cohort</a> </div>
+          <div class="col-lg-2 col-md-2">
+           <h4 class="page-header float-start">{% if from_workbook %}Data Source | {% endif %}Cohorts</h4>
+          </div>
+           <div class="col-lg-10 col-md-10 new-cohort"><a class="float-end " href="{% url 'cohort' %}" class="btn btn-primary"><i class="fa fa-plus"></i> New Cohort</a> </div>
     </div>
      </div>
 </div>
 {% endblock %}
 {% block content %}
 <div class="container">
-    <div class="isb-panel isb-panel-default">
-    <div class ="isb-panel-heading">
+    <div class="card bg-white">
+    <div class ="card-header bg-white bg-border-0">
       <h4>Saved Cohorts</h4>
     </div>
         <!-- <ul class="nav nav-tabs" role="tablist">
@@ -39,7 +41,7 @@
         </ul> -->
 
 
-        <div class="tab-content isb-panel-body ">
+        <div class="tab-content card-body ">
 
 
             <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="saved-cohorts-list">
