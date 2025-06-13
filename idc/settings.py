@@ -678,7 +678,7 @@ DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
 
 # Explicitly check for known problems in descriptions and names provided by users
-DENYLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+DENYLIST_RE = r'(<script>|</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|</iframe>)'
 ATTRIBUTE_DISALLOW_RE = r'([^a-zA-Z0-9_])'
 
 if DEBUG and DEBUG_TOOLBAR and not IS_APP_ENGINE:
