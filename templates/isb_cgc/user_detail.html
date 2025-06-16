@@ -34,8 +34,8 @@
 {% block content %}
     <div class="row">
         <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="isb-panel panel-default user-panel">
-                <div class="isb-panel-heading">
+            <div class="card user-panel mt-4">
+                <div class="card-header border-0 bg-white">
                     {% if not unconnected_local_account %}
                         <img src="{{ user_details.avatar_url }}" class="avatar" alt="User Avatar"/>
                     {% else %}
@@ -45,7 +45,7 @@
                         Personal Details
                     </h5>
                 </div>
-                <div class="isb-panel-body">
+                <div class="card-body">
                     <table class="user-info" role="presentation">
                         <tr>
                             {% if not unconnected_local_account %}
@@ -76,27 +76,27 @@
             </div>
         </div>
         <div class="col-lg-4 col-md-3 col-sm-12">
-            <div class="isb-panel panel-default gcp-panel">
-                <div class="isb-panel-heading">
+            <div class="card gcp-panel mt-4">
+                <div class="card-header">
                     <h5>
                         <i class="fa fa-cloud" aria-hidden="true"></i> Google Cloud Platform
                     </h5>
                 </div>
-                <div class="isb-panel-body">
+                <div class="card-body">
                     {% if True %}
                         <label>Google Cloud Credits</label>
                         <div>
                             Apply for <strong>Cloud Credits</strong> and your own <strong>Google Cloud Project</strong> by submitting a request.
 
                         </div>
-                        <div class="text-right">
+                        <div class="text-end">
                             <a class="sm_btn"
                                 href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp"
                                 target="_blank" rel="noreferrer"><i class="fa fa-credit-card" aria-hidden="true"></i>Request Credits</a>
                         </div>
                         <label>Google Cloud Console</label>
                         <div>Access a user friendly, integrated Google Cloud Platform management console</div>
-                        <div class="text-right">
+                        <div class="text-end">
                             <a class="btn sm_btn" href="http://console.cloud.google.com"
                                target="_blank" rel="noreferrer"><i class="fa fa-arrow-circle-o-right"
                                                   aria-hidden="true"></i>Visit</a>
@@ -121,13 +121,13 @@
             </div>
         </div>
         <div class="col-lg-4 col-md-3 col-sm-12">
-            <div class="isb-panel panel-default account-management-panel">
-                <div class="isb-panel-heading">
+            <div class="card account-management-panel mt-4">
+                <div class="card-header">
                         <h5>
                             Account Management
                         </h5>
                 </div>
-                <div class="isb-panel-body">
+                <div class="card-body">
                         {% if unconnected_local_account %}
                         <p>
                             <a href="{% url 'account_change_password' %}" target="_blank" rel="noopener noreferrer">Change Your Password</a>

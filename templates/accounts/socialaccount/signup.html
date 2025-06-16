@@ -11,12 +11,12 @@
             <div class="col-lg-12">
                 <div class="col-lg-4 col-md-4 col-sm-1"></div>
                 <div class="col-lg-4 social-sign-up accounts-col">
-                    <div class="panel panel-default">
+                    <div class="card">
                     {% if form.is_already_local %}
-                        <div class="panel-heading">
+                        <div class="card-header bg-white border-0">
                             <h1>{% trans "Google Sign Up" %}</h1>
                         </div>
-                        <div class="panel-body">
+                        <div class="card-body">
                             <p>
                                 The account <b>{{ form.init_email }}</b> is already registered as a local ISB-CGC account.
                                 Please return to the <a href="{% url 'account_login' %}">Sign In page</a> and choose 'Sign in with ISB-CGC'.
@@ -27,7 +27,7 @@
                             </p>
                         </div>
                         {% else %}
-                        <div class="panel-body">
+                        <div class="card-body">
                             <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
                                 {% if not form.errors %}
                                     <p>{% blocktrans with provider_name=account.get_provider.name site_name=site.name %}You are about to use your {{provider_name}} account to login to

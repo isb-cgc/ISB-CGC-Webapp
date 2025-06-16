@@ -70,7 +70,7 @@
                                                            data-value-display="{% if v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}"
                                                     >
                                                     {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                     <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                     <span class="float-end file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                 </label>
                                             </li>
                                         {% endfor %}

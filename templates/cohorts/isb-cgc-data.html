@@ -74,7 +74,7 @@
                                                                             {% if cohort.id > 0 %} disabled{% endif %}
                                                                     >
                                                                     {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
-                                                                    <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                                    <span class="float-end case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                                 </label>
                                                             </li>
                                                     {% endfor %}
@@ -128,7 +128,7 @@
                                                                data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
                                                                 {% if cohort.id > 0 %} disabled{% endif %}
                                                         >
-                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %} <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %} <span class="float-end case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
