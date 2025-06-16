@@ -27,14 +27,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
 RUN apt-get install -y wget
-RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.29-1_all.deb" -P /tmp
+RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.30-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
 RUN apt-get install -y lsb-release
 # TODO: we need to start using the keyring instead
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
-RUN dpkg --install /tmp/mysql-apt-config_0.8.29-1_all.deb
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv A8D3785C
+RUN dpkg --install /tmp/mysql-apt-config_0.8.30-1_all.deb
 
 # fetch the updated package metadata (in particular, mysql-server)
 RUN apt-get update
@@ -44,7 +44,7 @@ RUN apt-get install -y mysql-server
 
 RUN apt-get -y install build-essential
 RUN apt-get -y install --reinstall python3-m2crypto python3-cryptography
-RUN apt-get -y install libxml2-dev libxmlsec1-dev swig  pkg-config
+RUN apt-get -y install libxml2-dev libxmlsec1-dev swig pkg-config
 RUN pip install pexpect
 
 RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git g++ curl

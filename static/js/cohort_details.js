@@ -1236,7 +1236,8 @@ require([
         ACTIVE_NODE_ID = load_node_id;
 
         if (load_program_id == null) {
-            load_program_id = all_nodes[0].programs[0].id;
+            let default_selected = $('#program-select :selected').attr('program-id');
+            load_program_id = default_selected || all_nodes[0].programs[0].id;
         }
         ACTIVE_PROGRAM_ID = load_program_id;
 
@@ -1504,6 +1505,5 @@ require([
         last_searches[attr] = searchVal;
         search_helpers.update_zero_case_filters(filterSet.parents('.filter-panel').find('.hide-zeros'));
     });
-
 });
 
