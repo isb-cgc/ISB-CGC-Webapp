@@ -210,7 +210,7 @@ define(['jquery'], function($) {
                     unblockSubmit(callback,expectedCookie);
                 }
                 attempts--;
-            }, 1000 );
+            }, 100 );
         },
         setCookie: _setCookie,
         getCookie: _getCookie,
