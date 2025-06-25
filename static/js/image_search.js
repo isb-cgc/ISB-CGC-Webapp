@@ -828,6 +828,9 @@ require([
 
     }
 
+    $('body').on('input', 'focus', function(){
+        console.log($(this));
+    });
 
 });
 
