@@ -123,7 +123,7 @@ require([
 
     // TODO: replace with call to JS messenger block
     function statusMessage(message, type) {
-      base.showJsMessage(type, message);
+      base.showJsMessage(type, message, true);
     }
     function progressUpdate(message) {
       base.showJsMessage('info', message, true);
@@ -132,7 +132,7 @@ require([
     function workerOnMessage (event) {
       let thisWorker = event.target;
       if (event.data.message === 'error') {
-        statusMessage(`Error ${JSON.stringify(event)}`, 'error');
+        statusMessage(`Error ${JSON.stringify(event)}`, 'error', true);
       }
       if (event.data.message === 'done') {
         progressUpdate(`Download progress: ${s3_urls.length} remaining, ${event.data.path} downloaded`);
@@ -152,7 +152,7 @@ require([
       downloadWorker.onerror = function(event) {
         let thisWorker = event.target
         console.error('Main: Error in worker:', event.message, event);
-        statusMessage(`Error in worker: ${event.message}`, 'error');
+        statusMessage(`Error in worker: ${event.message}`, 'error', true);
         finalizeWorker(thisWorker);
       }
       downloadWorkers.downloadCount = 0;
@@ -166,7 +166,7 @@ require([
     function triggerWorkerDownloads() {
       if (s3_urls.length == 0 && downloadWorkers.length == 0) {
         if (workerObjectURL) URL.revokeObjectURL(workerObjectURL);
-        statusMessage(`Downloads complete`, 'info');
+        statusMessage(`Downloads complete`, 'info', true);
       } else {
         while (s3_urls.length > 0) {
           let targetWorker = null;
