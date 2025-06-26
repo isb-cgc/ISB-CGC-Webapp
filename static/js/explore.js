@@ -567,6 +567,16 @@ require([
     });
 
     tippy.delegate('.series-table', {
+        content: 'Direct download is only available in Chromium browsers.',
+        theme: 'dark',
+        placement: 'left',
+        arrow: false,
+        interactive:true,
+        target: '.download-all-disabled',
+        maxWidth: 200
+    });
+
+    tippy.delegate('.series-table', {
         content: 'Some or all of the images in this collection are not publicly available.',
         theme: 'dark',
         placement: 'right',

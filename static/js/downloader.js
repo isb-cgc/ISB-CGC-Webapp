@@ -132,7 +132,7 @@ require([
     function workerOnMessage (event) {
       let thisWorker = event.target;
       if (event.data.message === 'error') {
-        statusMessage(`Error ${JSON.stringify(event.data)}`, 'alert');
+        statusMessage(`Error ${JSON.stringify(event)}`, 'error');
       }
       if (event.data.message === 'done') {
         progressUpdate(`Download progress: ${s3_urls.length} remaining, ${event.data.path} downloaded`);
@@ -243,10 +243,14 @@ require([
         let crdc_series_id = $(this).attr('data-series');
         getAllS3ObjectKeys(bucket, "us-east-1", crdc_series_id).then( keys => {
           keys.forEach((key) => {
-            if (key != "") {
+            if (key !== "") {
               s3_urls.push(`https://${bucket}.s3.us-east-1.amazonaws.com/${key}`);
             }
           });
+          if(s3_urls.length <= 0) {
+              statusMessage('Error while parsing instance list!', 'error');
+              return;
+          }
           beginDownload().then(
               function(){statusMessage("Download underway.", 'info');}
           );

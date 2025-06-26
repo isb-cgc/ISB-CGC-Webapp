@@ -1132,9 +1132,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     $(row).attr('data-studyid', data['StudyInstanceUID']);
                     $(row).attr('data-caseid', data['PatientID']);
                     $(row).attr('data-projectid', data['collection_id'][0]);
-                    $(row).attr('data-crdc',  data['crdc_series_uuid'])
-                    $(row).attr('data-aws',  data['aws_bucket'])
-                    $(row).attr('data-gcs',  data['gcs_bucket'])
+                    $(row).attr('data-crdc',  data['crdc_series_uuid']);
+                    $(row).attr('data-aws',  data['aws_bucket']);
+                    $(row).attr('data-gcs',  data['gcs_bucket']);
                     $(row).addClass('text_head');
 
                     $(row).attr('data-aws',  data['aws_bucket'])
@@ -1142,17 +1142,17 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                      if ('cart_series_in_collection' in data){
                        $(row).attr('cart_series_in_collection',  data['cart_series_in_collection']);
                     } else{
-                        $(row).attr('cart_series_in_collection','0')
+                        $(row).attr('cart_series_in_collection','0');
                     }
                     if ('filter_series_in_collection' in data){
                        $(row).attr('filter_series_in_collection',  data['filter_series_in_collection']);
                     } else {
-                        $(row).attr('filter_series_in_collection','0')
+                        $(row).attr('filter_series_in_collection','0');
                     }
                     if ('filter_cart_series_in_collection' in data){
                        $(row).attr('filter_cart_series_in_collection',  data['filter_cart_series_in_collection']);
                     } else {
-                        $(row).attr('filter_cart_series_in_collection','0')
+                        $(row).attr('filter_cart_series_in_collection','0');
                     }
 
                     if ('cart_series_in_case' in data){
@@ -1163,28 +1163,28 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     if ('filter_series_in_case' in data){
                        $(row).attr('filter_series_in_case',  data['filter_series_in_case']);
                     } else {
-                        $(row).attr('filter_series_in_case','0')
+                        $(row).attr('filter_series_in_case','0');
                     }
                     if ('filter_cart_series_in_case' in data){
                        $(row).attr('filter_cart_series_in_case',  data['filter_cart_series_in_case']);
                     } else {
-                        $(row).attr('filter_cart_series_in_case','0')
+                        $(row).attr('filter_cart_series_in_case','0');
                     }
 
                     if ('cart_series_in_study' in data){
                        $(row).attr('cart_series_in_study',  data['cart_series_in_study']);
                     } else {
-                        $(row).attr('cart_series_in_study','0')
+                        $(row).attr('cart_series_in_study','0');
                     }
                     if ('filter_series_in_study' in data){
                        $(row).attr('filter_series_in_study',  data['filter_series_in_study']);
                     } else {
-                        $(row).attr('filter_series_in_study','0')
+                        $(row).attr('filter_series_in_study','0');
                     }
                     if ('filter_cart_series_in_study' in data){
                        $(row).attr('filter_cart_series_in_study',  data['filter_cart_series_in_study']);
                     } else {
-                        $(row).attr('filter_cart_series_in_study','0')
+                        $(row).attr('filter_cart_series_in_study','0');
                     }
 
                     var collection_id=data['collection_id'][0];
@@ -1197,7 +1197,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         $(row).addClass('someInCart');
                     } else {
                         $(row).attr('series_in_cart','0');
-                        $(row).attr('series_in_filter_and_cart','0')
+                        $(row).attr('series_in_filter_and_cart','0');
                         $(row).removeClass('someInCart');
                     }
                     $(row).attr('series_in_filter','1');
@@ -1221,7 +1221,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "series-description", "targets": [6]},
                     {className: "ohif open-viewer", "targets": [7]},
                     {className: "download-col", "targets": [8]},
-
                  ],
                   "columns": [
                       {"type": "html", "orderable": false, render: function () {
@@ -1278,12 +1277,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         if (Array.isArray(row['collection_id'])){
                             coll_id=row['collection_id'][0];
                         } else {
-                            coll_id=row['collection_id']
+                            coll_id=row['collection_id'];
                         }
                         if (row['access'].includes('Limited') ) {
                             return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                         } else if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
-                            return nonViewAbleModality.has(el)
+                            return nonViewAbleModality.has(el);
                         }) ) || nonViewAbleModality.has(row['Modality']) )   {
                             let tooltip = "no-viewer-tooltip";
                             return `<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash ${tooltip}"></i>`;
@@ -1291,7 +1290,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             return slimViewAbleModality.has(el)}
                         ) ) || (slimViewAbleModality.has(row['Modality']))) {
                             return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
-                                '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
+                                '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>';
                         } else {
                             let v2_link = is_xc ? "" : OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data;
                             let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '&SeriesInstanceUIDs=' + data;
@@ -1330,7 +1329,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                       "type":"html",
                       "orderable": false,
                       data: 'SeriesInstanceUID', render: function (data, type, row){
-                          return `<i class="fa fa-download download-all-instances" data-bucket="${row['aws_bucket']}" data-series="${row['crdc_series_uuid']}"></i>`
+                          if("showDirectoryPicker" in window) {
+                            return `<i class="fa fa-download download-all-instances" data-bucket="${row['aws_bucket']}" data-series="${row['crdc_series_uuid']}"></i>`
+                          }
+                          return `<i class="fa fa-download download-all-disabled"></i>`
                       }
                   }
             ],
