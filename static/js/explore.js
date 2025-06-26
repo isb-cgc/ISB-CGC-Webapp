@@ -547,6 +547,26 @@ require([
     });
 
     tippy.delegate('.series-table', {
+        content: 'Download all of the image instances for this series.',
+        theme: 'dark',
+        placement: 'left',
+        arrow: false,
+        interactive:true,
+        target: '.download-all-instances',
+        maxWidth: 200
+    });
+
+    tippy.delegate('.series-table', {
+        content: 'Download a manifest file for this series.',
+        theme: 'dark',
+        placement: 'left',
+        arrow: false,
+        interactive:true,
+        target: '.export-button',
+        maxWidth: 200
+    });
+
+    tippy.delegate('.series-table', {
         content: 'Some or all of the images in this collection are not publicly available.',
         theme: 'dark',
         placement: 'right',

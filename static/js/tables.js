@@ -1330,7 +1330,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                       "type":"html",
                       "orderable": false,
                       data: 'SeriesInstanceUID', render: function (data, type, row){
-                          return `<i class="fa fa-download download-all-instances" data-bucket="${row['aws_bucket']}" data-series="${row['SeriesInstanceUID']}"></i>`
+                          return `<i class="fa fa-download download-all-instances" data-bucket="${row['aws_bucket']}" data-series="${row['crdc_series_uuid']}"></i>`
                       }
                   }
             ],
