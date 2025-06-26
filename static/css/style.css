@@ -4506,6 +4506,6 @@ d-topics-list iframe {
   font-size: smaller;
 }
 
-.collapse-all, .open-all {
+.collapse-all, .open-all, .download-all-instances {
   cursor: pointer;
 }

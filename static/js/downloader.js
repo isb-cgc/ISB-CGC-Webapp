@@ -21,17 +21,13 @@ require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
         jquery: 'libs/jquery-3.7.1.min',
-        underscore: 'libs/underscore-min',
         base: 'base'
-    },
-    shim: {
-        'underscore': {exports: '_'}
     }
 });
 
 require([
-    'base', // This must always be loaded
-], function (base) {
+    'base', 'jquery'
+], function (base, $) {
 
     let downloadWorkers = [];
     let downloadWorker = null;
@@ -112,7 +108,6 @@ require([
             console.error(error)
             self.postMessage({message: "error", path: s3_url, error: error})
           }
-
       }
     `;
 
@@ -127,23 +122,20 @@ require([
     }
 
     // TODO: replace with call to JS messenger block
-    function statusMessage(message) {
-      const messageP = document.createElement("p");
-      messageP.innerText = message;
-      document.body.appendChild(messageP);
+    function statusMessage(message, type) {
+      base.showJsMessage(type, message);
     }
-    const progressP = document.querySelector("#progress");
     function progressUpdate(message) {
-      progressP.innerText = message;
+      base.showJsMessage('info', message, true);
     }
 
     function workerOnMessage (event) {
       let thisWorker = event.target;
       if (event.data.message === 'error') {
-        statusMessage(`Error ${JSON.stringify(event.data)}`);
+        statusMessage(`Error ${JSON.stringify(event.data)}`, 'alert');
       }
       if (event.data.message === 'done') {
-        progressUpdate(`${s3_urls.length} remaining: ${event.data.path} downloaded`);
+        progressUpdate(`Download progress: ${s3_urls.length} remaining, ${event.data.path} downloaded`);
       }
       if (s3_urls.length == 0 || thisWorker.downloadCount > workerDownloadThreshold) {
         finalizeWorker(thisWorker);
@@ -160,7 +152,7 @@ require([
       downloadWorker.onerror = function(event) {
         let thisWorker = event.target
         console.error('Main: Error in worker:', event.message, event);
-        statusMessage('Main: Error in worker:', event.message, event);
+        statusMessage(`Error in worker: ${event.message}`, 'error');
         finalizeWorker(thisWorker);
       }
       downloadWorkers.downloadCount = 0;
@@ -174,7 +166,7 @@ require([
     function triggerWorkerDownloads() {
       if (s3_urls.length == 0 && downloadWorkers.length == 0) {
         if (workerObjectURL) URL.revokeObjectURL(workerObjectURL);
-        statusMessage(`Downloads complete`);
+        statusMessage(`Downloads complete`, 'info');
       } else {
         while (s3_urls.length > 0) {
           let targetWorker = null;
@@ -246,9 +238,9 @@ require([
       }
     }
 
-    $('.container-fluid').on('.download-all-instances', 'click', function(){
+    $('.container-fluid').on('click', '.download-all-instances', function(){
         let bucket = $(this).attr('data-bucket');
-        let crdc_series_id = $(this).attr('data-crdc-series-id');
+        let crdc_series_id = $(this).attr('data-series');
         getAllS3ObjectKeys(bucket, "us-east-1", crdc_series_id).then( keys => {
           keys.forEach((key) => {
             if (key != "") {
@@ -256,8 +248,7 @@ require([
             }
           });
           beginDownload().then(
-              // TODO: use JS messager
-              function(){statusMessage("Download complete.");}
+              function(){statusMessage("Download underway.", 'info');}
           );
         });
     });

@@ -1127,7 +1127,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                  "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                  "order": [[0, "asc"]],
                  "createdRow": function (row, data, dataIndex) {
-                    $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
+                    $(row).attr('id', 'series_' + data['SeriesInstanceUID']);
+                    $(row).attr('data-seriesid', data['SeriesInstanceUID']);
                     $(row).attr('data-studyid', data['StudyInstanceUID']);
                     $(row).attr('data-caseid', data['PatientID']);
                     $(row).attr('data-projectid', data['collection_id'][0]);
@@ -1323,7 +1324,13 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                       "type":"html",
                       "orderable": false,
                       data: 'SeriesInstanceUID', render: function (data){
-                          return '<i class="fa fa-download series-export export-button" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          return '<i class="fa fa-list series-export export-button" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                      }
+                  }, {
+                      "type":"html",
+                      "orderable": false,
+                      data: 'SeriesInstanceUID', render: function (data, type, row){
+                          return `<i class="fa fa-download download-all-instances" data-bucket="${row['aws_bucket']}" data-series="${row['SeriesInstanceUID']}"></i>`
                       }
                   }
             ],

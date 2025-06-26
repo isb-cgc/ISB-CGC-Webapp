@@ -18,6 +18,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
+        downloader: 'downloader',
         jquery: 'libs/jquery-3.7.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
@@ -35,8 +36,6 @@ require.config({
         cartutils: 'cartutils',
         tippy: 'libs/tippy-bundle.umd.min',
          '@popperjs/core': 'libs/popper.min'
-
-
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -57,7 +56,6 @@ require.config({
           exports: 'tippy',
             deps: ['@popperjs/core']
         }
-
     }
 });
 
@@ -74,7 +72,8 @@ require([
     'base', // This must ALWAYS be loaded!
     'jquerydt',
     'jqueryui',
-    'bootstrap'
+    'bootstrap',
+    'downloader'
 
 ], function(plotutils,filterutils,sliderutils, tables, cartutils, tippy,$, _, base) {
 
@@ -806,8 +805,7 @@ require([
           localStorage.setItem("projA", JSON.stringify(projA));
           localStorage.setItem("maxSeries", maxSeries);
           localStorage.setItem("maxStudies", maxStudies);
-        }
-        else{
+        } else{
             if ("projA" in sessionStorage){
                 localStorage.remove("projA");
             }
@@ -825,12 +823,6 @@ require([
             localStorage.removeItem("cartcleared");
             window.resetCart();
         }
-
-    }
-
-    $('body').on('input', 'focus', function(){
-        console.log($(this));
-    });
-
+    };
 });
 
