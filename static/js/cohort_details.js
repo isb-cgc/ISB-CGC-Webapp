@@ -313,7 +313,7 @@ require([
         }
 
         if($(selFilterPanel + ' .mol-filter-container').length <= 0) {
-            $(selFilterPanel + ' .isb-panel-body').append($('<span class="mol-filter-container">'));
+            $(selFilterPanel + ' .card-body').append($('<span class="mol-filter-container">'));
         }
 
         var tokenProgDisplName = prog.data('prog-displ-name'),
@@ -374,15 +374,15 @@ require([
                         .attr("title", valTokenDisplay)
                 );
 
-                $(selFilterPanel+' .isb-panel-body .mol-filter-container').append(token.clone(true));
+                $(selFilterPanel+' .card-body .mol-filter-container').append(token.clone(true));
                 createFormFilterSet.append(token.clone(true));
             }
         });
         clear_mol_filters($(this));
-        if($(selFilterPanel+' .isb-panel-body .mol-filter').length > 0) {
-            $(selFilterPanel+' .isb-panel-body .mol-filter-container').show();
+        if($(selFilterPanel+' .card-body .mol-filter').length > 0) {
+            $(selFilterPanel+' .card-body .mol-filter-container').show();
         } else {
-            $(selFilterPanel+' .isb-panel-body .mol-filter-container').hide();
+            $(selFilterPanel+' .card-body .mol-filter-container').hide();
         }
         update_all_selected_filters_ui('#' + activeDataTab);
         update_displays();
@@ -435,7 +435,7 @@ require([
                 .addClass(progDataTab+'-token filter-token');
 
             // Don't re-add the token and filter if it already exists
-            if($(selFilterPanel+' .isb-panel-body span[data-feature-id="'+feature_id+'"]'
+            if($(selFilterPanel+' .card-body span[data-feature-id="'+feature_id+'"]'
                 + '[data-value-id="'+value_id+'"][data-prog-id="'+progId+'"][data-node-id="'+nodeName+'"]').length <= 0) {
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default')
@@ -453,7 +453,7 @@ require([
                     'create-cohort-form-item': token.clone(true)
                 });
 
-                $(selFilterPanel +' .isb-panel-body').append($this.data('select-filters-item'));
+                $(selFilterPanel +' .card-body').append($this.data('select-filters-item'));
                 createFormFilterSet.append($this.data('create-cohort-form-item'));
             }
         } else { // Checkbox unchecked
@@ -474,7 +474,7 @@ require([
 
         !withoutDisplayUpdates && update_displays();
 
-        if(!cohort_id && $('.all-selected-filters .isb-panel-body span').length > 0) {
+        if(!cohort_id && $('.all-selected-filters .card-body span').length > 0) {
             $('#at-least-one-filter-alert-modal').hide();
             $('#at-least-one-filter-alert').hide();
             $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
@@ -494,7 +494,7 @@ require([
 
         // There must be at least one filter for one program if this is a
         // new cohort
-        if(!cohort_id && $('.all-selected-filters .isb-panel-body span').length <= 0) {
+        if(!cohort_id && $('.all-selected-filters .card-body span').length <= 0) {
             $('#at-least-one-filter-alert').show();
             e.preventDefault();
             return false;
@@ -502,7 +502,7 @@ require([
 
         var activeDataTab = $('.data-tab.active').attr('id');
         var progCount = 0;
-        $('.all-selected-filters .isb-panel-body').each(function(){
+        $('.all-selected-filters .card-body').each(function(){
             if($(this).find('span').length > 0) {
                 progCount++;
             }
@@ -567,7 +567,7 @@ require([
         $(this).find('input[type="submit"]').attr("disabled","disabled");
         savingChanges = true;
 
-        if($('.selected-filters .isb-panel-body span.filter-token').length > 0) {
+        if($('.selected-filters .card-body span.filter-token').length > 0) {
             form.append('<input type="hidden" name="apply-filters" value="true" />');
         }
 
@@ -576,7 +576,7 @@ require([
         }
 
         var values=[];
-        var token_list_selector = cohort_id ? '.selected-filters .isb-panel-body' : '#selected-filters';
+        var token_list_selector = cohort_id ? '.selected-filters .card-body' : '#selected-filters';
         $(token_list_selector + ' span.filter-token').each(function() {
             var $this = $(this);
             var value = {
@@ -892,7 +892,7 @@ require([
             }
         });
 
-        $('.all-selected-filters').find('.isb-panel-body').empty();
+        $('.all-selected-filters').find('.card-body').empty();
         // bug fix #2722
         creationForm.find('#selected-filters p').hide();
         creationForm.find('#selected-filters span').remove();
@@ -959,9 +959,9 @@ require([
 
             // Remove the filter tokens from their respective containers
             createFormFilterSet.find('span[data-feature-id="'+featureId+'"][data-value-id="'+valId+'"]').remove();
-            $(selFilterPanel+' .isb-panel-body span[data-feature-id="'+featureId+'"][data-value-id="'+valId+'"]').remove();
+            $(selFilterPanel+' .card-body span[data-feature-id="'+featureId+'"][data-value-id="'+valId+'"]').remove();
 
-            if(!cohort_id && $('.selected-filters .isb-panel-body span').length <= 0) {
+            if(!cohort_id && $('.selected-filters .card-body span').length <= 0) {
                 $('#at-least-one-filter-alert-modal').show();
                 $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
             }
@@ -973,7 +973,7 @@ require([
 
             // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
             var progCount = 0;
-            $('.selected-filters .isb-panel-body').each(function(){
+            $('.selected-filters .card-body').each(function(){
                 if($(this).find('span').length > 0) {
                     progCount++;
                 }
@@ -1173,7 +1173,7 @@ require([
     var reject_load = false;
 
     var update_all_selected_filters_ui = function(dataset_selector) {
-        let all_selected_panel = $('.all-selected-filters' + ' .isb-panel-body');
+        let all_selected_panel = $('.all-selected-filters' + ' .card-body');
         all_selected_panel.empty();
 
         let create_form_filters = $('#selected-filters');

@@ -7,13 +7,13 @@
         <div class="col-lg-4 col-md-3">
         </div>
         <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="isb-panel isb-panel-default">
-                <div class="isb-panel-heading">
-                    <h3 class="isb-panel-title">
+            <div class="card">
+                <div class="card-header border-0 bg-white">
+                    <h3 class="card-title">
                         Multi-factor Authentication Required
                     </h3>
                 </div>
-                <div class="isb-panel-body">
+                <div class="card-body">
                     <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
                     <div class="form-row" style="display: none;">
                         {{ form.otp_device.errors }}

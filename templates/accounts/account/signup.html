@@ -16,13 +16,13 @@
             <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8 accounts-col">
             <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-                <div class="isb-panel isb-panel-default"></div>
-                <div class="isb-panel isb-panel-default">
-                    <div class="isb-panel-heading"><h3>Sign Up</h3></div>
-                    <div class="isb-panel-body">
+                <div class="card"></div>
+                <div class="card">
+                    <div class="card-header bg-white border-0"><h3>Sign Up</h3></div>
+                    <div class="card-body">
                         <p>{% blocktrans %}Already have an account? Please <a href="{{ login_url }}"><b>sign in</b></a> instead.{% endblocktrans %}</p>
                     </div>
-                    <div class="isb-panel-body">
+                    <div class="card-body">
                           {% csrf_token %}
                           {{ form.as_p }}
                           {% if redirect_field_value %}

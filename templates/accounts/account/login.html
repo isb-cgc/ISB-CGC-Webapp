@@ -16,25 +16,25 @@
         <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8 accounts-col mx-auto">
         <form class="login" method="POST" action="{% url 'account_login' %}" autocomplete="off">
-            <!-- Blank panel to enforce space above the primary panel -->
-            <div class="isb-panel isb-panel-default"></div>
+
             <!-- Login panel -->
-            <div class="isb-panel isb-panel-default">
-                <div class="isb-panel-body">
+            <div class="card mb-4">
+                <div class="card-body">
                     <h4><i>If you have a Google ID:</i></h4>
                     <a class="btn btn-primary google-sign-in" href="{% provider_login_url 'google' action="reauthenticate" %}">
                         <img class="icon-small" style="padding: 0px 10px 0px 0px" alt="G" src="{%  static 'img/google_icon_sm.png' %}" />
                         <span><b>Continue with Google</b></span>
                     </a>
                 </div>
-                <div class="isb-panel-body panel-or">
+                <div class="card-body">
+                    <div class="row">
                     <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><hr /></div>
                     <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-center"><h4> OR </h4></div>
                     <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><hr /></div>
+                    </div>
                 </div>
-                <!-- Blank panel to enforce layout -->
-                <div class="isb-panel-body isb-login"></div>
-                <div class="isb-panel-body isb-login">
+
+                <div class="card-body isb-login">
                     <h4><i>If you have a local CGC account:</i></h4>
                     <h3>Sign in with ISB-CGC</h3>
                       {% csrf_token %}
@@ -45,16 +45,18 @@
                       <button class="primaryAction btn btn-primary" type="submit">{% trans "Sign In" %}</button>
                 </div>
             </div>
-            <div class="isb-panel isb-panel-default">
-                <div class="isb-panel-body sign-up">
+
+
+            <div class="card mb-4">
+                <div class="card-body sign-up">
                     <p>
                     Forgot your password?
                     </p>
                     <p><a class="btn btn-default secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Password Reset" %}</a></p>
                 </div>
             </div>
-            <div class="isb-panel isb-panel-default">
-                <div class="isb-panel-body sign-up">
+            <div class="card">
+                <div class="card-body sign-up">
                     <p><h4>Create a local account with ISB-CGC</h4></p>
                     <p>
                         <a class="btn btn-special" href="{{ signup_url }}">{% trans "Sign Up" %}</a>
