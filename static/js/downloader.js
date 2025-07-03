@@ -82,8 +82,8 @@ require([
             const collection_id = event.data.collection_id || 'unknown_collection'
             response = await fetch(s3_url)
             if (!response.ok) {
-                console.error('Worker: Failed to fetch S3 URL:', s3_url, response.statusText)
-                self.postMessage({message: "error", error: "Failed to fetch S3 URL"})
+                console.error('Worker: Failed to fetch URL:', s3_url, response.statusText)
+                self.postMessage({message: "error", error: "Failed to fetch URL"})
                 return
             }
             const arrayBuffer = await response.arrayBuffer()
@@ -105,7 +105,8 @@ require([
             await writable.close()
             self.postMessage({message: "done", path: s3_url, localFilePath: filePath})
           } catch (error) {
-            console.error(error)
+            console.error("Error when attempting to fetch URL "+s3_url);
+            console.error(error);
             self.postMessage({message: "error", path: s3_url, error: error})
           }
       }
@@ -121,7 +122,6 @@ require([
       downloadWorkers = downloadWorkers.filter(w => w !== worker);
     }
 
-    // TODO: replace with call to JS messenger block
     function statusMessage(message, type) {
       base.showJsMessage(type, message, true);
     }
@@ -132,7 +132,7 @@ require([
     function workerOnMessage (event) {
       let thisWorker = event.target;
       if (event.data.message === 'error') {
-        statusMessage(`Error ${JSON.stringify(event)}`, 'error', true);
+        statusMessage(`Worker Error ${JSON.stringify(event)}`, 'error', true);
       }
       if (event.data.message === 'done') {
         progressUpdate(`Download progress: ${s3_urls.length} remaining, ${event.data.path} downloaded`);
@@ -151,7 +151,7 @@ require([
       downloadWorker.onmessage = workerOnMessage;
       downloadWorker.onerror = function(event) {
         let thisWorker = event.target
-        console.error('Main: Error in worker:', event.message, event);
+        console.error('Main: Error in worker:', event.message || "No message given", event);
         statusMessage(`Error in worker: ${event.message}`, 'error', true);
         finalizeWorker(thisWorker);
       }
