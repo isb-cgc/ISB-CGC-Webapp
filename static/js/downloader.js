@@ -21,18 +21,21 @@ require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
         jquery: 'libs/jquery-3.7.1.min',
-        base: 'base'
+        base: 'base',
+        text: 'libs/text'
     }
 });
 
 require([
-    'base', 'jquery'
-], function (base, $) {
+    'base', 'jquery', 'text!downloadWorker.js'
+], function (base, $, workerCode) {
 
     let downloadWorkers = [];
     let downloadWorker = null;
     const s3_urls = [];
 
+    const workerCodeBlob = new Blob([workerCode], { type: 'application/javascript' });
+    const workerObjectURL = URL.createObjectURL(workerCodeBlob);
     const workerDownloadThreshold = 100;
     const availableWorkers = [];
 
@@ -66,17 +69,17 @@ require([
     }
 
     function allocateWorker() {
-      downloadWorker = new Worker(STATIC_FILES_URL + 'js/downloadWorker.js');
+      downloadWorker = new Worker(workerObjectURL);
       downloadWorker.onmessage = workerOnMessage;
       downloadWorker.onerror = function(event) {
-        let thisWorker = event.target;
+        let thisWorker = event.target
         console.error('Main: Error in worker:', event.message || "No message given", event);
         statusMessage(`Error in worker: ${event.message}`, 'error', true);
         finalizeWorker(thisWorker);
       }
       downloadWorkers.downloadCount = 0;
       downloadWorkers.push(downloadWorker);
-      return downloadWorker;
+      return downloadWorker
     }
 
     let workerLimit = navigator.hardwareConcurrency;
@@ -84,6 +87,7 @@ require([
 
     function triggerWorkerDownloads() {
       if (s3_urls.length == 0 && downloadWorkers.length == 0) {
+        if (workerObjectURL) URL.revokeObjectURL(workerObjectURL);
         statusMessage(`Downloads complete`, 'info', true);
       } else {
         while (s3_urls.length > 0) {
