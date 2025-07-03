@@ -1612,8 +1612,8 @@ card {
     background-color: #F8F8F8;
     border-color: #1976D2; }
   .alert.alert-warning, .alert.alert-password-expire {
-    background-color: #F8F8F8;
-    border-color: #FFA000; }
+    background-color: #fdf7dd;
+    border-color: #eb9121; }
   .alert.alert-error {
     background-color: #F8F8F8;
     border-color: #D32F2F; }
