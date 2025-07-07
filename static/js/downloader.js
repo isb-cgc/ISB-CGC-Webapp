@@ -57,7 +57,7 @@ require([
             return currentDirectoryHandle;
         }
         
-        importScripts('https://cdn.jsdelivr.net/npm/dcmjs@0.41.0/build/dcmjs.min.js')
+        importScripts('https://cdn.jsdelivr.net/npm/dcmjs@0.41.0/build/dcmjs.min.js');
         
         function dicomValue(dataset, tagName) {
             let value = "Undefined-" + tagName;
@@ -68,7 +68,7 @@ require([
                     value = dataset.dict[hexTag].Value;
                 }
             }
-            return value
+            return value;
         }
         
         self.onmessage = async function (event) {
@@ -135,7 +135,7 @@ require([
         statusMessage(`Worker Error ${JSON.stringify(event)}`, 'error', true);
       }
       if (event.data.message === 'done') {
-        progressUpdate(`Download progress: ${s3_urls.length} remaining, ${event.data.path} downloaded`);
+        progressUpdate(`Download progress: ${s3_urls.length} remaining...`);
       }
       if (s3_urls.length == 0 || thisWorker.downloadCount > workerDownloadThreshold) {
         finalizeWorker(thisWorker);
@@ -165,7 +165,6 @@ require([
 
     function triggerWorkerDownloads() {
       if (s3_urls.length == 0 && downloadWorkers.length == 0) {
-        if (workerObjectURL) URL.revokeObjectURL(workerObjectURL);
         statusMessage(`Downloads complete`, 'info', true);
       } else {
         while (s3_urls.length > 0) {
