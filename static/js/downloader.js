@@ -26,8 +26,10 @@ require.config({
     }
 });
 
+let downloadworker_path = STATIC_FILES_URL + 'js/downloadWorker.js'
+
 require([
-    'base', 'jquery', 'text!downloadWorker.jsx'
+    'base', 'jquery', `text!${downloadworker_path}`
 ], function (base, $, workerCode) {
 
     let downloadWorkers = [];
