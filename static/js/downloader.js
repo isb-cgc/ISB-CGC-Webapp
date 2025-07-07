@@ -22,13 +22,12 @@ require.config({
     paths: {
         jquery: 'libs/jquery-3.7.1.min',
         base: 'base',
-        text: 'libs/text',
-        downloadWorker: 'downloadWorker.js'
+        text: 'libs/text'
     }
 });
 
 require([
-    'base', 'jquery', 'text!downloadWorker'
+    'base', 'jquery', 'text!downloadWorker.jsx'
 ], function (base, $, workerCode) {
 
     let downloadWorkers = [];
