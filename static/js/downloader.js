@@ -113,7 +113,7 @@ require([
     const s3_urls = [];
 
     const workerCodeBlob = new Blob([workerCode], { type: 'application/javascript' });
-    const workerObjectURL = URL.createObjectURL(workerCodeBlob);
+    let workerObjectURL = null;
     const workerDownloadThreshold = 100;
     const availableWorkers = [];
 
@@ -123,10 +123,10 @@ require([
     }
 
     function statusMessage(message, type) {
-      base.showJsMessage(type, message, true);
+      base.showFloatingMessage(type, message, true);
     }
     function progressUpdate(message) {
-      base.showJsMessage('info', message, true);
+      base.showFloatingMessage('info', message, true);
     }
 
     function workerOnMessage (event) {
@@ -135,7 +135,7 @@ require([
         statusMessage(`Worker Error ${JSON.stringify(event)}`, 'error', true);
       }
       if (event.data.message === 'done') {
-        progressUpdate(`Download progress: ${s3_urls.length} remaining...`);
+        progressUpdate(`Download progress: ${s3_urls.length} remaining, ${event.data.path} downloaded`);
       }
       if (s3_urls.length == 0 || thisWorker.downloadCount > workerDownloadThreshold) {
         finalizeWorker(thisWorker);
@@ -165,8 +165,16 @@ require([
 
     function triggerWorkerDownloads() {
       if (s3_urls.length == 0 && downloadWorkers.length == 0) {
+          // cleanup
+        if (workerObjectURL) {
+            URL.revokeObjectURL(workerObjectURL);
+            workerObjectURL = null;
+        }
         statusMessage(`Downloads complete`, 'info', true);
       } else {
+          if(!workerObjectURL){
+            workerObjectURL = URL.createObjectURL(workerCodeBlob);
+          }
         while (s3_urls.length > 0) {
           let targetWorker = null;
           if (availableWorkers.length > 0) {

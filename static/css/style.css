@@ -4509,3 +4509,11 @@ d-topics-list iframe {
 .collapse-all, .open-all, .download-all-instances {
   cursor: pointer;
 }
+
+#floating-message {
+  position: fixed;
+  bottom: 140px;
+  left: 20px;
+  right: 12px;
+  z-index: 9999;
+}

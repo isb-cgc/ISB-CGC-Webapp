@@ -261,6 +261,8 @@ define(['jquery', 'utils'], function($, utils) {
         // From http://www.regular-expressions.info/email.html
         email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
         showJsMessage: utils.showJsMessage,
+        showFloatingMessage: utils.showFloatingMessage,
+        hideFloatingMessage: utils.hideFloatingMessage,
         // Simple method for standardizing storage of a message into sessionStorage so it can be retrieved and reloaded
         // at document load time
         setReloadMsg: function(type,text) {
