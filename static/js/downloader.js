@@ -22,7 +22,8 @@ require.config({
     paths: {
         jquery: 'libs/jquery-3.7.1.min',
         base: 'base',
-        text: 'libs/text'
+        text: 'libs/text',
+        downloadWorker: 'downloadWorker'
     }
 });
 
