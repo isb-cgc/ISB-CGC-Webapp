@@ -86,7 +86,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     // Update the rows in the Projects Table, clear the other tables.
     window.updateTablesAfterFilter = function (collFilt, collectionsData, collectionStats,cartStats){
-
         var usedCollectionData = new Array();
 
         var hasColl = collFilt.length>0 ? true : false;
@@ -107,14 +106,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         updateProjectTable(usedCollectionData,collectionStats, cartStats);
         initializeTableViewedItemsData();
         initializeTableCacheData();
-        $('#cases_tab').DataTable().destroy();
-        $('#studies_tab').DataTable().destroy();
-        $('#series_tab').DataTable().destroy();
         updateCaseTable(false,"");
         updateStudyTable(false,"");
         updateSeriesTable(false,"");
-
-
     }
 
     // initialize cases, studies, and series cache data
@@ -1119,6 +1113,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         } else {
             pageRows = 10;
         }
+        console.debug($('#series_tab'));
+        console.debug($('#series_tab').DataTable());
         $('#series_tab').DataTable().destroy();
         try {
             $('#series_tab').DataTable({
