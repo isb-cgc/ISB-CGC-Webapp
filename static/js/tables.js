@@ -1330,7 +1330,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                       "orderable": false,
                       data: 'SeriesInstanceUID', render: function (data, type, row){
                           if("showDirectoryPicker" in window) {
-                            return `<i class="fa fa-download download-all-instances" data-bucket="${row['aws_bucket']}" data-series="${row['crdc_series_uuid']}"></i>`
+                            return `<i class="fa fa-download download-all-instances" data-bucket="${row['aws_bucket']}" 
+                                data-series="${row['crdc_series_uuid']}" 
+                                data-series-id="${row['SeriesInstanceUID']}" 
+                                data-modality="${row['Modality']}" 
+                                data-collection="${row['collection_id']}" 
+                                data-study="${row['StudyInstanceUID']}" 
+                                data-patient="${row['PatientID']}"                                 
+                                ></i>`
                           }
                           return `<i class="fa fa-download download-all-disabled"></i>`
                       }

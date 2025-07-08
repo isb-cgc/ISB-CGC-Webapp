@@ -57,25 +57,17 @@ require([
             return currentDirectoryHandle;
         }
         
-        importScripts('https://cdn.jsdelivr.net/npm/dcmjs@0.41.0/build/dcmjs.min.js');
-        
-        function dicomValue(dataset, tagName) {
-            let value = "Undefined-" + tagName;
-            const entry = dcmjs.data.DicomMetaDictionary.nameMap[tagName];
-            if (entry && entry.tag) {
-                const hexTag = entry.tag.replace("(", "").replace(",", "").replace(")", "");
-                if (hexTag in dataset.dict) {
-                    value = dataset.dict[hexTag].Value;
-                }
-            }
-            return value;
-        }
-        
         self.onmessage = async function (event) {
-            const s3_url = event.data.url;
+            const s3_url = event.data['url'];
+            const metadata = event.data['metadata'];
+            const modality = metadata['modality'];
+            const patientID = metadata['patient'];
+            const collection_id = metadata['collection'];
+            const studyInstanceUID = metadata['study'];
+            const seriesInstanceUID = metadata['series'];
+            const fileName = metadata['instance'];
             try {
-                const directoryHandle = event.data.directoryHandle;
-                const collection_id = event.data.collection_id || 'unknown_collection';
+                const directoryHandle = event.data['directoryHandle'];
                 response = await fetch(s3_url)
                 if (!response.ok) {
                     console.error('Worker: Failed to fetch URL:', s3_url, response.statusText);
@@ -83,19 +75,12 @@ require([
                     return
                 }
                 const arrayBuffer = await response.arrayBuffer();
-                const dataset = dcmjs.data.DicomMessage.readFile(arrayBuffer);
-                const modality = dicomValue(dataset, "Modality");
-                const patientID = dicomValue(dataset, "PatientID");
-                const sopInstanceUID = dicomValue(dataset, "SOPInstanceUID");
-                const studyInstanceUID = dicomValue(dataset, "StudyInstanceUID");
-                const seriesInstanceUID = dicomValue(dataset, "SeriesInstanceUID");
                 const seriesDirectory = modality + "_" + seriesInstanceUID;
                 const filePath = [collection_id, patientID, studyInstanceUID, seriesDirectory].join("/");
-                const fileName = sopInstanceUID + ".dcm";
                 const blob = new Blob([arrayBuffer], {type: 'application/dicom'});
                 const file = new File([blob], fileName, {type: 'application/dicom'});
                 const subDirectoryHandle = await createNestedDirectories(directoryHandle, filePath);
-                const fileHandle = await subDirectoryHandle.getFileHandle(fileName, {create: true,});
+                const fileHandle = await subDirectoryHandle.getFileHandle(fileName, {create: true});
                 const writable = await fileHandle.createWritable();
                 await writable.write(arrayBuffer);
                 await writable.close();
@@ -132,7 +117,7 @@ require([
     function workerOnMessage (event) {
       let thisWorker = event.target;
       if (event.data.message === 'error') {
-        statusMessage(`Worker Error ${JSON.stringify(event)}`, 'error', true);
+        statusMessage(`Worker Error: ${JSON.stringify(event)}`, 'error');
       }
       if (event.data.message === 'done') {
         progressUpdate(`Download progress: ${s3_urls.length} remaining, ${event.data.path} downloaded`);
@@ -187,7 +172,7 @@ require([
             }
           }
           const s3_url = s3_urls.pop();
-          targetWorker.postMessage({ url: s3_url, collection_id: collection_id, directoryHandle: directoryHandle });
+          targetWorker.postMessage({ 'url': s3_url['url'], 'metadata': s3_url, 'directoryHandle': directoryHandle });
         }
       }
     }
@@ -246,12 +231,27 @@ require([
     }
 
     $('.container-fluid').on('click', '.download-all-instances', function(){
-        let bucket = $(this).attr('data-bucket');
-        let crdc_series_id = $(this).attr('data-series');
+        const bucket = $(this).attr('data-bucket');
+        const crdc_series_id = $(this).attr('data-series');
+        const series_id = $(this).attr('data-series-id');
+        const collection_id = $(this).attr('data-collection');
+        const study_id = $(this).attr('data-study');
+        const modality = $(this).attr('data-modality');
+        const patient_id = $(this).attr('data-patient');
         getAllS3ObjectKeys(bucket, "us-east-1", crdc_series_id).then( keys => {
           keys.forEach((key) => {
             if (key !== "") {
-              s3_urls.push(`https://${bucket}.s3.us-east-1.amazonaws.com/${key}`);
+                const keys = key.split("/");
+                const instance = keys[keys.length-1];
+              s3_urls.push({
+                  'url': `https://${bucket}.s3.us-east-1.amazonaws.com/${key}`,
+                  'study': study_id,
+                  'collection': collection_id,
+                  'series': series_id,
+                  'modality': modality,
+                  'instance': instance,
+                  'patient': patient_id
+              });
             }
           });
           if(s3_urls.length <= 0) {
