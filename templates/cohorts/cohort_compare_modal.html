@@ -1,0 +1,82 @@
+<!-- Version Comparison Modal -->
+{% load static %}
+
+
+    <div class="modal fade" id="version-compare-modal" tabindex="-1" role="dialog" aria-labelledby="versionCompareModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Cohort Version Compare </h4>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+                </div>
+                <form method="POST" >
+                <div class="modal-body">
+
+                    <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
+                    <div class="col-md-12 data-tab-content-panel spinner-panel">
+                        <div class="isb-panel isb-panel-default">
+                            <div class="isb-panel-body">
+                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                    <div id="version-compare-content" style="display:none">
+                    <p>This cohort was built with an older data version and is no longer available. Would you like to generate a new cohort
+                    from this cohort's filters using the current data version?</p>
+
+                     <div class="isb-panel-body curr-filter-panel gradient-overlay">
+
+                     </div>
+
+                    <table class="table">
+                        <thead><th></th><th>Original Version</th><th>New Version</th></thead>
+                        <tbody>
+                            <tr>
+                                <td># Cases</td>
+                                <td id="cases_orig"></td>
+                                <td id="cases_new"></td>
+                            </tr>
+                           <tr>
+                                <td># Sample</td>
+                                <td id="samples_orig"></td>
+                                <td id="samples_new"></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                        <div class="form-group">
+                            <label for="create-cohort-name">Name:</label>
+                            <input id="create-cohort-name" name="name" type="text">
+
+
+
+                        </div>
+                        <div class="form-group">
+                            <h5 role="heading" aria-level="5">Selected Filters:</h5>
+                            <p id="selected-filters" class="form-control-static">
+
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+                <div class="modal-footer" style="display:none">
+                    {% csrf_token %}
+                        <input type="submit" value="Save New Cohort" class="btn btn-primary">
+                        <div id="saving-cohort" class="collapse" style="display: none;">
+                            <i class="fa fa-circle-o-notch fa-spin" style="font-family :'FontAwesome' !important"></i> Saving Cohort...
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>

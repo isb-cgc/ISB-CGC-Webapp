@@ -19,14 +19,15 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        'jquery': ['libs/jquery-3.5.1.min'],
+        'jquery': ['libs/jquery-3.7.1.min'],
         'bootstrap': ['libs/bootstrap.bundle.min'],
         'jqueryui': ['libs/jquery-ui.min'],
         'session_security': ['session_security/script'],
         'underscore': ['libs/underscore-min'],
         'assetscore': ['libs/assets.core'],
         'assetsresponsive': ['libs/assets.responsive'],
-        'tablesorter': ['libs/jquery.tablesorter.min']
+        'tablesorter': ['libs/jquery.tablesorter.min'],
+        'datatables.net':['libs/datatables.min']
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -35,6 +36,7 @@ require.config({
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
+        'datatables.net':['jquery'],
         'underscore': {exports: '_'}
     }
 });
@@ -49,7 +51,8 @@ require([
     'utils',
     'assetscore',
     'assetsresponsive',
-    'tablesorter'
+    'tablesorter',
+    'datatables.net'
 ], function($, jqueryui, bootstrap, session_security, _, utils) {
     'use strict';
 
@@ -168,7 +171,7 @@ require([
         sortList: [[5,1]]
     });
 
-    $('#cohort-table')
+     $('#cohort-table')
         .on('sortEnd', function()
         {
             update_table_display();
@@ -181,6 +184,8 @@ require([
         sortList: [[8,1]]
     });
 
+
+
     $("#share-share_users").on("keypress", function(e) {
         // Suppress enter key to change line in share text boxes
         if ((e.keyCode == 10 || e.keyCode == 13)) {
@@ -190,6 +195,7 @@ require([
 
     // ------ pagination -------
 
+    /*
     if (document.readyState == 'complete') {
         update_table_display();
     } else {
@@ -199,6 +205,9 @@ require([
             }
         }
     }
+
+     */
+
 
     // change no of entries per page
     $('.isb-panel-body').on('change', '.items-per-page', function () {

@@ -93,7 +93,6 @@ function($, tree_graph, stack_bar_chart) {
     };
 
     return  {
-
         filter_data_for_clin_trees: function(attr_counts, these_nodes, program_id) {
             if(program_id == null || program_id == undefined) {
                 program_id = $('ul.nav-tabs-data li.active a').data('program-id');
@@ -191,8 +190,7 @@ function($, tree_graph, stack_bar_chart) {
                 $('.case-trees .spinner').hide();
 
                 context.update_zero_case_filters_all();
-                $('.hide-zeros input').on('change', function()
-                {
+                $('.hide-zeros input').on('change', function() {
                     context.update_zero_case_filters($(this));
                 });
                 return $.Deferred().resolve();
@@ -247,8 +245,8 @@ function($, tree_graph, stack_bar_chart) {
             }
         },
 
-        format_filters: function(program_id) {
-            var list = {};
+        format_filters: function(program_id, add_key=true) {
+            var filt_hsh = {};
             var program_selector = '';
             if (program_id != '0') {
                 program_selector = '#' + program_id + '-data ';
@@ -260,15 +258,18 @@ function($, tree_graph, stack_bar_chart) {
                 let key_id = -1;
                 if ($this.data('feature-id'))
                     key_id = $this.data('feature-id');
-                key = (key_id > 0 ? key_id+":" : "") + key
+                if (add_key) {
+                    key = (key_id > 0 ? key_id + ":" : "") + key
+                }
                 if ($this.data('value-id'))
                     val = $this.data('value-id');
 
-                if(!list[key])
-                    list[key] = [];
-                list[key].push(val);
+                if(!filt_hsh[key]) {
+                    filt_hsh[key] = [];
+                }
+                filt_hsh[key].push(val);
             });
-            return list;
+            return filt_hsh;
         },
 
         generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version, program_id) {
@@ -282,11 +283,9 @@ function($, tree_graph, stack_bar_chart) {
                 url += 'limit=' + limit + '&';
             }
 
-
             if (filters) {
                 url += 'filters=' + encodeURIComponent(JSON.stringify(filters)) + '&';
             }
-
             url += 'mut_filter_combine='+$('.mut-filter-combine :selected').val();
             return url;
         },
@@ -294,55 +293,57 @@ function($, tree_graph, stack_bar_chart) {
         update_zero_case_filters: function(hide_zero_case_checkbox) {
             if (!hide_zero_case_checkbox)
                 return;
-
-            var should_hide = hide_zero_case_checkbox.prop('checked');
-            var parent_filter_panel = hide_zero_case_checkbox.parent().parent();
+            let hideZeros = hide_zero_case_checkbox.is(':checked');
+            let parent_filter_panel = hide_zero_case_checkbox.parent().parent();
             parent_filter_panel.find('.search-checkbox-list').each(function() {
-               var filter_list = $(this);
-               var num_filter_to_show = 0;
-               filter_list.find('li').each(function() {
-                   var filter = $(this);
-                   var is_zero_case = (filter.find('span').text() == "0");
-                   if (!is_zero_case || !should_hide) {
-                       num_filter_to_show++;
-                   }
-               });
+                let filter_list = $(this);
+                let num_filter_to_show = 0;
+                filter_list.find('li').each(function () {
+                    let filter = $(this);
+                    let searchMismatch = filter.hasClass('search-mismatch');
+                    let isChecked = filter.find('input').is(':checked');
+                    let is_zero_case = (filter.find('input').attr('data-count') === "0");
+                    let toHide = (!isChecked && ((is_zero_case && hideZeros) || searchMismatch));
+                    if (!toHide) {
+                        num_filter_to_show++;
+                    }
+                });
 
-               var num_extra = num_filter_to_show - 6;
-               var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
-               filter_list.find('.show-more').text(show_more_text);
+                var num_extra = num_filter_to_show - 6;
+                var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
+                filter_list.find('.show-more').text(show_more_text);
 
-               var is_expanded = filter_list.find('.less-checks').hasClass("more-expanded");
-               if (num_filter_to_show == 0 || num_extra <= 0) {
-                   filter_list.find('.more-checks').hide();
-                   filter_list.find('.less-checks').hide();
-               } else if (!is_expanded) {
-                   filter_list.find('.more-checks').show();
-               }
+                var is_expanded = filter_list.find('.less-checks').hasClass("more-expanded");
+                if (num_filter_to_show == 0 || num_extra <= 0) {
+                    filter_list.find('.more-checks').hide();
+                    filter_list.find('.less-checks').hide();
+                } else if (!is_expanded) {
+                    filter_list.find('.more-checks').show();
+                }
 
-               var visible_filter_count = 0;
-               filter_list.find('li').each(function() {
-                   var filter = $(this);
-                   var is_zero_case = (filter.find('span').text() == "0");
-                   filter.removeClass("extra-values");
-                   filter.removeClass("visible-filter");
-                   if (is_zero_case && should_hide) {
-                       filter.hide();
-                   } else {
-                       filter.addClass("visible-filter");
-                       if (visible_filter_count >= 6) {
-                           filter.addClass("extra-values");
-                           if (!is_expanded)
-                           {
-                               filter.hide();
-                           }
-                       }
-                       else {
-                           filter.show();
-                       }
-                       visible_filter_count++;
-                   }
-               });
+                let visible_filter_count = 0;
+                filter_list.find('li').each(function () {
+                    let filter = $(this);
+                    let isChecked = filter.find('.filter-value').is(':checked');
+                    let is_zero_case = (filter.find('input').attr('data-count') === "0");
+                    filter.removeClass("extra-values");
+                    filter.removeClass("visible-filter");
+                    let searchMismatch = filter.hasClass('search-mismatch');
+                    if (!isChecked && ((is_zero_case && hideZeros) || searchMismatch)) {
+                        filter.hide();
+                    } else {
+                        filter.addClass("visible-filter");
+                        if (visible_filter_count >= 6 && !isChecked) {
+                            filter.addClass("extra-values");
+                            if (!is_expanded) {
+                                filter.hide();
+                            }
+                        } else {
+                            filter.show();
+                        }
+                        visible_filter_count++;
+                    }
+                });
             });
         },
 
@@ -385,6 +386,7 @@ function($, tree_graph, stack_bar_chart) {
                             }
                         }
                         $that.siblings('span').html(format_num_with_commas(new_count));
+                        $that.attr("data-count", new_count);
                     });
                 }
             });

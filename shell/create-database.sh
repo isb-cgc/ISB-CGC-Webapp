@@ -48,7 +48,7 @@ echo "Note that you can ignore the \"root@localhost is created with an empty pas
 echo "  being created before the debconf password has been set."
 sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password ${MYSQL_ROOT_PASSWORD}"
 sudo debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password ${MYSQL_ROOT_PASSWORD}"
-sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y --force-yes install mysql-server
+sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install mysql-server
 
 echo "Creating Databases..."
 mysql -u${MYSQL_ROOT_USER} -p${MYSQL_ROOT_PASSWORD} -h ${MYSQL_DB_HOST} -e "CREATE DATABASE ${DATABASE_NAME}"
