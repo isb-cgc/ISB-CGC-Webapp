@@ -40,7 +40,7 @@ require.config({
 });
 
 // Return an object for consts/methods used by most views
-define(['jquery'], function($) {
+define(['jquery', 'jqueryui'], function($, jqueryui) {
 
     // Download block poll with cookie via StackOverflow:
     // https://stackoverflow.com/questions/1106377/detect-when-browser-receives-file-download
@@ -135,26 +135,39 @@ define(['jquery'], function($) {
 
     // A method for displaying a special floating message box during worker thread activity. Note there is only
     // ever one floating message box
-    function _showFloatingMessage(type, contents, withEmpty, add_classes) {
+    // If withEmpty is true, the message is assumed to replace the currently visible contents of the message box proper.
+    // If withEmpty is false, the message is assumed to replace the .contents element
+    // If withEmpty is false and the type is not null and isn't found on the alert subelement, the subelement's classes
+    // will be changed to match the new type
+    function _showFloatingMessage(type, contents, withEmpty, add_classes, icon, controls) {
         let msgBox = $('#floating-message');
         withEmpty && msgBox.empty();
-        let msg = "";
-        if (contents instanceof Array) {
-            for (let i = 0; i < contents.length; i++) {
-                msg += contents[i] + '<br />';
-            }
+        let msg = contents instanceof Array ? contents.join("<br />") : contents;
+        controls = controls instanceof Array ? controls.join(" ") : controls;
+        icon = icon || "";
+        if(withEmpty || msgBox.find('.alert-dismissible').length <= 0) {
+            msgBox.append(
+                $('<div>')
+                    .addClass(`alert alert-${type} alert-dismissible`)
+                    .html(
+                        `
+                        <p><span class="contents">${msg}</span> ${icon}</p> 
+                        <p>${controls}</p>                        
+                        `
+                    )
+                    .prepend(
+                        '<button type="button" class="close close-msg-box" text="Close this pane"><span aria-hidden="true">'
+                        + '&times;</span><span class="sr-only">Close</span></button>'
+                    )
+            );
         } else {
-            msg = contents;
+            let alert_box = msgBox.find('.alert-dismissible');
+            alert_box.find('.contents').html(msg);
+            if(type && !alert_box.hasClass(`alert-${type}`)) {
+                alert_box.removeClass();
+                alert_box.addClass(`alert alert-dismissible alert-${type}`);
+            }
         }
-        msgBox.append(
-            $('<div>')
-                .addClass(`alert alert-${type} alert-dismissible`)
-                .html(msg)
-                .prepend(
-                    '<button type="button" class="close close-msg-box"><span aria-hidden="true">'
-                    + '&times;</span><span class="sr-only">Close</span></button>'
-                )
-        );
         msgBox.show();
     }
 

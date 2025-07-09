@@ -1786,7 +1786,7 @@ a.skip-nav {
     background-color: #F8F8F8;
     border-color: #76b876; }
   .alert.alert-info {
-    color: #2d81c4;
+    color: #1c5c8d;
     background-color: #F8F8F8;
     border-color: #1976D2; }
   .alert.alert-warning {
@@ -1795,6 +1795,10 @@ a.skip-nav {
   .alert.alert-error {
     background-color: #F8F8F8;
     border-color: #D32F2F; }
+  .alert.alert-message {
+    background-color: #F8F8F8;
+    border-color: #47435b;
+  }
 
 .alert a {
   font-weight: 600;
@@ -4512,8 +4516,8 @@ d-topics-list iframe {
 
 #floating-message {
   position: fixed;
-  bottom: 140px;
-  left: 20px;
-  right: 12px;
+  top: 180px;
+  width: 300px;
+  right: 40px;
   z-index: 9999;
 }

@@ -214,6 +214,8 @@ require([
         sessionStorage.removeItem("user-manifest");
     });
 
+    $('#floating-message').draggable();
+
     $(document).ready(function(){
         if(sessionStorage.getItem("reloadMsg")) {
             var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));

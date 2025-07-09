@@ -93,9 +93,17 @@ require([
         }    
     `;
 
+    let cancel_button = `
+        <button type="button" class="cancel-download btn btn-default" text="Cancel remaining downloads">Cancel</button>
+    `;
+    let close_button = `
+        <button type="button" class="close-message-window close-msg-box btn btn-primary" text="Close this window">Close</button>
+    `;
+
     let downloadWorkers = [];
     let downloadWorker = null;
     const s3_urls = [];
+    let pending_cancellation = false;
 
     const workerCodeBlob = new Blob([workerCode], { type: 'application/javascript' });
     let workerObjectURL = null;
@@ -107,22 +115,28 @@ require([
       downloadWorkers = downloadWorkers.filter(w => w !== worker);
     }
 
-    function statusMessage(message, type) {
-      base.showFloatingMessage(type, message, true);
+    // Replaces the current floating message contents with a new message, including a new icon if provided
+    function statusMessage(message, type, icon, withClose, withCancel) {
+        let buttons = [];
+        withCancel && buttons.push(cancel_button);
+        withClose && buttons.push(close_button);
+      base.showFloatingMessage(type, message, true, null, icon, buttons);
     }
-    function progressUpdate(message) {
-      base.showFloatingMessage('info', message, true);
+
+    // Updates the current floating message contents and display class
+    function progressUpdate(message, type) {
+      base.showFloatingMessage(type, message, false);
     }
 
     function workerOnMessage (event) {
       let thisWorker = event.target;
       if (event.data.message === 'error') {
-        statusMessage(`Worker Error: ${JSON.stringify(event)}`, 'error');
+        statusMessage(`Worker Error: ${JSON.stringify(event)}`, 'error', null, true, false);
       }
       if (event.data.message === 'done') {
-        progressUpdate(`Download progress: ${s3_urls.length} remaining, ${event.data.path} downloaded`);
+        progressUpdate(`Download progress: ${s3_urls.length} remaining...`);
       }
-      if (s3_urls.length == 0 || thisWorker.downloadCount > workerDownloadThreshold) {
+      if (s3_urls.length == 0 || thisWorker.downloadCount > workerDownloadThreshold || pending_cancellation) {
         finalizeWorker(thisWorker);
       } else {
         thisWorker.downloadCount += 1;
@@ -136,8 +150,8 @@ require([
       downloadWorker.onmessage = workerOnMessage;
       downloadWorker.onerror = function(event) {
         let thisWorker = event.target
-        console.error('Main: Error in worker:', event.message || "No message given", event);
-        statusMessage(`Error in worker: ${event.message}`, 'error', true);
+        console.error('[Main] Error in worker:', event.message || "No message given", event);
+        statusMessage(`[Worker] Error in worker: ${event.message}`, 'error', null, true, false);
         finalizeWorker(thisWorker);
       }
       downloadWorkers.downloadCount = 0;
@@ -155,7 +169,10 @@ require([
             URL.revokeObjectURL(workerObjectURL);
             workerObjectURL = null;
         }
-        statusMessage(`Downloads complete`, 'info', true);
+        let msg = pending_cancellation ? 'Download cancelled.' : `Download complete.`;
+        let type = pending_cancellation ? 'warning' : 'info';
+        statusMessage(msg, type, null, true, false);
+        pending_cancellation = false;
       } else {
           if(!workerObjectURL){
             workerObjectURL = URL.createObjectURL(workerCodeBlob);
@@ -230,6 +247,13 @@ require([
       }
     }
 
+    $('.container-fluid').on('click', '.cancel-download', function(){
+        pending_cancellation = true;
+        $('.cancel-download').hide();
+        $('.close-message-window').show();
+        s3_urls.splice(0, s3_urls.length);
+    });
+
     $('.container-fluid').on('click', '.download-all-instances', function(){
         const bucket = $(this).attr('data-bucket');
         const crdc_series_id = $(this).attr('data-series');
@@ -255,11 +279,15 @@ require([
             }
           });
           if(s3_urls.length <= 0) {
-              statusMessage('Error while parsing instance list!', 'error');
+              statusMessage('Error while parsing instance list!', 'error', null, true, false);
               return;
           }
           beginDownload().then(
-              function(){statusMessage("Download underway.", 'info');}
+              function(){
+                  $('.cancel-download').show();
+                  $('.close-message-window').hide();
+                  statusMessage("Download underway.", 'message', '<i class="fa-solid fa-atom fa-spin"></i>', false, true);
+              }
           );
         });
     });
