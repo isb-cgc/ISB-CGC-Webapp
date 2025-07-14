@@ -30,6 +30,14 @@ require([
 ], function (base, $) {
 
     let workerCode = `
+        const abort_controller = new AbortController();
+        let pending_abort = false;
+        let working = false;
+        function abortFetch(msg) {
+            abort_controller.abort(msg || "Fetch aborted.");
+            pending_abort = true;
+        };
+        
         async function createNestedDirectories(topLevelDirectoryHandle, path) {
             const pathSegments = path.split('/').filter((segment) => segment !== '');
             let currentDirectoryHandle = topLevelDirectoryHandle;
@@ -58,6 +66,11 @@ require([
         }
         
         self.onmessage = async function (event) {
+            if(event.data['abort'] && working) {
+                abortFetch(event.data['reason']);
+                return;
+            }
+            working = true;
             const s3_url = event.data['url'];
             const metadata = event.data['metadata'];
             const modality = metadata['modality'];
@@ -68,11 +81,17 @@ require([
             const fileName = metadata['instance'];
             try {
                 const directoryHandle = event.data['directoryHandle'];
-                response = await fetch(s3_url)
+                response = await fetch(s3_url, {
+                    signal: abort_controller.signal
+                });
                 if (!response.ok) {
-                    console.error('Worker: Failed to fetch URL:', s3_url, response.statusText);
-                    self.postMessage({message: "error", error: "Failed to fetch URL"});
-                    return
+                    if(pending_abort) {
+                        console.log('User aborted downloads');
+                    } else {
+                        console.error('[Worker] Failed to fetch URL: '+s3_url, response.statusText);
+                        self.postMessage({message: "error", error: "Failed to fetch URL"});
+                    }
+                    return;
                 }
                 const arrayBuffer = await response.arrayBuffer();
                 const seriesDirectory = modality + "_" + seriesInstanceUID;
@@ -85,10 +104,18 @@ require([
                 await writable.write(arrayBuffer);
                 await writable.close();
                 self.postMessage({message: "done", path: s3_url, localFilePath: filePath});
+                working = false;
             } catch (error) {
-                console.error("Error when attempting to fetch URL " + s3_url);
-                console.error(error);
-                self.postMessage({message: "error", path: s3_url, error: error});
+                let msg = error.name || "Unnamed Error" + " when attempting to fetch URL " + s3_url;
+                if(error.name === "AbortError" || (error.name === undefined && pending_abort)) {
+                    msg = "Fetch was aborted. The user may have cancelled their downloads.";
+                    working && console.log(msg);
+                } else {
+                    console.error(msg);
+                    console.error(error);
+                }
+                self.postMessage({message: 'error', path: s3_url, error: error, 'text': msg});
+                working = false;
             }
         }    
     `;
@@ -130,13 +157,22 @@ require([
 
     function workerOnMessage (event) {
       let thisWorker = event.target;
-      if (event.data.message === 'error') {
-        statusMessage(`Worker Error: ${JSON.stringify(event)}`, 'error', null, true, false);
+      let true_error = event.data.message === 'error' && event.data.error.name !== "AbortError";
+      let cancellation = event.data.message === 'error' && (pending_cancellation || event.data.error.name === "AbortError");
+      if(true_error) {
+          console.error(`Worker Error: ${JSON.stringify(event)}`);
+        statusMessage(`Encountered an error while downloading these files.`, 'error', null, true, false);
       }
-      if (event.data.message === 'done') {
-        progressUpdate(`Download progress: ${s3_urls.length} remaining...`);
+      if (event.data.message === 'done' || cancellation) {
+          let in_progress = downloadWorkers.length - availableWorkers.length;
+          let msg = `Download status: ${in_progress} files in progress, ${s3_urls.length} in queue...`;
+          if(s3_urls.length <= 0) {
+              // This means the remaining downloads are all in-progress, or we cancelled
+              msg = cancellation ? "Cleaning up cancelled downloads..." : `Download status: ${in_progress} file(s) in progress...`;
+          }
+          progressUpdate(msg);
       }
-      if (s3_urls.length == 0 || thisWorker.downloadCount > workerDownloadThreshold || pending_cancellation) {
+      if (s3_urls.length == 0 || (thisWorker.downloadCount > workerDownloadThreshold) || pending_cancellation) {
         finalizeWorker(thisWorker);
       } else {
         thisWorker.downloadCount += 1;
@@ -252,6 +288,9 @@ require([
         $('.cancel-download').hide();
         $('.close-message-window').show();
         s3_urls.splice(0, s3_urls.length);
+        downloadWorkers.forEach(worker => {
+            worker.postMessage({'abort': true, 'reason': 'User cancelled download.'});
+        });
     });
 
     $('.container-fluid').on('click', '.download-all-instances', function(){
