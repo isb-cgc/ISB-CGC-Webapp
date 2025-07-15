@@ -1098,11 +1098,6 @@ def cart_data(request):
     return JsonResponse(response, status=status)
 
 
-def test_page(request, mtch):
-    pg=request.path[:-1]+'.html'
-    return render(request, 'idc'+pg)
-
-
 # User dashboard, where saved cohorts (and, in the future, uploaded/indexed data) are listed
 @login_required
 def dashboard_page(request):

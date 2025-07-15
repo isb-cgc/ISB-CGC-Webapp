@@ -53,7 +53,6 @@ urlpatterns = [
     re_path(r'^studymp/', views.studymp, name='studymp'),
     re_path(r'^warning/', views.warn_page, name='warn'),
     re_path(r'^about/', views.about_page, name='about_page'),
-    re_path(r'^test(.*)/', views.test_page, name='test_page'),
     re_path(r'^dashboard/', views.dashboard_page, name='dashboard'),
     re_path(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     re_path(r'^privacy/', views.privacy_policy, name='privacy'),
