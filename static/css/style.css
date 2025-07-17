@@ -4521,3 +4521,8 @@ d-topics-list iframe {
   right: 40px;
   z-index: 9999;
 }
+
+.special-announcement {
+  margin-bottom: 0px;
+  text-align: center;
+}

@@ -2,58 +2,58 @@
     <div class="modal fade" id="save-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="saveCohortModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="saveCohortModal">Save Cohort</h4>
-                    <div class="modal-js-messages" id="save-cohort-modal-js-messages">
-                        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your cohort's name or description contains invalid characters (<span class="unallowed-chars"></span>). Please remove them before saving.
-                        </div>
-                        <div id="name-too-long-alert-modal" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your cohort's name must be no more than 255 characters long.
-                        </div>
-                    </div>
-                </div>
-                <form id="save-cohort-form" method="POST" action="{% url 'save_cohort' %}">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="save-cohort-name">Name</label>
-                            <input class="form-control" type="text" id="save-cohort-name" name="name" required />
-                            <label for="save-cohort-desc">Description</label>
-                            <input class="form-control" type="text" id="save-cohort-desc" name="desc" />
-                        </div>
-                        <div class="form-group">
-                            <h5 class="sel-filters-heading">Selected Filters</h5>
-                            <div class="form-control-static">
-                            <div id="selected-filters-prog-set" class="selected-filters">
-                                <h5>Search Scope</h5>
-                            </div>
-                            <div id="selected-filters-orig-set" class="selected-filters">
-                                <h5>Original</h5>
-                            </div>
-                            <div id="selected-filters-der-set" class="selected-filters">
-                                <h5>Derived</h5>
-                            </div>
-                            <div id="selected-filters-rel-set" class="selected-filters">
-                                <h5>Related</h5>
-                            </div>
-                            </div>
-                        </div>
-                        <div class="access_warn is-hidden" style="color:red">This cohort includes collections with limited access. Some or all of the DICOM files in these collections are not publicly available.</div>
-                    </div>
-                    <input type="hidden" name="mut_filter_combine" value="AND" />
-                    <input type="hidden" name="selected-filters" value="" />
-
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Save Cohort" class="btn btn-primary" />
-                        <div id="saving-cohort" class="collapse" style="display: none;">
-                            <i class="fa-solid fa-circle-notch fa-spin"></i>  Saving Cohort...
-                        </div>
-                    </div>
-                </form>
+{#                <div class="modal-header">#}
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                    <h4 class="modal-title" id="saveCohortModal">Save Cohort</h4>#}
+{#                    <div class="modal-js-messages" id="save-cohort-modal-js-messages">#}
+{#                        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">#}
+{#                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>#}
+{#                            Your cohort's name or description contains invalid characters (<span class="unallowed-chars"></span>). Please remove them before saving.#}
+{#                        </div>#}
+{#                        <div id="name-too-long-alert-modal" class="alert alert-warning alert-dismissable" style="display: none;">#}
+{#                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>#}
+{#                            Your cohort's name must be no more than 255 characters long.#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <form id="save-cohort-form" method="POST" action="{% url 'save_cohort' %}">#}
+{#                    <div class="modal-body">#}
+{#                        <div class="form-group">#}
+{#                            <label for="save-cohort-name">Name</label>#}
+{#                            <input class="form-control" type="text" id="save-cohort-name" name="name" required />#}
+{#                            <label for="save-cohort-desc">Description</label>#}
+{#                            <input class="form-control" type="text" id="save-cohort-desc" name="desc" />#}
+{#                        </div>#}
+{#                        <div class="form-group">#}
+{#                            <h5 class="sel-filters-heading">Selected Filters</h5>#}
+{#                            <div class="form-control-static">#}
+{#                            <div id="selected-filters-prog-set" class="selected-filters">#}
+{#                                <h5>Search Scope</h5>#}
+{#                            </div>#}
+{#                            <div id="selected-filters-orig-set" class="selected-filters">#}
+{#                                <h5>Original</h5>#}
+{#                            </div>#}
+{#                            <div id="selected-filters-der-set" class="selected-filters">#}
+{#                                <h5>Derived</h5>#}
+{#                            </div>#}
+{#                            <div id="selected-filters-rel-set" class="selected-filters">#}
+{#                                <h5>Related</h5>#}
+{#                            </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="access_warn is-hidden" style="color:red">This cohort includes collections with limited access. Some or all of the DICOM files in these collections are not publicly available.</div>#}
+{#                    </div>#}
+{#                    <input type="hidden" name="mut_filter_combine" value="AND" />#}
+{#                    <input type="hidden" name="selected-filters" value="" />#}
+{##}
+{#                    <div class="modal-footer">#}
+{#                        {% csrf_token %}#}
+{#                        <input type="submit" value="Save Cohort" class="btn btn-primary" />#}
+{#                        <div id="saving-cohort" class="collapse" style="display: none;">#}
+{#                            <i class="fa-solid fa-circle-notch fa-spin"></i>  Saving Cohort...#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </form>#}
             </div>
         </div>
     </div>

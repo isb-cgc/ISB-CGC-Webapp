@@ -58,93 +58,93 @@
                                     BigQuery
                                 </a>
                             </li>
-
                         </ul>
                         <div class="tab-content">
                             <div id="manifest-bq" class="tab-pane manifest" role="tab-panel">
                                 {% if user_is_social and is_cohort %}
-                                    <div class="bq-table-name manifest-name">
-                                        <label for="export-bq-name">Name</label>
-                                        <p>BigQuery table names are automatically generated and will be provided once the manifest has exported.</p>
-                                    </div>
-                                    <!-- Columns -->
-                                    <div id="bq-columns-container">
-                                        <div id="bq-columns-heading" class="list-group-item__heading export-manifest-group__heading">
-                                            <a role="button" data-toggle="collapse" href="#bq-columns" aria-expanded="true"
-                                               aria-controls="bq-columns">
-                                                <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Columns
-                                            </a>
-                                        </div>
-                                        <div id="bq-columns" class="list-group list-group-item__body collapse in" aria-expanded="true">
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="hidden" value="collection_id" checked>
-                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">collection_id (Collection ID)</span>
-                                            </label></li>
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="hidden" value="SeriesInstanceUID" checked>
-                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">SeriesInstanceUID (Series Instance UID)</span>
-                                            </label></li>
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="hidden" value="source_DOI" checked>
-                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">source_DOI (Source DOI)</span>
-                                            </label></li>
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="hidden" value="idc_version" checked>
-                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">idc_version (IDC Data Version)</span>
-                                            </label></li>
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="hidden" value="gcs_url" checked>
-                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">gcs_url (Google Cloud Storage Path)</span>
-                                            </label></li>
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="hidden" value="aws_url" checked>
-                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">aws_url (AWS Cloud Storage Path)</span>
-                                            </label></li>
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="checkbox" value="PatientID" checked>
-                                                <span class="value">PatientID (Patient ID)</span>
-                                            </label></li>
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="checkbox" value="StudyInstanceUID" checked>
-                                                <span class="value">StudyInstanceUID (Study Instance UID)</span>
-                                            </label></li>
-                                            <li class="checkbox bq-only"><label>
-                                                <input class="column-checkbox" type="checkbox" value="SOPInstanceUID" checked>
-                                                <span class="value">SOPInstanceUID (SOP Instance UID)</span>
-                                            </label></li>
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="checkbox" value="crdc_study_uuid" checked>
-                                                <span class="value">crdc_study_uuid (CRDC Study UUID)</span>
-                                            </label></li>
-
-                                            <li class="checkbox"><label>
-                                                <input class="column-checkbox" type="checkbox" value="crdc_series_uuid" checked>
-                                                <span class="value">crdc_series_uuid (CRDC Series UUID)</span>
-                                            </label></li>
-                                            <li class="checkbox bq-only"><label>
-                                                <input class="column-checkbox" type="checkbox" value="crdc_instance_uuid" checked>
-                                                <span class="value">crdc_instance_uuid (CRDC SOP Instance UUID)</span>
-                                            </label></li>
-                                        </div>
-                                    </div>
-                                    <div id="bq-manifest">
-                                        <a id="get-bq-table" data-export-type="bq" class="btn btn-primary get-manifest" title="Get BQ Table of this manifest.">
-                                            Get BQ Table
-                                        </a>
-                                    </div>
+{#                                    <div class="bq-table-name manifest-name">#}
+{#                                        <label for="export-bq-name">Name</label>#}
+{#                                        <p>BigQuery table names are automatically generated and will be provided once the manifest has exported.</p>#}
+{#                                    </div>#}
+{#                                    <!-- Columns -->#}
+{#                                    <div id="bq-columns-container">#}
+{#                                        <div id="bq-columns-heading" class="list-group-item__heading export-manifest-group__heading">#}
+{#                                            <a role="button" data-toggle="collapse" href="#bq-columns" aria-expanded="true"#}
+{#                                               aria-controls="bq-columns">#}
+{#                                                <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Columns#}
+{#                                            </a>#}
+{#                                        </div>#}
+{#                                        <div id="bq-columns" class="list-group list-group-item__body collapse in" aria-expanded="true">#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="hidden" value="collection_id" checked>#}
+{#                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">collection_id (Collection ID)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="hidden" value="SeriesInstanceUID" checked>#}
+{#                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">SeriesInstanceUID (Series Instance UID)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="hidden" value="source_DOI" checked>#}
+{#                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">source_DOI (Source DOI)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="hidden" value="idc_version" checked>#}
+{#                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">idc_version (IDC Data Version)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="hidden" value="gcs_url" checked>#}
+{#                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">gcs_url (Google Cloud Storage Path)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="hidden" value="aws_url" checked>#}
+{#                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">aws_url (AWS Cloud Storage Path)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="checkbox" value="PatientID" checked>#}
+{#                                                <span class="value">PatientID (Patient ID)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="checkbox" value="StudyInstanceUID" checked>#}
+{#                                                <span class="value">StudyInstanceUID (Study Instance UID)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox bq-only"><label>#}
+{#                                                <input class="column-checkbox" type="checkbox" value="SOPInstanceUID" checked>#}
+{#                                                <span class="value">SOPInstanceUID (SOP Instance UID)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="checkbox" value="crdc_study_uuid" checked>#}
+{#                                                <span class="value">crdc_study_uuid (CRDC Study UUID)</span>#}
+{#                                            </label></li>#}
+{##}
+{#                                            <li class="checkbox"><label>#}
+{#                                                <input class="column-checkbox" type="checkbox" value="crdc_series_uuid" checked>#}
+{#                                                <span class="value">crdc_series_uuid (CRDC Series UUID)</span>#}
+{#                                            </label></li>#}
+{#                                            <li class="checkbox bq-only"><label>#}
+{#                                                <input class="column-checkbox" type="checkbox" value="crdc_instance_uuid" checked>#}
+{#                                                <span class="value">crdc_instance_uuid (CRDC SOP Instance UUID)</span>#}
+{#                                            </label></li>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div id="bq-manifest">#}
+{#                                        <a id="get-bq-table" data-export-type="bq" class="btn btn-primary get-manifest" title="Get BQ Table of this manifest.">#}
+{#                                            Get BQ Table#}
+{#                                        </a>#}
+{#                                    </div>#}
                                 {% else %}
                                     <div class="panel-body">
-                                        Exporting to BigQuery requires you to be logged in with a linked Google Social
-                                        Account, and to save your filters as a cohort.
-                                        {% if user_is_auth and not user_is_social %}
-                                            You can link your account to a Google ID from the
-                                            <a target="_blank" rel="noopener noreferrer" href="/users/{{ request.user.id }}/">Account Details</a> page.
-                                        {% else %}
-                                            Please log in with a Google Social account to enable this feature.
-                                            {% if not is_cohort %}
-                                                Please save your filters as a cohort to enable this feature.
-                                            {% endif %}
-                                        {% endif %}
+{#                                        Exporting to BigQuery requires you to be logged in with a linked Google Social#}
+{#                                        Account, and to save your filters as a cohort.#}
+{#                                        {% if user_is_auth and not user_is_social %}#}
+{#                                            You can link your account to a Google ID from the#}
+{#                                            <a target="_blank" rel="noopener noreferrer" href="/users/{{ request.user.id }}/">Account Details</a> page.#}
+{#                                        {% else %}#}
+{#                                            Please log in with a Google Social account to enable this feature.#}
+{#                                            {% if not is_cohort %}#}
+{#                                                Please save your filters as a cohort to enable this feature.#}
+{#                                            {% endif %}#}
+{#                                        {% endif %}#}
+                                            Exporting to BigQuery is no longer supported.
                                     </div>
                                 {% endif %}
                             </div>

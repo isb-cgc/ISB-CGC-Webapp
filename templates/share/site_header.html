@@ -54,11 +54,11 @@
                             Documentation <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
                         </a>
                     </li>
-                    {% if user.is_authenticated %}
-                    <li class="navbar-link navbar-item">
-                        <a href="{% url 'cohort_list' %}" title="View Your Cohorts">Cohorts</a>
-                    </li>
-                    {% endif %}
+{#                    {% if user.is_authenticated %}#}
+{#                    <li class="navbar-link navbar-item">#}
+{#                        <a href="{% url 'cohort_list' %}" title="View Your Cohorts">Cohorts</a>#}
+{#                    </li>#}
+{#                    {% endif %}#}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li id="grid-menu" class="navbar-item" title="Additional Menu Items">
@@ -154,33 +154,33 @@
                         </div>
                     </div>
                     </li>
-                    {% if user.is_authenticated %}
-                    <li id="user-login" class="navbar-item navbar-login">
-                        <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                            {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
-                                {% if avatar_url %}
-                                    <img src="{{ avatar_url }}" width="30" height="30" alt="Avatar">
-                                {% else %}
-                                    <i class="fa-solid fa-user basic-avatar"> </i>
-                                {% endif %}
-                            {% endwith %}
-                        </a>
-                        <div class="dropdown">
-                            <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
-                                {{ user.first_name }} <i class="fa fa-solid fa-caret-down"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                                {% if has_access %}<li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa-solid fa-cog"></i></a></li>{% endif %}
-                                <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a></li>
-                            </ul>
-                        </div>
-                    </li>
-                {% else %}
-                    <li class="navbar-item inline-block navbar-signin">
-                        <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text" role="button"
-                           {% if request.path == "/explore/" %}data-uri{% else %}href{% endif %}="{% url 'account_login' %}" title="Sign In"><i class="fa fa-solid fa-sign-in"></i>Sign In</a>
-                    </li>
-                {% endif %}
+{#                    {% if user.is_authenticated %}#}
+{#                    <li id="user-login" class="navbar-item navbar-login">#}
+{#                        <a class="avatar-link" href="{% url 'user_detail' user.id %}">#}
+{#                            {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}#}
+{#                                {% if avatar_url %}#}
+{#                                    <img src="{{ avatar_url }}" width="30" height="30" alt="Avatar">#}
+{#                                {% else %}#}
+{#                                    <i class="fa-solid fa-user basic-avatar"> </i>#}
+{#                                {% endif %}#}
+{#                            {% endwith %}#}
+{#                        </a>#}
+{#                        <div class="dropdown">#}
+{#                            <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">#}
+{#                                {{ user.first_name }} <i class="fa fa-solid fa-caret-down"></i>#}
+{#                            </a>#}
+{#                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">#}
+{#                                {% if has_access %}<li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa-solid fa-cog"></i></a></li>{% endif %}#}
+{#                                <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a></li>#}
+{#                            </ul>#}
+{#                        </div>#}
+{#                    </li>#}
+{#                {% else %}#}
+{#                    <li class="navbar-item inline-block navbar-signin">#}
+{#                        <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text" role="button"#}
+{#                           {% if request.path == "/explore/" %}data-uri{% else %}href{% endif %}="{% url 'account_login' %}" title="Sign In"><i class="fa fa-solid fa-sign-in"></i>Sign In</a>#}
+{#                    </li>#}
+{#                {% endif %}#}
                     </ul>
                 </div>
         </div>

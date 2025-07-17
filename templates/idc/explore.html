@@ -55,20 +55,31 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="alert alert-warning alert-dismissible special-announcement">
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                    We have removed user accounts from our system. If you would like to provide feedback on this
+                    decision or need help accessing your previously saved cohorts, please visit us at our
+                    <a class="external-link" href="" url="https://discourse.canceridc.dev/t/idc-portal-sign-in-feature-deprecation/723"
+                         title="IDC Discourse Forum" data-toggle="modal" data-target="#external-web-warning">
+                        Discourse topic <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                    </a>.
+                </div>
+            </div>
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data </h3>
-        
-
-            {% if request.user.is_authenticated %}
-            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"
-                data-target="#save-cohort-modal"
-                title="Select at least one filter." disabled="disabled"
-            > Save As New Cohort
-            </button>
-            {% else %}
-            <button id="save-cohort-btn" class="btn btn-special pull-right login-first" title="Select at least one filter."
-                 data-uri="{% url 'account_login' %}" disabled="disabled"> Log in to Save Cohort
-            </button>
-            {% endif %}
+{#            {% if request.user.is_authenticated %}#}
+{#            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"#}
+{#                data-target="#save-cohort-modal"#}
+{#                title="Select at least one filter." disabled="disabled"#}
+{#            > Save As New Cohort#}
+{#            </button>#}
+{#            {% else %}#}
+{#            <button id="save-cohort-btn" class="btn btn-special pull-right login-first" title="Select at least one filter."#}
+{#                 data-uri="{% url 'account_login' %}" disabled="disabled"> Log in to Save Cohort#}
+{#            </button>#}
+{#            {% endif %}#}
         </div>
     </div>
 {% endblock %}

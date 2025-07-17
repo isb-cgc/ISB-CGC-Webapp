@@ -185,7 +185,7 @@ require([
                         $('#search_def_access').addClass('is-hidden');
                         $('.access_warn').addClass('is-hidden');
                     }
-                    if(is_cohort || (isFiltered && data.total > 0)) {
+                    if(isFiltered && data.total > 0) {
                         $('#search_def_stats').html("Cohort filter contents: " +
                             data.totals.SeriesInstanceUID.toString() + " series from " +
                             data.totals.PatientID.toString() + " cases / " +
@@ -196,16 +196,6 @@ require([
                         $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                     } else {
                         $('#search_def_stats').html("&nbsp;");
-                    }
-                    if (is_cohort) {
-                        (async_download && !user_is_social)  && $('#need-social-account').show();
-                    } else {
-                        data.total > 0 && $('#save-cohort-btn').removeAttr('disabled');
-                        if (user_is_auth) {
-                            $('#save-cohort-btn').prop('title', data.total > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
-                        } else {
-                            $('#save-cohort-btn').prop('title', 'Log in to save.');
-                        }
                     }
 
                     filterutils.updateCollectionTotals('Program', data.programs);
@@ -486,16 +476,7 @@ require([
         sessionStorage.setItem('anonymous_sliders', sliderStr);
     };
 
-
-    $('#save-cohort-btn, #sign-in-dropdown').on('click', function() {
-        if (!user_is_auth) {
-            save_anonymous_selection_data();
-            location.href=$(this).data('uri');
-        }
-    });
-
     cohort_loaded = false;
-
 
     $('.fa-cog').on("click",function(){
          let srt = $(this).parent().parent().parent().find('.cntr')

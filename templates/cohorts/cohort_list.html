@@ -181,23 +181,23 @@
     <!-- Delete Cohort Modal -->
     <div class="modal fade" id="delete-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="delete-cohort-header" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="delete-cohort-header">Delete Cohorts</h4>
-                </div>
-                <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
-                    <div class="modal-body">
-                        <label>Are you sure you want to delete cohort #<span class="del-cohort"></span>?</label>
-                        <p class="form-control-static selected-cohorts"></p>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Delete" class="btn btn-primary" />
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
+{#            <div class="modal-content">#}
+{#                <div class="modal-header">#}
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                    <h4 class="modal-title" id="delete-cohort-header">Delete Cohorts</h4>#}
+{#                </div>#}
+{#                <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">#}
+{#                    <div class="modal-body">#}
+{#                        <label>Are you sure you want to delete cohort #<span class="del-cohort"></span>?</label>#}
+{#                        <p class="form-control-static selected-cohorts"></p>#}
+{#                    </div>#}
+{#                    <div class="modal-footer">#}
+{#                        {% csrf_token %}#}
+{#                        <input type="submit" value="Delete" class="btn btn-primary" />#}
+{#                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
+{#                    </div>#}
+{#                </form>#}
+{#            </div>#}
         </div>
     </div>
 

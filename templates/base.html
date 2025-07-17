@@ -91,20 +91,6 @@
                     {% endautoescape %}
                 {% endif %}
                 <div id="js-messages">
-                    {% if request.user.is_authenticated %}
-                        <div class="alert alert-warning alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert">
-                                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                            </button>
-                            We are planning to remove user accounts from our system. This will remove access to your
-                            currently saved cohorts. If you would like to provide feedback on this decision, please visit
-                            us at our
-                            <a class="external-link" href="" url="https://discourse.canceridc.dev/"
-                                 title="IDC Discourse Forum" data-toggle="modal" data-target="#external-web-warning">
-                                Discourse Forum <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
-                            </a>.
-                        </div>
-                    {% endif %}
                 </div>
                 <div id="floating-message" style="display: none;"></div>
             </div>
@@ -184,25 +170,25 @@
      aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title" id="logoutModalLabel">Logout</h4>
-            </div>
-            <form method="post" action="{% url 'account_logout' %}">
-                <div class="modal-body">
-                    <p>Are you sure you want to sign out?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                    {% csrf_token %}
-                    {% if redirect_field_value %}
-                        <input type="hidden" name="{{redirect_field_name}}" value="{{redirect_field_value}}"/>
-                    {% endif %}
-                    <button type="submit" class="btn btn-primary sign-out-dropdown">Sign Out</button>
-                </div>
-            </form>
+{#            <div class="modal-header">#}
+{#                <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                    <span aria-hidden="true">&times;</span>#}
+{#                </button>#}
+{#                <h4 class="modal-title" id="logoutModalLabel">Logout</h4>#}
+{#            </div>#}
+{#            <form method="post" action="{% url 'account_logout' %}">#}
+{#                <div class="modal-body">#}
+{#                    <p>Are you sure you want to sign out?</p>#}
+{#                </div>#}
+{#                <div class="modal-footer">#}
+{#                    <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
+{#                    {% csrf_token %}#}
+{#                    {% if redirect_field_value %}#}
+{#                        <input type="hidden" name="{{redirect_field_name}}" value="{{redirect_field_value}}"/>#}
+{#                    {% endif %}#}
+{#                    <button type="submit" class="btn btn-primary sign-out-dropdown">Sign Out</button>#}
+{#                </div>#}
+{#            </form>#}
         </div>
     </div>
 </div>
