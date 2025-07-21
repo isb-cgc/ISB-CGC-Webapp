@@ -4517,7 +4517,7 @@ d-topics-list iframe {
 #floating-message {
   position: fixed;
   top: 180px;
-  width: 300px;
+  width: 400px;
   right: 40px;
   z-index: 9999;
 }
