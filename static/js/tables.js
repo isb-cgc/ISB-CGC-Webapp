@@ -948,7 +948,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                     let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                         '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                         '</a></li>';
-                                    let disable_multi = Array.isArray(row['aws_bucket']) && (row['aws_bucket'].length > 0);
+                                    let disable_multi = Array.isArray(row['aws_bucket']) && (row['aws_bucket'].length > 1);
                                     if(!is_xc) {
                                         if(!disable_multi) {
                                             let bucket = Array.isArray(row['aws_bucket']) ? row['aws_bucket'][0] : row['aws_bucket'];
