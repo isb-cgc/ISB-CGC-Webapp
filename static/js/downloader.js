@@ -465,7 +465,7 @@ require([
         let series = [];
         if(clicked.hasClass('download-study')) {
             // This is a study row click
-            let response = await fetch(`http://localhost:8086/series_ids/${study_id}/`);
+            let response = await fetch(`${BASE_URL}/series_ids/${study_id}/`);
             if (!response.ok) {
                 console.error(`[ERROR] Failed to retrieve series IDs for study ${study_id}: ${response.status}`);
                 return;
