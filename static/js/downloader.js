@@ -29,6 +29,23 @@ require([
     'base', 'jquery'
 ], function (base, $) {
 
+    const byte_level = {
+        1: "KB",
+        2: "MB",
+        3: "GB",
+        4: "TB",
+        5: "PB"
+    };
+
+    function size_display_string(size) {
+        let log_level = Math.floor(Math.log10(size));
+        let byte_count = 12;
+        while(log_level%byte_count >= log_level) {
+            byte_count-=3;
+        }
+        return `${(Math.round((size/(Math.pow(10,log_level)))*100)/100)} ${byte_level[(byte_count/3)]}` ;
+    }
+
     class DownloadRequest {
         region = "us-east-1";
 
@@ -41,6 +58,7 @@ require([
             this.bucket = request['bucket'];
             this.crdc_series_id = request['crdc_series_id'];
             this.directory = request['directory'];
+            this.total_size = parseFloat(request['series_size']);
         }
 
         async getAllS3ObjectKeys() {
@@ -107,7 +125,6 @@ require([
             });
             return s3_urls;
         }
-
     }
 
     class DownloadQueueManager {
@@ -117,8 +134,28 @@ require([
         hopper = [];
         working_queue = [];
 
+        queue_byte_size = 0;
+        series_count = 0;
+
         get pending() {
-            return this.working_queue.length + this.hopper.length;
+            let pending_items = [
+                this.hopper.length > 0 ? `${this.hopper.length} series` : "",
+                this.working_queue.length > 0 ? `${this.working_queue.length} file(s)` : ""
+            ];
+            return `${pending_items.join(" and ")}`;
+        }
+
+        get total_downloads_requested() {
+            return size_display_string(this.queue_byte_size);
+        }
+
+        reset_queue_counts() {
+            this.queue_byte_size = 0;
+            this.series_count = 0;
+        }
+
+        get active_requests() {
+            return (this.working_queue.length > 0);
         }
 
         async _update_queue() {
@@ -134,6 +171,8 @@ require([
             let request_success = false;
             if(this.hopper.length < this.HOPPER_LIMIT) {
                 this.hopper.push(new DownloadRequest(request));
+                this.queue_byte_size += parseFloat(request['series_size']);
+                this.series_count += 1;
                 request_success = true;
             }
             return request_success;
@@ -166,7 +205,7 @@ require([
             downloader_manager.statusMessage(`Encountered an error while downloading these files.`, 'error', null, true, false);
         }
         if (event.data.message === 'done' || cancellation) {
-            let msg = `Download status: ${downloader_manager.in_progress} files in progress, ${downloader_manager.queues.pending} in queue...`;
+            let msg = `Download status: ${downloader_manager.in_progress} file(s) in progress, ${downloader_manager.queues.pending} in queue...`;
             if (downloader_manager.queues.isEmpty()) {
                 // This means the remaining downloads are all in-progress, or we cancelled
                 msg = cancellation ? "Cleaning up cancelled downloads..." : `Download status: ${downloader_manager.in_progress} file(s) in progress...`;
@@ -194,9 +233,8 @@ require([
         workerCode = `
             const abort_controller = new AbortController();
             let pending_abort = false;
-            let working = false;
             function abortFetch(msg) {
-                abort_controller.abort(msg || "Fetch aborted.");
+                abort_controller.abort({"name": "AbortError", "reason": msg || "Fetch aborted."});
                 pending_abort = true;
             };
             
@@ -228,11 +266,10 @@ require([
             }
             
             self.onmessage = async function (event) {
-                if(event.data['abort'] && working) {
+                if(event.data['abort'] || pending_abort) {
                     abortFetch(event.data['reason']);
                     return;
                 }
-                working = true;
                 const s3_url = event.data['url'];
                 const metadata = event.data['metadata'];
                 const modality = metadata['modality'];
@@ -255,29 +292,23 @@ require([
                         }
                         return;
                     }
-                    const arrayBuffer = await response.arrayBuffer();
+                    const inputStream = await response.body;
                     const seriesDirectory = modality + "_" + seriesInstanceUID;
                     const filePath = [collection_id, patientID, studyInstanceUID, seriesDirectory].join("/");
-                    const blob = new Blob([arrayBuffer], {type: 'application/dicom'});
-                    const file = new File([blob], fileName, {type: 'application/dicom'});
                     const subDirectoryHandle = await createNestedDirectories(directoryHandle, filePath);
                     const fileHandle = await subDirectoryHandle.getFileHandle(fileName, {create: true});
-                    const writable = await fileHandle.createWritable();
-                    await writable.write(arrayBuffer);
-                    await writable.close();
+                    const outputStream = await fileHandle.createWritable();
+                    await inputStream.pipeTo(outputStream, {signal: abort_controller.signal});
                     self.postMessage({message: "done", path: s3_url, localFilePath: filePath});
-                    working = false;
                 } catch (error) {
                     let msg = error.name || "Unnamed Error" + " when attempting to fetch URL " + s3_url;
                     if(error.name === "AbortError" || (error.name === undefined && pending_abort)) {
                         msg = "Fetch was aborted. The user may have cancelled their downloads.";
-                        working && console.log(msg);
                     } else {
                         console.error(msg);
                         console.error(error);
                     }
                     self.postMessage({message: 'error', path: s3_url, error: error, 'text': msg});
-                    working = false;
                 }
             }    
         `;
@@ -304,6 +335,10 @@ require([
             this.workerCodeBlob = new Blob([this.workerCode], {type: 'application/javascript'});
         }
 
+        get overall_progress() {
+            return `${this.queues.total_downloads_requested} of data over ${this.queues.series_count} series requested`;
+        }
+
         get in_progress() {
             return this.downloadWorkers.length - this.availableWorkers.length;
         }
@@ -318,7 +353,11 @@ require([
 
         // Updates the current floating message contents and display class
         progressUpdate(message, type) {
-            base.showFloatingMessage(type, message, false);
+            let messages = [message];
+            if(!this.pending_cancellation && this.in_progress > 0) {
+                messages.unshift(this.overall_progress);
+            }
+            base.showFloatingMessage(type, messages, false);
         }
 
         finalizeWorker(worker) {
@@ -344,6 +383,7 @@ require([
                     this.workerObjectURL = null;
                 }
                 let msg = this.pending_cancellation ? 'Download cancelled.' : `Download complete.`;
+                this.queues.reset_queue_counts();
                 let type = this.pending_cancellation ? 'warning' : 'info';
                 this.statusMessage(msg, type, null, true, false);
                 this.pending_cancellation = false;
@@ -351,8 +391,7 @@ require([
                 if (!this.workerObjectURL) {
                     this.workerObjectURL = URL.createObjectURL(this.workerCodeBlob);
                 }
-                console.log("Queues:",this.queues.isEmpty());
-                while (!this.queues.isEmpty()) {
+                while (!this.queues.isEmpty() && !this.pending_cancellation) {
                     let targetWorker = null;
                     if (this.availableWorkers.length > 0) {
                         targetWorker = this.availableWorkers.pop();
@@ -370,6 +409,9 @@ require([
                             'metadata': item_to_download,
                             'directoryHandle': item_to_download['directory']
                         });
+                        let queue_msg = this.queues.pending > 0 ? `, ${this.queues.pending} in queue` : "";
+                        let msg = `Download status: ${this.in_progress} file(s) in progress${queue_msg}...`;
+                        this.progressUpdate(msg);
                     } else {
                         break;
                     }
@@ -393,21 +435,14 @@ require([
 
         beginDownloads() {
             if(!this.queues.isEmpty()) {
+                if(this.in_progress <= 0) {
+                    $('.cancel-download').show();
+                    $('.close-message-window').hide();
+                    this.statusMessage("Download underway.", 'message', '<i class="fa-solid fa-atom fa-spin"></i>', false, true);
+                }
                 this.triggerWorkerDownloads();
             }
-            $('.cancel-download').show();
-            $('.close-message-window').hide();
-            this.statusMessage("Download underway.", 'message', '<i class="fa-solid fa-atom fa-spin"></i>', false, true);
         }
-    }
-
-    async function getDirectory() {
-        let directoryHandle = await window.showDirectoryPicker({
-            id: 'idc-downloads',
-            startIn: 'downloads',
-            mode: 'readwrite',
-        });
-        return directoryHandle;
     }
 
     let downloader_manager = new DownloadManager();
@@ -416,28 +451,33 @@ require([
         downloader_manager.cancel();
     });
 
-    $('.container-fluid').on('click', '.download-all-instances', function () {
+    $('.container-fluid').on('click', '.download-all-instances', async function () {
         const clicked = $(this);
-        getDirectory().then(handle => {
-            const bucket = clicked.attr('data-bucket');
-            const crdc_series_id = clicked.attr('data-series');
-            const series_id = clicked.attr('data-series-id');
-            const collection_id = clicked.attr('data-collection');
-            const study_id = clicked.attr('data-study');
-            const modality = clicked.attr('data-modality');
-            const patient_id = clicked.attr('data-patient');
-            downloader_manager.addRequest({
-                'directory': handle,
-                'bucket': bucket,
-                'crdc_series_id': crdc_series_id,
-                'series_id': series_id,
-                'collection_id': collection_id,
-                'study_id': study_id,
-                'modality': modality,
-                'patient_id': patient_id
-            });
-
-            downloader_manager.beginDownloads();
+        let directoryHandle = await window.showDirectoryPicker({
+            id: 'idc-downloads',
+            startIn: 'downloads',
+            mode: 'readwrite',
         });
+        const bucket = clicked.attr('data-bucket');
+        const crdc_series_id = clicked.attr('data-series');
+        const series_id = clicked.attr('data-series-id');
+        const collection_id = clicked.attr('data-collection');
+        const study_id = clicked.attr('data-study');
+        const modality = clicked.attr('data-modality');
+        const patient_id = clicked.attr('data-patient');
+        const total_series_size = clicked.attr('data-series-size');
+        downloader_manager.addRequest({
+            'directory': directoryHandle,
+            'bucket': bucket,
+            'crdc_series_id': crdc_series_id,
+            'series_id': series_id,
+            'collection_id': collection_id,
+            'study_id': study_id,
+            'modality': modality,
+            'patient_id': patient_id,
+            'series_size': total_series_size
+        });
+
+        downloader_manager.beginDownloads();
     });
 });

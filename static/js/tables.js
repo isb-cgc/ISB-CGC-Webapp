@@ -1332,7 +1332,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 data-modality="${row['Modality']}" 
                                 data-collection="${row['collection_id']}" 
                                 data-study="${row['StudyInstanceUID']}" 
-                                data-patient="${row['PatientID']}"                                 
+                                data-patient="${row['PatientID']}" 
+                                data-series-size="${row['instance_size']}"                                                 
                                 ></i>`
                           }
                           return `<i class="fa fa-download download-all-disabled"></i>`
