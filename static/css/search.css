@@ -456,6 +456,11 @@ tr {
 #studies_table td.open-viewer {
     width:4%;
     /* This is necessary to make sure the 2 icons remain together, lined up. */
+    min-width: 80px;
+}
+
+#studies_table td.open-viewer {
+    /* This is necessary to make sure the 2 icons remain together, lined up. */
     min-width: 70px;
 }
 

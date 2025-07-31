@@ -546,8 +546,38 @@ require([
         maxWidth: 85
     });
 
+    tippy.delegate('.studies-table', {
+        content: 'Download all of the image instances in this study.',
+        theme: 'dark',
+        placement: 'left',
+        arrow: false,
+        interactive:true,
+        target: '.download-all-instances',
+        maxWidth: 200
+    });
+
+    tippy.delegate('.studies-table', {
+        content: 'Download a manifest file for this study.',
+        theme: 'dark',
+        placement: 'left',
+        arrow: false,
+        interactive:true,
+        target: '.export-button',
+        maxWidth: 200
+    });
+
+    tippy.delegate('.studies-table', {
+        content: 'Direct download is only available in Chromium browsers.',
+        theme: 'dark',
+        placement: 'left',
+        arrow: false,
+        interactive:true,
+        target: '.download-all-disabled',
+        maxWidth: 200
+    });
+
     tippy.delegate('.series-table', {
-        content: 'Download all of the image instances for this series.',
+        content: 'Download all of the image instances in this series.',
         theme: 'dark',
         placement: 'left',
         arrow: false,
