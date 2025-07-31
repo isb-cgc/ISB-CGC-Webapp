@@ -849,7 +849,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "col1 study-description", "targets": [6]},
                     {className: "col1 numrows", "targets": [7]},
                     {className: "ohif open-viewer", "targets": [8]},
-                    {className: "download-col", "targets": [9]},
+                    {className: "manifest-col", "targets": [9]},
+                    {className: "download-col", "targets": [10]},
                 ],
                 "columns": [
                     {
@@ -978,10 +979,24 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                           "type":"html",
                           "orderable": false,
                           data: 'StudyInstanceUID', render: function (data, type, row){
-                              return '<i class="fa fa-download study-export export-button" data-series-count="'+row['unique_series']
+                              return '<i class="fa fa-list study-export export-button" data-series-count="'+row['unique_series']
                                   +'" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
                           }
-                      }
+                      },
+                    {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'StudyInstanceUID', render: function (data, type, row) {
+                            if ("showDirectoryPicker" in window) {
+                                return `<i class="fa fa-download download-all-instances download-study"   
+                                    data-collection="${row['collection_id']}" 
+                                    data-study="${row['StudyInstanceUID']}" 
+                                    data-patient="${row['PatientID']}"                                       
+                                    ></i>`;
+                            }
+                            return `<i class="fa fa-download download-all-disabled"></i>`;
+                        }
+                    }
                 ],
                 "processing": true,
                 "serverSide": true,
@@ -1216,7 +1231,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "col1 body-part-examined", "targets": [5]},
                     {className: "series-description", "targets": [6]},
                     {className: "ohif open-viewer", "targets": [7]},
-                    {className: "download-col", "targets": [8]},
+                    {className: "manifest-col", "targets": [8]},
+                    {className: "download-col", "targets": [9]},
                  ],
                   "columns": [
                       {"type": "html", "orderable": false, render: function () {
@@ -2138,7 +2154,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
         } else if ($(elem).hasClass('ohif') || $(elem).parentsUntil('tr').hasClass('ohif')) {
             //do nothing here. opening the viewer
-        } else if ($(elem).hasClass('download-col') || $(elem).parentsUntil('tr').hasClass('download-col')) {
+        } else if ($(elem).hasClass('download-col') || $(elem).hasClass('manifest-col') || $(elem).parentsUntil('tr').hasClass('download-col')
+        || $(elem).parentsUntil('tr').hasClass('manifest-col')) {
             //do nothing here. downloading a series or study manifest
         } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
              handleCartClick(tabletype, row, elem, ids);

@@ -44,6 +44,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
 from idc.models import User_Data
+from solr_helpers import build_solr_query, query_solr_and_format_result
 
 
 
@@ -52,8 +53,6 @@ logger = logging.getLogger(__name__)
 
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
-
-
 
 
 # The site's homepage
@@ -183,7 +182,6 @@ def user_login_failed_callback(sender, credentials, **kwargs):
             log_name,
             '[WEBAPP LOGIN] Login FAILED for: {credentials}'.format(credentials=credentials)
         )
-
     except Exception as e:
         logger.exception(e)
 
@@ -241,24 +239,6 @@ def save_ui_hist(request):
 
     return JsonResponse({}, status=status)
 
-# @login_required
-# def getCartData(request):
-#     response = {}
-#     status = 200
-#     sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-#         active=True, source_type=DataSource.SOLR,
-#         aggregate_level="StudyInstanceUID"
-#     )
-
-#def compcartsets(carthist, sel):
-
-# def cartsets(carthist):
-#     cartsets = []
-#
-#     for cartfiltset in carhist:
-#         for selection in cartfiltset:
-#             sel = selection['sel']
-
 
 def cart(request):
     response={}
@@ -286,15 +266,9 @@ def cart(request):
     return JsonResponse(response, status=status)
 
 
-# Calculate the size and counts of a cart based on its current partitions
-def calculate_cart(request):
-    pass
-
-
 # returns various metadata mappings for selected projects used in calculating cart selection
 # counts 'on the fly' client side
 def studymp(request):
-
     response = {}
     status = 200
     sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
@@ -789,8 +763,8 @@ def populate_tables_old(request):
 
     return JsonResponse(response, status=status)
 
+
 # Data exploration and cohort creation page
-#@login_required
 def explore_data_page(request, filter_path=False, path_filters=None):
     context = {'request': request}
     is_json = False
@@ -946,6 +920,7 @@ def explorer_manifest(request):
         logger.exception(e)
     return redirect(reverse('cart'))
 
+
 # Given a set of filters in a GET request, parse the filter set out into a filter set recognized
 # by the explore_data_page method and forward it on to that view, returning its response.
 def parse_explore_filters(request):
@@ -1093,6 +1068,47 @@ def cart_data(request):
     except Exception as e:
         logger.error("[ERROR] While loading cart:")
         logger.exception(e)
+        status = 400
+
+    return JsonResponse(response, status=status)
+
+
+def get_series_for_study(request, study_uid):
+    try:
+        status = 200
+        response = { "result": [] }
+        source = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+            active=True, source_type=DataSource.SOLR,
+            aggregate_level="SeriesInstanceUID"
+        ).first()
+        filter_query = build_solr_query(
+            {"StudyInstanceUID": [study_uid]},
+            with_tags_for_ex=False,
+            search_child_records_by=None, solr_default_op='AND'
+        )
+        result = query_solr_and_format_result(
+            {
+                "collection": source.name,
+                "fields": ["StudyInstanceUID", "Modality", "crdc_series_uuid", "SeriesInstanceUID", "aws_bucket", "instance_size"],
+                "query_string": None,
+                "fqs": [filter_query['full_query_str']],
+                "facets": None, "sort":None, "counts_only":False
+            }
+        )
+        for doc in result['docs']:
+            response['result'].append({
+                "series_id": doc['SeriesInstanceUID'],
+                "crdc_series_id": doc['crdc_series_uuid'],
+                "bucket": doc['aws_bucket'][0],
+                "series_size": doc['instance_size'][0],
+                "modality": doc['Modality'][0],
+                "study": doc['StudyInstanceUID']
+            })
+
+    except Exception as e:
+        logger.error("[ERROR] While fetching series per study ID:")
+        logger.exception(e)
+        response['message'] = "Error while retrieving series IDs"
         status = 400
 
     return JsonResponse(response, status=status)

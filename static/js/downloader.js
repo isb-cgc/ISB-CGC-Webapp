@@ -458,26 +458,42 @@ require([
             startIn: 'downloads',
             mode: 'readwrite',
         });
-        const bucket = clicked.attr('data-bucket');
-        const crdc_series_id = clicked.attr('data-series');
-        const series_id = clicked.attr('data-series-id');
         const collection_id = clicked.attr('data-collection');
         const study_id = clicked.attr('data-study');
-        const modality = clicked.attr('data-modality');
         const patient_id = clicked.attr('data-patient');
-        const total_series_size = clicked.attr('data-series-size');
-        downloader_manager.addRequest({
-            'directory': directoryHandle,
-            'bucket': bucket,
-            'crdc_series_id': crdc_series_id,
-            'series_id': series_id,
-            'collection_id': collection_id,
-            'study_id': study_id,
-            'modality': modality,
-            'patient_id': patient_id,
-            'series_size': total_series_size
-        });
 
+        let series = [];
+        if(clicked.hasClass('download-study')) {
+            // This is a study row click
+            let response = await fetch(`http://localhost:8086/series_ids/${study_id}/`);
+            if (!response.ok) {
+                console.error(`[ERROR] Failed to retrieve series IDs for study ${study_id}: ${response.status}`);
+                return;
+            }
+            const series_data = await response.json();
+            series.push(...series_data['result']);
+        } else {
+            series.push({
+                "bucket": clicked.attr('data-bucket'),
+                "crdc_series_id": clicked.attr('data-series'),
+                "series_id": clicked.attr('data-series-id'),
+                "modality": clicked.attr('data-modality'),
+                "series_size": clicked.attr('data-series-size')
+            });
+        }
+        series.forEach(series_request => {
+            downloader_manager.addRequest({
+                'directory': directoryHandle,
+                'bucket': series_request['bucket'],
+                'crdc_series_id': series_request['crdc_series_id'],
+                'series_id': series_request['series_id'],
+                'collection_id': collection_id,
+                'study_id': study_id,
+                'modality': series_request['modality'],
+                'patient_id': patient_id,
+                'series_size': series_request['series_size']
+            });
+        });
         downloader_manager.beginDownloads();
     });
 });
