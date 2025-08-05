@@ -490,7 +490,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             {className: "col1 project-name", "targets": [3]},
             {className: "col1 case-id", "targets": [4]},
             {className: "col1 numrows", "targets": [5]},
-            {className: "col1", "targets": [6]}];
+            {className: "col1 numseries", "targets": [6]},
+            {className: "col1 download-case", "targets": [7]}];
     };
 
     const caseTableColumns = function() {
@@ -548,7 +549,16 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         }};
         const study_col  = {"type": "num", "orderable": true, data: 'unique_studies'};
         const series_col =  {"type": "num", "orderable": true, data: 'unique_series'};
-        return [caret_col, cart_col, cartnum_col, collection_col, case_col, study_col, series_col];
+        const download_col = {"type": "htlp", "orderable": false, data: 'patient_id', render: function(data, type, row) {
+                if ("showDirectoryPicker" in window) {
+                    return `<i class="fa fa-download download-all-instances download-case"   
+                        data-collection="${row['collection_id']}" 
+                        data-patient="${row['PatientID']}"                                       
+                        ></i>`;
+                }
+                return `<i class="fa fa-download download-all-disabled"></i>`;
+        }};
+        return [caret_col, cart_col, cartnum_col, collection_col, case_col, study_col, series_col, download_col];
     };
 
     // recreates the cases table when a chevron is clicked in the projects table. Defines the chevron and cart selection actions.

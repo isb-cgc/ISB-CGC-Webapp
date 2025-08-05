@@ -463,9 +463,9 @@ require([
         const patient_id = clicked.attr('data-patient');
 
         let series = [];
-        if(clicked.hasClass('download-study')) {
-            // This is a study row click
-            let response = await fetch(`${BASE_URL}/series_ids/${study_id}/`);
+        if(clicked.hasClass('download-study') || clicked.hasClass('download-case')) {
+            let study_uri = (study_id !== undefined && study_id !== null) ? `${study_id}/` : "";
+            let response = await fetch(`${BASE_URL}/series_ids/${patient_id}/${study_uri}`);
             if (!response.ok) {
                 console.error(`[ERROR] Failed to retrieve series IDs for study ${study_id}: ${response.status}`);
                 return;
@@ -478,7 +478,8 @@ require([
                 "crdc_series_id": clicked.attr('data-series'),
                 "series_id": clicked.attr('data-series-id'),
                 "modality": clicked.attr('data-modality'),
-                "series_size": clicked.attr('data-series-size')
+                "series_size": clicked.attr('data-series-size'),
+                "study_id": study_id
             });
         }
         series.forEach(series_request => {
@@ -488,7 +489,7 @@ require([
                 'crdc_series_id': series_request['crdc_series_id'],
                 'series_id': series_request['series_id'],
                 'collection_id': collection_id,
-                'study_id': study_id,
+                'study_id': series_request['study_id'],
                 'modality': series_request['modality'],
                 'patient_id': patient_id,
                 'series_size': series_request['series_size']

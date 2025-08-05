@@ -1073,7 +1073,7 @@ def cart_data(request):
     return JsonResponse(response, status=status)
 
 
-def get_series_for_study(request, study_uid):
+def get_series(request, patient_id, study_uid=None):
     try:
         status = 200
         response = { "result": [] }
@@ -1081,18 +1081,23 @@ def get_series_for_study(request, study_uid):
             active=True, source_type=DataSource.SOLR,
             aggregate_level="SeriesInstanceUID"
         ).first()
+        filters = {
+            "PatientID": [patient_id]
+        }
+        if study_uid:
+            filters["StudyInstanceUID"] = [study_uid]
         filter_query = build_solr_query(
-            {"StudyInstanceUID": [study_uid]},
+            filters,
             with_tags_for_ex=False,
             search_child_records_by=None, solr_default_op='AND'
         )
         result = query_solr_and_format_result(
             {
                 "collection": source.name,
-                "fields": ["StudyInstanceUID", "Modality", "crdc_series_uuid", "SeriesInstanceUID", "aws_bucket", "instance_size"],
+                "fields": ["PatientID", "StudyInstanceUID", "Modality", "crdc_series_uuid", "SeriesInstanceUID", "aws_bucket", "instance_size"],
                 "query_string": None,
                 "fqs": [filter_query['full_query_str']],
-                "facets": None, "sort":None, "counts_only":False
+                "facets": None, "sort": None, "counts_only": False, "limit": 2000
             }
         )
         for doc in result['docs']:
@@ -1102,7 +1107,8 @@ def get_series_for_study(request, study_uid):
                 "bucket": doc['aws_bucket'][0],
                 "series_size": doc['instance_size'][0],
                 "modality": doc['Modality'][0],
-                "study": doc['StudyInstanceUID']
+                "study_id": doc['StudyInstanceUID'],
+                "case": doc["PatientID"]
             })
 
     except Exception as e:
