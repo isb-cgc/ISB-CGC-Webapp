@@ -183,6 +183,8 @@ require([
 
         queue_byte_size = 0;
         series_count = 0;
+        case_count = 0;
+        study_count = 0;
 
         get pending() {
             let pending_items = [
@@ -363,7 +365,6 @@ require([
                 }
             }    
         `;
-
 
         // Status
         pending_cancellation = false;
