@@ -555,7 +555,7 @@ require([
         target: '.download-all-instances',
         maxWidth: 200
     });
-    
+
     tippy.delegate('.cases-table', {
         content: 'Direct download is only available in Chromium browsers.',
         theme: 'dark',

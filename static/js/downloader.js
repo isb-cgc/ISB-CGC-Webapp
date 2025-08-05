@@ -46,6 +46,53 @@ require([
         return `${(Math.round((size/(Math.pow(10,log_level)))*100)/100)} ${byte_level[(byte_count/3)]}` ;
     }
 
+    class DownloadProgressDisplay {
+        msgBox = $('#floating-message');
+        cancel_button = this.msgBox.find('.cancel-floating-message');
+        close_button = this.msgBox.find('.close-floating-message');
+        msgBoxContents = this.msgBox.find('.floating-message-content');
+        msgBoxHeader = this.msgBox.find('.floating-message-header');
+
+        // Updates floating message text elements and/or icons
+        // messages: Object of DOM element contents to update of the form:
+        //      { <subclass>: <HTML>, [<subclass>: <HTML>...] }
+        //      subclass should be the final term in the element's floating-message class
+        //          (eg. floating-message-header has a subclass of header)
+        //      A falsey valye will empty all text elements
+        // icon: string subclass of the icon to display. subclass should be the final term in the icon's
+        //      floating-message-icon class (eg. floating-message-icon-download has a subclass of download)
+        update(type, messages, icon) {
+           let alert_box = this.msgBox.find('.alert');
+            alert_box.removeClass();
+            alert_box.addClass(`alert alert-dismissible alert-${type}`);
+            let new_icon = typeof icon === "string";
+            (!icon || new_icon) && this.msgBox.find('.floating-message-icon').hide();
+            (new_icon) && this.msgBox.find(`.floating-message-icon-${icon}`).show();
+            if(messages) {
+                for (const [loc, msg] of Object.entries(messages)) {
+                    let updateTo = this.msgBox.find(`.floating-message-${loc}`);
+                    updateTo.empty();
+                    updateTo.append(`${msg}`);
+                }
+            } else {
+                this.msgBox.find('.floating-messages').empty();
+            }
+        }
+
+        // Sets up the download message box and displays it. Subsequent calls to this method
+        // will completely override the current contents of the entire display. To update only the type, text
+        // and/or icons, use update.
+        show(type, contents, icon, withCancel, withClose) {
+            withCancel ? this.cancel_button.show() : this.cancel_button.hide();
+            withClose ? this.close_button.show() : this.close_button.hide();
+            this.msgBoxContents.empty();
+            this.msgBoxHeader.empty();
+            type = type || "info";
+            this.update(type, contents, icon)
+            this.msgBox.show();
+        }
+    }
+
     class DownloadRequest {
         region = "us-east-1";
 
@@ -202,15 +249,17 @@ require([
         let cancellation = event.data.message === 'error' && (downloader_manager.pending_cancellation || event.data.error.name === "AbortError");
         if (true_error) {
             console.error(`Worker Error: ${JSON.stringify(event)}`);
-            downloader_manager.statusMessage(`Encountered an error while downloading these files.`, 'error', null, true, false);
+            downloader_manager.statusMessage(`Encountered an error while downloading these files.`, 'error', "error", true, false);
         }
         if (event.data.message === 'done' || cancellation) {
             let msg = `Download status: ${downloader_manager.in_progress} file(s) in progress, ${downloader_manager.queues.pending} in queue...`;
+            let progType = "download";
             if (downloader_manager.queues.isEmpty()) {
                 // This means the remaining downloads are all in-progress, or we cancelled
                 msg = cancellation ? "Cleaning up cancelled downloads..." : `Download status: ${downloader_manager.in_progress} file(s) in progress...`;
+                progType = cancellation ? "cancel" : "done";
             }
-            downloader_manager.progressUpdate(msg);
+            downloader_manager.progressUpdate(msg, progType);
         }
         if (downloader_manager.queues.isEmpty() || (thisWorker.downloadCount > downloader_manager.workerDownloadThreshold) || downloader_manager.pending_cancellation) {
             downloader_manager.finalizeWorker(thisWorker);
@@ -224,11 +273,13 @@ require([
     function workerOnError(event) {
         let thisWorker = event.target
         console.error('[Main] Error in worker:', event.message || "No message given", event);
-        downloader_manager.statusMessage(`[Worker] Error in worker: ${event.message}`, 'error', null, true, false);
+        downloader_manager.statusMessage(`[Worker] Error in worker: ${event.message}`, 'error', "error", true, false);
         downloader_manager.finalizeWorker(thisWorker);
     }
 
     class DownloadManager {
+        progressDisplay = new DownloadProgressDisplay();
+
         // Text blobs
         workerCode = `
             const abort_controller = new AbortController();
@@ -312,12 +363,7 @@ require([
                 }
             }    
         `;
-        cancel_button = `
-            <button type="button" class="cancel-download btn btn-default">Cancel</button>
-        `;
-        close_button = `
-            <button type="button" class="close-message-window close-msg-box btn btn-primary">Close</button>
-        `;
+
 
         // Status
         pending_cancellation = false;
@@ -345,19 +391,40 @@ require([
 
         // Replaces the current floating message contents with a new message, including a new icon if provided
         statusMessage(message, type, icon, withClose, withCancel) {
-            let buttons = [];
-            withCancel && buttons.push(this.cancel_button);
-            withClose && buttons.push(this.close_button);
-            base.showFloatingMessage(type, message, true, null, icon, buttons);
+            let messages = {
+                "content": message
+            };
+            if(!this.pending_cancellation && this.in_progress > 0) {
+                messages['header'] = this.overall_progress;
+            }
+            this.progressDisplay.show(type, messages, icon, withCancel, withClose);
         }
 
         // Updates the current floating message contents and display class
-        progressUpdate(message, type) {
-            let messages = [message];
-            if(!this.pending_cancellation && this.in_progress > 0) {
-                messages.unshift(this.overall_progress);
+        progressUpdate(message, progType) {
+            progType = progType || "download";
+            let type = "info";
+            let icon = progType || true;
+            switch(progType) {
+                case "cancel":
+                    type = "warning";
+                    break;
+                case "done":
+                    type = "success";
+                    break;
+                case "error":
+                    type = "error";
+                    break;
+                default:
+                    break;
             }
-            base.showFloatingMessage(type, messages, false);
+            let messages = {
+                "content": message
+            };
+            if(!this.pending_cancellation && this.in_progress > 0) {
+                messages['header'] = this.overall_progress;
+            }
+            this.progressDisplay.update(type, messages, icon);
         }
 
         finalizeWorker(worker) {
@@ -384,8 +451,9 @@ require([
                 }
                 let msg = this.pending_cancellation ? 'Download cancelled.' : `Download complete.`;
                 this.queues.reset_queue_counts();
-                let type = this.pending_cancellation ? 'warning' : 'info';
-                this.statusMessage(msg, type, null, true, false);
+                let type = this.pending_cancellation ? 'warning' : 'success';
+                let icon = this.pending_cancellation ? 'cancel' : 'done';
+                this.statusMessage(msg, type, icon, true, false);
                 this.pending_cancellation = false;
             } else {
                 if (!this.workerObjectURL) {
@@ -411,7 +479,7 @@ require([
                         });
                         let queue_msg = this.queues.pending > 0 ? `, ${this.queues.pending} in queue` : "";
                         let msg = `Download status: ${this.in_progress} file(s) in progress${queue_msg}...`;
-                        this.progressUpdate(msg);
+                        this.progressUpdate(msg, "download");
                     } else {
                         break;
                     }
@@ -438,7 +506,7 @@ require([
                 if(this.in_progress <= 0) {
                     $('.cancel-download').show();
                     $('.close-message-window').hide();
-                    this.statusMessage("Download underway.", 'message', '<i class="fa-solid fa-atom fa-spin"></i>', false, true);
+                    this.statusMessage("Download underway.", 'info', "download", false, true);
                 }
                 this.triggerWorkerDownloads();
             }

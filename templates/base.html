@@ -92,7 +92,32 @@
                 {% endif %}
                 <div id="js-messages">
                 </div>
-                <div id="floating-message" style="display: none;"></div>
+                <div id="floating-message" style="display: none;">
+                        <div class="alert alert-info alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                            </button>
+                            <p class="floating-messages floating-message-header"></p>
+                            <p><span class="floating-messages floating-message-content"></span>
+                                <i class="floating-message-icon floating-message-icon-download fa-solid fa-atom fa-spin"
+                                   style="display: none;"></i>
+                                <i class="floating-message-icon floating-message-icon-error fa-solid fa-circle-xmark"
+                                   style="display: none;"></i>
+                                <i class="floating-message-icon floating-message-icon-done fa-solid fa-circle-check"
+                                   style="display: none;"></i>
+                                <i class="floating-message-icon floating-message-icon-cancel fa-solid fa-circle-exclamation"
+                                   style="display: none;"></i>
+                            </p>
+                            <p>
+                                <button type="button"
+                                        class="cancel-download btn btn-default cancel-floating-message"
+                                        style="display: none;">Cancel</button>
+                                <button type="button"
+                                        class="close-message-window close-msg-box btn btn-primary close-floating-message"
+                                        style="display: none;">Close</button>
+                            </p>
+                        </div>
+                </div>
             </div>
         </div>
         <!-- Page Content -->

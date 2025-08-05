@@ -133,44 +133,6 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
         return uuid;
     }
 
-    // A method for displaying a special floating message box during worker thread activity. Note there is only
-    // ever one floating message box
-    // If withEmpty is true, the message is assumed to replace the currently visible contents of the message box proper.
-    // If withEmpty is false, the message is assumed to replace the .contents element
-    // If withEmpty is false and the type is not null and isn't found on the alert subelement, the subelement's classes
-    // will be changed to match the new type
-    function _showFloatingMessage(type, contents, withEmpty, add_classes, icon, controls) {
-        let msgBox = $('#floating-message');
-        withEmpty && msgBox.empty();
-        let msg = contents instanceof Array ? contents.join("<br />") : contents;
-        controls = controls instanceof Array ? controls.join(" ") : controls;
-        icon = icon || "";
-        if(withEmpty || msgBox.find('.alert-dismissible').length <= 0) {
-            msgBox.append(
-                $('<div>')
-                    .addClass(`alert alert-${type} alert-dismissible`)
-                    .html(
-                        `
-                        <p><span class="contents">${msg}</span> ${icon}</p> 
-                        <p>${controls}</p>                        
-                        `
-                    )
-                    .prepend(
-                        '<button type="button" class="close close-msg-box" text="Close this pane"><span aria-hidden="true">'
-                        + '&times;</span><span class="sr-only">Close</span></button>'
-                    )
-            );
-        } else {
-            let alert_box = msgBox.find('.alert-dismissible');
-            alert_box.find('.contents').html(msg);
-            if(type && !alert_box.hasClass(`alert-${type}`)) {
-                alert_box.removeClass();
-                alert_box.addClass(`alert alert-dismissible alert-${type}`);
-            }
-        }
-        msgBox.show();
-    }
-
     function _hideFloatingMessage(withEmpty) {
         withEmpty && $('#floating-message').empty();
         $('#floating-message').hide();
@@ -245,7 +207,6 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
 
     return {
         showJsMessage: _showJsMessage,
-        showFloatingMessage: _showFloatingMessage,
         hideFloatingMessage: _hideFloatingMessage,
         // Block re-requests of requests which can't be handled via AJAX (eg. file downloads)
         // Uses cookie polling
