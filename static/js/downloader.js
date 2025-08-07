@@ -183,8 +183,11 @@ require([
 
         queue_byte_size = 0;
         series_count = 0;
-        case_count = 0;
-        study_count = 0;
+        collections = new Set([]);
+        cases = new Set([]);
+        studies = new Set([]);
+
+        cancellation_underway = false;
 
         get pending() {
             let pending_items = [
@@ -198,13 +201,22 @@ require([
             return size_display_string(this.queue_byte_size);
         }
 
-        reset_queue_counts() {
+        reset_queue_manager() {
             this.queue_byte_size = 0;
             this.series_count = 0;
+            this.collections = new Set([]);
+            this.cases = new Set([]);
+            this.studies = new Set([]);
+            this.cancellation_underway = false;
         }
 
         get active_requests() {
             return (this.working_queue.length > 0);
+        }
+
+        cancel() {
+            this.cancellation_underway = true;
+            this._emptyQueues();
         }
 
         async _update_queue() {
@@ -214,14 +226,21 @@ require([
                     this.working_queue.push(...keys);
                 });
             }
+            // It's possible a cancellation came in while we were doing this. If so, re-empty the working_queue
+            if(this.cancellation_underway) {
+                this.working_queue.slice(0,this.working_queue.length);
+            }
         }
 
         load(request) {
             let request_success = false;
-            if(this.hopper.length < this.HOPPER_LIMIT) {
+            if(this.hopper.length < this.HOPPER_LIMIT && !this.cancellation_underway) {
                 this.hopper.push(new DownloadRequest(request));
                 this.queue_byte_size += parseFloat(request['series_size']);
                 this.series_count += 1;
+                this.studies.add(request['study_id']);
+                this.collections.add(request['collection_id']);
+                this.cases.add(request['patient_id']);
                 request_success = true;
             }
             return request_success;
@@ -233,22 +252,22 @@ require([
 
         async get_download_item() {
             await this._update_queue();
-            if(this.working_queue.length > 0) {
+            if(this.working_queue.length > 0 && !this.cancellation_underway) {
                 return this.working_queue.pop();
             }
             return null;
         }
 
-        emptyQueues() {
-            this.working_queue.slice(0,this.working_queue.length);
-            this.hopper.slice(0,this.hopper.length);
+        _emptyQueues() {
+            this.hopper.length = 0;
+            this.working_queue.length = 0;
         }
     }
 
     function workerOnMessage(event) {
         let thisWorker = event.target;
         let true_error = event.data.message === 'error' && event.data.error.name !== "AbortError";
-        let cancellation = event.data.message === 'error' && (downloader_manager.pending_cancellation || event.data.error.name === "AbortError");
+        let cancellation = downloader_manager.pending_cancellation || (event.data.message === 'error' && event.data.error.name === "AbortError");
         if (true_error) {
             console.error(`Worker Error: ${JSON.stringify(event)}`);
             downloader_manager.statusMessage(`Encountered an error while downloading these files.`, 'error', "error", true, false);
@@ -383,7 +402,11 @@ require([
         }
 
         get overall_progress() {
-            return `${this.queues.total_downloads_requested} of data over ${this.queues.series_count} series requested`;
+            return `${this.queues.total_downloads_requested} of data in ` +
+                `${this.queues.collections.size} collection(s) / ` +
+                `${this.queues.cases.size} case(s) / ` +
+                `${this.queues.studies.size} ${this.queues.studies.size <= 1 ? "study" : "studies"} / ` +
+                `${this.queues.series_count} series`;
         }
 
         get in_progress() {
@@ -443,46 +466,54 @@ require([
         }
 
         async triggerWorkerDownloads() {
-            // One way or another, there's nothing left to download
             if (this.queues.isEmpty() && this.downloadWorkers.length <= 0) {
+                // One way or another, we're stopping
                 // cleanup our worker object URL for now
                 if (this.workerObjectURL) {
                     URL.revokeObjectURL(this.workerObjectURL);
                     this.workerObjectURL = null;
                 }
                 let msg = this.pending_cancellation ? 'Download cancelled.' : `Download complete.`;
-                this.queues.reset_queue_counts();
+                this.queues.reset_queue_manager();
                 let type = this.pending_cancellation ? 'warning' : 'success';
                 let icon = this.pending_cancellation ? 'cancel' : 'done';
                 this.statusMessage(msg, type, icon, true, false);
                 this.pending_cancellation = false;
             } else {
-                if (!this.workerObjectURL) {
-                    this.workerObjectURL = URL.createObjectURL(this.workerCodeBlob);
-                }
-                while (!this.queues.isEmpty() && !this.pending_cancellation) {
-                    let targetWorker = null;
-                    if (this.availableWorkers.length > 0) {
-                        targetWorker = this.availableWorkers.pop();
-                    } else {
-                        if (this.downloadWorkers.length <= this.workerLimit) {
-                            targetWorker = this.allocateWorker();
-                        } else {
-                            break; // all workers busy and we can't add more
-                        }
+                if(!this.pending_cancellation) {
+                    if (!this.workerObjectURL) {
+                        this.workerObjectURL = URL.createObjectURL(this.workerCodeBlob);
                     }
-                    if(targetWorker) {
-                        let item_to_download = await this.queues.get_download_item();
-                        targetWorker.postMessage({
-                            'url': item_to_download['url'],
-                            'metadata': item_to_download,
-                            'directoryHandle': item_to_download['directory']
-                        });
-                        let queue_msg = this.queues.pending > 0 ? `, ${this.queues.pending} in queue` : "";
-                        let msg = `Download status: ${this.in_progress} file(s) in progress${queue_msg}...`;
-                        this.progressUpdate(msg, "download");
-                    } else {
-                        break;
+                    while (!this.queues.isEmpty() && !this.pending_cancellation) {
+                        let targetWorker = null;
+                        if (this.availableWorkers.length > 0) {
+                            targetWorker = this.availableWorkers.pop();
+                        } else {
+                            if (this.downloadWorkers.length <= this.workerLimit) {
+                                targetWorker = this.allocateWorker();
+                            } else {
+                                break; // all workers busy and we can't add more
+                            }
+                        }
+                        if(targetWorker) {
+                            let item_to_download = await this.queues.get_download_item();
+                            if(item_to_download) {
+                                targetWorker.postMessage({
+                                    'url': item_to_download['url'],
+                                    'metadata': item_to_download,
+                                    'directoryHandle': item_to_download['directory']
+                                });
+                                let queue_msg = this.queues.pending > 0 ? `, ${this.queues.pending} in queue` : "";
+                                let msg = `Download status: ${this.in_progress} file(s) in progress${queue_msg}...`;
+                                this.progressUpdate(msg, "download");
+                            } else {
+                                // For whatever reason, we didn't get an item to work on; put this worker back on the
+                                // available set
+                                this.availableWorkers.push(targetWorker);
+                            }
+                        } else {
+                            break;
+                        }
                     }
                 }
             }
@@ -496,7 +527,7 @@ require([
             this.pending_cancellation = true;
             $('.cancel-download').hide();
             $('.close-message-window').show();
-            this.queues.emptyQueues();
+            this.queues.cancel();
             this.downloadWorkers.forEach(worker => {
                 worker.postMessage({'abort': true, 'reason': 'User cancelled download.'});
             });

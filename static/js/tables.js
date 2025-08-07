@@ -491,7 +491,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             {className: "col1 case-id", "targets": [4]},
             {className: "col1 numrows", "targets": [5]},
             {className: "col1 numseries", "targets": [6]},
-            {className: "col1 download-case", "targets": [7]}];
+            {className: "col1 download-case download-col", "targets": [7]}];
     };
 
     const caseTableColumns = function() {
@@ -2166,7 +2166,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             //do nothing here. opening the viewer
         } else if ($(elem).hasClass('download-col') || $(elem).hasClass('manifest-col') || $(elem).parentsUntil('tr').hasClass('download-col')
         || $(elem).parentsUntil('tr').hasClass('manifest-col')) {
-            //do nothing here. downloading a series or study manifest
+            //do nothing here. downloading a manifest or instances
         } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
              handleCartClick(tabletype, row, elem, ids);
          }

@@ -134,7 +134,7 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
     }
 
     function _hideFloatingMessage(withEmpty) {
-        withEmpty && $('#floating-message').empty();
+        withEmpty && $('.floating-messages').empty();
         $('#floating-message').hide();
     }
 
