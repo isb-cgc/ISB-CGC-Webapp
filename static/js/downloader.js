@@ -38,12 +38,16 @@ require([
     };
 
     function size_display_string(size) {
+        if(size <= 0) {
+            return "0 MB";
+        }
         let log_level = Math.floor(Math.log10(size));
         let byte_count = 12;
         while(log_level%byte_count >= log_level) {
             byte_count-=3;
         }
-        return `${(Math.round((size/(Math.pow(10,log_level)))*100)/100)} ${byte_level[(byte_count/3)]}` ;
+        let bytes = (Math.round((size/(Math.pow(10,log_level)))*100)/100).toFixed(2);
+        return `${bytes} ${byte_level[(byte_count/3)]}` ;
     }
 
     class DownloadProgressDisplay {
@@ -65,7 +69,7 @@ require([
            let alert_box = this.msgBox.find('.alert');
             alert_box.removeClass();
             alert_box.addClass(`alert alert-dismissible alert-${type}`);
-            let new_icon = typeof icon === "string";
+            let new_icon = (typeof icon === "string");
             (!icon || new_icon) && this.msgBox.find('.floating-message-icon').hide();
             (new_icon) && this.msgBox.find(`.floating-message-icon-${icon}`).show();
             if(messages) {
@@ -182,6 +186,7 @@ require([
         working_queue = [];
 
         queue_byte_size = 0;
+        bytes_downloaded = 0;
         series_count = 0;
         collections = new Set([]);
         cases = new Set([]);
@@ -190,19 +195,26 @@ require([
         cancellation_underway = false;
 
         get pending() {
-            let pending_items = [
-                this.hopper.length > 0 ? `${this.hopper.length} series` : "",
-                this.working_queue.length > 0 ? `${this.working_queue.length} file(s)` : ""
-            ];
-            return `${pending_items.join(" and ")}`;
+            if(this.hopper.length <= 0 && this.working_queue.length <= 0) {
+                return "";
+            }
+            let pending_items = [];
+            this.hopper.length > 0 && pending_items.push(`${this.hopper.length} series`);
+            this.working_queue.length > 0 && pending_items.push(`${this.working_queue.length} file(s)`);
+            return pending_items.join(" and ");
         }
 
         get total_downloads_requested() {
             return size_display_string(this.queue_byte_size);
         }
 
+        get total_bytes_downloaded() {
+            return size_display_string(this.bytes_downloaded);
+        }
+
         reset_queue_manager() {
             this.queue_byte_size = 0;
+            this.bytes_downloaded = 0;
             this.series_count = 0;
             this.collections = new Set([]);
             this.cases = new Set([]);
@@ -273,12 +285,13 @@ require([
             downloader_manager.statusMessage(`Encountered an error while downloading these files.`, 'error', "error", true, false);
         }
         if (event.data.message === 'done' || cancellation) {
-            let msg = `Download status: ${downloader_manager.in_progress} file(s) in progress, ${downloader_manager.queues.pending} in queue...`;
+            let msg = `Download status: ${downloader_manager.in_progress} file(s) downloading${downloader_manager.pending_msg}...`;
             let progType = "download";
+            !cancellation && downloader_manager.add_to_done(parseFloat(event.data.size));
             if (downloader_manager.queues.isEmpty()) {
                 // This means the remaining downloads are all in-progress, or we cancelled
-                msg = cancellation ? "Cleaning up cancelled downloads..." : `Download status: ${downloader_manager.in_progress} file(s) in progress...`;
-                progType = cancellation ? "cancel" : "done";
+                msg = cancellation ? "Cleaning up cancelled downloads..." : msg;
+                progType = cancellation ? "cancel" : (downloader_manager.in_progress <= 0 ? "done" : progType);
             }
             downloader_manager.progressUpdate(msg, progType);
         }
@@ -371,7 +384,7 @@ require([
                     const fileHandle = await subDirectoryHandle.getFileHandle(fileName, {create: true});
                     const outputStream = await fileHandle.createWritable();
                     await inputStream.pipeTo(outputStream, {signal: abort_controller.signal});
-                    self.postMessage({message: "done", path: s3_url, localFilePath: filePath});
+                    self.postMessage({message: "done", path: s3_url, localFilePath: filePath, size: response.headers.get('content-length')});
                 } catch (error) {
                     let msg = error.name || "Unnamed Error" + " when attempting to fetch URL " + s3_url;
                     if(error.name === "AbortError" || (error.name === undefined && pending_abort)) {
@@ -402,15 +415,31 @@ require([
         }
 
         get overall_progress() {
-            return `${this.queues.total_downloads_requested} of data in ` +
+            return `${this.queues.total_bytes_downloaded} / ${this.queues.total_downloads_requested} downloaded `;
+        }
+
+        get all_requested() {
+            return `${this.queues.total_downloads_requested} requested in ` +
                 `${this.queues.collections.size} collection(s) / ` +
                 `${this.queues.cases.size} case(s) / ` +
                 `${this.queues.studies.size} ${this.queues.studies.size <= 1 ? "study" : "studies"} / ` +
                 `${this.queues.series_count} series`;
         }
 
+        get pending_msg() {
+            let pending = this.queues.pending;
+            if(pending.length > 0) {
+                return `, ${pending} pending`;
+            }
+            return "";
+        }
+
         get in_progress() {
             return this.downloadWorkers.length - this.availableWorkers.length;
+        }
+
+        add_to_done(downloaded_amount) {
+            this.queues.bytes_downloaded += downloaded_amount;
         }
 
         // Replaces the current floating message contents with a new message, including a new icon if provided
@@ -419,7 +448,7 @@ require([
                 "content": message
             };
             if(!this.pending_cancellation && this.in_progress > 0) {
-                messages['header'] = this.overall_progress;
+                messages['header'] = this.all_requested;
             }
             this.progressDisplay.show(type, messages, icon, withCancel, withClose);
         }
@@ -429,24 +458,28 @@ require([
             progType = progType || "download";
             let type = "info";
             let icon = progType || true;
+            let prog = `${this.overall_progress} <br />`;
             switch(progType) {
                 case "cancel":
                     type = "warning";
+                    prog = "";
                     break;
                 case "done":
                     type = "success";
                     break;
                 case "error":
+                    prog = "";
                     type = "error";
                     break;
                 default:
                     break;
             }
+
             let messages = {
-                "content": message
+                "content": prog + message
             };
             if(!this.pending_cancellation && this.in_progress > 0) {
-                messages['header'] = this.overall_progress;
+                messages['header'] = this.all_requested;
             }
             this.progressDisplay.update(type, messages, icon);
         }
@@ -503,8 +536,7 @@ require([
                                     'metadata': item_to_download,
                                     'directoryHandle': item_to_download['directory']
                                 });
-                                let queue_msg = this.queues.pending > 0 ? `, ${this.queues.pending} in queue` : "";
-                                let msg = `Download status: ${this.in_progress} file(s) in progress${queue_msg}...`;
+                                let msg = `Download status: ${this.in_progress} file(s) in progress${this.pending_msg}...`;
                                 this.progressUpdate(msg, "download");
                             } else {
                                 // For whatever reason, we didn't get an item to work on; put this worker back on the
