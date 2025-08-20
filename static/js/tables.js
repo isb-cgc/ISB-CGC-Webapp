@@ -436,6 +436,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 "columns":[...columns]
             }
         );
+        let collex_input = $('#proj_table_filter input');
+        collex_input.after(`<button class="clear"><i class="fa fa-solid fa-circle-xmark"></i></button>`);
+        collex_input.addClass("table-search-box");
+        collex_input.attr("data-search-type", "collection");
         $('#proj_table').children('tbody').attr('id', 'projects_table');
         $('#projects_table_head').find('th').each(function() {
             this.style.width = null;
@@ -1520,6 +1524,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     // stops long enough for the callback to begin. Any calls sent in after the callback fires will see one call
     // queued and the others ignored, so that only a single call fires once the first one is completed.
     function filterTable(wrapper, type, input){
+        // Ignore unsupported delay methods
+        if(update_methods[type] === undefined || update_methods[type] === null){
+            return;
+        }
         if(SEARCH_PENDING) {
             if(SEARCH_QUEUE.length <= 0) {
                 enqueueSearch(wrapper, type, input);
@@ -1568,7 +1576,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     $('#rh_panel').on('click', '.dataTables_filter button.clear', function(){
         let search_box = $(this).siblings('.table-search-box');
         search_box.val('');
-        search_box.trigger("change");
+        let type = search_box.attr("data-search-type");
+        if(type !== "collection") {
+            search_box.trigger("change");
+        } else {
+            $('#proj_table').DataTable().search("").draw();
+            setTimeout(function(){
+                search_box.focus();
+            }, 200);
+        }
     });
 
     window.resetCartInTables = function(projArr){
