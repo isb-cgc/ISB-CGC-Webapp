@@ -18,7 +18,7 @@ require.config({
 require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
     function($) {
         var collex_data_table = $('#collections-table').DataTable({
-            "dom": '<"dataTables_controls"i<>lpf>rt<"bottom"><"clear">',
+            "dom": '<"dataTables_controls"i<>lpf>rt<"dataTables_controls"i<>lpf><"bottom"><"clear">',
             "pageLength": 100,
             'order': [[ 2, 'desc' ], [ 1, 'asc' ]]
         });
