@@ -547,8 +547,8 @@ require([
     });
 
 
-    tippy.delegate('.series-table', {
-        content: 'Get the citation list for this series.',
+    tippy.delegate('.filter-display-panel', {
+        content: 'Get the citation list for this cohort.',
         theme: 'dark',
         placement: 'left',
         arrow: false,

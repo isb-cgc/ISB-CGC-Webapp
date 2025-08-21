@@ -62,6 +62,8 @@ require([
     'assetsresponsive',
 ], function($, jqueryui, tippy, base) {
 
+    var DOI_CACHE = {};
+
     A11y.Core();
 
     var downloadToken = new Date().getTime();
@@ -76,16 +78,19 @@ require([
         `);
         let citations = [];
         await Promise.all(dois.map(async function(cite){
-            let response = await fetch(`https://doi.org/${cite}`, {
-                headers: {
-                    "Accept": "text/x-bibliography; style=mla"
+            if(!DOI_CACHE[cite]) {
+                let response = await fetch(`https://doi.org/${cite}`, {
+                    headers: {
+                        "Accept": "text/x-bibliography; style=elsevier-vancouver-no-et-al"
+                    }
+                });
+                if (!response.ok) {
+                    citations.push(`Encountered an error requesting DOI ${cite}`);
+                } else {
+                    DOI_CACHE[cite] = await response.text();
                 }
-            });
-            if (!response.ok) {
-                citations.push(`Encountered an error requesting DOI ${cite}`);
-            } else {
-                citations.push(await response.text());
             }
+            citations.push(DOI_CACHE[cite]);
         }));
         cites_list.html(citations.join("\n\n"));
         copy_cites.attr('content', citations.join("\n\n"));

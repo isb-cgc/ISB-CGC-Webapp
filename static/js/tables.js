@@ -1245,9 +1245,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "col1 body-part-examined", "targets": [5]},
                     {className: "series-description", "targets": [6]},
                     {className: "ohif open-viewer", "targets": [7]},
-                    {className: "series-citations", "targets": [8]},
-                    {className: "manifest-col", "targets": [9]},
-                    {className: "download-col", "targets": [10]}
+                    {className: "manifest-col", "targets": [8]},
+                    {className: "download-col", "targets": [9]}
                  ],
                   "columns": [
                       {"type": "html", "orderable": false, render: function () {
@@ -1345,10 +1344,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 volView_element +
                                 '</ul></div>';
                         }
-                    }
-                }, {
-                    "type": "html", "orderable": false, data: 'source_DOI', render: function (data) {
-                        return '<i class="fa fa-list-ol series-citations citations-button" data-dois="'+data.join("||")+'"data-toggle="modal" data-target="#citations-modal"></i>'
                     }
                 }, {
                       "type":"html",
