@@ -546,6 +546,17 @@ require([
         maxWidth: 85
     });
 
+
+    tippy.delegate('.series-table', {
+        content: 'Get the citation list for this series.',
+        theme: 'dark',
+        placement: 'left',
+        arrow: false,
+        interactive:true,
+        target: '.citations-button',
+        maxWidth: 200
+    });
+
     tippy.delegate('.cases-table', {
         content: 'Download all of the image instances in this case.',
         theme: 'dark',

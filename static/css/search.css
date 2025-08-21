@@ -395,16 +395,14 @@ tr {
     background-color: #b7cfe5;
 }
 
-.export-button:hover, .btnGroupDropViewers:hover {
+.export-button:hover, .citations-button:hover, .btnGroupDropViewers:hover {
     cursor: pointer;
 }
 
 #projects_table td.cartnumholder, #projects_table_head th.cartnumholder,
 #cases_table td.cartnumholder, #cases_table_head th.cartnumholder,
-#studies_table td.cartnumholder, #studies_table_head th.cartnumholder
-{
+#studies_table td.cartnumholder, #studies_table_head th.cartnumholder {
     width: 10%;
-
 }
 
 #projects_table td.ckbx:not(.cartnumholder), #projects_table_head th.ckbx:not(.cartnumholder),
@@ -412,7 +410,7 @@ tr {
 #studies_table_head th.ckbx:not(.cartnumholder), #studies_table td.ckbx:not(.cartnumholder),
 #series_table_head th.ckbx, #series_table td.ckbx {
     width: 5%;
-     }
+}
 
 #search_def_stats {
     padding-top: 8px; }

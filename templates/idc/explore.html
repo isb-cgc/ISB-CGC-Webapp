@@ -89,7 +89,7 @@
 {% with user_is_social=request.user|has_social is_cohort=False %}
     {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri user_is_social=user_is_social is_cohort=is_cohort %}
 {% endwith %}
-
+{% include "idc/citations-modal.html" %}
 {% include "idc/explore_data_core.html" %}
 
 {% endblock %}
@@ -156,6 +156,7 @@
     <script type="text/javascript" src="{% static 'js/explore.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/bq-string.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/citations_modal.js' %}?v={{ APP_VERSION }}"></script>
 
 
 {% endblock %}

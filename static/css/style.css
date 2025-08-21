@@ -2543,10 +2543,18 @@ section .min-max {
   border-radius: 4px;
 }
 
+.modal pre {
+    margin-top: 10px;
+}
+
 pre.bq-string {
   max-height: 600px;
   width: 570px;
-  margin-top: 10px;
+}
+
+pre.citations-list {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .bq-string-display img {

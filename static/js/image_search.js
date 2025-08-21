@@ -73,7 +73,8 @@ require([
     'jquerydt',
     'jqueryui',
     'bootstrap',
-    'downloader'
+    'downloader',
+    'citations_modal'
 
 ], function(plotutils,filterutils,sliderutils, tables, cartutils, tippy,$, _, base) {
 
