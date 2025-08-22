@@ -1142,8 +1142,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         } else {
             pageRows = 10;
         }
-        console.debug($('#series_tab'));
-        console.debug($('#series_tab').DataTable());
         $('#series_tab').DataTable().destroy();
         try {
             $('#series_tab').DataTable({
@@ -2177,12 +2175,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         if ($(elem).hasClass('collection_info')) {
             displayInfo($(elem));
         } else if ($(elem).hasClass('copy-this') || $(elem).hasClass('fa-copy')) {
-                            //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
+            //do nothing. handled by triggers in base.js and explore.js to copy to clipboard and show a copy tooltip
         } else if ($(elem).hasClass('ohif') || $(elem).parentsUntil('tr').hasClass('ohif')) {
             //do nothing here. opening the viewer
         } else if ($(elem).hasClass('download-col') || $(elem).hasClass('manifest-col') || $(elem).parentsUntil('tr').hasClass('download-col')
         || $(elem).parentsUntil('tr').hasClass('manifest-col')) {
-            //do nothing here. downloading a manifest or instances
+            // Handled by delegates
         } else if ($(elem).hasClass('shopping-cart') || $(elem).hasClass('shopping-cart-holder')) {
              handleCartClick(tabletype, row, elem, ids);
          }

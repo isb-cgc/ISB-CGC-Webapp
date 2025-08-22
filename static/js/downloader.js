@@ -46,7 +46,7 @@ require([
         while(log_level%byte_count >= log_level) {
             byte_count-=3;
         }
-        let bytes = (Math.round((size/(Math.pow(10,log_level)))*100)/100).toFixed(2);
+        let bytes = (Math.round((size/(Math.pow(10,byte_count)))*100)/100).toFixed(3);
         return `${bytes} ${byte_level[(byte_count/3)]}` ;
     }
 
@@ -277,6 +277,10 @@ require([
     }
 
     function workerOnMessage(event) {
+        if(event.data.message === 'update') {
+            downloader_manager.add_to_done(parseFloat(event.data.size));
+            return;
+        }
         let thisWorker = event.target;
         let true_error = event.data.message === 'error' && event.data.error.name !== "AbortError";
         let cancellation = downloader_manager.pending_cancellation || (event.data.message === 'error' && event.data.error.name === "AbortError");
@@ -287,7 +291,6 @@ require([
         if (event.data.message === 'done' || cancellation) {
             let msg = `Download status: ${downloader_manager.in_progress} file(s) downloading${downloader_manager.pending_msg}...`;
             let progType = "download";
-            !cancellation && downloader_manager.add_to_done(parseFloat(event.data.size));
             if (downloader_manager.queues.isEmpty()) {
                 // This means the remaining downloads are all in-progress, or we cancelled
                 msg = cancellation ? "Cleaning up cancelled downloads..." : msg;
@@ -365,7 +368,12 @@ require([
                 const fileName = metadata['instance'];
                 try {
                     const directoryHandle = event.data['directoryHandle'];
-                    response = await fetch(s3_url, {
+                    const seriesDirectory = modality + "_" + seriesInstanceUID;
+                    const filePath = [collection_id, patientID, studyInstanceUID, seriesDirectory].join("/");
+                    const subDirectoryHandle = await createNestedDirectories(directoryHandle, filePath);
+                    const fileHandle = await subDirectoryHandle.getFileHandle(fileName, {create: true});
+                    const outputStream = await fileHandle.createWritable();
+                    let response = await fetch(s3_url, {
                         signal: abort_controller.signal
                     });
                     if (!response.ok) {
@@ -377,13 +385,20 @@ require([
                         }
                         return;
                     }
-                    const inputStream = await response.body;
-                    const seriesDirectory = modality + "_" + seriesInstanceUID;
-                    const filePath = [collection_id, patientID, studyInstanceUID, seriesDirectory].join("/");
-                    const subDirectoryHandle = await createNestedDirectories(directoryHandle, filePath);
-                    const fileHandle = await subDirectoryHandle.getFileHandle(fileName, {create: true});
-                    const outputStream = await fileHandle.createWritable();
-                    await inputStream.pipeTo(outputStream, {signal: abort_controller.signal});
+                    let counts = 0;
+                    let read = 0;
+                    for await(const chunk of response.body) {
+                        if(abort_controller.signal.aborted) break;
+                        outputStream.write(chunk);
+                        counts += 1;
+                        read += chunk.length;
+                        if(counts%20 === 0) {
+                            self.postMessage({message: "update", size: read});
+                            read = 0;
+                         }
+                    }
+                    read > 0 && self.postMessage({message: "update", size: read});
+                    await outputStream.close();
                     self.postMessage({message: "done", path: s3_url, localFilePath: filePath, size: response.headers.get('content-length')});
                 } catch (error) {
                     let msg = error.name || "Unnamed Error" + " when attempting to fetch URL " + s3_url;
