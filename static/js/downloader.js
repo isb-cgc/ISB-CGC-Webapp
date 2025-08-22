@@ -46,7 +46,7 @@ require([
         while(log_level%byte_count >= log_level) {
             byte_count-=3;
         }
-        let bytes = (Math.round((size/(Math.pow(10,byte_count)))*100)/100).toFixed(3);
+        let bytes = (Math.round((size/(Math.pow(10,byte_count)))*1000)/1000).toFixed(3);
         return `${bytes} ${byte_level[(byte_count/3)]}` ;
     }
 
