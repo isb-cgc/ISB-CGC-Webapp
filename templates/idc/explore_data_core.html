@@ -626,21 +626,30 @@
                             collections are not publicly available
                         </div>
                         <div class="space-top-10">
-                            <button id="export-manifest" class="btn btn-primary btn-small" disabled data-toggle="modal"
+                            <button id="export-manifest" class="btn btn-primary btn-small filter-activated-controls" disabled data-toggle="modal"
+                                data-default-title="Export this cohort's series as a manifest for download."
                                 data-target="#export-manifest-modal"
                                 title="Select a filter to enable this feature."
                             > Manifest <i class="fa fa-solid fa-download"></i>
                             </button>
-                            <button class="btn btn-small btn-default bq-string-display" disabled data-toggle="modal"
+                            <button class="btn btn-small btn-special citations-button filter-activated-controls" disabled data-toggle="modal" data-target="#citations-modal" role="button"
+                                data-default-title="Display this cohort's citation list in Vancouver format."
+                                title= "Select a filter to enable this feature."
+                            > Citations <i class="fa fa-list-numeric"></i>
+                            </button>
+                            <button class="btn btn-small btn-default bq-string-display filter-activated-controls" disabled data-toggle="modal"
+                                data-default-title="Display this cohort's filter as a BQ SQL string."
                                 data-target="#bq-string-display" title= "Select a filter to enable this feature."
                             > SQL
                             </button>
                             <button
-                                class="btn btn-small btn-special get-filter-uri" disabled role="button"
+                                class="btn btn-small btn-special get-filter-uri filter-activated-controls" disabled role="button"
+                                data-default-title="Display this cohort's filter query URL."
                                 title="Select a filter to enable this feature."
                             > URL <i class="fa fa-angles-right"></i>
                             </button>
-                            <button class="btn btn-small btn-special hide-filter-uri" role="button"
+                            <button class="btn btn-small btn-special hide-filter-uri filter-activated-controls" role="button"
+                                data-default-title="Hide the filter query URL."
                                 title="Hide the filter query URL." style="display: none;"
                             > URL <i class="fa fa-angles-down"></i>
                             </button>

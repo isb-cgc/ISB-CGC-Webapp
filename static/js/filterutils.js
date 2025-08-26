@@ -64,56 +64,40 @@ define(['jquery', 'base'], function($, base) {
     var showFilters = [];
     var first_filter_load = true;
 
-    const update_bq_filters = function() {
-        let filters = parseFilterObj();
-        if (Object.keys(filters).length <= 0) {
-            $('#export-manifest').attr("disabled", "disabled");
-            $('.bq-string-copy').attr("disabled","disabled");
-            $('.bq-string-display').attr("disabled","disabled");
-            $('.bq-string-display').attr("title","Select a filter to enable this feature.");
-            $('.bq-string').html("");
-            $('#export-manifest-form input[name="filters"]').val("");
-        } else {
-            $('#export-manifest').removeAttr("disabled");
-            $('.bq-string-copy').removeAttr("disabled");
-            $('.bq-string-display').removeAttr("disabled");
-            $('.bq-string-display').attr("title","Click to display this filter as a BQ string.");
-            $('.bq-string-display').attr('filter-params', JSON.stringify(filters));
-            $('.bq-string-copy').attr('filter-params', JSON.stringify(filters));
-            $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
-        }
-    };
-
-    var update_filter_url = function() {
+    const update_filter_controls = function() {
         let filters = parseFilterObj();
         if (Object.keys(filters).length <= 0) {
             $('.filter-placeholder').show();
-            $('.get-filter-uri').attr("disabled","disabled");
-            $('#export-manifest').attr("disabled","disabled");
-            $('#export-manifest').attr("data-no-filters", "true");
-            if(!$('#export-manifest').attr('data-pending-manifest')) {
-                $('#export-manifest').attr("title", "Select a filter to enable this feature.");
-            }
-            $('.get-filter-uri').attr("title","Select a filter to enable this feature.");
-            $('.filter-url').html("");
-            $('.copy-url').removeAttr("content");
-            $('.copy-url').attr("disabled","disabled");
+            $('.filter-activated-controls').each(function(){
+                if(!$(this).attr('data-pending-manifest')) {
+                    $(this).attr("disabled","disabled");
+                    $(this).attr("title","Select a filter to enable this feature.");
+                }
+            })
+            $('.bq-string, .citations-list').html("");
+            $('.bq-string-copy, .citations-button').attr('filter-params', "");
             $('.hide-filter-uri').triggerHandler('click');
             $('.url-too-long').hide();
             $('#export-manifest-form').attr(
                 'action',
                 $('#export-manifest-form').data('uri-base')
             );
+            $('.filter-url').html("");
+            $('.copy-url').removeAttr("content");
+            $('#export-manifest').attr("data-no-filters", "true");
+            $('#export-manifest-form input[name="filters"]').val("");
         } else {
             $('.filter-placeholder').hide();
-            $('.get-filter-uri').removeAttr("disabled");
+            $('.filter-activated-controls').each((function(){
+                if(!$(this).attr('data-pending-manifest')) {
+                    $(this).attr("title", $(this).attr("data-default-title"));
+                    $(this).removeAttr("disabled");
+                }
+            }));
+            $('.bq-string-display').attr('filter-params', JSON.stringify(filters));
+            $('.bq-string-copy, .citations-button').attr('filter-params', JSON.stringify(filters));
+            $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
             $('#export-manifest').removeAttr("data-no-filters");
-            if(!$('#export-manifest').attr('data-pending-manifest')) {
-                $('#export-manifest').removeAttr("disabled");
-                $('#export-manifest').attr("title", "Export these search results as a manifest for downloading.");
-            }
-            $('.copy-url').removeAttr("disabled");
-            $('.get-filter-uri').attr("title","Click to display this filter set's query URL.");
             let url = BASE_URL+"/explore/filters/?";
             let encoded_filters = []
             for (let i in filters) {
@@ -675,8 +659,7 @@ define(['jquery', 'base'], function($, base) {
 
         if (mkFilt) {
             isFiltered = mkFiltText();
-            update_filter_url();
-            update_bq_filters();
+            update_filter_controls();
           if (window.location.href.search(/\/filters\//g) >= 0) {
              if (!first_filter_load) {
                 window.history.pushState({}, '', window.location.origin + "/explore/")
@@ -1230,8 +1213,7 @@ define(['jquery', 'base'], function($, base) {
 
 
     return {
-        update_bq_filters: update_bq_filters,
-        update_filter_url: update_filter_url,
+        update_filter_controls: update_filter_controls,
         updateCollectionTotals: updateCollectionTotals,
         parseFilterObj: parseFilterObj,
         findFilterCats: findFilterCats,
