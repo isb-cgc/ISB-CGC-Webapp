@@ -41,13 +41,14 @@ require([
         if(size <= 0) {
             return "0 MB";
         }
-        let log_level = Math.floor(Math.log10(size));
-        let byte_count = 12;
-        while(log_level%byte_count >= log_level) {
-            byte_count-=3;
+        let byte_count = 0;
+        let converted_size = size;
+        while(converted_size > 1024) {
+            byte_count += 1;
+            converted_size /= 1024;
         }
-        let bytes = (Math.round((size/(Math.pow(10,byte_count)))*1000)/1000).toFixed(3);
-        return `${bytes} ${byte_level[(byte_count/3)]}` ;
+        let bytes = (Math.round(converted_size*1000)/1000).toFixed(3);
+        return `${bytes} ${byte_level[byte_count]}` ;
     }
 
     class DownloadProgressDisplay {
@@ -444,6 +445,8 @@ require([
         workerObjectURL = null;
         workerLimit = navigator.hardwareConcurrency;
 
+        lastProgressUpdate = -1;
+
         constructor() {
             this.queues = new DownloadQueueManager();
             this.workerCodeBlob = new Blob([this.workerCode], {type: 'application/javascript'});
@@ -489,7 +492,11 @@ require([
         }
 
         // Updates the current floating message contents and display class
+        // Will abort out of an update if there isn't a pending cancellation and the last update time was < 2 seconds
+        // ago
         progressUpdate(message, progType) {
+            if(this.lastProgressUpdate > 0 && Date.now()-this.lastProgressUpdate < 1000 && !this.pending_cancellation)
+                return;
             progType = progType || "download";
             let type = "info";
             let icon = progType || true;
@@ -516,6 +523,7 @@ require([
             if(!this.pending_cancellation && this.in_progress > 0) {
                 messages['header'] = this.all_requested;
             }
+            this.lastProgressUpdate = Date.now();
             this.progressDisplay.update(type, messages, icon);
         }
 
