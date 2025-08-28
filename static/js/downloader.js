@@ -412,7 +412,7 @@ require([
                         outputStream.write(chunk);
                         thisChunkTime = Date.now();
                         read += chunk.length;
-                        if(lastReportTime < 0 || ((thisChunkTime-lastReportTime) > 2000)) {
+                        if(lastReportTime < 0 || ((thisChunkTime-lastReportTime) > 300)) {
                             lastReportTime = Date.now();
                             self.postMessage({message: "update", size: read});
                             read = 0;
@@ -495,7 +495,7 @@ require([
         // Will abort out of an update if there isn't a pending cancellation and the last update time was < 2 seconds
         // ago
         progressUpdate(message, progType) {
-            if(this.lastProgressUpdate > 0 && Date.now()-this.lastProgressUpdate < 1000 && !this.pending_cancellation)
+            if(this.lastProgressUpdate > 0 && Date.now()-this.lastProgressUpdate < 300 && !this.pending_cancellation)
                 return;
             progType = progType || "download";
             let type = "info";
