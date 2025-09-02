@@ -159,6 +159,9 @@ else:
             print("[ERROR] While trying to set local/developer git version: ")
             print(e)
             VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'), "unavailable")
+    else:
+        print("[ERROR] Application version file not found for test/prod deployment! Exiting...")
+        exit(1)
 
 APP_VERSION = os.environ.get("APP_VERSION", VERSION)
 
