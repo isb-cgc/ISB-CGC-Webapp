@@ -16,7 +16,7 @@
  *
  */
 
-// by @pieper 6/25/25
+// initial design by @pieper 6/25/25
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
@@ -29,13 +29,20 @@ require([
     'base', 'jquery'
 ], function (base, $) {
 
-    const byte_level = {
+    const byte_level = Object.freeze({
         1: "KB",
         2: "MB",
         3: "GB",
         4: "TB",
         5: "PB"
-    };
+    });
+
+    const REQ_TYPE = Object.freeze({
+        COLLECTION: 1,
+        CASE: 2,
+        STUDY: 3,
+        SERIES: 4
+    });
 
     function size_display_string(size) {
         if(size <= 0) {
@@ -99,6 +106,7 @@ require([
     }
 
     class DownloadRequest {
+        request_type = REQ_TYPE.SERIES;
         region = "us-east-1";
 
         constructor(request) {
@@ -111,6 +119,20 @@ require([
             this.crdc_series_id = request['crdc_series_id'];
             this.directory = request['directory'];
             this.total_size = parseFloat(request['series_size']);
+
+            if(this.series_id) {
+                this.request_type = REQ_TYPE.SERIES;
+            } else if(this.study_id) {
+                this.request_type = REQ_TYPE.STUDY;
+            } else if(this.patient_id) {
+                this.request_type = REQ_TYPE.CASE;
+            } else {
+                this.request_type = REQ_TYPE.COLLECTION;
+            }
+        }
+
+        get request_type() {
+            return
         }
 
         async getAllS3ObjectKeys() {
@@ -181,7 +203,7 @@ require([
 
     class DownloadQueueManager {
         WORKING_QUEUE_LIMIT = 2000;
-        HOPPER_LIMIT = 500;
+        HOPPER_LIMIT = 4000;
 
         hopper = [];
         working_queue = [];
@@ -249,6 +271,7 @@ require([
         async _update_queue() {
             if(this.working_queue.length < this.WORKING_QUEUE_LIMIT && this.hopper.length > 0) {
                 let request = this.hopper.pop();
+                if(request)
                 await request.loadAllKeys().then(keys => {
                     this.working_queue.push(...keys);
                 });
