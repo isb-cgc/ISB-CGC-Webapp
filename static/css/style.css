@@ -4522,6 +4522,11 @@ d-topics-list iframe {
   cursor: pointer;
 }
 
+.download-all-disabled {
+  cursor: not-allowed;
+  color: gray;
+}
+
 #floating-message {
   position: fixed;
   bottom: 50px;

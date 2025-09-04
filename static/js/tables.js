@@ -491,10 +491,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             {className: "ckbx studyview","targets": [0]},
             {className: "ckbx shopping-cart-holder", "targets": [1]},
             {className: "ckbx cartnumholder", "targets":[2]},
-            {className: "col1 project-name", "targets": [3]},
+            {className: "col1 project-name wide", "targets": [3]},
             {className: "col1 case-id", "targets": [4]},
-            {className: "col1 numrows", "targets": [5]},
-            {className: "col1 numseries", "targets": [6]},
+            {className: "col1 numrows narrow", "targets": [5]},
+            {className: "col1 numseries narrow", "targets": [6]},
             {className: "col1 download-case download-col", "targets": [7]}];
     };
 
@@ -864,7 +864,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "col1 numrows", "targets": [7]},
                     {className: "ohif open-viewer", "targets": [8]},
                     {className: "manifest-col", "targets": [9]},
-                    {className: "download-col", "targets": [10]},
+                    {className: "download-col download-study", "targets": [10]},
                 ],
                 "columns": [
                     {
@@ -1244,7 +1244,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     {className: "series-description", "targets": [6]},
                     {className: "ohif open-viewer", "targets": [7]},
                     {className: "manifest-col", "targets": [8]},
-                    {className: "download-col", "targets": [9]}
+                    {className: "download-col download-series", "targets": [9]}
                  ],
                   "columns": [
                       {"type": "html", "orderable": false, render: function () {

@@ -423,6 +423,14 @@ tr {
     width: 23.75%;
     word-wrap: break-word; }
 
+#cases_table td.narrow, #cases_table_head th.narrow {
+    width: 15%;
+    word-wrap: break-word; }
+
+#cases_table td.wide, #cases_table_head th.wide {
+    width: 28%;
+    word-wrap: break-word; }
+
 #studies_table_head th, #studies_table td {
     word-break: break-word; }
 
@@ -463,8 +471,11 @@ tr {
 }
 
 #studies_table_head th.download-col,
-#studies_table td.download-col {
+#studies_table td.download-col, #cases_table_head th.download-col,
+#cases_table td.download-col, #series_table_head th.download-col,
+#series_table td.download-col {
     width:6%;
+    min-width: 80px;
 }
 
 #series_table_head th, #series_table td {

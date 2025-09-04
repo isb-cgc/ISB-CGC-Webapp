@@ -1,5 +1,5 @@
 if [ -n "$CI" ]; then
-    echo "Check our Python and Ubuntu versions since they keep getting updated without warning..."
+    echo "[STATUS] Check our Python and OS versions since they keep getting updated without warning..."
 
     ls -l /usr/bin/python3*
     cat /etc/os-release
@@ -14,7 +14,7 @@ if [ -n "$CI" ]; then
     elif [[ ${CIRCLE_BRANCH} == "expr" ]]; then
         COMMON_BRANCH=expr
     fi
-    echo "Cloning IDC-Common branch ${COMMON_BRANCH}..."
+    echo "[STATUS] Cloning IDC-Common branch ${COMMON_BRANCH}..."
     git clone -b ${COMMON_BRANCH} https://github.com/ImagingDataCommons/IDC-Common.git
 else
     if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
@@ -35,7 +35,7 @@ find . -type f -name '*.pyc' -delete
 apt-get update -qq
 
 # Install and update apt-get info
-echo "Preparing System..."
+echo "[STATUS] Preparing System..."
 apt-get -y --force-yes install software-properties-common ca-certificates gnupg
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv B7B3B788A8D3785C
 wget "https://repo.mysql.com/mysql-apt-config_0.8.30-1_all.deb" -P /tmp
@@ -46,48 +46,48 @@ apt-get update -qq
 apt-get install mysql-client
 
 # Install apt-get dependencies
-echo "Installing Dependencies..."
+echo "[STATUS] Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git g++ curl dos2unix pkg-config
 apt-get install -y --force-yes python3-distutils python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
 apt-get install -y --force-yes python3-pip
 
-echo "Dependencies Installed"
+echo "[STATUS] Dependencies Installed"
 
 # If this is local development, clean out lib for a re-structuring 
 if [ -z "${CI}" ]; then
     # Clean out lib to prevent confusion over multiple builds in local development
     # and prep for local install
-    echo "Emptying out ${HOMEROOT}/lib/ ..."
+    echo "[STATUS] Emptying out ${HOMEROOT}/lib/ ..."
     rm -rf "${HOMEROOT}/lib/"
-    echo "Confirming clearance of lib:"
+    echo "[STATUS] Confirming clearance of lib:"
     ls ${HOMEROOT}/lib/
 fi
 
 # Install PIP + Dependencies
-echo "Installing pip3..."
+echo "[STATUS] Installing pip3..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python3
 
 # Install our primary python libraries
 # If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
-    echo "Installing Python Libraries..."
+    echo "[STATUS] Installing Python Libraries..."
     pip install -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
-    echo "Using restored cache for Python Libraries"
+    echo "[STATUS] Using restored cache for Python Libraries"
 fi
 
 if [ -z "${CI}" ]; then
-    echo "Installing responses library for unit tests, but not for deployment..."
+    echo "[STATUS] Installing responses library for unit tests, but not for deployment..."
     pip install -q responses -t ${HOMEROOT}/lib --only-binary all
 fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
-    echo "Installing Django Debug Toolbar for local dev..."
+    echo "[STATUS] Installing Django Debug Toolbar for local dev..."
     pip install -q django-debug-toolbar==3.2.4 -t ${HOMEROOT}/lib --only-binary all
 fi
 
 if [ "$IS_DEV" = "True" ]; then
-    echo "Installing GitPython for local dev version display..."
+    echo "[STATUS] Installing GitPython for local dev version display..."
     pip install -q gitpython -t ${HOMEROOT}/lib --only-binary all
 fi
 
@@ -96,7 +96,7 @@ echo "Libraries Installed"
 # Install Google Cloud SDK
 # If we're not on CircleCI or we are but google-cloud-sdk isn't there, install it
 if [ -z "${CI}" ] || [ ! -d "/usr/lib/google-cloud-sdk" ]; then
-    echo "Installing Google Cloud SDK..."
+    echo "[STATUS] Installing Google Cloud SDK..."
     export CLOUDSDK_CORE_DISABLE_PROMPTS=1
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
     apt-get -y install apt-transport-https ca-certificates
@@ -104,14 +104,14 @@ if [ -z "${CI}" ] || [ ! -d "/usr/lib/google-cloud-sdk" ]; then
     apt-get update -qq
     apt-get -y install google-cloud-sdk
     apt-get -y install google-cloud-sdk-app-engine-python
-    echo "Google Cloud SDK Installed"
+    echo "[STATUS] Google Cloud SDK Installed"
 fi
 
 # Run dos2unix on the files in shell/ because of line terminator shenanigans with Windows
-echo "Running dos2unix on shell/*.sh..."
+echo "[STATUS] Running dos2unix on shell/*.sh..."
 dos2unix ${HOMEROOT}/shell/*.sh
 
-echo "Loading Git Hooks"
+echo "[STATUS] Loading Git Hooks"
 if [ -z "${CI}" ] && [ -d "${HOMEROOT}/git-hooks/" ]; then
     cp -r ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
 fi
@@ -123,5 +123,7 @@ if [ -n "${CI}" ]; then
     else
         TIER=${DEPLOYMENT_TIER,,}
     fi
-    echo "APP_VERSION=${TIER}.$(date '+%Y%m%d%H%M').${APP_SHA}" > ${HOMEROOT}/version.env
+    VERSION="${TIER}.$(date '+%Y%m%d%H%M').${APP_SHA}"
+    echo "[STATUS] Application version set to ${VERSION}"
+    echo "APP_VERSION=${VERSION}" > ${HOMEROOT}/version.env
 fi

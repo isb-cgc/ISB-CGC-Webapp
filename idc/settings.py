@@ -159,12 +159,16 @@ else:
             print("[ERROR] While trying to set local/developer git version: ")
             print(e)
             VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'), "unavailable")
+    else:
+        print("[ERROR] Application version file not found for non-dev deployment! Exiting...")
+        exit(1)
 
 APP_VERSION = os.environ.get("APP_VERSION", VERSION)
 
 DEV_TIER = bool(DEBUG or re.search(r'^local-dev\.', APP_VERSION))
 
 print("[STATUS] DEV_TIER setting is {}".format(DEV_TIER))
+print("[STATUS] Application version is {}".format(APP_VERSION))
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
