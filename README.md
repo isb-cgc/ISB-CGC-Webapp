@@ -21,7 +21,9 @@ From there perform the following steps...
 
 ## Configuring PyCharm
 
-PyCharm Pro can be used to run your Web Application as a native Django application.
+PyCharm Pro can be used to run your Web Application as a native Django application. 
+
+**NOTE:** PyCharm 2025 versions no longer include support for remote Python interpreters. Use 2024 or older!
 
 ### Setup
 
@@ -61,6 +63,7 @@ To run your server in PyCharm:
   * Kernel header update: `sudo apt-get -y install dkms build-essential linux-headers-$(uname -r)`
     * NOTE: you may get a 'package not found' error here; if so, you'll need to look up the current header package for this install and use that instead.
   * Guest Additions ISO mounting and installation: https://docs.bitnami.com/virtual-machine/faq/configuration/install-virtualbox-guest-additions/
+  * NOTE: in newer versions of VirtualBox the CD/DVD drives are added under Basic>Storage
  3. Next, set the `shell/python-su.sh` script to executable in the vagrant machine's command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
  4. You can now click on the Run or Debug icons in the toolbar (upper-right corner of the PyCharm GUI)
   * Your server will start and the PyCharm console should show all the logs and output from the system. 

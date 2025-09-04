@@ -4,3 +4,4 @@ echo 'export SECURE_LOCAL_PATH=../parentDir/secure_files/idc/' | tee -a /home/va
 echo 'export DJANGO_SETTINGS_MODULE=idc.settings' | tee -a /home/vagrant/.bash_profile
 source /home/vagrant/.bash_profile
 chmod +x /home/vagrant/www/shell/python-su.sh
+sudo ln -s /home/vagrant/www /vagrant
