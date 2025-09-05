@@ -184,16 +184,18 @@ require([
                     if (key !== "") {
                         const keys = key.split("/");
                         const instance = keys[keys.length - 1];
-                        s3_urls.push({
-                            'url': `https://${this.bucket}.s3.us-east-1.amazonaws.com/${key}`,
-                            'study': this.study_id,
-                            'collection': this.collection_id,
-                            'series': this.series_id,
-                            'modality': this.modality,
-                            'instance': instance,
-                            'patient': this.patient_id,
-                            'directory': this.directory
-                        });
+                        if(instance.length > 0) {
+                            s3_urls.push({
+                                'url': `https://${this.bucket}.s3.us-east-1.amazonaws.com/${key}`,
+                                'study': this.study_id,
+                                'collection': this.collection_id,
+                                'series': this.series_id,
+                                'modality': this.modality,
+                                'instance': instance,
+                                'patient': this.patient_id,
+                                'directory': this.directory
+                            });
+                        }
                     }
                 });
             });
@@ -445,12 +447,16 @@ require([
                     await outputStream.close();
                     self.postMessage({message: "done", path: s3_url, localFilePath: filePath, size: response.headers.get('content-length')});
                 } catch (error) {
-                    let msg = error.name || "Unnamed Error" + " when attempting to fetch URL " + s3_url;
+                    let msg = (error.name || "Unnamed Error") + " when attempting to fetch URL " + s3_url;
                     if(error.name === "AbortError" || (error.name === undefined && pending_abort)) {
                         msg = "Fetch was aborted. The user may have cancelled their downloads.";
                     } else {
-                        console.error(msg);
-                        console.error(error);
+                        console.error("[Worker Error]", error.name);
+                        console.error("[Worker Error]", error.message);
+                        if(error.message.indexOf("getFileHandle") >= 0) {
+                            console.error("[Worker Error] File name attempted: ",fileName);
+                        }
+                        console.error("[Worker Error] on S3 target ", s3_url);
                     }
                     self.postMessage({message: 'error', path: s3_url, error: error, 'text': msg});
                 }
