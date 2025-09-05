@@ -649,7 +649,10 @@ require([
         downloader_manager.cancel();
     });
 
-    $('.container-fluid').on('click', '.download-all-instances', async function () {
+    $('.container-fluid').on('click', '.download-all-instances', async function (event) {
+        // Stop propagation to the other handlers or the showDirectoryPicker will complain.
+        event.stopImmediatePropagation();
+        event.preventDefault();
         const clicked = $(this);
         let directoryHandle = await window.showDirectoryPicker({
             id: 'idc-downloads',

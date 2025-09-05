@@ -58,8 +58,6 @@ require([
 
 // Return an object for consts/methods used by most views
 define(['jquery', 'base'], function($, base) {
-
-
     var ANONYMOUS_FILTERS = {};
     var showFilters = [];
     var first_filter_load = true;
