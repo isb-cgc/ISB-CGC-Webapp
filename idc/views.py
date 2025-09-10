@@ -91,7 +91,9 @@ def landing_page(request):
         "Chest-Abdomen-Pelvis, Leg, TSpine",
         "Abdomen, Arm, Bladder, Chest, Head-Neck, Kidney, Leg, Retroperitoneum, Stomach, Uterus",
         "Blood, Bone",
-        "Esophagus, Lung, Pancreas, Thymus"
+        "Esophagus, Lung, Pancreas, Thymus",
+        "Esophagus, Head-Neck, Lung, Pancreas, Rectum, Thymus",
+        "Arm, Bladder, Buttock, Colon, Liver, Myometrium, Pancreas, Rectum, Shoulder, Scapula"
     ]
 
     for collection in collex:

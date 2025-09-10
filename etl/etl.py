@@ -428,12 +428,12 @@ def create_solr_params(schema_src, solr_src):
     solr_index_strings = []
     field_types = ''
     add_copy_field = ''
-    SCHEMA_BASE = '{{field_types}add-field": {fields}{add_copy_field}'
+    SCHEMA_BASE = '{{{field_types}"add-field": {fields}{add_copy_field}}}'
     if len(TOKENIZED_FIELDS):
         field_types = '"add-field-type": { "name":"tokenizedText", "class":"solr.TextField", "analyzer" : { "tokenizer": { "name":"nGram" }}}, '
-        copy_fields = ",".join(['{"source":"{field}","dest":"{field{}_tokenized"}'.format(field) for field in TOKENIZED_FIELDS])
-        add_copy_field = ', "add-copy-field": [{copy_fields}]'.format(copy_fields)
-    CORE_CREATE_STRING = "sudo -u solr /opt/bitnami/solr/bin/solr create -c {solr_src} -s 2 -rf 2"
+        copy_fields = ",".join(['{{"source":"{field}","dest":"{field}_tokenized"}}'.format(field=field) for field in TOKENIZED_FIELDS])
+        add_copy_field = ', "add-copy-field": [{copy_fields}]'.format(copy_fields=copy_fields)
+    CORE_CREATE_STRING = "sudo -u solr /opt/bitnami/solr/bin/solr create -c {solr_src}"
     SCHEMA_STRING = "curl -u {solr_user}:{solr_pwd} -X POST -H 'Content-type:application/json' --data-binary '{schema}' https://localhost:8983/solr/{solr_src}/schema --cacert solr-ssl.pem"
     INDEX_STRING = "curl -u {solr_user}:{solr_pwd} -X POST 'https://localhost:8983/solr/{solr_src}/update?commit=yes{params}' --data-binary @{file_name}.csv -H 'Content-type:application/csv' --cacert solr-ssl.pem"
     for field in schema:
@@ -463,7 +463,8 @@ def create_solr_params(schema_src, solr_src):
     with open("{}_solr_cmds.txt".format(solr_src.name), "w") as cmd_outfile:
         schema_array = SCHEMA_BASE.format(
             field_types=field_types,
-            add_copy_field=add_copy_field
+            add_copy_field=add_copy_field,
+            fields=solr_schema
         )
         params = "&{}".format("&".join(solr_index_strings))
         cmd_outfile.write(CORE_CREATE_STRING.format(solr_src=solr_src.name))
