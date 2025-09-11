@@ -482,9 +482,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             }
         });
          return deferred.promise();
-
     }
-
 
     const caseTableColDefs = function(){
         return [
@@ -927,6 +925,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                         }
                     }, {
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
+                            if(data === "" || data === undefined || data === null) {
+                                return "";
+                            }
                             // fix when StudyData is an array of values
                             var dt = new Date(Date.parse(data));
                             var dtStr = (dt.getUTCMonth() + 1).toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getUTCDate().toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getUTCFullYear().toString();
