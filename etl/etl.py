@@ -42,7 +42,7 @@ django.setup()
 
 from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, \
     Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion, DataSetType, \
-    Attribute_Set_Type, Attribute_Display_Category, ImagingDataCommonsVersion, Attribute_Tooltips
+    Attribute_Set_Type, Attribute_Display_Category, ImagingDataCommonsVersion, Attribute_Tooltips, Citation
 from google_helpers.bigquery.bq_support import BigQuerySupport
 
 from django.contrib.auth.models import User
@@ -317,6 +317,35 @@ def add_source_joins(froms, from_col, tos=None, to_col=None):
 
     if len(src_joins):
         DataSourceJoin.objects.bulk_create(src_joins)
+
+
+def load_citations(filename):
+    try:
+        cites_file = open(filename,"r")
+        current_cites = [x.doi for x in Citation.objects.all()]
+        new_cites = []
+        updated_cites = {}
+        for line in csv_reader(cites_file):
+            if "doi, citation" in line:
+                print("[STATUS] Saw header line during citation load - skipping!")
+                continue
+            if line[0] in current_cites:
+                updated_cites[line[0]] = line[1]
+            else:
+                new_cites.append(Citation(doi=line[0], cite=line[1]))
+        if len(new_cites):
+            Citation.objects.bulk_create(new_cites)
+            print("[STATUS] The following {} DOI citations were added: {}".format(len(new_cites), "  ".join([x.doi for x in new_cites])))
+        if len(updated_cites):
+            to_update = Citation.objects.filter(doi__in=updated_cites.keys())
+            for upd in to_update:
+                upd.cite = updated_cites[upd.doi]
+            Citation.objects.bulk_update(to_update, ["cite"])
+            print("[STATUS] {} DOI citations were updated.".format(len(updated_cites)))
+    except Exception as e:
+        ERRORS_SEEN.append("Error seen while loading citations, check the logs!")
+        logger.error("[ERROR] While trying to load citations: ")
+        logger.exception(e)
 
 
 def load_collections(filename, data_version="8.0"):
@@ -781,7 +810,8 @@ def parse_args():
 
     parser = ArgumentParser()
     parser.add_argument('-j', '--config-file', type=str, default='', help='JSON file of version data to update')
-    parser.add_argument('-c', '--collex-file', type=str, default='', help='CSV data of collections to update/create')
+    parser.add_argument('-c', '--collex-file', type=str, default='', help='CSV data of citations to update/create')
+    parser.add_argument('-i', '--cites-file', type=str, default='', help='CSV data of collections to update/create')
     parser.add_argument('-d', '--display-vals', type=str, default='', help='CSV data of display values to add/update')
     parser.add_argument('-p', '--programs-file', type=str, default='', help='CSV data of programs to add/update')
     parser.add_argument('-a', '--attributes-file', type=str, default='', help='CSV data of attributes to add/update')
@@ -821,6 +851,8 @@ def main():
         len(args.programs_file) and load_programs(args.programs_file)
         # Add/update collections - any new programs must be added first
         len(args.collex_file) and load_collections(args.collex_file)
+        # Add/update any citations
+        len(args.cites_file) and load_citations(args.cites_file)
         # Add/update display values for attributes
         if len(args.display_vals):
             dvals = load_display_vals(args.display_vals)

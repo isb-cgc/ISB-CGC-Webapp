@@ -76,7 +76,8 @@ def landing_page(request):
         "Testicles": "Testis",
         "Adrenal Glands": "Adrenal Gland",
         "Adrenal": "Adrenal Gland",
-        "Lymph Node": "Lymph Nodes"
+        "Lymph Node": "Lymph Nodes",
+        "Bone Marrow": "Blood"
     }
 
     skip = [
