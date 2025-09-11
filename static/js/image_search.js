@@ -624,7 +624,7 @@ require([
         }
     }
 
-     $(document).ready(function () {
+     $(document).ready(async function () {
 
         tables.initializeTableCacheData();
         tables.initializeTableViewedItemsData();
@@ -694,7 +694,7 @@ require([
         window.cartHist.push(cartSel);
         window.proj_in_cart = new Object();
 
-        filterutils.load_preset_filters();
+        await filterutils.load_preset_filters();
         $('.hide-filter-uri').on('click',function() {
             $(this).hide();
             $('.get-filter-uri').show();

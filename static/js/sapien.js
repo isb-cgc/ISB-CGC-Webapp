@@ -73,14 +73,17 @@ require([
       Chest: 'rgb(0, 233, 255)',
     };
 
+    // Map the sapiens.js expected location names (typically uses a dash) to the TumorLocation
+    // value stored in DICOM (freeform text to an extent, not normalized)
+    //format: { <sapiens.js name>: [<TumorLocation>, ...], ...}
     var variantNames = {
         'Colorectal': ['Colon','Rectum'],
-        "Blood": ["Marrow, Blood", "Marrow and Blood", "Blood"],
+        "Blood": ["Marrow, Blood", "Marrow and Blood", "Blood", "Bone Marrow", "Blood, Bone"],
         "Bile-Duct": ["Bile Duct"],
         "Adrenal-Gland": ["Adrenal Glands", "Adrenal"],
         "Testis": ["Testicles"],
         "Head-and-Neck": ["Head", "Head-Neck"],
-        "Lymph-Nodes": ["Lymph Node", "Lymph Nodes"]
+        "Lymph-Nodes": ["Lymph Node", "Lymph Nodes"],
     };
 
     let data = case_counts.sort(function(a,b){
@@ -119,7 +122,7 @@ require([
 
   root.prepend(rawsvg.buildHumanBody(null,null,' '));
 
-  let initChartWidth = 400;
+  let initChartWidth = 500;
   let initChartHeight = 470;
   let top = 75;
   let labelSize ='12px';
@@ -130,7 +133,7 @@ require([
   let fileCountKey = 'fileCount';
 
   const plotHeight = initChartHeight - 30;
-  const barStartOffset = 130;
+  const barStartOffset = 200;
   const barWidth = initChartWidth - barStartOffset;
   const maxCases = Math.max(...data.map(d => d[caseCountKey]));
   const halfPixel = 0.5;
@@ -188,7 +191,7 @@ require([
     .attr('fill', 'rgb(10, 10, 10)')
     .attr('font-size', labelSize)
     .style('text-anchor', 'end')
-    .text(d => d[primarySiteKey])
+    .text(d => d[primarySiteKey] === "Blood" ? "Blood and Bone Marrow" : d[primarySiteKey])
     .on('mouseover', function (d, i) { // needs `this`
       const organSelector = toClassName(d[primarySiteKey]);
       const organ = document.getElementById(organSelector);
