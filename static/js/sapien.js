@@ -78,7 +78,7 @@ require([
     //format: { <sapiens.js name>: [<TumorLocation>, ...], ...}
     var variantNames = {
         'Colorectal': ['Colon','Rectum'],
-        "Blood": ["Marrow, Blood", "Marrow and Blood", "Blood", "Bone Marrow"],
+        "Blood": ["Marrow, Blood", "Marrow and Blood", "Blood", "Bone Marrow", "Blood, Bone"],
         "Bile-Duct": ["Bile Duct"],
         "Adrenal-Gland": ["Adrenal Glands", "Adrenal"],
         "Testis": ["Testicles"],
