@@ -196,7 +196,6 @@ define(['jquery', 'base'], function($, base) {
         if (sliders.length > 0) {
             load_sliders(sliders, false);
         }
-
         //mkFiltText();
         //return updateFacetsData(true).promise();
         return handleFilterSelectionUpdate(null, true, true)
@@ -633,7 +632,6 @@ define(['jquery', 'base'], function($, base) {
         }
     };
 
-
     window.resetFilters = function(){
         $('input:checkbox').not('.hide-zeros').not('.tbl-sel').prop('checked',false);
         $('input:checkbox').not('.hide-zeros').not('.tbl-sel').prop('indeterminate',false);
@@ -664,34 +662,22 @@ define(['jquery', 'base'], function($, base) {
             } else {
                 first_filter_load = false;
             }
-        }
+          }
         }
 
         if (doUpdate){
             var mxstudies = 0;
             var mxseries = 0;
-
             var projArr=[];
             var serverdata = [updateFacetsData(true)];
             projArr = Object.keys(window.proj_in_cart);
-            /*
-            $('#projects_table').find('tr').each(function(){
-                if ($(this).hasClass('someInCart')){
-                   var projid = $(this).attr('data-projectid');
-                   projArr.push(projid)
-                }
-
-            });*/
-
-             if (projArr.length>0)
-            {
+            if (projArr.length>0) {
                 serverdata.push(getProjectCartStats(projArr));
             }
 
             $('.spinner').show();
             //$.when.apply(undefined, serverdata).then(function(ret)
-            promise = Promise.all(serverdata).then(function(ret)
-            {
+            promise = Promise.all(serverdata).then(function(ret) {
 
                 var collFilt = ret[0][0];
                 var collectionData = ret[0][1];
@@ -711,22 +697,18 @@ define(['jquery', 'base'], function($, base) {
                     cartStats={}
                 }
                 //var numStudiesRet = totals.StudyInstanceUID;
-
-
-
                 createPlots('search_orig_set');
-               createPlots('search_derived_set');
-               createPlots('tcga_clinical');
+                createPlots('search_derived_set');
+                createPlots('tcga_clinical');
 
                 if ($('.search-configuration').find('.hide-zeros')[0].checked) {
-                        addSliders('search_orig_set', false, true, '');
-                        addSliders('quantitative', false, true, 'quantitative.');
-                        addSliders('tcga_clinical', false, true, 'tcga_clinical.');
-                    }
+                    addSliders('search_orig_set', false, true, '');
+                    addSliders('quantitative', false, true, 'quantitative.');
+                    addSliders('tcga_clinical', false, true, 'tcga_clinical.');
+                }
 
                 updateTablesAfterFilter(collFilt, collectionData, collectionStats,cartStats);
                 $('.spinner').hide();
-                //updateTableCounts(1)
             });
 
 
