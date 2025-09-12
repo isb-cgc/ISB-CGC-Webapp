@@ -66,7 +66,7 @@ require([
 
     A11y.Core();
 
-    var downloadToken = new Date().getTime();
+    let csrftoken = $.getCookie('csrftoken')
 
     $('#citations-modal').on('show.bs.modal', async function(event) {
         let button = $(event.relatedTarget);
@@ -78,9 +78,22 @@ require([
         `);
         let dois_to_get = dois.filter((d) => (DOI_CACHE[d] === null || DOI_CACHE[d] === undefined));
         if(dois_to_get.length > 0) {
-            let encoded_dois = dois_to_get.map(d => `doi=${encodeURIComponent(d)}`);
-            const resp = await fetch(`${BASE_URL}/citations?${encoded_dois.join("&")}`);
+            let resp = null;
+            if(dois_to_get.join(",").length > 2048) {
+                resp = await fetch(`${BASE_URL}/citations/`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        'doi': dois_to_get
+                    }),
+                    headers: {"X-CSRFToken": csrftoken},
+                    "content-type": "application/json"
+                });
+            } else {
+                let encoded_dois = dois_to_get.map(d => `doi=${encodeURIComponent(d)}`);
+                resp = await fetch(`${BASE_URL}/citations/?${encoded_dois.join("&")}`);
+            }
             if(!resp.ok) {
+                cites_list.html("Failed to retrieve citations!");
                 throw new Error("Failed to retrieve citations!");
             }
             let new_cites = await resp.json();

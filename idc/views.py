@@ -369,10 +369,14 @@ def populate_tables(request):
 
 def get_citations(request):
     resp = { 'message': 'error', 'citations': None}
-    code = 400
     try:
         req = request.GET if request.method == 'GET' else request.POST
-        dois = [uri_to_iri(x) for x in req.getlist("doi", [])]
+        if request.method == 'GET':
+            dois = [uri_to_iri(x) for x in req.getlist("doi", [])]
+        else:
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+            dois = body.get("doi", [])
         cites = Citation.objects.filter(doi__in=dois)
         resp['citations'] = {x.doi: x.cite for x in cites}
         code = 200
