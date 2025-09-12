@@ -54,7 +54,7 @@ def cohort_detail(request, cohort_id):
     if debug: logger.debug('Called {}'.format(sys._getframe().f_code.co_name))
 
     try:
-        req = request.GET if request.GET else request.POST
+        req = request.GET if request.method == 'GET' else request.POST
         is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
         source = req.get('data_source_type', DataSource.SOLR)
         fields = json.loads(req.get('fields', '[]'))

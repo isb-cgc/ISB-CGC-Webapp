@@ -73,7 +73,8 @@ define(['jquery', 'base'], function($, base) {
                 }
             })
             $('.bq-string, .citations-list').html("");
-            $('.bq-string-copy, .citations-button').attr('filter-params', "");
+            $('.bq-string-copy').attr('filter-params', "");
+            $('.citations-button').attr('data-dois', "");
             $('.hide-filter-uri').triggerHandler('click');
             $('.url-too-long').hide();
             $('#export-manifest-form').attr(
@@ -92,8 +93,7 @@ define(['jquery', 'base'], function($, base) {
                     $(this).removeAttr("disabled");
                 }
             }));
-            $('.bq-string-display').attr('filter-params', JSON.stringify(filters));
-            $('.bq-string-copy, .citations-button').attr('filter-params', JSON.stringify(filters));
+            $('.bq-string-display, .bq-string-copy').attr('filter-params', JSON.stringify(filters));
             $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
             $('#export-manifest').removeAttr("data-no-filters");
             let url = BASE_URL+"/explore/filters/?";

@@ -176,6 +176,11 @@ require([
                     $('input[name="async_download"]').val(
                         async_download ? "True" : "False"
                     );
+                    if('dois' in data) {
+                        $('.citations-button').attr("data-dois", Object.keys(data['dois']).join("||"));
+                    } else {
+                        $('.citations-button').attr("data-dois", "");
+                    }
                     if (('filtered_counts' in data) && ('origin_set' in data['filtered_counts']) &&
                         ('access' in data['filtered_counts']['origin_set']['All']['attributes']) &&
                         ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) &&

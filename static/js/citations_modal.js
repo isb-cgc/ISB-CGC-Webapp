@@ -76,36 +76,27 @@ require([
         cites_list.html(`
             Formatting citation(s)... <i class="fa fa-compass fa-spin"></i>
         `);
-        let citations = [];
-        await Promise.all(dois.map(async function(cite){
-            if(!DOI_CACHE[cite]) {
-                let response = await fetch(`https://doi.org/${cite}`, {
-                    headers: {
-                        "Accept": "text/x-bibliography; style=elsevier-vancouver-no-et-al"
-                    }
-                });
-                if (!response.ok) {
-                    citations.push(`Encountered an error requesting DOI ${cite}`);
-                } else {
-                    DOI_CACHE[cite] = await response.text();
-                }
+        let dois_to_get = dois.filter((d) => (DOI_CACHE[d] === null || DOI_CACHE[d] === undefined));
+        if(dois_to_get.length > 0) {
+            let encoded_dois = dois_to_get.map(d => `doi=${encodeURIComponent(d)}`);
+            const resp = await fetch(`${BASE_URL}/citations?${encoded_dois.join("&")}`);
+            if(!resp.ok) {
+                throw new Error("Failed to retrieve citations!");
             }
-            citations.push(DOI_CACHE[cite]);
-        }));
+            let new_cites = await resp.json();
+            DOI_CACHE = {
+                ...new_cites['citations'],
+                ...DOI_CACHE
+            };
+        }
+        let citations = dois.map(d => DOI_CACHE[d]);
         cites_list.html(citations.join("\n\n"));
         copy_cites.attr('content', citations.join("\n\n"));
     });
 
     $('#citations-modal').on('hide.bs.modal', function() {
-
-    });
-
-    $('#export-manifest-modal').on('hidden.bs.modal', function() {
         $(".citations-list").empty();
-    });
-
-    $('.copy-this').on('click', function(e) {
-        // copy the entire set
+        $("#citations-modal .copy-this").attr('content', "");
     });
 
     tippy.delegate('#citations-modal', {
