@@ -66,7 +66,7 @@ require([
 
     A11y.Core();
 
-    var downloadToken = new Date().getTime();
+    let csrftoken = $.getCookie('csrftoken')
 
     $('#citations-modal').on('show.bs.modal', async function(event) {
         let button = $(event.relatedTarget);
@@ -76,36 +76,40 @@ require([
         cites_list.html(`
             Formatting citation(s)... <i class="fa fa-compass fa-spin"></i>
         `);
-        let citations = [];
-        await Promise.all(dois.map(async function(cite){
-            if(!DOI_CACHE[cite]) {
-                let response = await fetch(`https://doi.org/${cite}`, {
-                    headers: {
-                        "Accept": "text/x-bibliography; style=elsevier-vancouver-no-et-al"
-                    }
+        let dois_to_get = dois.filter((d) => (DOI_CACHE[d] === null || DOI_CACHE[d] === undefined));
+        if(dois_to_get.length > 0) {
+            let resp = null;
+            if(dois_to_get.join(",").length > 2048) {
+                resp = await fetch(`${BASE_URL}/citations/`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        'doi': dois_to_get
+                    }),
+                    headers: {"X-CSRFToken": csrftoken},
+                    "content-type": "application/json"
                 });
-                if (!response.ok) {
-                    citations.push(`Encountered an error requesting DOI ${cite}`);
-                } else {
-                    DOI_CACHE[cite] = await response.text();
-                }
+            } else {
+                let encoded_dois = dois_to_get.map(d => `doi=${encodeURIComponent(d)}`);
+                resp = await fetch(`${BASE_URL}/citations/?${encoded_dois.join("&")}`);
             }
-            citations.push(DOI_CACHE[cite]);
-        }));
+            if(!resp.ok) {
+                cites_list.html("Failed to retrieve citations!");
+                throw new Error("Failed to retrieve citations!");
+            }
+            let new_cites = await resp.json();
+            DOI_CACHE = {
+                ...new_cites['citations'],
+                ...DOI_CACHE
+            };
+        }
+        let citations = dois.map(d => DOI_CACHE[d]);
         cites_list.html(citations.join("\n\n"));
         copy_cites.attr('content', citations.join("\n\n"));
     });
 
     $('#citations-modal').on('hide.bs.modal', function() {
-
-    });
-
-    $('#export-manifest-modal').on('hidden.bs.modal', function() {
         $(".citations-list").empty();
-    });
-
-    $('.copy-this').on('click', function(e) {
-        // copy the entire set
+        $("#citations-modal .copy-this").attr('content', "");
     });
 
     tippy.delegate('#citations-modal', {
