@@ -107,9 +107,10 @@ require([
 
     var update_export_modal_for_cart = function(partitions, filtergrp_list, mxstudies=0, mxseries=0){
         is_cohort = false;
+        let export_modal = $('#export-manifest-modal');
         let export_form = $('#export-manifest-form');
         var name_base='';
-        $('.modal-title').text("Export Cart Manifest");
+        export_modal.find('.modal-title').text("Export Cart Manifest");
         export_form.append('<input type="hidden" name="from_cart">')
         export_form.find('input[name="from_cart"]').val("True");
         if(filtergrp_list !== null && filtergrp_list !== undefined && filtergrp_list.length > 0) {
@@ -157,7 +158,7 @@ require([
 
         $('.filter-tab.manifest-file').show();
         $('.filter-tab.manifest-bq').show();
-        $('.modal-title').text('Export Manifest');
+        export_modal.find('.modal-title').text('Export Manifest');
     }
 
     const update_export_modal_for_mini = function(button){
@@ -235,15 +236,16 @@ require([
     });
 
     $('#export-manifest-modal').on('hidden.bs.modal', function() {
-      $('.manifest-file').show();
-      $('.manifest-bq').show();
+      let export_modal = $('#export-manifest-modal');
+      export_modal.find('.manifest-file').show();
+      export_modal.find('.manifest-bq').show();
       $('#download-idc-index').show();
-      $('.header-fields-container').show();
-      $('.idc-index-loc-type').show();
-      $('.download-manifest-text').show();
+      export_modal.find('.header-fields-container').show();
+      export_modal.find('.idc-index-loc-type').show();
+      export_modal.find('.download-manifest-text').show();
       $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().show();
       $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
-      $('.modal-title').text('Export Manifest');
+      export_modal.find('.modal-title').text('Export Manifest');
       $('#manifest-source').text('manifest');
     });
 

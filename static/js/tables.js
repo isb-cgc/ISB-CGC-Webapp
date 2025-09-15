@@ -2081,12 +2081,12 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             idsArr.push(ids);
 
             if (rowsAdded) {
-                $(this).find('.fa-caret-right').addClass('is-hidden');
-                $(this).find('.fa-caret-down').removeClass('is-hidden');
+                $(this).find('.expansion-toggle .fa-caret-right').addClass('is-hidden');
+                $(this).find('.expansion-toggle .fa-caret-down').removeClass('is-hidden');
                 $(this).find('.viewbx').addClass('open');
             } else{
-               $(this).find('.fa-caret-right').removeClass('is-hidden');
-                $(this).find('.fa-caret-down').addClass('is-hidden');
+               $(this).find('.expansion-toggle .fa-caret-right').removeClass('is-hidden');
+                $(this).find('.expansion-toggle .fa-caret-down').addClass('is-hidden');
                 $(this).find('.viewbx').removeClass('open');
             }
         });
@@ -2193,15 +2193,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                  toggle_elem = toggle_elem[0];
                  $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
              }
-             if ($(row).find('.fa-caret-down.is-hidden').length>0){
+             if ($(row).find('.expansion-toggle .fa-caret-down.is-hidden').length>0){
                  var rowsAdded = true;
-                 $(row).find('.fa-caret-right').addClass('is-hidden');
-                 $(row).find('.fa-caret-down').removeClass('is-hidden');
+                 $(row).find('.expansion-toggle .fa-caret-right').addClass('is-hidden');
+                 $(row).find('.expansion-toggle .fa-caret-down').removeClass('is-hidden');
 
              } else {
                  var rowsAdded = false;
-                 $(row).find('.fa-caret-right').removeClass('is-hidden');
-                 $(row).find('.fa-caret-down').addClass('is-hidden');
+                 $(row).find('.expansion-toggle .fa-caret-right').removeClass('is-hidden');
+                 $(row).find('.expansion-toggle .fa-caret-down').addClass('is-hidden');
              }
              changeViewStates(tabletype, [ids], rowsAdded);
          }
