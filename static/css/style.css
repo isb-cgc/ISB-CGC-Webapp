@@ -2555,6 +2555,7 @@ pre.bq-string {
 pre.citations-list {
   white-space: pre-wrap;
   word-break: break-word;
+  max-height: 600px;
 }
 
 .bq-string-display img {
