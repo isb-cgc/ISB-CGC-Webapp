@@ -675,18 +675,18 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                                 let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                     '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                     '</a></li>';
-                                let per_series_bucket = Array.isArray(row['aws_bucket']);
+                                let disable_multi = Array.isArray(row['aws_bucket']) && (row['aws_bucket'].length > 1);
                                 if(!is_xc) {
-                                    let volView_link = "";
-                                    if(!per_series_bucket) {
-                                        volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function (i) {
-                                            return "s3://" + row['aws_bucket'] + "/" + i;
+                                    if(!disable_multi) {
+                                        let bucket = Array.isArray(row['aws_bucket']) ? row['aws_bucket'][0] : row['aws_bucket'];
+                                        let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function (i) {
+                                            return "s3://" + bucket + "/" + i;
                                         }).join(",") + ']"';
+                                        volView_element = '<li><a class="external-link" href="" url="'+volView_link+'" ' +
+                                            'data-toggle="modal" data-target="#external-web-warning">VolView ' +
+                                            '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                            '</a></li>';
                                     }
-                                    volView_element = '<li><a class="external-link" href="" url="'+volView_link+'" ' +
-                                        'data-toggle="modal" data-target="#external-web-warning">VolView ' +
-                                        '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
-                                        '</a></li>';
                                     v2_element = '<li><a href="'+v2_link+'" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
                                 }
                                 return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
