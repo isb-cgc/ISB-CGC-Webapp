@@ -23,6 +23,7 @@ import sys
 import datetime
 import re
 import copy
+from xmlrpc.client import boolean
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -226,7 +227,7 @@ def quota_page(request):
 def save_ui_hist(request):
     status = 200
     try:
-        req = request.POST or request.GET
+        req = request.GET if request.method == 'GET' else request.POST
         hist = req['his']
         try:
             user_data = User_Data.objects.get(user_id=request.user.id)
@@ -269,7 +270,7 @@ def studymp(request):
     ).distinct()
 
     try:
-       req = request.GET if request.GET else request.POST
+       req = request.GET if request.method == 'GET' else request.POST
        filters = json.loads(req.get('filters', '{}'))
 
        mxSeries = int(req.get('mxseries'))
@@ -534,7 +535,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
 def explorer_manifest(request):
     try:
-        req = request.GET or request.POST
+        req = request.GET if request.method == 'GET' else request.POST
         if req.get('manifest-type', 'file-manifest') == 'bq-manifest' :
             messages.error(request, "BigQuery export requires a cohort! Please save your filters as a cohort.")
             return JsonResponse({'msg': 'BigQuery export requires a cohort.'}, status=400)
@@ -549,7 +550,7 @@ def explorer_manifest(request):
 # by the explore_data_page method and forward it on to that view, returning its response.
 def parse_explore_filters(request):
     try:
-        if not request.GET:
+        if not request.GET or request.method != 'GET':
             raise Exception("This call only supports GET!")
         raw_filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
         filters = {}
@@ -618,7 +619,7 @@ def cart_page(request):
         request.session.create()
 
     try:
-        req = request.GET if request.GET else request.POST
+        req = request.GET if request.method == 'GET' else request.POST
         carthist = json.loads(req.get('carthist', '{}'))
         mxseries = req.get('mxseries',0)
         mxstudies = req.get('mxstudies',0)
@@ -641,10 +642,11 @@ def cart_data(request):
     response = {}
     field_list = ['collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID', 'aws_bucket', "source_DOI"]
     try:
-        req = request.GET if request.GET else request.POST
+        req = request.GET if request.method == 'GET' else request.POST
         filtergrp_list = json.loads(req.get('filtergrp_list', '{}'))
         aggregate_level = req.get('aggregate_level', 'StudyInstanceUID')
         results_level = req.get('results_level', 'StudyInstanceUID')
+        dois_only = bool(req.get('dois_only', 'false').lower() == 'true')
 
         partitions = json.loads(req.get('partitions', '{}'))
 
@@ -653,13 +655,22 @@ def cart_data(request):
         length = int(req.get('length', 100))
         mxseries = int(req.get('mxseries',1000))
 
-        if ((len(partitions)>0) and (aggregate_level == 'StudyInstanceUID')):
-            response = get_cart_data_studylvl(filtergrp_list, partitions, limit, offset, length, mxseries, results_lvl=results_level)
-        elif ((len(partitions)>0) and (aggregate_level == 'SeriesInstanceUID')):
-            response = get_cart_data_serieslvl(filtergrp_list, partitions, field_list, limit, offset)
-        else:
+        if len(partitions) <= 0 or aggregate_level not in ['SeriesInstanceUID', 'StudyInstanceUID']:
             response['numFound'] = 0
             response['docs'] = []
+        else:
+            if aggregate_level == 'StudyInstanceUID':
+                response = get_cart_data_studylvl(
+                    filtergrp_list, partitions, limit, offset, length, mxseries, with_records=(not dois_only),
+                    results_lvl=results_level, dois_only=dois_only
+                )
+            elif aggregate_level == 'SeriesInstanceUID':
+                response = get_cart_data_serieslvl(
+                    filtergrp_list, partitions, field_list if not dois_only else None, limit, offset,
+                    with_records=(not dois_only), dois_only=dois_only
+                )
+        if dois_only:
+            response = {'dois': response['dois']}
     except Exception as e:
         logger.error("[ERROR] While loading cart:")
         logger.exception(e)

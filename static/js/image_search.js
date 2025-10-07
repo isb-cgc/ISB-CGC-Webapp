@@ -177,9 +177,9 @@ require([
                         async_download ? "True" : "False"
                     );
                     if('dois' in data) {
-                        $('.citations-button').attr("data-dois", Object.keys(data['dois']).join("||"));
+                        $('.filter-display-panel .citations-button').attr("data-dois", Object.keys(data['dois']).join("||"));
                     } else {
-                        $('.citations-button').attr("data-dois", "");
+                        $('.filter-display-panel .citations-button').attr("data-dois", "");
                     }
                     if (('filtered_counts' in data) && ('origin_set' in data['filtered_counts']) &&
                         ('access' in data['filtered_counts']['origin_set']['All']['attributes']) &&
@@ -604,15 +604,11 @@ require([
 
             if (gtotals[0]>0){
                 $('#cart_stats').removeClass('empty-cart');
-                $('.cart-view').removeAttr('disabled');
-                $('.clear-cart').removeAttr('disabled');
-                $('#export-manifest-cart').removeAttr('disabled');
-            } else{
+                $('.cart-activated-controls').removeAttr('disabled');
+            } else {
                 $('#cart_stats').addClass('empty-cart');
                 $('#cart_stats').html('Your cart is currently empty.');
-                $('.cart-view').attr('disabled', 'disabled');
-                $('#export-manifest-cart').attr('disabled','disabled');
-                $('.clear-cart').attr('disabled','disabled');
+                $('.cart-activated-controls').attr('disabled','disabled');
             }
         }
         else if ("cartHist" in localStorage){
