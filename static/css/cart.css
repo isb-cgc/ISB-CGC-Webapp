@@ -19,3 +19,42 @@
 .export-button:hover, .btnGroupDropViewers:hover {
     cursor: pointer;
 }
+
+.cart-filter-display {
+    margin-bottom: 8px;
+}
+
+.filter-type, .adjustment-type {
+    color: #a66206;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.filter-att{
+    background-color: #2A537A;
+    border-radius: 3px;
+    display: inline-block;
+    color: #F8F8F8;
+    padding: 2px;
+    margin: 0 3px 3px 3px
+}
+
+.filter-title, .adjustments-op {
+    font-weight: bold;
+}
+
+.adjustment-att {
+    color: #2A537A;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.cart-def-list {
+    margin-bottom: 15px;
+    padding-bottom: 9px;
+}
+
+.cart-def-list:not(:last-child) {
+    border-bottom: 2px solid black;
+}

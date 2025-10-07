@@ -81,7 +81,7 @@ require([
             let cart_result = await fetch(`${BASE_URL}/cart_data/`, {
                     method: "POST",
                     body: new URLSearchParams({
-                        'filtergrp_list': JSON.stringify(window.filtergrp_list),
+                        'filtergrp_list': JSON.stringify(window.filtergrp_list ? window.filtergrp_list : [{}]),
                         'partitions': JSON.stringify(window.partitions),
                         'dois_only': 'true'
                     }),
