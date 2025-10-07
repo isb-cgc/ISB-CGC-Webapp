@@ -1,5 +1,5 @@
 cryptography==44.0.2
-django==4.2.24
+django==4.2.25
 django-allauth==0.63.1
 django-anymail[mailgun]
 django-axes==5.40.0
