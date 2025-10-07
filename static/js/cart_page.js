@@ -108,6 +108,7 @@ require([
                     }
                     filter_div = `<div class="cart-filter-display"><span class="filter-title">Filter: </span>${filter_set.join(" AND ")}</div>`;
                 }
+                let adjustments = [];
                 for (var j=0;j<selections.length;j++){
                     var selectext= "";
                     var selec = selections[j];
@@ -128,8 +129,9 @@ require([
                         }
                         selectext += filter_match
                     }
-                    adjustment_div = `<div class="cart-adjustment-display">${selectext}</div>`;
+                    adjustments.push(`<p>${selectext}</p>`);
                 }
+                adjustment_div = `<div class="cart-adjustment-display">${adjustments.join("\n")}</div>`;
             }
             contentArray.push(`${filter_div}${adjustment_div}`)
         }
