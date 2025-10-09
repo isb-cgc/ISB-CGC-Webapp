@@ -1538,7 +1538,11 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
         let refocus = function(){
             setTimeout(function(){
-                $(`#${input.attr('id')}`).focus();
+                let thisInput = $(`#${input.attr('id')}`);
+                thisInput.focus();
+                let val=thisInput.val();
+                thisInput.val("");
+                thisInput.val(val);
             }, 300);
         };
 
