@@ -679,7 +679,7 @@ def cart_data(request):
     return JsonResponse(response, status=status)
 
 
-def get_series(request, patient_id, study_uid=None):
+def get_series(request, collection_id, patient_id=None, study_uid=None):
     try:
         status = 200
         response = { "result": [] }
@@ -688,8 +688,10 @@ def get_series(request, patient_id, study_uid=None):
             aggregate_level="SeriesInstanceUID"
         ).first()
         filters = {
-            "PatientID": [patient_id]
+            "collection_id": [collection_id]
         }
+        if patient_id:
+            filters['PaitnetID'] = [patient_id]
         if study_uid:
             filters["StudyInstanceUID"] = [study_uid]
         filter_query = build_solr_query(
