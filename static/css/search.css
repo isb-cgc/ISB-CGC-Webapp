@@ -781,8 +781,21 @@ li.cartlist {
     }
 }
 
-
 #projects_table:hover, #cases_table:hover, #studies_table:hover{
     cursor:pointer;
+}
 
+.citations-button .fa-quote-left,.citations-button .fa-quote-right {
+    position: relative;
+    font-size: xx-small;
+}
+
+.citations-button .fa-quote-left {
+    top: -5px;
+    margin-left: 2px;
+}
+
+.citations-button .fa-quote-right {
+    top: 2px;
+    margin-left: -1px;
 }

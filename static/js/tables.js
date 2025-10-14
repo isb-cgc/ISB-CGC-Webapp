@@ -242,7 +242,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 {className: "ckbx cartnumholder", "targets": [2]},
                 {className: "collex_name", "targets": [3]},
                 {className: "collex-case-count table-count", "targets": [4]},
-                {className: "projects_table_num_cohort table-count", "targets": [5]}];
+                {className: "projects_table_num_cohort table-count", "targets": [5]},
+                {className: "download-collection download-col", "targets": [6]}];
     }
 
     // project(collection) table column definitions
@@ -290,37 +291,38 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 return;
             }
         };
+        const download_col = {"type": "html", "orderable": false, data: 'collection_id', render: function(data, type, row) {
+                if ("showDirectoryPicker" in window) {
+                    return `<i class="fa fa-download download-all-instances download-collection"   
+                        data-collection="${row[0]}" 
+                        data-total-series="${row[6]['mxseries']}" 
+                        ></i>`;
+                }
+                return `<i class="fa fa-download download-all-disabled"></i>`;
+            }};
 
-        return [caret_col, cart_col, cartnum_col, collection_col, case_col, dyn_case_col];
+        return [caret_col, cart_col, cartnum_col, collection_col, case_col, dyn_case_col, download_col];
     }
 
      const setRowCartClasses = function(row){
-            if ( parseInt($(row).attr('series_in_cart'))>0)
-            {
+            if ( parseInt($(row).attr('series_in_cart'))>0) {
                 $(row).addClass('someInCart');
-            }
-            else{
+            } else{
                 $(row).removeClass('someInCart');
             }
 
-            if ( parseInt($(row).attr('series_in_cart'))<parseInt($(row).attr('mxseries')))
-            {
+            if ( parseInt($(row).attr('series_in_cart'))<parseInt($(row).attr('mxseries'))){
                 $(row).addClass('extraInItem');
-            }
-            else{
+            } else{
                 $(row).removeClass('extraInItem');
             }
 
             if ( parseInt($(row).attr('series_in_filter'))>parseInt($(row).attr('series_in_filter_and_cart'))){
                 $(row).addClass('extraInFilter');
-            }
-            else{
+            } else{
                 $(row).removeClass('extraInFilter');
             }
-
-
         }
-
 
     // creates the project or collection table  on document load and after filtering. Defines the chevron and cart selection actions
     window.updateProjectTable = function(collectionData,collectionStats, cartStats) {
@@ -345,7 +347,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 lclstats['studies_in_filter']=0
             }
             if (('series_per_collec' in collectionStats) && (projid in collectionStats['series_per_collec'])) {
-                //stats['mxseries'] = collectionStats['series_per_collec'][projid]
                 lclstats['series_in_filter']=collectionStats['series_per_collec'][projid];
             } else {
                 lclstats['mxseries'] = 0
@@ -373,20 +374,15 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     } else {
                         lclstats[item + '_in_filter_and_cart'] = 0;
                     }
-
-                   }
-
-                  else{
+               } else{
                   lclstats[item + '_in_cart'] = 0;
                   lclstats[item + '_in_filter_and_cart'] = 0;
                   //stats[item + '_in_filter'] = 0;
-                  }
+              }
             }
-
             var ncur=[cur[0], lclstats["series_in_cart"], cur[0], cur[1],cur[2],cur[3],lclstats];
             newCollectionData.push(ncur);
         }
-
 
         $('#proj_table').DataTable().destroy();
         $("#proj_table_wrapper").find('.dataTables_controls').remove();
@@ -404,6 +400,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     $(row).attr('data-projectid', data[0]);
                     $(row).data('totalcases', data[5]);
                     $(row).attr('totalcases', data[5]);
+                    $(row).attr('data-total-series', data[6]['mxseries'])
                     $(row).attr('id', 'project_row_' + data[0]);
                     var projid = data[0];
                     // stats is created from the explorer data page when the page is first created
@@ -419,7 +416,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
                     $(row).on('click', function(event) {
                         handleRowClick("collections", row, event, [projid])
-
                     });
 
                      $(row).find('.collection_info').on("mouseenter", function(e){
@@ -551,7 +547,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         }};
         const study_col  = {"type": "num", "orderable": true, data: 'unique_studies'};
         const series_col =  {"type": "num", "orderable": true, data: 'unique_series'};
-        const download_col = {"type": "htlp", "orderable": false, data: 'patient_id', render: function(data, type, row) {
+        const download_col = {"type": "html", "orderable": false, data: 'patient_id', render: function(data, type, row) {
                 if ("showDirectoryPicker" in window) {
                     return `<i class="fa fa-download download-all-instances download-case"   
                         data-collection="${row['collection_id']}" 
@@ -1538,7 +1534,11 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
         let refocus = function(){
             setTimeout(function(){
-                $(`#${input.attr('id')}`).focus();
+                let thisInput = $(`#${input.attr('id')}`);
+                thisInput.focus();
+                let val=thisInput.val();
+                thisInput.val("");
+                thisInput.val(val);
             }, 300);
         };
 

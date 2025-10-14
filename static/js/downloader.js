@@ -670,15 +670,21 @@ require([
         const patient_id = clicked.attr('data-patient');
 
         let series = [];
-        if(clicked.hasClass('download-study') || clicked.hasClass('download-case')) {
-            let study_uri = (study_id !== undefined && study_id !== null) ? `${study_id}/` : "";
-            let response = await fetch(`${BASE_URL}/series_ids/${patient_id}/${study_uri}`);
-            if (!response.ok) {
-                console.error(`[ERROR] Failed to retrieve series IDs for study ${study_id}: ${response.status}`);
+        if(clicked.hasClass('download-study') || clicked.hasClass('download-case') || clicked.hasClass('download-collection')) {
+            if(clicked.hasClass('download-collection') && parseInt(clicked.attr('data-total-series')) > 65000) {
+                console.debug("Saw more than 65k series, routing to BQ.");
                 return;
+            } else {
+                let study_uri = (study_id !== undefined && study_id !== null) ? `${study_id}/` : "";
+                let patient_uri = (patient_id !== undefined && patient_id !== null) ? `${patient_id}/` : "";
+                let response = await fetch(`${BASE_URL}/series_ids/${collection_id}/${patient_uri}${study_uri}`);
+                if (!response.ok) {
+                    console.error(`[ERROR] Failed to retrieve series IDs: ${response.status}`);
+                    return;
+                }
+                const series_data = await response.json();
+                series.push(...series_data['result']);
             }
-            const series_data = await response.json();
-            series.push(...series_data['result']);
         } else {
             series.push({
                 "bucket": clicked.attr('data-bucket'),
