@@ -292,14 +292,27 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             }
         };
         const download_col = {"type": "html", "orderable": false, data: 'collection_id', render: function(data, type, row) {
-                if ("showDirectoryPicker" in window) {
-                    return `<i class="fa fa-download download-all-instances download-collection"   
-                        data-collection="${row[0]}" 
-                        data-total-series="${row[6]['mxseries']}" 
-                        ></i>`;
+            let download_size = window.collection[row[0]]['total_size'];
+            if ("showDirectoryPicker" in window && download_size < 3) {
+                let download_classes = "download-collection";
+                download_classes = (download_size > 1) ? `${download_classes} download-size-warning` : `${download_classes} download-all-instances`;
+                let modal_attr = "";
+                if(download_size > 1) {
+                    modal_attr = ` data-toggle="modal" data-target="#download-warning"`;
                 }
-                return `<i class="fa fa-download download-all-disabled"></i>`;
-            }};
+                return `<i class="fa fa-download ${download_classes}"   
+                    data-collection="${row[0]}" 
+                    data-total-series="${row[6]['mxseries']}" 
+                    data-download-type="collection"
+                    ${modal_attr}
+                    ></i>`;
+            }
+            let disabled_classes = "download-all-disabled";
+            if(download_size >= 3) {
+                disabled_classes = `${disabled_classes} download-size-disabled`;
+            }
+            return `<i class="fa fa-download ${disabled_classes}"></i>`;
+        }};
 
         return [caret_col, cart_col, cartnum_col, collection_col, case_col, dyn_case_col, download_col];
     }
@@ -551,7 +564,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 if ("showDirectoryPicker" in window) {
                     return `<i class="fa fa-download download-all-instances download-case"   
                         data-collection="${row['collection_id']}" 
-                        data-patient="${row['PatientID']}"                                       
+                        data-patient="${row['PatientID']}" 
+                        data-total-series="${row['unique_series']}"   
+                        data-download-type="case"                                 
                         ></i>`;
                 }
                 return `<i class="fa fa-download download-all-disabled"></i>`;
@@ -1002,7 +1017,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 return `<i class="fa fa-download download-all-instances download-study"   
                                     data-collection="${row['collection_id']}" 
                                     data-study="${row['StudyInstanceUID']}" 
-                                    data-patient="${row['PatientID']}"                                       
+                                    data-patient="${row['PatientID']}" 
+                                    data-download-type="study" 
+                                    data-total-series="${row['unique_series']}"                         
                                     ></i>`;
                             }
                             return `<i class="fa fa-download download-all-disabled"></i>`;
