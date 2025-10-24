@@ -680,7 +680,18 @@ require([
         }
         let job_result = await series_job.json();
         downloader_manager.pendingfetchMessage("collection");
-        let polling = async function(file_name){
+
+        const MAX_ELAPSED_SERIES_IDS = 8000;
+        let polling = async function(file_name, check_start){
+            if(!check_start) {
+                check_start = Date.now();
+            }
+            let check_now = Date.now();
+            let elapsed_millis = check_now-check_start;
+            if((elapsed_millis) > MAX_ELAPSED_SERIES_IDS) {
+                console.error("Unable to retrieve series IDs!");
+                return;
+            }
             let check_res = await fetch(`${CHECK_MANIFEST_URL}${file_name}/`);
             if(!check_res.ok) {
                 console.error("Unable to retrieve series IDs!");
@@ -696,12 +707,10 @@ require([
                 const series_data = await response.json();
                 series.push(...series_data['result']);
             } else {
-                setTimeout(function(){
-                    polling();
-                },2000);
+                setTimeout(polling,2000, file_name, check_start);
             }
         };
-    await polling(job_result.file_name);
+        await polling(job_result.file_name);
     }
 
     $('.container-fluid').on('click', '.download-size-warning', function(){
