@@ -60,6 +60,8 @@
         const SLIM_VIEWER_PATH = '{{ SLIM_VIEWER_PATH }}';
         const FETCH_MANIFEST_URL = "{% url 'fetch_user_manifest_base' %}";
         const CHECK_MANIFEST_URL = "{% url 'check_user_manifest_base' %}";
+        const SERIES_IDS_URL = "{% url 'get_series_ids_base' %}";
+        const SERIES_IDS_FILTER_URL = "{% url 'get_series_ids_filter' %}";
     </script>
     <!-- OCPL Banner -->
     <script async src="https://assets.adobedtm.com/6a4249cd0a2c/785de09de161/launch-70d67a6a40a8.min.js"></script>
@@ -104,6 +106,9 @@
                                    style="display: none;"></i>
                                 <i class="floating-message-icon floating-message-icon-cancel fa-solid fa-circle-exclamation"
                                    style="display: none;"></i>
+                                <i class="floating-message-icon floating-message-icon-seek fa-solid fa-compass fa-spin"
+                                   style="display: none;"></i>
+
                             </p>
                             <p>
                                 <button type="button"

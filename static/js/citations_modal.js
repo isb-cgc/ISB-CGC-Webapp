@@ -66,7 +66,7 @@ require([
 
     A11y.Core();
 
-    let csrftoken = $.getCookie('csrftoken')
+    let csrftoken = $.getCookie('csrftoken');
 
     $('#citations-modal').on('show.bs.modal', async function(event) {
         let button = $(event.relatedTarget);

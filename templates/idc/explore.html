@@ -111,6 +111,7 @@
         const stats = JSON.parse(document.getElementById('stats').textContent)
         const set_attributes =JSON.parse(document.getElementById('set_attributes').textContent)
         const urlParams = new URLSearchParams(window.location.search);
+        const SERIES_MANIFEST_URI = "{% url 'get_series_ids_manifest' %}";
         window.attMap = {};
         window.openProjects = {};
         window.openCases = {};

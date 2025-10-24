@@ -59,10 +59,10 @@ ERRORS_SEEN = []
 COLLECTION_HEADER_CHK = "collection_uuid"
 
 FIELD_MAP = {x: i for i, x in enumerate([
-            "collection_id", "collection_uuid", "name", "collections", "image_types", "supporting_data", "subject_count", "doi",
-            "source_url", "cancer_type", "species", "location", "analysis_artifacts", "description", "collection_type",
-            "program", "access", "date_updated", "tcia_wiki_collection_id", "license_short_name", "active"
-    ])}
+    "collection_id", "collection_uuid", "name", "collections", "image_types", "supporting_data", "subject_count", "doi",
+    "source_url", "cancer_type", "species", "location", "analysis_artifacts", "description", "collection_type",
+    "program", "access", "date_updated", "tcia_wiki_collection_id", "license_short_name", "active", "total_size"
+])}
 
 TOKENIZED_FIELDS = ["PatientID", "SeriesInstanceUID", "StudyInstanceUID"]
 
@@ -356,7 +356,7 @@ def load_collections(filename, data_version="8.0"):
         exact_collection_fields = [
             "collection_id", "collection_uuid", "name", "collections", "image_types", "supporting_data", "subject_count", "doi",
             "source_url", "cancer_type", "species", "location", "analysis_artifacts", "description", "collection_type",
-            "access", "date_updated", "active"]
+            "access", "date_updated", "active", "total_size"]
         field_map = FIELD_MAP
         for line in csv_reader(collection_file):
             if COLLECTION_HEADER_CHK in line:
@@ -366,7 +366,6 @@ def load_collections(filename, data_version="8.0"):
                 for field in line:
                     field_map[field] = i
                     i += 1
-                print(field_map)
                 continue
             collex = {
                 'data': { x: line[field_map[x]] for x in exact_collection_fields },

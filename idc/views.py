@@ -450,7 +450,6 @@ def explore_data_page(request, filter_path=False, path_filters=None):
             collapse_on, is_json, uniques=uniques, totals=totals, with_stats=with_stats, disk_size=disk_size
         )
 
-        print(context.keys())
         if not('totals' in context):
           context['totals']={}
         if not('PatientID' in context['totals']):
@@ -702,7 +701,7 @@ def get_series(request, collection_id, patient_id=None, study_uid=None):
         result = query_solr_and_format_result(
             {
                 "collection": source.name,
-                "fields": ["PatientID", "StudyInstanceUID", "Modality", "crdc_series_uuid", "SeriesInstanceUID", "aws_bucket", "instance_size"],
+                "fields": ["collection_id", "PatientID", "StudyInstanceUID", "Modality", "crdc_series_uuid", "SeriesInstanceUID", "aws_bucket", "instance_size"],
                 "query_string": None,
                 "fqs": [filter_query['full_query_str']],
                 "facets": None, "sort": None, "counts_only": False, "limit": 2000
@@ -716,7 +715,8 @@ def get_series(request, collection_id, patient_id=None, study_uid=None):
                 "series_size": doc['instance_size'][0],
                 "modality": doc['Modality'][0],
                 "study_id": doc['StudyInstanceUID'],
-                "case": doc["PatientID"]
+                "patient_id": doc["PatientID"],
+                "collection_id": doc['collection_id']
             })
 
     except Exception as e:
