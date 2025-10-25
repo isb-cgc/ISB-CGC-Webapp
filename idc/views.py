@@ -690,7 +690,7 @@ def get_series(request, collection_id, patient_id=None, study_uid=None):
             "collection_id": [collection_id]
         }
         if patient_id:
-            filters['PaitnetID'] = [patient_id]
+            filters['PatientID'] = [patient_id]
         if study_uid:
             filters["StudyInstanceUID"] = [study_uid]
         filter_query = build_solr_query(
