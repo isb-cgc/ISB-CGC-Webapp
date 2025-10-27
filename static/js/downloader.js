@@ -329,7 +329,8 @@ require([
         let true_error = event.data.message === 'error' && event.data.error.name !== "AbortError";
         let cancellation = downloader_manager.pending_cancellation || (event.data.message === 'error' && event.data.error.name === "AbortError");
         if (true_error) {
-            console.error(`Worker Error: ${JSON.stringify(event)}`);
+            console.error("Saw worker Error: ",event.data['error']);
+            console.error(event.data['text']);
             downloader_manager.statusMessage(`Encountered an error while downloading these files.`, 'error', "error", true, false);
         }
         if (event.data.message === 'done' || cancellation) {
@@ -410,19 +411,23 @@ require([
                 const studyInstanceUID = metadata['study'];
                 const seriesInstanceUID = metadata['series'];
                 const fileName = metadata['instance'];
+                let response = null;
+                let fileHandle = null;
+                const seriesDirectory = modality + "_" + seriesInstanceUID;
+                const filePath = [collection_id, patientID, studyInstanceUID, seriesDirectory].join("/");
                 try {
                     const directoryHandle = event.data['directoryHandle'];
-                    const seriesDirectory = modality + "_" + seriesInstanceUID;
-                    const filePath = [collection_id, patientID, studyInstanceUID, seriesDirectory].join("/");
                     const subDirectoryHandle = await createNestedDirectories(directoryHandle, filePath);
-                    const fileHandle = await subDirectoryHandle.getFileHandle(fileName, {create: true});
+                    fileHandle = await subDirectoryHandle.getFileHandle(fileName, {create: true});
                     const outputStream = await fileHandle.createWritable();
-                    let response = await fetch(s3_url, {
+                    response = await fetch(s3_url, {
                         signal: abort_controller.signal
                     });
+                    console.error("Checking response.");
                     if (!response.ok) {
+                        console.error("[Worker] Saw !ok response of ",response.status);
                         if(pending_abort) {
-                            console.log('User aborted downloads');
+                            console.log('[Worker] User aborted downloads!');
                         } else {
                             console.error('[Worker] Failed to fetch URL: '+s3_url, response.statusText);
                             self.postMessage({message: "error", error: "Failed to fetch URL"});
@@ -451,14 +456,11 @@ require([
                     if(error.name === "AbortError" || (error.name === undefined && pending_abort)) {
                         msg = "Fetch was aborted. The user may have cancelled their downloads.";
                     } else {
-                        console.error("[Worker Error]", error.name);
-                        console.error("[Worker Error]", error.message);
-                        if(error.message.indexOf("getFileHandle") >= 0) {
-                            console.error("[Worker Error] File name attempted: ",fileName);
+                        if((!fileHandle && error.name === "NotFoundError") || error.message.indexOf("getFileHandle") >= 0) {
+                            msg = "Encountered an error while trying to create the file '"+filePath+"/"+fileName+"'";
                         }
-                        console.error("[Worker Error] on S3 target ", s3_url);
                     }
-                    self.postMessage({message: 'error', path: s3_url, error: error, 'text': msg});
+                    self.postMessage({'message': 'error', 'path': s3_url, 'error': error, 'text': msg});
                 }
             }    
         `;
@@ -748,11 +750,11 @@ require([
             } else {
                 let response = null;
                 if(download_type in ["filter", "cart"]) {
-                    response = await fetch(`${BASE_URL}/${SERIES_IDS_FILTER_URL}`);
+                    response = await fetch(`${BASE_URL}${SERIES_IDS_FILTER_URL}`);
                 } else {
                     let study_uri = (study_id !== undefined && study_id !== null) ? `${study_id}/` : "";
                     let patient_uri = (patient_id !== undefined && patient_id !== null) ? `${patient_id}/` : "";
-                    response = await fetch(`${BASE_URL}/${SERIES_IDS_URL}${collection_id}/${patient_uri}${study_uri}`);
+                    response = await fetch(`${BASE_URL}${SERIES_IDS_URL}${collection_id}/${patient_uri}${study_uri}`);
                 }
                 if (!response.ok) {
                     console.error(`[ERROR] Failed to retrieve series IDs: ${response.status}`);
