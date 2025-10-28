@@ -483,8 +483,8 @@ require([
 
     const download_tooltip = {
         dynamicTip: function(ref){
-            let table_type = $(ref).parents('table').attr('data-table-type');
-            return `Download all of the image instances in this ${table_type}.`;
+            let download_type = $(ref).attr('data-download-type');
+            return `Download all of the image instances in this ${download_type}.`;
         },
         content: 'Download all images.', // placeholder text
         theme: 'dark',

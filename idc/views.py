@@ -39,7 +39,9 @@ from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips, DataSetType, Citation
-from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data_serieslvl, get_cart_data_studylvl, get_table_data_with_cart_data
+from idc_collections.collex_metadata_utils import (build_explorer_context, get_collex_metadata, create_file_manifest,
+                                                   get_cart_data_serieslvl, get_cart_data_studylvl,
+                                                   get_table_data_with_cart_data, cart_manifest)
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
@@ -48,7 +50,7 @@ from django.dispatch import receiver
 from idc.models import User_Data
 from solr_helpers import build_solr_query, query_solr_and_format_result
 
-
+from idc.settings import MAX_FILE_LIST_REQUEST
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
@@ -678,35 +680,48 @@ def cart_data(request):
     return JsonResponse(response, status=status)
 
 
-def get_series(request, collection_id, patient_id=None, study_uid=None):
+def get_series(request, collection_id=None, patient_id=None, study_uid=None):
+    status = 200
+    response = {"result": []}
     try:
-        status = 200
-        response = { "result": [] }
-        source = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-            active=True, source_type=DataSource.SOLR,
-            aggregate_level="SeriesInstanceUID"
-        ).first()
-        filters = {
-            "collection_id": [collection_id]
-        }
-        if patient_id:
-            filters['PatientID'] = [patient_id]
-        if study_uid:
-            filters["StudyInstanceUID"] = [study_uid]
-        filter_query = build_solr_query(
-            filters,
-            with_tags_for_ex=False,
-            search_child_records_by=None, solr_default_op='AND'
-        )
-        result = query_solr_and_format_result(
-            {
-                "collection": source.name,
-                "fields": ["collection_id", "PatientID", "StudyInstanceUID", "Modality", "crdc_series_uuid", "SeriesInstanceUID", "aws_bucket", "instance_size"],
-                "query_string": None,
-                "fqs": [filter_query['full_query_str']],
-                "facets": None, "sort": None, "counts_only": False, "limit": 2000
+        fields = ["collection_id", "PatientID", "StudyInstanceUID", "Modality", "crdc_series_uuid", "SeriesInstanceUID", "aws_bucket", "instance_size"]
+        result = {}
+        if not collection_id:
+            # This is a request for filters and/or a cart
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+            partitions = body.get("partitions", {})
+            filtergrp_list = body.get("filtergrp_list", {})
+            if not(len(partitions) or len(filtergrp_list)):
+                raise Exception("You can only request series IDs based on a filter, collection ID, Patient ID, or study ID!")
+            result = cart_manifest(filtergrp_list, partitions, 0, fields, MAX_FILE_LIST_REQUEST)
+        else:
+            source = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+                active=True, source_type=DataSource.SOLR,
+                aggregate_level="SeriesInstanceUID"
+            ).first()
+            filters = {
+                "collection_id": [collection_id]
             }
-        )
+            if patient_id:
+                filters['PatientID'] = [patient_id]
+            if study_uid:
+                filters["StudyInstanceUID"] = [study_uid]
+            filter_query = build_solr_query(
+                filters,
+                with_tags_for_ex=False,
+                search_child_records_by=None, solr_default_op='AND'
+            )
+            result = query_solr_and_format_result(
+                {
+                    "collection": source.name,
+                    "fields": fields,
+                    "query_string": None,
+                    "fqs": [filter_query['full_query_str']],
+                    "facets": None, "sort": None, "counts_only": False, "limit": 2000
+                }
+            )
+
         for doc in result['docs']:
             response['result'].append({
                 "series_id": doc['SeriesInstanceUID'],
@@ -716,7 +731,7 @@ def get_series(request, collection_id, patient_id=None, study_uid=None):
                 "modality": doc['Modality'][0],
                 "study_id": doc['StudyInstanceUID'],
                 "patient_id": doc["PatientID"],
-                "collection_id": doc['collection_id']
+                "collection_id": doc['collection_id'][0]
             })
 
     except Exception as e:

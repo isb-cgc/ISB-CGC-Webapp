@@ -141,7 +141,7 @@ require([
             success: function (data) {
                 try {
                     let curInd = window.cartHist.length-1;
-                    let tmp=filterutils.parseFilterObj()
+                    let tmp=filterutils.parseFilterObj();
                     let filtObj=JSON.parse(JSON.stringify(tmp));
                     if (cartHist[curInd].selections.length>0){
                         let cartSel = new Object();
