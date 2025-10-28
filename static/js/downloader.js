@@ -21,13 +21,19 @@ require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
         jquery: 'libs/jquery-3.7.1.min',
-        base: 'base'
+        base: 'base',
+        cartutils: 'cartutils',
+        filterutils: 'filterutils'
+    },
+    shim: {
+        'cartutils': ['jquery'],
+        'filterutils': ['jquery']
     }
 });
 
 require([
-    'base', 'jquery'
-], function (base, $) {
+    'base', 'jquery', 'cartutils', 'filterutils',
+], function (base, $, cartutils, filterutils) {
 
     const byte_level = Object.freeze({
         1: "KB",
@@ -423,7 +429,6 @@ require([
                     response = await fetch(s3_url, {
                         signal: abort_controller.signal
                     });
-                    console.error("Checking response.");
                     if (!response.ok) {
                         console.error("[Worker] Saw !ok response of ",response.status);
                         if(pending_abort) {
@@ -749,8 +754,34 @@ require([
 
             } else {
                 let response = null;
-                if(download_type in ["filter", "cart"]) {
-                    response = await fetch(`${BASE_URL}${SERIES_IDS_FILTER_URL}`);
+                if(["cohort", "cart"].includes(download_type)) {
+                    let filter_and_cart = {};
+                    if (download_type === "cohort") {
+                        let filtergrp_list = [];
+                        for(const [attr, vals] of Object.entries(filterutils.parseFilterObj())) {
+                            filtergrp_list.push({[attr]: vals});
+                        }
+                        filter_and_cart["filtergrp_list"] = filtergrp_list;
+                    } else {
+                         window.updatePartitionsFromScratch();
+                         let ret = cartutils.formcartdata();
+                         window.partitions = ret[0];
+                         window.filtergrp_lst = ret[1];
+                        let filterSets = [];
+                        for(let i=0; i< window.cartHist.length;i++) {
+                           filterSets.push(window.cartHist[i]['filter']);
+                        }
+                        filter_and_cart['partitions'] = window.partitions;
+                        filter_and_cart['filtergrp_list'] = filterSets;
+                    }
+                    response = await fetch(`${BASE_URL}${SERIES_IDS_FILTER_URL}`, {
+                            method: "POST",
+                            body: JSON.stringify(filter_and_cart),
+                            headers: {
+                                "X-CSRFToken": csrftoken,
+                                "content-type": "application/json"
+                            }
+                        });
                 } else {
                     let study_uri = (study_id !== undefined && study_id !== null) ? `${study_id}/` : "";
                     let patient_uri = (patient_id !== undefined && patient_id !== null) ? `${patient_id}/` : "";

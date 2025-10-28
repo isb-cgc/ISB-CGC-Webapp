@@ -75,29 +75,28 @@ require([
         if (button.hasClass('series-export') || button.hasClass('study-export')){
             update_export_modal_for_mini(button);
         } else if (button.hasClass('cart-export')){
-            updatePartitionsFromScratch();
              window.updatePartitionsFromScratch();
-             var ret =cartutils.formcartdata();
+             let ret = cartutils.formcartdata();
              window.partitions = ret[0];
              window.filtergrp_lst = ret[1];
 
-             var projS = new Set();
+             let projS = new Set();
              for (var i=0;i<partitions.length;i++){
                 projS.add(partitions[i].id[0]);
              }
-            var mxstudies=0;
-            var mxseries=0;
-            var projl = [...projS]
-            for (var i=0;i<projl.length;i++){
-               var proj = projl[i]
+            let mxstudies=0;
+            let mxseries=0;
+            let projl = [...projS]
+            for (let i=0;i<projl.length;i++){
+               let proj = projl[i]
                mxseries+= window.selProjects[proj].mxseries;
                mxstudies+= window.selProjects[proj].mxstudies;
             }
-            var filterSets = new Array();
+            let filterSets = [];
             for(let i=0; i< window.cartHist.length;i++) {
                filterSets.push(window.cartHist[i]['filter'])
             }
-            update_export_modal_for_cart(partitions, filterSets);
+            update_export_modal_for_cart(window.partitions, filterSets);
         } else if (button.hasClass('cart-export-from-cp')){
             update_export_modal_for_cart(window.partitions, window.filtergrp_list);
         } else if(button.hasClass('export-cohort-manifest')) {
