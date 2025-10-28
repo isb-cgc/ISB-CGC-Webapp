@@ -694,7 +694,29 @@ def get_series(request, collection_id=None, patient_id=None, study_uid=None):
             filtergrp_list = body.get("filtergrp_list", {})
             if not(len(partitions) or len(filtergrp_list)):
                 raise Exception("You can only request series IDs based on a filter, collection ID, Patient ID, or study ID!")
-            result = cart_manifest(filtergrp_list, partitions, 0, fields, MAX_FILE_LIST_REQUEST)
+            if len(partitions):
+                result = cart_manifest(filtergrp_list, partitions, 0, fields, MAX_FILE_LIST_REQUEST)
+            else:
+                source = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+                    active=True, source_type=DataSource.SOLR,
+                    aggregate_level="SeriesInstanceUID"
+                ).first()
+                filter_query = build_solr_query(
+                    { w: v for x in filtergrp_list for w, v in list(x.items())},
+                    with_tags_for_ex=False,
+                    search_child_records_by=None, solr_default_op='AND'
+                )
+                result = query_solr_and_format_result(
+                    {
+                        "collection": source.name,
+                        "fields": fields,
+                        "query_string": None,
+                        "fqs": [filter_query['full_query_str']],
+                        "facets": {'instance_size': 'sum(instance_size)'}, "sort": None, "counts_only": False, "limit": MAX_FILE_LIST_REQUEST,
+                        "totals": ['SeriesInstanceUID', 'collection_id', 'PatientID', 'StudyInstanceUID']
+                    },
+                    normalize_facets=False
+                )
         else:
             source = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
                 active=True, source_type=DataSource.SOLR,
@@ -718,7 +740,7 @@ def get_series(request, collection_id=None, patient_id=None, study_uid=None):
                     "fields": fields,
                     "query_string": None,
                     "fqs": [filter_query['full_query_str']],
-                    "facets": None, "sort": None, "counts_only": False, "limit": 2000
+                    "facets": None, "sort": None, "counts_only": False, "limit": MAX_FILE_LIST_REQUEST
                 }
             )
 
@@ -733,6 +755,14 @@ def get_series(request, collection_id=None, patient_id=None, study_uid=None):
                 "patient_id": doc["PatientID"],
                 "collection_id": doc['collection_id'][0]
             })
+        if 'facets' in result:
+            response['download_stats'] = {
+                'series_count': result['facets']['total_SeriesInstanceUID'],
+                'study_count': result['facets']['total_StudyInstanceUID'],
+                'collection_count': result['facets']['total_collection_id'],
+                'case_count': result['facets']['total_PatientID'],
+                'queue_byte_size': result['facets']['instance_size'],
+            }
 
     except Exception as e:
         logger.error("[ERROR] While fetching series per study ID:")

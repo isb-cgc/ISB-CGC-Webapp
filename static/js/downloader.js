@@ -56,9 +56,9 @@ require([
         }
         let byte_count = 0;
         let converted_size = size;
-        while(converted_size > 1024) {
+        while(converted_size > 1000) {
             byte_count += 1;
-            converted_size /= 1024;
+            converted_size /= 1000;
         }
         let bytes = (Math.round(converted_size*1000)/1000).toFixed(3);
         return `${bytes} ${byte_level[byte_count]}` ;
@@ -219,10 +219,14 @@ require([
         queue_byte_size = 0;
         bytes_downloaded = 0;
         series_count = 0;
+        study_count = 0;
+        case_count = 0;
+        collection_count = 0;
         start_time = -1;
         collections = new Set([]);
         cases = new Set([]);
         studies = new Set([]);
+        preset_totals = false;
 
         cancellation_underway = false;
 
@@ -257,10 +261,22 @@ require([
             this.bytes_downloaded = 0;
             this.series_count = 0;
             this.collections = new Set([]);
+            this.collection_count = 0;
             this.cases = new Set([]);
+            this.case_count = 0;
             this.studies = new Set([]);
+            this.study_count = 0;
             this.cancellation_underway = false;
             this.start_time = -1;
+        }
+
+        set_download_totals(queue_byte_size, collection_count, case_count, study_count, series_count) {
+            this.queue_byte_size = queue_byte_size;
+            this.collection_count = collection_count;
+            this.case_count = case_count;
+            this.study_count = study_count;
+            this.series_count = series_count;
+            this.preset_totals = true;
         }
 
         get active_requests() {
@@ -294,11 +310,16 @@ require([
             let request_success = false;
             if(this.hopper.length < this.HOPPER_LIMIT && !this.cancellation_underway) {
                 this.hopper.push(new DownloadRequest(request));
-                this.queue_byte_size += parseFloat(request['series_size']);
-                this.series_count += 1;
                 this.studies.add(request['study_id']);
                 this.collections.add(request['collection_id']);
                 this.cases.add(request['patient_id']);
+                if(!this.preset_totals) {
+                    this.queue_byte_size += parseFloat(request['series_size']);
+                    this.series_count += 1;
+                    this.collection_count = this.collections.size;
+                    this.study_count = this.studies.size;
+                    this.case_count = this.cases.size;
+                }
                 request_success = true;
             }
             return request_success;
@@ -494,9 +515,9 @@ require([
 
         get all_requested() {
             return `${this.queues.total_downloads_requested} requested in ` +
-                `${this.queues.collections.size} collection(s) / ` +
-                `${this.queues.cases.size} case(s) / ` +
-                `${this.queues.studies.size} ${this.queues.studies.size <= 1 ? "study" : "studies"} / ` +
+                `${this.queues.collection_count} collection(s) / ` +
+                `${this.queues.case_count} case(s) / ` +
+                `${this.queues.study_count} ${this.queues.study_count <= 1 ? "study" : "studies"} / ` +
                 `${this.queues.series_count} series`;
         }
 
@@ -655,6 +676,12 @@ require([
             });
         }
 
+        set_download_stats(stats) {
+            this.queues.set_download_totals(
+                stats.queue_byte_size, stats.collection_count, stats.case_count, stats.study_count, stats.series_count
+            );
+        }
+
         beginDownloads() {
             if(!this.queues.isEmpty()) {
                 if(this.in_progress <= 0) {
@@ -793,6 +820,9 @@ require([
                 }
                 const series_data = await response.json();
                 series.push(...series_data['result']);
+                if('download_stats' in series_data){
+                    downloader_manager.set_download_stats(series_data['download_stats']);
+                }
             }
         } else {
             series.push({
