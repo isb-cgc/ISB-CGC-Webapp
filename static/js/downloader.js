@@ -537,7 +537,7 @@ require([
             this.queues.bytes_downloaded += downloaded_amount;
         }
 
-        pendingfetchMessage(fetch_type) {
+        pendingFetchMessage(fetch_type) {
             // Don't display if we already have pending downloads
             if(this.in_progress > 0) {
                 return;
@@ -674,6 +674,14 @@ require([
             this.downloadWorkers.forEach(worker => {
                 worker.postMessage({'abort': true, 'reason': 'User cancelled download.'});
             });
+            // Sometimes worker latency can cause a race condition between final cleanup and resetting the download
+            // manager's state. Run trigger a final time after waiting a couple of seconds to be totally sure
+            // we've cleaned up after ourselves.
+            setTimeout(2000, function(){
+                if(downloader_manager.pending_cancellation) {
+                    downloader_manager.triggerWorkerDownloads();
+                }
+            });
         }
 
         set_download_stats(stats) {
@@ -713,7 +721,7 @@ require([
             return;
         }
         let job_result = await series_job.json();
-        downloader_manager.pendingfetchMessage("collection");
+        downloader_manager.pendingFetchMessage("collection");
 
         const MAX_ELAPSED_SERIES_IDS = 8000;
         let polling = async function(file_name, check_start){
@@ -782,6 +790,7 @@ require([
             } else {
                 let response = null;
                 if(["cohort", "cart"].includes(download_type)) {
+                    downloader_manager.pendingFetchMessage(download_type);
                     let filter_and_cart = {};
                     if (download_type === "cohort") {
                         let filtergrp_list = [];
