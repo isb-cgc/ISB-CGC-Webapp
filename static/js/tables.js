@@ -292,9 +292,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             }
         };
         const download_col = {"type": "html", "orderable": false, data: 'collection_id', render: function(data, type, row) {
-            let download_size = window.collection[row[0]]['total_size'];
+            let download_size = window.collection[row[0]]['total_size_with_ar'];
             if ("showDirectoryPicker" in window && download_size < 3) {
-                let download_classes = "download-collection";
+                let download_classes = "download-collection download-instances";
                 download_classes = (download_size > 1) ? `${download_classes} download-size-warning` : `${download_classes} download-all-instances`;
                 let modal_attr = "";
                 if(download_size > 1) {
@@ -306,12 +306,10 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     data-download-type="collection"
                     ${modal_attr}
                     ></i>`;
+            } else {
+                let disabled_type = ("showDirectoryPicker" in window) ? "dowbload-size-disabled" : "download_all_disabled";
+                return `<i class="fa fa-download is-disabled download-instances" data-disabled-type="${disabled_type}"></i>`;
             }
-            let disabled_classes = "download-all-disabled";
-            if(download_size >= 3) {
-                disabled_classes = `${disabled_classes} download-size-disabled`;
-            }
-            return `<i class="fa fa-download ${disabled_classes}"></i>`;
         }};
 
         return [caret_col, cart_col, cartnum_col, collection_col, case_col, dyn_case_col, download_col];
@@ -562,14 +560,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         const series_col =  {"type": "num", "orderable": true, data: 'unique_series'};
         const download_col = {"type": "html", "orderable": false, data: 'patient_id', render: function(data, type, row) {
                 if ("showDirectoryPicker" in window) {
-                    return `<i class="fa fa-download download-all-instances download-case"   
+                    return `<i class="fa fa-download download-instances download-all-instances download-case"   
                         data-collection="${row['collection_id']}" 
                         data-patient="${row['PatientID']}" 
                         data-total-series="${row['unique_series']}"   
                         data-download-type="case"                                 
                         ></i>`;
                 }
-                return `<i class="fa fa-download download-all-disabled"></i>`;
+                return `<i class="fa fa-download  download-instances is-disabled" data-disabled-type="download-all-disabled"></i>`;
         }};
         return [caret_col, cart_col, cartnum_col, collection_col, case_col, study_col, series_col, download_col];
     };
@@ -1014,7 +1012,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                           "orderable": false,
                           data: 'StudyInstanceUID', render: function (data, type, row) {
                             if ("showDirectoryPicker" in window) {
-                                return `<i class="fa fa-download download-all-instances download-study"   
+                                return `<i class="fa fa-download download-all-instances download-instances download-study"   
                                     data-collection="${row['collection_id']}" 
                                     data-study="${row['StudyInstanceUID']}" 
                                     data-patient="${row['PatientID']}" 
@@ -1022,7 +1020,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                     data-total-series="${row['unique_series']}"                         
                                     ></i>`;
                             }
-                            return `<i class="fa fa-download download-all-disabled"></i>`;
+                            return `<i class="fa fa-download download-instances is-disabled" data-disabled-type="download-all-disabled"></i>`;
                         }
                     }
                 ],
@@ -1368,7 +1366,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                       "orderable": false,
                       data: 'SeriesInstanceUID', render: function (data, type, row){
                           if("showDirectoryPicker" in window) {
-                            return `<i class="fa fa-download download-all-instances" data-bucket="${row['aws_bucket']}" 
+                            return `<i class="fa fa-download download-all-instances download-instances" data-bucket="${row['aws_bucket']}" 
                                 data-series="${row['crdc_series_uuid']}" 
                                 data-series-id="${row['SeriesInstanceUID']}" 
                                 data-modality="${row['Modality']}" 
@@ -1378,7 +1376,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 data-series-size="${row['instance_size']}"                                                 
                                 ></i>`
                           }
-                          return `<i class="fa fa-download download-all-disabled"></i>`
+                          return `<i class="fa fa-download is-disabled download-instances" data-disabled-type="download-all-disabled"></i>`
                       }
                   }
             ],
@@ -1957,10 +1955,9 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     }
 
     const handleCartClick = function(tabletype, row, elem, ids){
-         var updateElems =["series", "studies","cases"]
-        //$(row).find('.shopping-cart-holder').trigger('shopping-cart:update-started');
-         var addingToCart = true;
-         if (tabletype=="series") {
+         let updateElems =["series", "studies","cases"];
+         let addingToCart = true;
+         if (tabletype==="series") {
              if ($(elem).parentsUntil('tr').parent().hasClass('someInCart')) {
                  addingToCart = false;
              } else {
@@ -1975,7 +1972,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
          }
 
          // record new selection
-         var newSel={}
+         let newSel={};
          newSel['added'] = addingToCart;
          newSel['sel'] = ids;
          cartutils.updateCartSelections(newSel);

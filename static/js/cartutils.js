@@ -122,10 +122,10 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         return deferred.promise();
     };
 
-
-    const updateCartCounts =function(){
+    const updateCartCounts = async function(){
         var buttonContents = '<button class="btn filter-type clear-cart" role="button" title="Empty your cart."><i class="fa fa-rotate-left"></i></button>';
-        if (Object.keys(window.proj_in_cart).length>0){
+        let cart_has_contents = Boolean(Object.keys(window.proj_in_cart).length>0);
+        if (cart_has_contents){
             var nmprojs = 0;
             var nmcases=0;
             var nmstudies=0;
@@ -138,7 +138,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             }
 
             let content = buttonContents+'<span id ="#cart_stats">Cart contents: ' + nmseries.toString()+' series from '+nmprojs.toString()+
-                ' collections / '+nmcases.toString()+' cases / '+nmstudies.toString()+' studies</span>';
+                ' collections / '+nmcases.toString()+' cases / '+nmstudies.toString()+' studies</span> <span class="cart_disk_size">(Calculating size...)</span>';
             localStorage.setItem('manifestSeriesCount',nmseries);
 
             $('#cart_stats_holder').html(content) ;
@@ -149,6 +149,28 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             $('#cart_stats').addClass('empty-cart');
             $('.cart-activated-controls').attr('disabled', 'disabled');
         }
+        let cart_disk_size = 0;
+        let cart_disk_display_size = "(Calculating...)";
+        let cart_disk_resp = await fetch(`${BASE_URL}/cart_data/`, {
+                method: "POST",
+                body: new URLSearchParams({
+                    'filtergrp_list': JSON.stringify(window.filtergrp_list ? window.filtergrp_list : [{}]),
+                    'partitions': JSON.stringify(window.partitions),
+                    'size_only': 'true'
+                }),
+                headers: {"X-CSRFToken": $.getCookie('csrftoken'), "content-type": 'application/x-www-form-urlencoded'}
+        });
+        if(!cart_disk_resp.ok) {
+            console.error("Unable to fetch cart size!");
+            cart_disk_size = 4;
+            cart_disk_display_size = "(Unable to retrieve size.)";
+        } else {
+            let cart_disk_res = await cart_disk_resp.json();
+            cart_disk_size = cart_disk_res['total_size']/Math.pow(1000,4);
+            cart_disk_display_size = cart_disk_res['display_size'];
+        }
+        $('.cart_disk_size').html(cart_disk_display_size);
+        base.updateDownloadBtns('cart', cart_has_contents, cart_disk_size);
 
     }
 
@@ -298,7 +320,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
 
      window.updatePartitionsFromScratch = function(){
         window.partitions = new Array();
-
         for (var i=0;i<window.cartHist.length;i++){
            var cartHist=window.cartHist[i];
            updateGlobalPartitions(cartHist.partitions);
@@ -308,10 +329,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
            refilterGlobalPartitions(cartHist,i);
         }
         fixpartitions();
-        var filtStrings = createFiltStrings();
-        var solrStr = createSolrString(filtStrings);
-        window.solrStr = solrStr;
-        var ii=1;
     };
 
     //looking across the history of cart selections, create one set of exclusive partitions of the imaging data
@@ -488,29 +505,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             filtStrings.push(fstr);
         }
         return(filtStrings);
-    }
-
-    // not really needed, but used to creating the solr string in on the client side
-    const createSolrString = function(filtStringA){
-        var solrStr=''
-        var solrA=[]
-        for (var i=0;i< window.partitions.length;i++){
-            var curPart = window.partitions[i];
-            if (!curPart['null']) {
-                var curPartAttStrA = parsePartitionAttStrings(filtStringA, curPart);
-                var curPartStr = parsePartitionStrings(curPart);
-                for (var j = 0; j < curPartAttStrA.length; j++) {
-                    if (curPartAttStrA[j].length > 0) {
-                        solrA.push('(' + curPartStr + ')(' + curPartAttStrA[j] + ')')
-                    } else{
-                        solrA.push(curPartStr);
-                    }
-                }
-            }
-        }
-        solrA = solrA.map(x => '('+x+')');
-        var solrStr = solrA.join(' OR ')
-        return solrStr
     }
 
     const parsePartitionAttStrings = function(filtStringA, partition){

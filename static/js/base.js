@@ -276,6 +276,7 @@ define(['jquery', 'utils'], function($, utils) {
             utils.removeCookie(name, path);
         },
         blockResubmit: utils.blockResubmit,
-        checkManifestReady: utils.checkManifestReady
+        checkManifestReady: utils.checkManifestReady,
+        updateDownloadBtns: utils.updateDownloadBtns
     };
 });

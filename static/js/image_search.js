@@ -86,13 +86,7 @@ require([
     window.filterObj = {};
     window.projIdSel = [];
     window.studyIdSel = [];
-    //window.tcgaColls = ["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
     window.projSets = new Object();
-    window.projSets['tcga']=["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
-    window.projSets['rider']=["rider_lung_ct", "rider_phantom_pet_ct","rider_breast_mri", "rider_neuro_mri","rider_phantom_mri", "rider_lung_pet_ct"];
-    window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
-
-
 
     window.hidePanel=function(){
         $('#lh_panel').hide();
@@ -103,7 +97,6 @@ require([
         $('#rh_panel').addClass('col-lg-12');
         $('#rh_panel').addClass('col-md-12');
     };
-
     window.showPanel=function(){
         $('#lh_panel').show();
         $('#show_lh').hide();
@@ -191,6 +184,8 @@ require([
                         $('#search_def_access').addClass('is-hidden');
                         $('.access_warn').addClass('is-hidden');
                     }
+                    let download_btn = $('#download-cohort-images');
+                    let download_btn_tips = $('#download-cohort-images-tooltips');
                     if(isFiltered && data.total > 0) {
                         $('#search_def_stats').html("Cohort filter contents: " +
                             data.totals.SeriesInstanceUID.toString() + " series from " +
@@ -198,10 +193,13 @@ require([
                             data.totals.StudyInstanceUID.toString() + " studies (Size on disk: " +
                             data.totals.disk_size + ")"
                         );
+                        base.updateDownloadBtns("cohort", true, parseFloat(data.totals.disk_size.split(" ")[0]));
+
                     } else if(isFiltered && data.total <= 0) {
                         $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                     } else {
                         $('#search_def_stats').html("&nbsp;");
+                        base.updateDownloadBtns("cohort", false, 0);
                     }
 
                     filterutils.updateCollectionTotals('Program', data.programs);
@@ -566,63 +564,6 @@ require([
             }
             window.hide_spinner();
         }, 0);
-    }
-
-    updatecartedits = function(){
-        if (("cartedits" in localStorage) && (localStorage.getItem("cartedits") == "true")) {
-            var edits = window.cartHist[window.cartHist.length - 1]['selections'];
-
-            var filt = Object();
-            filt['StudyInstanceUID'] = new Array();
-            var studymp = {};
-            for (var i = 0; i < edits.length; i++) {
-                var sel = edits[i]['sel'];
-                var studyid = sel[2];
-                filt['StudyInstanceUID'].push(studyid);
-                var seriesid = sel[3];
-                if (!(studyid in studymp)) {
-                    studymp[studyid] = []
-                }
-                studymp[studyid].push(seriesid)
-            }
-            if ("studymp" in sessionStorage) {
-                var studymp = JSON.parse(sessionStorage.getItem("studymp"));
-                for (studyid in studymp) {
-                    window.studymp[studyid]['val'] = studymp[studyid]
-                }
-            }
-            if ("seriesdel" in sessionStorage) {
-                window.seriesdel = JSON.parse(sessionStorage.getItem("seriesdel"));
-            }
-
-            cartutils.updateGlobalCart(false, studymp, 'series')
-            window.updateTableCounts(1);
-            var gtotals = cartutils.getGlobalCounts();
-            var content = "Cart contents: " + gtotals[3]+" series from "+gtotals[0]+" collections / "+ gtotals[1]+" cases / "+gtotals[2]+ " studies";
-
-            $('#cart_stats').html(content) ;
-
-            if (gtotals[0]>0){
-                $('#cart_stats').removeClass('empty-cart');
-                $('.cart-activated-controls').removeAttr('disabled');
-            } else {
-                $('#cart_stats').addClass('empty-cart');
-                $('#cart_stats').html('Your cart is currently empty.');
-                $('.cart-activated-controls').attr('disabled','disabled');
-            }
-        }
-        else if ("cartHist" in localStorage){
-            localStorage.removeItem("cartHist");
-        }
-        if ("cartedits" in sessionStorage){
-            sessionStorage.removeItem("cartedits");
-        }
-        if ("studymp" in sessionStorage){
-            sessionStorage.removeItem("studymp");
-        }
-        if ("seriesdel" in sessionStorage) {
-            sessionStorage.removeItem("seriesdel");
-        }
     }
 
      $(document).ready(async function () {

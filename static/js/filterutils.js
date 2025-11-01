@@ -69,7 +69,7 @@ define(['jquery', 'base'], function($, base) {
             $('.filter-activated-controls').each(function(){
                 if(!$(this).attr('data-pending-manifest')) {
                     $(this).attr("disabled","disabled");
-                    $(this).attr("title","Select a filter to enable this feature.");
+                    !$(this).hasClass('tip-titled') && $(this).attr("title","Select a filter to enable this feature.");
                 }
             })
             $('.bq-string, .citations-list').html("");
@@ -89,7 +89,7 @@ define(['jquery', 'base'], function($, base) {
             $('.filter-placeholder').hide();
             $('.filter-activated-controls').each((function(){
                 if(!$(this).attr('data-pending-manifest')) {
-                    $(this).attr("title", $(this).attr("data-default-title"));
+                     !$(this).hasClass('tip-titled') && $(this).attr("title", $(this).attr("data-default-title"));
                     $(this).removeAttr("disabled");
                 }
             }));
