@@ -51,6 +51,7 @@ from idc.models import User_Data
 from solr_helpers import build_solr_query, query_solr_and_format_result
 
 from idc.settings import MAX_FILE_LIST_REQUEST
+from idc_collections.collex_metadata_utils import convert_disk_size
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
@@ -245,86 +246,6 @@ def save_ui_hist(request):
         status = 500
 
     return JsonResponse({}, status=status)
-
-
-# returns various metadata mappings for selected projects used in calculating cart selection
-# counts 'on the fly' client side
-def studymp(request):
-    response = {}
-    status = 200
-    sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-            active=True, source_type=DataSource.SOLR,
-            aggregate_level="StudyInstanceUID"
-        )
-    data_types = [DataSetType.IMAGE_DATA, DataSetType.ANCILLARY_DATA, DataSetType.DERIVED_DATA]
-    data_sets = DataSetType.objects.filter(data_type__in=data_types)
-    aggregate_level='StudyInstanceUID'
-    versions=[]
-    versions = ImagingDataCommonsVersion.objects.filter(
-        version_number__in=versions
-    ).get_data_versions(active=True) if len(versions) else ImagingDataCommonsVersion.objects.filter(
-        active=True
-    ).get_data_versions(active=True)
-    aux_sources = data_sets.get_data_sources().filter(
-        source_type=DataSource.SOLR,
-        aggregate_level__in=["case_barcode", "sample_barcode", aggregate_level],
-        id__in=versions.get_data_sources().filter(source_type=DataSource.SOLR).values_list("id", flat=True)
-    ).distinct()
-
-    try:
-       req = request.GET if request.method == 'GET' else request.POST
-       filters = json.loads(req.get('filters', '{}'))
-
-       mxSeries = int(req.get('mxseries'))
-       mxStudies= int(req.get('mxstudies'))
-       limit = int(req.get('limit', mxStudies))
-       offset = int(req.get('offset',0))
-
-       casestudymp = dict()
-       studymp = dict()
-       projstudymp = dict()
-
-       idsEx = get_collex_metadata(
-            filters, ['collection_id', 'PatientID','StudyInstanceUID', 'SeriesInstanceUID'], record_limit=limit,
-            sources=sources, offset=offset, records_only=True, custom_facets={}, aux_sources=aux_sources,
-            collapse_on='StudyInstanceUID', counts_only=False, filtered_needed=False,
-            raw_format=True, default_facets=False, sort=None
-        )
-
-       logger.debug("[STATUS] records pulled: {}".format(len(idsEx['docs'])))
-
-       for doc in idsEx['docs']:
-          proj=doc['collection_id'][0]
-          patientid=doc['PatientID']
-          studyid= doc['StudyInstanceUID']
-          cnt = len(doc['SeriesInstanceUID'])
-
-          if not patientid in casestudymp:
-              casestudymp[patientid]={}
-          if not proj in projstudymp:
-              projstudymp[proj] = {}
-          studymp[studyid]={}
-          studymp[studyid]['cnt'] = cnt
-          studymp[studyid]['proj'] = proj
-          studymp[studyid]['PatientID'] = patientid
-          studymp[studyid]['val'] = []
-          projstudymp[proj][studyid] = cnt
-          casestudymp[patientid][studyid] = cnt
-
-       response["studymp"] = studymp
-       response['casestudymp'] = casestudymp
-       response['projstudymp'] = projstudymp
-
-    except Exception as e:
-        logger.error("[ERROR] While attempting to get studymp:")
-        logger.exception(e)
-        messages.error(
-           request,
-           "Encountered an error when attempting to get the studymp - please contact the administrator."
-        )
-        status = 400
-
-    return JsonResponse(response, status=status)
 
 
 def populate_tables(request):
@@ -648,6 +569,7 @@ def cart_data(request):
         aggregate_level = req.get('aggregate_level', 'StudyInstanceUID')
         results_level = req.get('results_level', 'StudyInstanceUID')
         dois_only = bool(req.get('dois_only', 'false').lower() == 'true')
+        size_only = bool(req.get('size_only', 'false').lower() == 'true')
 
         partitions = json.loads(req.get('partitions', '{}'))
 
@@ -656,22 +578,29 @@ def cart_data(request):
         length = int(req.get('length', 100))
         mxseries = int(req.get('mxseries',1000))
 
+        doi_or_size_only = (dois_only or size_only)
+
         if len(partitions) <= 0 or aggregate_level not in ['SeriesInstanceUID', 'StudyInstanceUID']:
             response['numFound'] = 0
             response['docs'] = []
         else:
             if aggregate_level == 'StudyInstanceUID':
                 response = get_cart_data_studylvl(
-                    filtergrp_list, partitions, limit, offset, length, mxseries, with_records=(not dois_only),
-                    results_lvl=results_level, dois_only=dois_only
+                    filtergrp_list, partitions, limit, offset, length, mxseries, with_records=(not doi_or_size_only),
+                    results_lvl=results_level, dois_only=dois_only, size_only=size_only
                 )
             elif aggregate_level == 'SeriesInstanceUID':
                 response = get_cart_data_serieslvl(
-                    filtergrp_list, partitions, field_list if not dois_only else None, limit, offset,
-                    with_records=(not dois_only), dois_only=dois_only
+                    filtergrp_list, partitions, field_list if (not doi_or_size_only) else None, limit, offset,
+                    with_records=(not doi_or_size_only), dois_only=dois_only, size_only=size_only
                 )
         if dois_only:
             response = {'dois': response['dois']}
+        if size_only:
+            response = {
+                "total_size": response['total_size'],
+                "display_size": convert_disk_size(response['total_size'])
+            }
     except Exception as e:
         logger.error("[ERROR] While loading cart:")
         logger.exception(e)
@@ -704,7 +633,7 @@ def get_series(request, collection_id=None, patient_id=None, study_uid=None):
                 filter_query = build_solr_query(
                     { w: v for x in filtergrp_list for w, v in list(x.items())},
                     with_tags_for_ex=False,
-                    search_child_records_by=None, solr_default_op='AND'
+                    search_child_records_by={w: "StudyInstanceUID" for x in filtergrp_list for w in x}, solr_default_op='AND'
                 )
                 result = query_solr_and_format_result(
                     {

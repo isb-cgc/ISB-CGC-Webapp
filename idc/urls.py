@@ -51,7 +51,6 @@ urlpatterns = [
     re_path(r'^explore/manifest/$', views.explorer_manifest, name='get_explore_manifest'),
     re_path(r'^explore/manifest/series/$', views.explorer_manifest, name='get_series_ids_manifest'),
     re_path(r'^tables/', views.populate_tables, name='populate_tables'),
-    re_path(r'^studymp/', views.studymp, name='studymp'),
     re_path(r'^warning/', views.warn_page, name='warn'),
     re_path(r'^about/$', views.about_page, name='about_page'),
     re_path(r'^dashboard/', views.dashboard_page, name='dashboard'),

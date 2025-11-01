@@ -73,9 +73,6 @@ require([
     //sesssionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
     window.partitions = new Array();
 
-    window.studymp=new Object();
-    window.projstudymp = new Object();
-    window.casestudymp = new Object();
     window.collection = JSON.parse(document.getElementById('collections').textContent);
     var lst = Object.keys(window.collection).sort();
     window.collectionData = new Array();
@@ -481,8 +478,17 @@ require([
         plugins: [dynamicTipFunc]
     };
 
+    let disabled_messages = {
+        'download-all-disabled': chromium_only,
+        'download-size-disabled': "This set of images is over 3TB in size. Please use manifest download to obtain these images.",
+        'download-cart-disabled': "Add items to the cart to enable this feature.",
+        'download-cohort-disabled': "Select a filter to enable this feature."
+    };
     const download_tooltip = {
         dynamicTip: function(ref){
+            if($(ref).hasClass('is-disabled')){
+                return disabled_messages[$(ref).attr('data-disabled-type')];
+            }
             let download_type = $(ref).attr('data-download-type');
             return `Download all of the image instances in this ${download_type}.`;
         },
@@ -491,14 +497,10 @@ require([
         placement: 'left',
         arrow: false,
         interactive:true,
-        target: '.download-all-instances',
+        target: '.download-instances',
         maxWidth: 200,
         plugins: [dynamicTipFunc]
     };
-
-    tippy.delegate('.projects-table', disabled_download_tooltip);
-
-    tippy.delegate('.projects-table', download_tooltip);
 
     tippy.delegate('.projects-table', cart_tooltip);
 
@@ -523,7 +525,7 @@ require([
 
     tippy.delegate('.cases-table', copy_tip);
 
-    tippy.delegate('.filter-display-panel', {
+    tippy.delegate('#body', {
         content: 'Get the citation list for this cohort.',
         theme: 'dark',
         placement: 'left',
@@ -533,21 +535,9 @@ require([
         maxWidth: 200
     });
 
-    tippy.delegate('.cases-table', download_tooltip);
-
-    tippy.delegate('.cases-table', disabled_download_tooltip);
-
-    tippy.delegate('.studies-table', download_tooltip);
-
     tippy.delegate('.studies-table', manifest_tooltip);
 
-    tippy.delegate('.studies-table', disabled_download_tooltip);
-
-    tippy.delegate('.series-table', download_tooltip);
-
     tippy.delegate('.series-table', manifest_tooltip);
-
-    tippy.delegate('.series-table', disabled_download_tooltip);
 
     tippy.delegate('.series-table', {
         content: 'Some or all of the images in this collection are not publicly available.',
@@ -570,6 +560,9 @@ require([
         interactive: true, // This is required for any table tooltip to show at the appropriate spot!
         maxWidth: 800
     });
+
+    tippy.delegate('#body', disabled_download_tooltip);
+    tippy.delegate('#body', download_tooltip);
 
     tippy.delegate('#body', {
         content: function(reference) {

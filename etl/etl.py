@@ -61,7 +61,7 @@ COLLECTION_HEADER_CHK = "collection_uuid"
 FIELD_MAP = {x: i for i, x in enumerate([
     "collection_id", "collection_uuid", "name", "collections", "image_types", "supporting_data", "subject_count", "doi",
     "source_url", "cancer_type", "species", "location", "analysis_artifacts", "description", "collection_type",
-    "program", "access", "date_updated", "tcia_wiki_collection_id", "license_short_name", "active", "total_size"
+    "program", "access", "date_updated", "tcia_wiki_collection_id", "license_short_name", "active", "total_size", "total_size_with_ar"
 ])}
 
 TOKENIZED_FIELDS = ["PatientID", "SeriesInstanceUID", "StudyInstanceUID"]
@@ -146,8 +146,8 @@ SOLR_TYPE_EXCEPTION = {
 }
 
 SOLR_SINGLE_VAL = {
-    "StudyInstanceUID": ["PatientID", "StudyInstanceUID", "crdc_study_uuid"],
-    "SeriesInstanceUID": ["PatientID", "StudyInstanceUID", "SeriesInstanceUID", "crdc_study_uuid", "crdc_series_uuid"]
+    "StudyInstanceUID": ["PatientID", "StudyInstanceUID", "crdc_study_uuid","instance_size"],
+    "SeriesInstanceUID": ["PatientID", "StudyInstanceUID", "SeriesInstanceUID", "crdc_study_uuid", "crdc_series_uuid", "instance_size"]
 }
 
 ETL_CONFIG = {}
@@ -356,7 +356,7 @@ def load_collections(filename, data_version="8.0"):
         exact_collection_fields = [
             "collection_id", "collection_uuid", "name", "collections", "image_types", "supporting_data", "subject_count", "doi",
             "source_url", "cancer_type", "species", "location", "analysis_artifacts", "description", "collection_type",
-            "access", "date_updated", "active", "total_size"]
+            "access", "date_updated", "active", "total_size", "total_size_with_ar"]
         field_map = FIELD_MAP
         for line in csv_reader(collection_file):
             if COLLECTION_HEADER_CHK in line:

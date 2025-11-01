@@ -632,15 +632,16 @@
                                 title="Select a filter to enable this feature."
                             > Manifest <i class="fa fa-solid fa-list"></i>
                             </button>
-                            <button id="download-cohort-images" class="btn btn-primary btn-small filter-activated-controls download-all-instances" disabled
-                                data-default-title="Download the instance image files for this cohort."
-                                title="Select a filter to enable this feature."
+                            <span id="download-cohort-images-tooltips" class="download-instances is-disabled" data-download-type="cohort" data-disabled-type="download-cohort-disabled">
+                            <button id="download-cohort-images" class="btn btn-primary btn-small filter-activated-controls download-all-instances tip-titled" disabled
                                 data-download-type="cohort"
                             > Download <i class="fa fa-solid fa-download"></i>
                             </button>
-                            <button class="btn btn-small btn-special citations-button filter-activated-controls" disabled data-toggle="modal" data-target="#citations-modal" role="button"
-                                data-default-title="Display this cohort's citation list in Vancouver format."
-                                title= "Select a filter to enable this feature."
+                            </span>
+                            <button class="btn btn-small btn-special citations-button filter-activated-controls" disabled
+                                data-toggle="modal" data-target="#citations-modal" role="button"
+                                data-default-title=""
+                                title="Select a filter to enable this feature."
                             > Citations <i class="smaller-icon fa fa-quote-left"></i><i class="smaller-icon fa fa-quote-right"></i>
                             </button>
                             <button class="btn btn-small btn-default bq-string-display filter-activated-controls" disabled data-toggle="modal"
@@ -680,21 +681,25 @@
                         <div class="cart-container space-top-10">
                             <button id="export-manifest-cart" class="btn btn-primary cart-export btn-small cart-activated-controls" disabled data-toggle="modal"
                                 data-target="#export-manifest-modal"
+                                data-default-title="Download a manifest of this cart's series."
                                 title="Add items to the cart to enable this feature."
                             > Manifest <i class="fa fa-solid fa-list"></i>
                             </button>
-                            <button id="download-cart-images" class="btn btn-primary btn-small cart-activated-controls download-all-instances" disabled
-                                data-default-title="Download the instance image files for this cart."
-                                title="Select a filter to enable this feature."
+                            <span id="download-cart-images-tooltips" class="download-instances is-disabled" data-download-type="cart" data-disabled-type="download-cart-disabled">
+                            <button id="download-cart-images" class="btn btn-primary btn-small cart-activated-controls tip-titled" disabled
                                 data-download-type="cart"
                             > Download <i class="fa fa-solid fa-download"></i>
                             </button>
-                            <button class="btn btn-small btn-special citations-button cart-activated-controls for-cart" disabled data-toggle="modal" data-target="#citations-modal" role="button"
-                                data-default-title="Display this cart's citation list in Vancouver format."
-                                title= "Add items to the cart to enable this feature."
+                            </span>
+                            <button class="btn btn-small btn-special citations-button cart-activated-controls for-cart"
+                                disabled data-toggle="modal" data-target="#citations-modal" role="button"
+                                data-default-title=""
+                                title="Add items to the cart to enable this feature."
                             > Citations <i class="smaller-icon fa fa-quote-left"></i><i class="smaller-icon fa fa-quote-right"></i>
                             </button>
-                            <button class="btn btn-small btn-default cart-view cart-activated-controls" role="button" title="Get cart details." disabled
+                            <button class="btn btn-small btn-default cart-view cart-activated-controls" role="button"
+                                data-default-title="View this cart's complete contents."
+                                title="Add items to the cart to enable this feature." disabled
                                 onclick="viewcart()"
                             > View <i class="fa-solid fa-cart-shopping"></i>
                             </button>

@@ -142,6 +142,36 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
         _hideFloatingMessage(true);
     });
 
+
+        // Enabled is equivalent to 'is there a filter' or 'is something in the cart'
+    function _updateDownloadBtns(type, enabled, disk_size) {
+        let btn = $(`#download-${type}-images`);
+        let btn_tip = $(`#download-${type}-images-tooltips`);
+        let btn_and_tips = $(`#download-${type}-images-tooltips, #download-${type}-images-tooltips`);
+        if(!enabled){
+            btn_tip.addClass('is-disabled');
+            btn_tip.attr('data-disabled-type', `download-${type}-disabled`);
+            btn.attr("disabled", "disabled");
+            return;
+        }
+        if ("showDirectoryPicker" in window) {
+            btn_and_tips.removeClass('is-disabled download-all-instances download-size-warning');
+            if (disk_size > 3) {
+                btn_tip.addClass('is-disabled');
+                btn_tip.attr('data-disabled-type', "download-size-disabled");
+                btn.attr("disabled", "disabled");
+            } else {
+                btn.removeAttr("disabled");
+                btn_tip.attr('data-disabled-type', "");
+                (disk_size > 2) ? btn.addClass('download-size-warning') : btn.addClass('download-all-instances');
+            }
+        } else {
+            btn_tip.addClass('is-disabled');
+            btn_tip.attr('data-disabled-type', "download-all-disabled");
+            btn.attr("disabled", "disabled");
+        }
+    }
+
     const MAX_ELAPSED = 240000;
     function _checkManifestReady(file_name, check_start) {
         if(!check_start) {
@@ -226,6 +256,7 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
         getCookie: _getCookie,
         removeCookie: _removeCookie,
         checkManifestReady: _checkManifestReady,
-        checkForManifest: _checkForManifest
+        checkForManifest: _checkForManifest,
+        updateDownloadBtns: _updateDownloadBtns
     };
 });
