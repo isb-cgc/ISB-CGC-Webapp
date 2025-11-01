@@ -525,7 +525,7 @@ require([
 
     tippy.delegate('.cases-table', copy_tip);
 
-    tippy.delegate('.filter-display-panel', {
+    tippy.delegate('#body', {
         content: 'Get the citation list for this cohort.',
         theme: 'dark',
         placement: 'left',

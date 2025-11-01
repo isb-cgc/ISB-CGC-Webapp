@@ -125,6 +125,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
     const updateCartCounts = async function(){
         var buttonContents = '<button class="btn filter-type clear-cart" role="button" title="Empty your cart."><i class="fa fa-rotate-left"></i></button>';
         let cart_has_contents = Boolean(Object.keys(window.proj_in_cart).length>0);
+        let cart_controls = $('.cart-activated-controls');
         if (cart_has_contents){
             var nmprojs = 0;
             var nmcases=0;
@@ -136,18 +137,23 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 nmstudies=nmstudies+window.proj_in_cart[projid]['studies'];
                 nmseries=nmseries+window.proj_in_cart[projid]['series'];
             }
-
             let content = buttonContents+'<span id ="#cart_stats">Cart contents: ' + nmseries.toString()+' series from '+nmprojs.toString()+
                 ' collections / '+nmcases.toString()+' cases / '+nmstudies.toString()+' studies</span> <span class="cart_disk_size">(Calculating size...)</span>';
             localStorage.setItem('manifestSeriesCount',nmseries);
 
             $('#cart_stats_holder').html(content) ;
             $('#cart_stats').removeClass('empty-cart');
-            $('.cart-activated-controls').removeAttr('disabled');
+            cart_controls.each(function(){
+                $(this).removeAttr('disabled');
+                !$(this).hasClass('tip-titled') && $(this).attr("title",$(this).attr("data-default-title"));
+            });
         } else {
             $('#cart_stats_holder').html('<span id="#cart_stats">Your cart is currently empty</span>');
             $('#cart_stats').addClass('empty-cart');
-            $('.cart-activated-controls').attr('disabled', 'disabled');
+            cart_controls.each(function(){
+                $(this).attr('disabled', 'disabled');
+                !$(this).hasClass('tip-titled') && $(this).attr("title","Add items to the cart to enable this feature.");
+            });
         }
         let cart_disk_size = 0;
         let cart_disk_display_size = "(Calculating...)";
