@@ -307,7 +307,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     ${modal_attr}
                     ></i>`;
             } else {
-                let disabled_type = ("showDirectoryPicker" in window) ? "dowbload-size-disabled" : "download_all_disabled";
+                let disabled_type = ("showDirectoryPicker" in window) ? "download-size-disabled" : "download_all_disabled";
                 return `<i class="fa fa-download is-disabled download-instances" data-disabled-type="${disabled_type}"></i>`;
             }
         }};
