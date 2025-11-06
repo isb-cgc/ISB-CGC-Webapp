@@ -251,18 +251,18 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         var caret_col= { "type": "html", "orderable": false, render: function (data) {
             if (('state' in window.selProjects[data]) && ('view' in window.selProjects[data]['state']) && (window.selProjects[data]['state']['view'] )) {
                 return '<a role="button" title="Display cases in this collection below.">'+
-                    '<i class="fa fa-solid fa-caret-right is-hidden"></i>' +
-                    '<i class="fa fa-solid fa-caret-down"></i></a>'
+                    '<i class="fa fa-solid fa-folder is-hidden"></i>' +
+                    '<i class="fa fa-solid fa-folder-open"></i></a>'
             } else {
                 return '<a role="button" title="Display cases in this collection below.">'+
-                    '<i class="fa fa-solid fa-caret-right"></i>' +
-                    '<i class="fa fa-solid fa-caret-down is-hidden"></i></a>'
+                    '<i class="fa fa-solid fa-folder"></i>' +
+                    '<i class="fa fa-solid fa-folder-open is-hidden"></i></a>'
             }
        },
             createdCell: function(td) {
                 $(td).attr("title", "Display cases in this collection below.");
                 $(td).addClass('expansion-toggle');
-                if ($(td).find('.fa-caret-right.is-hidden').length > 0) {
+                if ($(td).find('.fa-folder.is-hidden').length > 0) {
                     $(td).addClass('open');
                 }
             }
@@ -407,6 +407,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 "order": ord,
                 "data": newCollectionData,
                 "createdRow": function (row, data, dataIndex) {
+                    $(row).addClass('entity-table-row');
                     $(row).data('projectid', data[0]);
                     $(row).attr('data-projectid', data[0]);
                     $(row).data('totalcases', data[5]);
@@ -510,19 +511,19 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 if ((collection_id in window.openCases) && (PatientID in window.openCases[collection_id]) ) {
                     //return '<input type="checkbox" checked>'
                    return '<a role="button">'+
-                        '<i class="fa fa-solid fa-caret-right is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                        '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
+                        '<i class="fa fa-solid fa-folder is-hidden"></i>' +
+                        '<i class="fa fa-solid fa-folder-open"></i></a>'
 
                 } else {
                     return '<a role="button" title="Display studies in this case below.">'+
-                        '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                        '<i class="fa fa-solid fa-caret-down is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
+                        '<i class="fa fa-solid fa-folder"></i>' +
+                        '<i class="fa fa-solid fa-folder-open is-hidden"></i></a>'
                 }
             },
             createdCell: function(td) {
                 $(td).attr("title", "Display studies in this case below.");
                 $(td).addClass('expansion-toggle');
-                if ($(td).find('.fa-caret-right.is-hidden').length > 0) {
+                if ($(td).find('.fa-folder.is-hidden').length > 0) {
                     $(td).addClass('open');
                 }
             }
@@ -593,6 +594,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[4, 'asc'],[3, 'asc']],
                 "createdRow": function (row, data, dataIndex) {
+                    $(row).addClass('entity-table-row');
                     $(row).attr('id', 'case_' + data['PatientID'])
                     $(row).attr('data-projectid', data['collection_id'][0]);
                     $(row).attr('data-caseid', data['PatientID']);
@@ -788,6 +790,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[3, "asc"]],
                 "createdRow": function (row, data, dataIndex) {
+                    $(row).addClass('entity-table-row');
                     $(row).attr('id', 'study_' + data['StudyInstanceUID'])
                     $(row).attr('data-studyid', data['StudyInstanceUID']);
                     $(row).attr('data-caseid', data['PatientID']);
@@ -884,20 +887,20 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                             if ( (PatientID in window.openStudies) && (StudyInstanceUID in window.openStudies[PatientID])) {
                                 //return '<input type="checkbox" checked>'
                                return '<a role="button">'+
-                                    '<i class="fa fa-solid fa-caret-right is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                                    '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
+                                    '<i class="fa fa-solid fa-folder is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
+                                    '<i class="fa fa-solid fa-folder-open" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                             } else {
                                 return '<a role="button">'+
-                                    '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
-                                    '<i class="fa fa-solid fa-caret-down is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
+                                    '<i class="fa fa-solid fa-folder " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
+                                    '<i class="fa fa-solid fa-folder-open is-hidden" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
                             }
                         },
                         createdCell: function(td) {
                             $(td).attr("title", "Display series in this study below.");
                             $(td).addClass('expansion-toggle');
-                            if ($(td).find('.fa-caret-right.is-hidden').length > 0) {
+                            if ($(td).find('.fa-folder.is-hidden').length > 0) {
                                 $(td).addClass('open');
                             }
                         }
@@ -989,7 +992,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                     }
                                     return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                         '<div class="dropdown viewer-toggle">' +
-                                        '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
+                                        '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-folder-open"></i></a>' +
                                         '<ul class="dropdown-menu viewer-menu">' +
                                         '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
                                         v2_element +
@@ -1163,6 +1166,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                  "order": [[0, "asc"]],
                  "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID']);
+                    $(row).addClass('entity-table-row');
                     $(row).attr('data-seriesid', data['SeriesInstanceUID']);
                     $(row).attr('data-studyid', data['StudyInstanceUID']);
                     $(row).attr('data-caseid', data['PatientID']);
@@ -1347,7 +1351,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
                             return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                 '<div class="dropdown viewer-toggle">' +
-                                '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
+                                '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-folder-open"></i></a>' +
                                 '<ul class="dropdown-menu viewer-menu">' +
                                 '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
                                 v2_element +
@@ -2062,8 +2066,8 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     };
 
     $('.addMult').on('click', function() {
-        var idsattr=["data-projectid", "data-caseid", "data-studyid"]
-        var idsArr=[]
+        var idsattr= ["data-projectid", "data-caseid", "data-studyid"];
+        var idsArr= [];
         var tbl_head = $(this).parentsUntil('table').filter('thead');
         var tbl_head_id = tbl_head.attr('id');
         if ($(this).hasClass('fa-plus-circle')){
@@ -2095,12 +2099,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             idsArr.push(ids);
 
             if (rowsAdded) {
-                $(this).find('.expansion-toggle .fa-caret-right').addClass('is-hidden');
-                $(this).find('.expansion-toggle .fa-caret-down').removeClass('is-hidden');
+                $(this).addClass('open');
+                $(this).find('.expansion-toggle .fa-folder').addClass('is-hidden');
+                $(this).find('.expansion-toggle .fa-folder-open').removeClass('is-hidden');
                 $(this).find('.viewbx').addClass('open');
             } else{
-               $(this).find('.expansion-toggle .fa-caret-right').removeClass('is-hidden');
-                $(this).find('.expansion-toggle .fa-caret-down').addClass('is-hidden');
+                $(this).removeClass('open');
+               $(this).find('.expansion-toggle .fa-folder').removeClass('is-hidden');
+                $(this).find('.expansion-toggle .fa-folder-open').addClass('is-hidden');
                 $(this).find('.viewbx').removeClass('open');
             }
         });
@@ -2201,21 +2207,23 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
          }
          // click anywhere else, open tables below
          else {
-             let toggle_elem = $(row).find('.expansion-toggle')
+             let toggle_elem = $(row).find('.expansion-toggle');
+             let rowsAdded = null;
              if (toggle_elem.length>0) {
-                 var rowsAdded;
                  toggle_elem = toggle_elem[0];
                  $(toggle_elem).hasClass('open') ? $(toggle_elem).removeClass('open') : $(toggle_elem).addClass('open');
              }
-             if ($(row).find('.expansion-toggle .fa-caret-down.is-hidden').length>0){
-                 var rowsAdded = true;
-                 $(row).find('.expansion-toggle .fa-caret-right').addClass('is-hidden');
-                 $(row).find('.expansion-toggle .fa-caret-down').removeClass('is-hidden');
+             if ($(row).find('.expansion-toggle .fa-folder-open.is-hidden').length>0){
+                 rowsAdded = true;
+                 $(row).addClass('open');
+                 $(row).find('.expansion-toggle .fa-folder').addClass('is-hidden');
+                 $(row).find('.expansion-toggle .fa-folder-open').removeClass('is-hidden');
 
              } else {
-                 var rowsAdded = false;
-                 $(row).find('.expansion-toggle .fa-caret-right').removeClass('is-hidden');
-                 $(row).find('.expansion-toggle .fa-caret-down').addClass('is-hidden');
+                 rowsAdded = false;
+                 $(row).removeClass('open');
+                 $(row).find('.expansion-toggle .fa-folder').removeClass('is-hidden');
+                 $(row).find('.expansion-toggle .fa-folder-open').addClass('is-hidden');
              }
              changeViewStates(tabletype, [ids], rowsAdded);
          }

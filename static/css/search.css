@@ -382,17 +382,25 @@ tr {
     display: table;
     width: 100%; }
 
-.expansion-toggle i {
+.table-striped > tbody > tr.entity-table-row.open {
+    background-color: #ffebce; !important
+}
+
+.expansion-toggle {
+    text-align: center;
     font-size: larger;
 }
 
 .expansion-toggle.open {
-    background-color: #c5b9d5;
+    background-color: #ffebce;
+}
+
+.table-striped > tbody > tr.entity-table-row:hover {
+    background-color: #b7cfe5;
 }
 
 .expansion-toggle:hover {
     cursor: pointer;
-    background-color: #b7cfe5;
 }
 
 .export-button:hover, .citations-button:hover, .btnGroupDropViewers:hover {
