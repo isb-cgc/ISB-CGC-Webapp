@@ -455,6 +455,7 @@ require([
         interactive: true,
         allowHTML: true,
         placement: 'right',
+        theme: 'dark',
         content: 'add series to cart', // placeholder text
         target: '.shopping-cart-holder',
         plugins: [dynamicTipFunc]

@@ -213,7 +213,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             return cmp;
         }
 
-
         var dir = request.order[0]['dir'];
         var colId = parseInt(request.order[0]['column']);
         var col = cache.colOrder[colId];
@@ -237,13 +236,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
     // classes for project(collection) table columns
     var projectTableColDefs = function(){
-        return [{className: "ckbx text_data viewbx caseview", "targets": [0]},
-                {className: "ckbx shopping-cart-holder", "targets": [1]},
-                {className: "ckbx cartnumholder", "targets": [2]},
-                {className: "collex_name", "targets": [3]},
-                {className: "collex-case-count table-count", "targets": [4]},
-                {className: "projects_table_num_cohort table-count", "targets": [5]},
-                {className: "download-collection download-col", "targets": [6]}];
+        return [
+            {className: "ckbx text_data viewbx caseview", "targets": [0]},
+            {className: "download-collection download-col", "targets": [1]},
+            {className: "ckbx shopping-cart-holder", "targets": [2]},
+            {className: "ckbx cartnumholder", "targets": [3]},
+            {className: "collex_name", "targets": [4]},
+            {className: "collex-case-count projects_table_num_cohort table-count", "targets": [5]}
+        ];
     }
 
     // project(collection) table column definitions
@@ -282,15 +282,11 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                  ' <a class="copy-this" role="button" content="' + row[0] +
                  '" title="Copy the IDC collection_id to the clipboard"><i class="fa-solid fa-copy"></i></a>'
                }};
-        var case_col = { "type": "num", orderable: true };
-        var dyn_case_col = {
-            "type": "num",
-            orderable: true,
-            "createdCell": function (td, data, row) {
+        var case_col = { "type": "num", orderable: true, "createdCell": function (td, data, row) {
                 $(td).attr('id', 'patient_col_' + row[0]);
-                return;
-            }
-        };
+            }, render: function(td, data,row) {
+                return `${row[4]} / ${row[5]}`;
+            }};
         const download_col = {"type": "html", "orderable": false, data: 'collection_id', render: function(data, type, row) {
             let download_size = window.collection[row[0]]['total_size_with_ar'];
             if ("showDirectoryPicker" in window && download_size < 3) {
@@ -312,7 +308,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
             }
         }};
 
-        return [caret_col, cart_col, cartnum_col, collection_col, case_col, dyn_case_col, download_col];
+        return [caret_col, download_col, cart_col, cartnum_col, collection_col, case_col];
     }
 
      const setRowCartClasses = function(row){
@@ -399,7 +395,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
         $("#proj_table_wrapper").find('.dataTables_controls').remove();
         var colDefs = projectTableColDefs();
         var columns = projectTableColumns();
-        var ord = [[3, "asc"]]
+        var ord = [[4, "asc"]]
 
         $('#proj_table').DataTable(
             {
@@ -495,13 +491,14 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
     const caseTableColDefs = function(){
         return [
             {className: "ckbx studyview","targets": [0]},
-            {className: "ckbx shopping-cart-holder", "targets": [1]},
-            {className: "ckbx cartnumholder", "targets":[2]},
-            {className: "col1 project-name wide", "targets": [3]},
-            {className: "col1 case-id", "targets": [4]},
-            {className: "col1 numrows narrow", "targets": [5]},
-            {className: "col1 numseries narrow", "targets": [6]},
-            {className: "col1 download-case download-col", "targets": [7]}];
+            {className: "col1 download-case download-col", "targets": [1]},
+            {className: "ckbx shopping-cart-holder", "targets": [2]},
+            {className: "ckbx cartnumholder", "targets":[3]},
+            {className: "col1 project-name wide", "targets": [4]},
+            {className: "col1 case-id", "targets": [5]},
+            {className: "col1 numrows narrow", "targets": [6]},
+            {className: "col1 numseries narrow", "targets": [7]}
+        ];
     };
 
     const caseTableColumns = function() {
@@ -570,7 +567,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 }
                 return `<i class="fa fa-download  download-instances is-disabled" data-disabled-type="download-all-disabled"></i>`;
         }};
-        return [caret_col, cart_col, cartnum_col, collection_col, case_col, study_col, series_col, download_col];
+        return [caret_col, download_col, cart_col, cartnum_col, collection_col, case_col, study_col, series_col];
     };
 
     // recreates the cases table when a chevron is clicked in the projects table. Defines the chevron and cart selection actions.
@@ -865,16 +862,16 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                 },
                 "columnDefs": [
                     {className: "ckbx seriesview", "targets": [0]},
-                    {className: "ckbx shopping-cart-holder", "targets": [1]},
-                    {className: "ckbx cartnumholder", "targets": [2]},
-                    {className: "col1 case-id", "targets": [3]},
-                    {className: "col2 study-id study-id-col study-id-tltp", "targets": [4]},
-                    {className: "col1 study-date", "targets": [5]},
-                    {className: "col1 study-description", "targets": [6]},
-                    {className: "col1 numrows", "targets": [7]},
-                    {className: "ohif open-viewer", "targets": [8]},
-                    {className: "manifest-col", "targets": [9]},
-                    {className: "download-col download-study", "targets": [10]},
+                    {className: "download-col download-study", "targets": [1]},
+                    {className: "ckbx shopping-cart-holder", "targets": [2]},
+                    {className: "ckbx cartnumholder", "targets": [3]},
+                    {className: "col1 case-id", "targets": [4]},
+                    {className: "col2 study-id study-id-col study-id-tltp", "targets": [5]},
+                    {className: "col1 study-date", "targets": [6]},
+                    {className: "col1 study-description", "targets": [7]},
+                    {className: "col1 numrows", "targets": [8]},
+                    {className: "ohif open-viewer", "targets": [9]},
+                    {className: "manifest-col", "targets": [10]}
                 ],
                 "columns": [
                     {
@@ -904,8 +901,22 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                 $(td).addClass('open');
                             }
                         }
-                    },
-                   {
+                    },{
+                          "type":"html",
+                          "orderable": false,
+                          data: 'StudyInstanceUID', render: function (data, type, row) {
+                            if ("showDirectoryPicker" in window) {
+                                return `<i class="fa fa-download download-all-instances download-instances download-study"   
+                                    data-collection="${row['collection_id']}" 
+                                    data-study="${row['StudyInstanceUID']}" 
+                                    data-patient="${row['PatientID']}" 
+                                    data-download-type="study" 
+                                    data-total-series="${row['unique_series']}"                         
+                                    ></i>`;
+                            }
+                            return `<i class="fa fa-download download-instances is-disabled" data-disabled-type="download-all-disabled"></i>`;
+                        }
+                    },{
                        "type": "html",
                        "orderable": false,
                        render: function () {
@@ -992,7 +1003,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                                     }
                                     return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                         '<div class="dropdown viewer-toggle">' +
-                                        '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-folder-open"></i></a>' +
+                                        '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                         '<ul class="dropdown-menu viewer-menu">' +
                                         '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
                                         v2_element +
@@ -1009,23 +1020,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                               return '<i class="fa fa-list study-export export-button" data-series-count="'+row['unique_series']
                                   +'" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
                           }
-                      },
-                    {
-                          "type":"html",
-                          "orderable": false,
-                          data: 'StudyInstanceUID', render: function (data, type, row) {
-                            if ("showDirectoryPicker" in window) {
-                                return `<i class="fa fa-download download-all-instances download-instances download-study"   
-                                    data-collection="${row['collection_id']}" 
-                                    data-study="${row['StudyInstanceUID']}" 
-                                    data-patient="${row['PatientID']}" 
-                                    data-download-type="study" 
-                                    data-total-series="${row['unique_series']}"                         
-                                    ></i>`;
-                            }
-                            return `<i class="fa fa-download download-instances is-disabled" data-disabled-type="download-all-disabled"></i>`;
-                        }
-                    }
+                      }
                 ],
                 "processing": true,
                 "serverSide": true,
@@ -1251,22 +1246,40 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                     });
                  },
                 "columnDefs": [
-                    {className: "ckbx shopping-cart-holder", "targets": [0]},
-                    {className: "col1 study-id study-id-col study-id-tltp", "targets": [1]},
-                    {className: "series-id series-id-tltp", "targets": [2]},
-                    {className: "series-number", "targets": [3]},
-                    {className: "col1 modality", "targets": [4]},
-                    {className: "col1 body-part-examined", "targets": [5]},
-                    {className: "series-description", "targets": [6]},
-                    {className: "ohif open-viewer", "targets": [7]},
-                    {className: "manifest-col", "targets": [8]},
-                    {className: "download-col download-series", "targets": [9]}
+                    {className: "download-col download-series", "targets": [0]},
+                    {className: "ckbx shopping-cart-holder", "targets": [1]},
+                    {className: "col1 study-id study-id-col study-id-tltp", "targets": [2]},
+                    {className: "series-id series-id-tltp", "targets": [3]},
+                    {className: "series-number", "targets": [4]},
+                    {className: "col1 modality", "targets": [5]},
+                    {className: "col1 body-part-examined", "targets": [6]},
+                    {className: "series-description", "targets": [7]},
+                    {className: "ohif open-viewer", "targets": [8]},
+                    {className: "manifest-col", "targets": [9]},
                  ],
                   "columns": [
-                      {"type": "html", "orderable": false, render: function () {
+                    {
+                      "type":"html",
+                      "orderable": false,
+                      data: 'SeriesInstanceUID', render: function (data, type, row){
+                          if("showDirectoryPicker" in window) {
+                            return `<i class="fa fa-download download-all-instances download-instances" data-bucket="${row['aws_bucket']}" 
+                                data-series="${row['crdc_series_uuid']}" 
+                                data-series-id="${row['SeriesInstanceUID']}" 
+                                data-modality="${row['Modality']}" 
+                                data-collection="${row['collection_id']}" 
+                                data-study="${row['StudyInstanceUID']}" 
+                                data-patient="${row['PatientID']}" 
+                                data-series-size="${row['instance_size']}"                                                 
+                                ></i>`
+                          }
+                          return `<i class="fa fa-download is-disabled download-instances" data-disabled-type="download-all-disabled"></i>`
+                      }
+                  }, {
+                    "type": "html", "orderable": false, render: function () {
                        return '<i class="fa-solid fa-cart-shopping shopping-cart"></i>'
                   }
-               }, {
+                }, {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
                             ' <a class="copy-this" role="button" content="' + data +
@@ -1351,7 +1364,7 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
 
                             return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                 '<div class="dropdown viewer-toggle">' +
-                                '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-folder-open"></i></a>' +
+                                '<a class="dropdown-toggle btnGroupDropViewers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                 '<ul class="dropdown-menu viewer-menu">' +
                                 '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
                                 v2_element +
@@ -1364,23 +1377,6 @@ define(['cartutils','filterutils','tippy','jquery', 'base'], function(cartutils,
                       "orderable": false,
                       data: 'SeriesInstanceUID', render: function (data){
                           return '<i class="fa fa-list series-export export-button" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
-                      }
-                  }, {
-                      "type":"html",
-                      "orderable": false,
-                      data: 'SeriesInstanceUID', render: function (data, type, row){
-                          if("showDirectoryPicker" in window) {
-                            return `<i class="fa fa-download download-all-instances download-instances" data-bucket="${row['aws_bucket']}" 
-                                data-series="${row['crdc_series_uuid']}" 
-                                data-series-id="${row['SeriesInstanceUID']}" 
-                                data-modality="${row['Modality']}" 
-                                data-collection="${row['collection_id']}" 
-                                data-study="${row['StudyInstanceUID']}" 
-                                data-patient="${row['PatientID']}" 
-                                data-series-size="${row['instance_size']}"                                                 
-                                ></i>`
-                          }
-                          return `<i class="fa fa-download is-disabled download-instances" data-disabled-type="download-all-disabled"></i>`
                       }
                   }
             ],
