@@ -382,17 +382,25 @@ tr {
     display: table;
     width: 100%; }
 
-.expansion-toggle i {
+.table-striped > tbody > tr.entity-table-row.open {
+    background-color: #ffebce; !important
+}
+
+.expansion-toggle {
+    text-align: center;
     font-size: larger;
 }
 
 .expansion-toggle.open {
-    background-color: #c5b9d5;
+    background-color: #ffebce;
+}
+
+.table-striped > tbody > tr.entity-table-row:hover {
+    background-color: #b7cfe5;
 }
 
 .expansion-toggle:hover {
     cursor: pointer;
-    background-color: #b7cfe5;
 }
 
 .export-button:hover, .citations-button:hover, .btnGroupDropViewers:hover {
@@ -410,13 +418,14 @@ tr {
 #studies_table_head th.ckbx:not(.cartnumholder), #studies_table td.ckbx:not(.cartnumholder),
 #series_table_head th.ckbx, #series_table td.ckbx {
     width: 5%;
+    text-align: left !important;
 }
 
 #search_def_stats {
     padding-top: 8px; }
 
 #projects_table td, #projects_table_head th {
-    width: 30%;
+    width: 40%;
     word-wrap: break-word; }
 
 #cases_table td, #cases_table_head th {
@@ -473,9 +482,9 @@ tr {
 #studies_table_head th.download-col,
 #studies_table td.download-col, #cases_table_head th.download-col,
 #cases_table td.download-col, #series_table_head th.download-col,
-#series_table td.download-col {
+#series_table td.download-col, #proj_table th.download-col, #proj_table td.download-col {
     width:6%;
-    min-width: 80px;
+    min-width: 60px;
 }
 
 #series_table_head th, #series_table td {
