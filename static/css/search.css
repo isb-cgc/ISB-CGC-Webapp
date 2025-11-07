@@ -417,15 +417,16 @@ tr {
 #cases_table_head th.ckbx:not(.cartnumholder), #cases_table td.ckbx:not(.cartnumholder),
 #studies_table_head th.ckbx:not(.cartnumholder), #studies_table td.ckbx:not(.cartnumholder),
 #series_table_head th.ckbx, #series_table td.ckbx {
-    width: 5%;
+    width: 3%;
     text-align: left !important;
+    min-width: 40px;
 }
 
 #search_def_stats {
     padding-top: 8px; }
 
 #projects_table td, #projects_table_head th {
-    width: 40%;
+    width: 45%;
     word-wrap: break-word; }
 
 #cases_table td, #cases_table_head th {
@@ -483,8 +484,8 @@ tr {
 #studies_table td.download-col, #cases_table_head th.download-col,
 #cases_table td.download-col, #series_table_head th.download-col,
 #series_table td.download-col, #proj_table th.download-col, #proj_table td.download-col {
-    width:6%;
-    min-width: 60px;
+    width:3%;
+    min-width: 40px;
 }
 
 #series_table_head th, #series_table td {
