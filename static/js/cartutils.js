@@ -126,11 +126,11 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
         var buttonContents = '<button class="btn filter-type clear-cart" role="button" title="Empty your cart."><i class="fa fa-rotate-left"></i></button>';
         let cart_has_contents = Boolean(Object.keys(window.proj_in_cart).length>0);
         let cart_controls = $('.cart-activated-controls');
+        var nmseries = 0;
         if (cart_has_contents){
             var nmprojs = 0;
             var nmcases=0;
             var nmstudies=0;
-            var nmseries =0;
             for (projid in window.proj_in_cart){
                 nmprojs++;
                 nmcases=nmcases+window.proj_in_cart[projid]['cases'];
@@ -176,7 +176,7 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
             cart_disk_display_size = cart_disk_res['display_size'];
         }
         $('.cart_disk_size').html(cart_disk_display_size);
-        base.updateDownloadBtns('cart', cart_has_contents, cart_disk_size);
+        base.updateDownloadBtns('cart', cart_has_contents, cart_disk_size, nmseries);
 
     }
 

@@ -482,6 +482,7 @@ require([
     let disabled_messages = {
         'download-all-disabled': chromium_only,
         'download-size-disabled': "This set of images is over 3TB in size. Please use manifest download to obtain these images.",
+        'download-count-disabled': "This set of images contains over 65000 records. Please use manifest download to obtain these images.",
         'download-cart-disabled': "Add items to the cart to enable this feature.",
         'download-cohort-disabled': "Select a filter to enable this feature."
     };

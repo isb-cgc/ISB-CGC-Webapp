@@ -785,53 +785,49 @@ require([
 
         let series = [];
         if(download_type !== "series") {
-            if(parseInt(clicked.attr('data-total-series')) > 65000) {
-
-            } else {
-                let response = null;
-                if(["cohort", "cart"].includes(download_type)) {
-                    downloader_manager.pendingFetchMessage(download_type);
-                    let filter_and_cart = {};
-                    if (download_type === "cohort") {
-                        let filtergrp_list = [];
-                        for(const [attr, vals] of Object.entries(filterutils.parseFilterObj())) {
-                            filtergrp_list.push({[attr]: vals});
-                        }
-                        filter_and_cart["filtergrp_list"] = filtergrp_list;
-                    } else {
-                         window.updatePartitionsFromScratch();
-                         let ret = cartutils.formcartdata();
-                         window.partitions = ret[0];
-                         window.filtergrp_lst = ret[1];
-                        let filterSets = [];
-                        for(let i=0; i< window.cartHist.length;i++) {
-                           filterSets.push(window.cartHist[i]['filter']);
-                        }
-                        filter_and_cart['partitions'] = window.partitions;
-                        filter_and_cart['filtergrp_list'] = filterSets;
+            let response = null;
+            if(["cohort", "cart"].includes(download_type)) {
+                downloader_manager.pendingFetchMessage(download_type);
+                let filter_and_cart = {};
+                if (download_type === "cohort") {
+                    let filtergrp_list = [];
+                    for(const [attr, vals] of Object.entries(filterutils.parseFilterObj())) {
+                        filtergrp_list.push({[attr]: vals});
                     }
-                    response = await fetch(`${BASE_URL}${SERIES_IDS_FILTER_URL}`, {
-                            method: "POST",
-                            body: JSON.stringify(filter_and_cart),
-                            headers: {
-                                "X-CSRFToken": csrftoken,
-                                "content-type": "application/json"
-                            }
-                        });
+                    filter_and_cart["filtergrp_list"] = filtergrp_list;
                 } else {
-                    let study_uri = (study_id !== undefined && study_id !== null) ? `${study_id}/` : "";
-                    let patient_uri = (patient_id !== undefined && patient_id !== null) ? `${patient_id}/` : "";
-                    response = await fetch(`${BASE_URL}${SERIES_IDS_URL}${collection_id}/${patient_uri}${study_uri}`);
+                     window.updatePartitionsFromScratch();
+                     let ret = cartutils.formcartdata();
+                     window.partitions = ret[0];
+                     window.filtergrp_lst = ret[1];
+                    let filterSets = [];
+                    for(let i=0; i< window.cartHist.length;i++) {
+                       filterSets.push(window.cartHist[i]['filter']);
+                    }
+                    filter_and_cart['partitions'] = window.partitions;
+                    filter_and_cart['filtergrp_list'] = filterSets;
                 }
-                if (!response.ok) {
-                    console.error(`[ERROR] Failed to retrieve series IDs: ${response.status}`);
-                    return;
-                }
-                const series_data = await response.json();
-                series.push(...series_data['result']);
-                if('download_stats' in series_data){
-                    downloader_manager.set_download_stats(series_data['download_stats']);
-                }
+                response = await fetch(`${BASE_URL}${SERIES_IDS_FILTER_URL}`, {
+                        method: "POST",
+                        body: JSON.stringify(filter_and_cart),
+                        headers: {
+                            "X-CSRFToken": csrftoken,
+                            "content-type": "application/json"
+                        }
+                    });
+            } else {
+                let study_uri = (study_id !== undefined && study_id !== null) ? `${study_id}/` : "";
+                let patient_uri = (patient_id !== undefined && patient_id !== null) ? `${patient_id}/` : "";
+                response = await fetch(`${BASE_URL}${SERIES_IDS_URL}${collection_id}/${patient_uri}${study_uri}`);
+            }
+            if (!response.ok) {
+                console.error(`[ERROR] Failed to retrieve series IDs: ${response.status}`);
+                return;
+            }
+            const series_data = await response.json();
+            series.push(...series_data['result']);
+            if('download_stats' in series_data){
+                downloader_manager.set_download_stats(series_data['download_stats']);
             }
         } else {
             series.push({

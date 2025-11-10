@@ -41,9 +41,10 @@ require.config({
 
 // Return an object for consts/methods used by most views
 define(['jquery', 'jqueryui'], function($, jqueryui) {
-    // Terabyte cutoffs for download button tooltips and enabling
+    // Terabyte and record count warning and cutoffs for download button tooltips and enabling
     let DOWNLOAD_SIZE_LIMIT = 3;
     let DOWNLOAD_SIZE_WARN = 2;
+    let DOWNLOAD_COUNT_LIMIT = 65000;
 
     // Download block poll with cookie via StackOverflow:
     // https://stackoverflow.com/questions/1106377/detect-when-browser-receives-file-download
@@ -148,8 +149,8 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
     // type - string, ID selector subtype for the buttons and tooltips to adjust
     // enabled - bool, sets if the button is to be disabled or enabled
     // disk_size - size for determining size limit enabling and tooltip message, is assumed to be in TB
-    // requires setting DOWNLOAD_SIZE_LIMIT and DOWNLOAD_SIZE_WARN
-    function _updateDownloadBtns(type, enabled, disk_size) {
+    // requires setting DOWNLOAD_COUNT_LIMIT, DOWNLOAD_SIZE_LIMIT, and DOWNLOAD_SIZE_WARN
+    function _updateDownloadBtns(type, enabled, disk_size, record_count) {
         let btn = $(`#download-${type}-images`);
         let btn_tip = $(`#download-${type}-images-tooltips`);
         let btn_and_tips = $(`#download-${type}-images-tooltips, #download-${type}-images-tooltips`);
@@ -161,10 +162,10 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
         }
         if ("showDirectoryPicker" in window) {
             btn_and_tips.removeClass('is-disabled download-all-instances download-size-warning');
-            if (disk_size > DOWNLOAD_SIZE_LIMIT) {
+            if (disk_size > DOWNLOAD_SIZE_LIMIT || record_count > DOWNLOAD_COUNT_LIMIT) {
                 btn_tip.addClass('is-disabled');
-                btn_tip.attr('data-disabled-type', "download-size-disabled");
                 btn.attr("disabled", "disabled");
+                btn_tip.attr('data-disabled-type', (disk_size > DOWNLOAD_SIZE_LIMIT ? "download-size-disabled" : "download-count-disabled"));
             } else {
                 btn.removeAttr("disabled");
                 btn_tip.attr('data-disabled-type', "");
