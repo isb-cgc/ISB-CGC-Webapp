@@ -41,6 +41,9 @@ require.config({
 
 // Return an object for consts/methods used by most views
 define(['jquery', 'jqueryui'], function($, jqueryui) {
+    // Terabyte cutoffs for download button tooltips and enabling
+    let DOWNLOAD_SIZE_LIMIT = 3;
+    let DOWNLOAD_SIZE_WARN = 2;
 
     // Download block poll with cookie via StackOverflow:
     // https://stackoverflow.com/questions/1106377/detect-when-browser-receives-file-download
@@ -142,8 +145,10 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
         _hideFloatingMessage(true);
     });
 
-
-        // Enabled is equivalent to 'is there a filter' or 'is something in the cart'
+    // type - string, ID selector subtype for the buttons and tooltips to adjust
+    // enabled - bool, sets if the button is to be disabled or enabled
+    // disk_size - size for determining size limit enabling and tooltip message, is assumed to be in TB
+    // requires setting DOWNLOAD_SIZE_LIMIT and DOWNLOAD_SIZE_WARN
     function _updateDownloadBtns(type, enabled, disk_size) {
         let btn = $(`#download-${type}-images`);
         let btn_tip = $(`#download-${type}-images-tooltips`);
@@ -156,14 +161,14 @@ define(['jquery', 'jqueryui'], function($, jqueryui) {
         }
         if ("showDirectoryPicker" in window) {
             btn_and_tips.removeClass('is-disabled download-all-instances download-size-warning');
-            if (disk_size > 3) {
+            if (disk_size > DOWNLOAD_SIZE_LIMIT) {
                 btn_tip.addClass('is-disabled');
                 btn_tip.attr('data-disabled-type', "download-size-disabled");
                 btn.attr("disabled", "disabled");
             } else {
                 btn.removeAttr("disabled");
                 btn_tip.attr('data-disabled-type', "");
-                (disk_size > 2) ? btn.addClass('download-size-warning') : btn.addClass('download-all-instances');
+                (disk_size > DOWNLOAD_SIZE_WARN) ? btn.addClass('download-size-warning') : btn.addClass('download-all-instances');
             }
         } else {
             btn_tip.addClass('is-disabled');

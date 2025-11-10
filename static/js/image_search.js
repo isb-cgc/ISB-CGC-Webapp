@@ -184,8 +184,6 @@ require([
                         $('#search_def_access').addClass('is-hidden');
                         $('.access_warn').addClass('is-hidden');
                     }
-                    let download_btn = $('#download-cohort-images');
-                    let download_btn_tips = $('#download-cohort-images-tooltips');
                     if(isFiltered && data.total > 0) {
                         $('#search_def_stats').html("Cohort filter contents: " +
                             data.totals.SeriesInstanceUID.toString() + " series from " +
@@ -193,8 +191,7 @@ require([
                             data.totals.StudyInstanceUID.toString() + " studies (Size on disk: " +
                             data.totals.disk_size + ")"
                         );
-                        base.updateDownloadBtns("cohort", true, parseFloat(data.totals.disk_size.split(" ")[0]));
-
+                        base.updateDownloadBtns("cohort", true, data.totals.disk_size_tb);
                     } else if(isFiltered && data.total <= 0) {
                         $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                     } else {
