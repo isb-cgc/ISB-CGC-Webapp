@@ -643,7 +643,6 @@ define(['jquery', 'base'], function($, base) {
         window.handleFilterSelectionUpdate(null, true, true);
     }
 
-
     window.handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
         var promise =  null
         if (!(filterElem ===null)) {
