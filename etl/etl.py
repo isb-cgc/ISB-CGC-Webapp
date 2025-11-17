@@ -284,9 +284,11 @@ def add_data_source(name, count_col, source_type, versions, programs, aggregate_
         print("[STATUS] DataSource entry created for: {}".format(obj.name))
     except Exception as e:
         msg = "DataSource {} may not have been added!".format(obj.name if obj else 'Unknown')
-        ERRORS_SEEN.append(msg)
+        clarifier = "Attributes are copied from a DataSource ORM object matched on the name, NOT from BigQuery directly! Check to make sure you have the correct attribute source name in the ETL config file."
+        ERRORS_SEEN.append(msg + "\n" + clarifier)
         logger.error("[ERROR] {}".format(msg))
         logger.exception(e)
+        logger.error("[ERROR] {}".format(clarifier))
 
 
 def add_source_joins(froms, from_col, tos=None, to_col=None):
@@ -322,15 +324,15 @@ def add_source_joins(froms, from_col, tos=None, to_col=None):
 def load_citations(filename):
     try:
         cites_file = open(filename,"r")
-        current_cites = [x.doi for x in Citation.objects.all()]
+        current_cites = [x.doi.lower() for x in Citation.objects.all()]
         new_cites = []
         updated_cites = {}
         for line in csv_reader(cites_file):
             if "doi, citation" in line:
                 print("[STATUS] Saw header line during citation load - skipping!")
                 continue
-            if line[0] in current_cites:
-                updated_cites[line[0]] = line[1]
+            if line[0].lower() in current_cites:
+                updated_cites[line[0].lower()] = {"doi": line[0], "cite":line[1]}
             else:
                 new_cites.append(Citation(doi=line[0], cite=line[1]))
         if len(new_cites):
@@ -339,8 +341,9 @@ def load_citations(filename):
         if len(updated_cites):
             to_update = Citation.objects.filter(doi__in=updated_cites.keys())
             for upd in to_update:
-                upd.cite = updated_cites[upd.doi]
-            Citation.objects.bulk_update(to_update, ["cite"])
+                upd.cite = updated_cites[upd.doi.lower()]["cite"]
+                upd.doi = updated_cites[upd.doi.lower()]["doi"]
+            Citation.objects.bulk_update(to_update, ["doi", "cite"])
             print("[STATUS] {} DOI citations were updated.".format(len(updated_cites)))
     except Exception as e:
         ERRORS_SEEN.append("Error seen while loading citations, check the logs!")

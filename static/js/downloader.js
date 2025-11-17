@@ -35,6 +35,34 @@ require([
     'base', 'jquery', 'cartutils', 'filterutils',
 ], function (base, $, cartutils, filterutils) {
 
+    async function createNestedDirectories(topLevelDirectoryHandle, path) {
+        const pathSegments = path.split('/').filter((segment) => segment !== '');
+        let currentDirectoryHandle = topLevelDirectoryHandle;
+        for (const segment of pathSegments) {
+            try {
+                // Attempt to get the directory handle without creating it
+                const entry = await currentDirectoryHandle.getDirectoryHandle(segment, {
+                    create: false
+                })
+                currentDirectoryHandle = entry;
+            } catch (error) {
+                // If the error is specifically about the directory not existing, create it
+                if (error.name === 'NotFoundError') {
+                    const entry = await currentDirectoryHandle.getDirectoryHandle(segment, {
+                        create: true
+                    })
+                    currentDirectoryHandle = entry;
+                } else {
+                    // TODO: Handle other potential errors (e.g., name conflicts)
+                    return false; // Indicate failure
+                }
+            }
+        }
+        // Return the last directory handle
+        return currentDirectoryHandle;
+    }
+
+
     const byte_level = Object.freeze({
         1: "KB",
         2: "MB",
@@ -704,7 +732,6 @@ require([
 
     let downloader_manager = new DownloadManager();
 
-
     async function handleLargeDownload(filter_and_cart) {
         let series_job = await fetch(
         `${SERIES_MANIFEST_URI}/`, {
@@ -840,6 +867,30 @@ require([
                 "patient_id": patient_id,
                 "collection_id": collection_id
             });
+        }
+        // Before we create the requests, we need to verify the path length isn't going to be an issue for the local
+        // system
+        let test_series = series[0];
+        let test_name = crypto.randomUUID();
+        let test_path = `testing_${test_series['collection_id']}/${test_series['patient_id']}/${test_series['study_id']}/${test_series['modality']}_${test_series['series_id']}/${test_name}`;
+        try {
+            await createNestedDirectories(directoryHandle, test_path);
+            // If we made it here, we're probably okay to proceed and can delete our test
+            await directoryHandle.removeEntry(`testing_${test_series['collection_id']}`, {recursive: true});
+        } catch (error) {
+            // A NotFoundError in response to a create attempt likely means we have a Windows path length error
+            if (error.name === 'NotFoundError') {
+                let path = await directoryHandle.values();
+                let base_path_length = (path.join("/")).length;
+                await directoryHandle.removeEntry(`testing_${test_series['collection_id']}`, {recursive: true});
+                alert(`Unable to save files! ` +
+                    `If you are on a Windows system, this could mean the path length needed to save the images in a `+
+                    `nested directory structure is too long for your file system. Windows maximum: 260 chars, potential length: ${test_name.length+base_path_length} chars` +
+                    `We can save your files in a flat directory structure and provide a file mapping them to their collection, patient, study, and series,` +
+                    `or you can choose a different destination directory.`
+                );
+                return;
+            }
         }
         series.forEach(series_request => {
             series_request['directory'] = directoryHandle;
