@@ -820,7 +820,6 @@ def parse_args():
     parser.add_argument('-s', '--solr-files-only', type=str, default='', help=solr_msg)
     return parser.parse_args()
 
-
 def main():
 
     try:
@@ -833,7 +832,7 @@ def main():
         # Load the configuration file into ETL_CONFIG and run data version and data source creation
         # This will copy over any attributes from prior versions indicated in the JSON config
         # Note that the config file is only required for 'full ETL' i.e. creation of new versions and
-        # deprecation of prior ones; it can be omitted to perform piecemeal updates eg. to collections
+        # deprecation of prior ones and running BQ queries. It can be omitted to perform piecemeal updates eg. to
         # metadata
         len(args.config_file) and update_data_versions(args.config_file)
 

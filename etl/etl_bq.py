@@ -41,9 +41,43 @@ django.setup()
 from google_helpers.bigquery.bq_support import BigQuerySupport
 
 
-def fetch_collex_metadata(dataset_version):
-
+def fetch_display_vals(dataset_version):
     pass
-
     return
 
+
+def fetch_collex_metadata(dataset_version):
+    pass
+    return
+
+
+def fetch_citations(dataset_version):
+    pass
+    return
+
+
+def build_derived_pivots(dataset_version):
+    # check for new attributes
+    # run queries
+    pass
+    return
+
+
+def build_derived_all(dataset_version):
+    pass
+    return
+
+
+def build_and_export_indicies(dataset_version):
+    pass
+    return
+
+
+def create_pivot(dataset_version):
+    pass
+    return
+
+
+def fetch_data_summary(dataset_version):
+    pass
+    return
