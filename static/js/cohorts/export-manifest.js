@@ -136,10 +136,9 @@ require([
 
         $('#download-s5cmd').addClass('iscart');
         $('#download-idc-index').addClass('iscart');
-
         $('.filter-tab.manifest-file').hide();
         $('.filter-tab.manifest-bq').hide();
-
+        !$('.manifest-idc-index, .manifest-s5cmd').hasClass('active') && $('a[href="#manifest-idc-index"]').tab('show');
         update_file_names();
     }
 

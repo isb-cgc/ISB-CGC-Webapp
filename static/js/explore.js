@@ -481,8 +481,8 @@ require([
 
     let disabled_messages = {
         'download-all-disabled': chromium_only,
-        'download-size-disabled': "This set of images is over 3TB in size. Please use manifest download to obtain these images.",
-        'download-count-disabled': "This set of images contains over 65000 records. Please use manifest download to obtain these images.",
+        'download-size-disabled': "This set of files is over 3TB in size. Please use manifest download to obtain these files.",
+        'download-count-disabled': "This set of files contains over 65000 records. Please use manifest download to obtain these files.",
         'download-cart-disabled': "Add items to the cart to enable this feature.",
         'download-cohort-disabled': "Select a filter to enable this feature."
     };
@@ -492,9 +492,9 @@ require([
                 return disabled_messages[$(ref).attr('data-disabled-type')];
             }
             let download_type = $(ref).attr('data-download-type');
-            return `Download all of the image instances in this ${download_type}.`;
+            return `Download all of the files in this ${download_type}.`;
         },
-        content: 'Download all images.', // placeholder text
+        content: 'Download all files.', // placeholder text
         theme: 'dark',
         placement: 'left',
         arrow: false,

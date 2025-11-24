@@ -147,6 +147,28 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 $(this).removeAttr('disabled');
                 !$(this).hasClass('tip-titled') && $(this).attr("title",$(this).attr("data-default-title"));
             });
+            let cart_disk_size = 0;
+            let cart_disk_display_size = "(Calculating...)";
+            let cart_disk_resp = await fetch(`${BASE_URL}/cart_data/`, {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        'filtergrp_list': JSON.stringify(window.filtergrp_list ? window.filtergrp_list : [{}]),
+                        'partitions': JSON.stringify(window.partitions),
+                        'size_only': 'true'
+                    }),
+                    headers: {"X-CSRFToken": $.getCookie('csrftoken'), "content-type": 'application/x-www-form-urlencoded'}
+            });
+            if(!cart_disk_resp.ok) {
+                console.error("Unable to fetch cart size!");
+                cart_disk_size = 4;
+                cart_disk_display_size = "(Unable to retrieve size.)";
+            } else {
+                let cart_disk_res = await cart_disk_resp.json();
+                cart_disk_size = cart_disk_res['total_size']/Math.pow(1000,4);
+                cart_disk_display_size = cart_disk_res['display_size'];
+            }
+            $('.cart_disk_size').html(cart_disk_display_size);
+            base.updateDownloadBtns('cart', cart_has_contents, cart_disk_size, nmseries);
         } else {
             $('#cart_stats_holder').html('<span id="#cart_stats">Your cart is currently empty</span>');
             $('#cart_stats').addClass('empty-cart');
@@ -155,29 +177,6 @@ define(['filterutils','jquery', 'tippy', 'base' ], function(filterutils, $,  tip
                 !$(this).hasClass('tip-titled') && $(this).attr("title","Add items to the cart to enable this feature.");
             });
         }
-        let cart_disk_size = 0;
-        let cart_disk_display_size = "(Calculating...)";
-        let cart_disk_resp = await fetch(`${BASE_URL}/cart_data/`, {
-                method: "POST",
-                body: new URLSearchParams({
-                    'filtergrp_list': JSON.stringify(window.filtergrp_list ? window.filtergrp_list : [{}]),
-                    'partitions': JSON.stringify(window.partitions),
-                    'size_only': 'true'
-                }),
-                headers: {"X-CSRFToken": $.getCookie('csrftoken'), "content-type": 'application/x-www-form-urlencoded'}
-        });
-        if(!cart_disk_resp.ok) {
-            console.error("Unable to fetch cart size!");
-            cart_disk_size = 4;
-            cart_disk_display_size = "(Unable to retrieve size.)";
-        } else {
-            let cart_disk_res = await cart_disk_resp.json();
-            cart_disk_size = cart_disk_res['total_size']/Math.pow(1000,4);
-            cart_disk_display_size = cart_disk_res['display_size'];
-        }
-        $('.cart_disk_size').html(cart_disk_display_size);
-        base.updateDownloadBtns('cart', cart_has_contents, cart_disk_size, nmseries);
-
     }
 
     // remove all items from the cart. clear the glblcart, carHist, cartDetails
