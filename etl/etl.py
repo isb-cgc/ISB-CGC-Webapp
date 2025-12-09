@@ -173,8 +173,7 @@ def add_data_sets(sets_set):
         try:
             obj, created = DataSetType.objects.update_or_create(name=dss['name'], data_type=dss['data_type'], set_type=dss['set_type'])
 
-            print("[STATUS] Data Set Type created:")
-            print(obj)
+            logger.info("[STATUS] Data Set Type created: {}".format(obj))
         except Exception as e:
             msg = "Data Version {} may not have been added!".format(dss['name'])
             ERRORS_SEEN.append(msg)
@@ -219,8 +218,7 @@ def add_programs(program_set):
                 short_name=prog['short_name'], name=prog['full_name'], is_public=prog['public'],
                 owner=User.objects.get(email=prog['owner']) if 'owner' in prog else idc_superuser)
 
-            print("Program created:")
-            print(obj)
+            logger.info("[STATUS] Program created: {}".format(obj))
 
             results[obj.short_name] = obj
 
@@ -281,7 +279,7 @@ def add_data_source(name, count_col, source_type, versions, programs, aggregate_
             )
         copy_attrs([attr_from], [name], attr_exclude)
 
-        print("[STATUS] DataSource entry created for: {}".format(obj.name))
+        logger.info("[STATUS] DataSource entry created for: {}".format(obj.name))
     except Exception as e:
         msg = "DataSource {} may not have been added!".format(obj.name if obj else 'Unknown')
         clarifier = "Attributes are copied from a DataSource ORM object matched on the name, NOT from BigQuery directly! Check to make sure you have the correct attribute source name in the ETL config file."
@@ -328,8 +326,8 @@ def load_citations(filename):
         new_cites = []
         updated_cites = {}
         for line in csv_reader(cites_file):
-            if "doi, citation" in line:
-                print("[STATUS] Saw header line during citation load - skipping!")
+            if "source_doi" in line:
+                logger.info("[STATUS] Saw header line during citation load - skipping!")
                 continue
             if line[0].lower() in current_cites:
                 updated_cites[line[0].lower()] = {"doi": line[0], "cite":line[1]}
@@ -337,14 +335,14 @@ def load_citations(filename):
                 new_cites.append(Citation(doi=line[0], cite=line[1]))
         if len(new_cites):
             Citation.objects.bulk_create(new_cites)
-            print("[STATUS] The following {} DOI citations were added: {}".format(len(new_cites), "  ".join([x.doi for x in new_cites])))
+            logger.info("[STATUS] The following {} DOI citations were added: {}".format(len(new_cites), "  ".join([x.doi for x in new_cites])))
         if len(updated_cites):
             to_update = Citation.objects.filter(doi__in=updated_cites.keys())
             for upd in to_update:
                 upd.cite = updated_cites[upd.doi.lower()]["cite"]
                 upd.doi = updated_cites[upd.doi.lower()]["doi"]
             Citation.objects.bulk_update(to_update, ["doi", "cite"])
-            print("[STATUS] {} DOI citations were updated.".format(len(updated_cites)))
+            logger.info("[STATUS] {} DOI citations were updated.".format(len(updated_cites)))
     except Exception as e:
         ERRORS_SEEN.append("Error seen while loading citations, check the logs!")
         logger.error("[ERROR] While trying to load citations: ")
@@ -363,7 +361,7 @@ def load_collections(filename, data_version="8.0"):
         field_map = FIELD_MAP
         for line in csv_reader(collection_file):
             if COLLECTION_HEADER_CHK in line:
-                print("[STATUS] Header found - mappping attributes.")
+                logger.info("[STATUS] Header found - mappping attributes.")
                 i = 0
                 field_map = {}
                 for field in line:
@@ -615,7 +613,7 @@ def copy_attrs(from_data_sources, to_data_sources, attr_excludes):
 
     for fds in from_sources:
         from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids']).exclude(name__in=attr_excludes)
-        print("Copying {} attributes from {} to: {}.".format(
+        logger.info("[STATUS] Copying {} attributes from {} to: {}.".format(
             len(from_source_attrs.values_list('name',flat=True)),
             fds.name, "; ".join(to_data_sources),
 
@@ -824,7 +822,7 @@ def main():
 
     try:
         if len(sys.argv) <= 1:
-            print("Use -h to access the help description.")
+            logger.info("Use -h to access the help description.")
             exit(0)
 
         args = parse_args()
@@ -862,7 +860,7 @@ def main():
                     attr_obj = Attribute.objects.get(name=attr)
                     update_display_values(attr_obj, dvals[attr]['vals'])
                 except ObjectDoesNotExist as e:
-                    print("[WARNING] Attr {} not found - display values will not be updated! Rerun ETL if this is not expected.".format(attr))
+                    logger.warning("[WARNING] Attr {} not found - display values will not be updated! Rerun ETL if this is not expected.".format(attr))
 
         # Solr commands are automatically output for full ETL; the step below is for outside-of-ETL executions
         if len(ETL_CONFIG):
@@ -888,7 +886,7 @@ def main():
         logger.exception(e)
         if len(ERRORS_SEEN):
             for err in ERRORS_SEEN:
-                print("-> {}".format(err))
+                logger.error("-> {}".format(err))
 
 
 if __name__ == "__main__":
