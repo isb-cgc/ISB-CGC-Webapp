@@ -35,6 +35,13 @@ require([
     'base', 'jquery', 'cartutils', 'filterutils',
 ], function (base, $, cartutils, filterutils) {
 
+    const TestResult = Object.freeze({
+        SUCCESS: "success",
+        CANCEL: "cancel",
+        FLAT: "flat",
+        ERROR: "error"
+    });
+
     async function createNestedDirectories(topLevelDirectoryHandle, path) {
         const pathSegments = path.split('/').filter((segment) => segment !== '');
         let currentDirectoryHandle = topLevelDirectoryHandle;
@@ -61,7 +68,6 @@ require([
         // Return the last directory handle
         return currentDirectoryHandle;
     }
-
 
     const byte_level = Object.freeze({
         1: "KB",
@@ -153,6 +159,7 @@ require([
             this.crdc_series_id = request['crdc_series_id'];
             this.directory = request['directory'];
             this.total_size = parseFloat(request['series_size']);
+            this.save_flat = request['save_flat'] || false;
 
             if(this.series_id) {
                 this.request_type = REQ_TYPE.SERIES;
@@ -227,7 +234,8 @@ require([
                                 'modality': this.modality,
                                 'instance': instance,
                                 'patient': this.patient_id,
-                                'directory': this.directory
+                                'directory': this.directory,
+                                'save_flat': this.save_flat
                             });
                         }
                     }
@@ -330,7 +338,7 @@ require([
             }
             // It's possible a cancellation came in while we were doing this. If so, re-empty the working_queue
             if(this.cancellation_underway) {
-                this.working_queue.slice(0,this.working_queue.length);
+                this.working_queue.length = 0;
             }
         }
 
@@ -417,6 +425,35 @@ require([
     class DownloadManager {
         progressDisplay = new DownloadProgressDisplay();
 
+        // The directory we're downloading to
+        directoryHandle = null;
+
+        // Save style
+        flat_save = false;
+        flatSaveManifest = null;
+        manifestOutputStream = null;
+        async setupFlatSave() {
+            if(!this.flat_save)
+                return;
+            let now = new Date();
+            const offset = now.getTimezoneOffset();
+            now = new Date(now.getTime() - (offset*60*1000));
+            let datestamp = now.toISOString().replace(/[\-:]/g,"").replace("T","_").split(".")[0];
+            this.flatSaveManifest = await this.directoryHandle.getFileHandle(`idc_file_id_manifest_${datestamp}.txt`, {create: true});
+            this.manifestOutputStream = await this.flatSaveManifest.createWritable();
+            this.manifestOutputStream.write("File Instance Name,Collection ID,Patient ID,Study ID,Series ID\n")
+        }
+        async updateFlatSave(file_info) {
+            if(!this.flat_save)
+                return;
+            await this.manifestOutputStream.write(`${file_info['instance']},${file_info['collection']},${file_info['patient']},${file_info['study']},${file_info['series']}\n`);
+        }
+        async cleanupFlatSave() {
+            this.manifestOutputStream && await this.manifestOutputStream.close();
+            this.manifestOutputStream = null;
+            this.flatSaveManifest = null;
+        }
+
         // Text blobs
         workerCode = `
             const abort_controller = new AbortController();
@@ -469,7 +506,8 @@ require([
                 let response = null;
                 let fileHandle = null;
                 const seriesDirectory = modality + "_" + seriesInstanceUID;
-                const filePath = [collection_id, patientID, studyInstanceUID, seriesDirectory].join("/");
+                console.log('save flat is ',metadata['save_flat']);
+                const filePath = metadata['save_flat'] ? collection_id : [collection_id, patientID, studyInstanceUID, seriesDirectory].join("/");
                 try {
                     const directoryHandle = event.data['directoryHandle'];
                     const subDirectoryHandle = await createNestedDirectories(directoryHandle, filePath);
@@ -645,6 +683,7 @@ require([
                     URL.revokeObjectURL(this.workerObjectURL);
                     this.workerObjectURL = null;
                 }
+                await this.cleanupFlatSave();
                 let msg = this.pending_cancellation ? 'Download cancelled.' : `Download complete.`;
                 this.queues.reset_queue_manager();
                 let type = this.pending_cancellation ? 'warning' : 'success';
@@ -675,6 +714,7 @@ require([
                                     'metadata': item_to_download,
                                     'directoryHandle': item_to_download['directory']
                                 });
+                                this.updateFlatSave(item_to_download);
                                 let msg = `Download status: ${this.in_progress} file(s) in progress${this.pending_msg}...`;
                                 this.progressUpdate(msg, "download");
                             } else {
@@ -703,7 +743,7 @@ require([
                 worker.postMessage({'abort': true, 'reason': 'User cancelled download.'});
             });
             // Sometimes worker latency can cause a race condition between final cleanup and resetting the download
-            // manager's state. Run trigger a final time after waiting a couple of seconds to be totally sure
+            // manager's state. Run triggerWorkerDownloads a final time after waiting a couple of seconds to be totally sure
             // we've cleaned up after ourselves.
             setTimeout(2000, function(){
                 if(downloader_manager.pending_cancellation) {
@@ -718,14 +758,15 @@ require([
             );
         }
 
-        beginDownloads() {
+        async beginDownloads() {
             if(!this.queues.isEmpty()) {
+                await this.setupFlatSave();
                 if(this.in_progress <= 0) {
                     $('.cancel-download').show();
                     $('.close-message-window').hide();
                     this.statusMessage("Download underway.", 'info', "download", false, true);
                 }
-                this.triggerWorkerDownloads();
+                await this.triggerWorkerDownloads();
             }
         }
     }
@@ -794,6 +835,43 @@ require([
         downloader_manager.cancel();
     });
 
+    async function showPathErrorDialog(min_length) {
+        $('.min-length-path').html(min_length);
+        $('#download-issue-dialog').modal('show');
+        return new Promise((resolve) => {
+            // Bind the new promise
+            $('#download-issue-dialog .btn').unbind('click').on('click', function(){
+                let result = null;
+                if($(this).hasClass('save-flat')) {
+                    result = TestResult.FLAT;
+                } else if($(this).hasClass('cancel-save')) {
+                    result = TestResult.CANCEL;
+                } else {
+                    result = TestResult.ERROR;
+                }
+                $('#download-issue-dialog').modal('hide');
+                resolve(result);
+            });
+        });
+    }
+
+    async function testFileCreation(test_series, directoryHandle) {
+        let test_name = crypto.randomUUID();
+        let test_path = `testing_${test_series['collection_id']}/${test_series['patient_id']}/${test_series['study_id']}/${test_series['modality']}_${test_series['series_id']}/${test_name}`;
+        try {
+            await createNestedDirectories(directoryHandle, test_path);
+            // If we made it here, we're probably okay to proceed and can delete our test
+            await directoryHandle.removeEntry(`testing_${test_series['collection_id']}`, {recursive: true});
+            return TestResult.SUCCESS;
+        } catch (error) {
+            // A NotFoundError in response to a create attempt likely means we have a Windows path length error
+            if (error.name === 'NotFoundError') {
+                await directoryHandle.removeEntry(`testing_${test_series['collection_id']}`, {recursive: true});
+                return await showPathErrorDialog(test_path.length);
+            }
+        }
+    }
+
     $('body').on('click', '.download-all-instances', async function (event) {
         // Stop propagation to the other handlers or the showDirectoryPicker will complain.
         event.stopImmediatePropagation();
@@ -804,6 +882,7 @@ require([
             startIn: 'downloads',
             mode: 'readwrite',
         });
+        downloader_manager.directoryHandle = directoryHandle;
         const collection_id = clicked.attr('data-collection');
         const study_id = clicked.attr('data-study');
         const patient_id = clicked.attr('data-patient');
@@ -870,32 +949,27 @@ require([
         }
         // Before we create the requests, we need to verify the path length isn't going to be an issue for the local
         // system
-        let test_series = series[0];
-        let test_name = crypto.randomUUID();
-        let test_path = `testing_${test_series['collection_id']}/${test_series['patient_id']}/${test_series['study_id']}/${test_series['modality']}_${test_series['series_id']}/${test_name}`;
-        try {
-            await createNestedDirectories(directoryHandle, test_path);
-            // If we made it here, we're probably okay to proceed and can delete our test
-            await directoryHandle.removeEntry(`testing_${test_series['collection_id']}`, {recursive: true});
-        } catch (error) {
-            // A NotFoundError in response to a create attempt likely means we have a Windows path length error
-            if (error.name === 'NotFoundError') {
-                let path = await directoryHandle.values();
-                let base_path_length = (path.join("/")).length;
-                await directoryHandle.removeEntry(`testing_${test_series['collection_id']}`, {recursive: true});
-                alert(`Unable to save files! ` +
-                    `If you are on a Windows system, this could mean the path length needed to save the images in a `+
-                    `nested directory structure is too long for your file system. Windows maximum: 260 chars, potential length: ${test_name.length+base_path_length} chars` +
-                    `We can save your files in a flat directory structure and provide a file mapping them to their collection, patient, study, and series,` +
-                    `or you can choose a different destination directory.`
-                );
-                return;
-            }
+        let save_flat = false;
+        switch(await testFileCreation(series[0], directoryHandle)){
+            case TestResult.CANCEL:
+                series.length = 0;
+                break;
+            case TestResult.FLAT:
+                save_flat = true;
+                break;
+            default:
+                break;
         }
+        if(series.length === 0) {
+            // For one reason or another, we cancelled
+            return;
+        }
+        downloader_manager.flat_save = save_flat;
         series.forEach(series_request => {
             series_request['directory'] = directoryHandle;
+            series_request['save_flat'] = save_flat;
             downloader_manager.addRequest(series_request);
         });
-        downloader_manager.beginDownloads();
+        await downloader_manager.beginDownloads();
     });
 });

@@ -677,12 +677,12 @@ def get_series(request, collection_id=None, patient_id=None, study_uid=None):
             response['result'].append({
                 "series_id": doc['SeriesInstanceUID'],
                 "crdc_series_id": doc['crdc_series_uuid'],
-                "bucket": doc['aws_bucket'][0],
-                "series_size": doc['instance_size'][0],
-                "modality": doc['Modality'][0],
+                "bucket": doc['aws_bucket'][0] if isinstance(doc['aws_bucket'], list) else doc['aws_bucket'],
+                "series_size": doc['instance_size'][0] if isinstance(doc['instance_size'], list) else doc['instance_size'],
+                "modality": doc['Modality'][0] if isinstance(doc['Modality'], list) else doc['Modality'],
                 "study_id": doc['StudyInstanceUID'],
                 "patient_id": doc["PatientID"],
-                "collection_id": doc['collection_id'][0]
+                "collection_id": doc['collection_id'][0] if isinstance(doc['collection_id'], list) else doc['collection_id']
             })
         if 'facets' in result:
             response['download_stats'] = {
